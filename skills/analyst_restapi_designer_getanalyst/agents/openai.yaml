@@ -1,0 +1,14 @@
+interface:
+  display_name: GetAnalyst REST API Designer Skill
+  short_description: Постановки задач на REST API от GetAnalyst
+  default_prompt: Используй $getanalyst-restapi-designer-skill, чтобы подготовить
+    полную постановку задачи на один REST API-метод.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

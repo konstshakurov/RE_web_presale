@@ -1,0 +1,9 @@
+# AInalyst dev and test dependencies
+# Install: pip install -r requirements-dev.txt
+
+# Core platform dependencies
+-r requirements.txt
+
+# Testing (pins verified in a clean venv on Python 3.14, 2026-07-22)
+pytest==9.0.3
+pytest-cov==7.1.0        # test coverage report

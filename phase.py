@@ -1,0 +1,298 @@
+#!/usr/bin/env python3
+"""
+Ai_RE_Project — BABOK phase switcher.
+
+Usage:
+    python phase.py              # show the current phase and the list of all phases
+    python phase.py planning     # switch to the planning phase (Ch. 3)
+    python phase.py elicitation  # Ch. 4 — requirements elicitation
+    python phase.py lifecycle    # Ch. 5 — requirements lifecycle management
+    python phase.py analysis     # Ch. 6 — strategy analysis
+    python phase.py design       # Ch. 7 — requirements analysis and design
+    python phase.py full         # all servers (unrestricted mode)
+
+After switching — restart Claude Code: /exit, then: claude --continue
+"""
+
+import json
+import os
+import sys
+from pathlib import Path
+
+# Make non-ASCII output (box glyphs, arrows) safe on Windows consoles (cp1251/cp866)
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+# ---------------------------------------------------------------------------
+# Project root — for absolute paths in .mcp.json (ADR-REVIEW item 10)
+# ---------------------------------------------------------------------------
+
+# Absolute path to the project root (where this file lives).
+# Used when generating .mcp.json so Claude Code can find the servers
+# regardless of the working directory at startup.
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+
+def _server(script: str) -> dict:
+    """Returns the MCP server configuration with an absolute path to the script."""
+    # Script mode puts the SCRIPT's directory (skills/) on sys.path — not the
+    # project root — so without PYTHONPATH every `from skills.common import ...`
+    # dies with ModuleNotFoundError: No module named 'skills', on any machine.
+    return {
+        "command": "python",
+        "args": [str(PROJECT_ROOT / script)],
+        "env": {"PYTHONPATH": str(PROJECT_ROOT)},
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase configuration
+# ---------------------------------------------------------------------------
+
+# The base server (Ch. 3 — planning) is present in ALL phases.
+# It's lightweight (5 tools) and always needed: project_id, stakeholder registry, etc.
+BASE_SERVER = {
+    "babok-ch3": _server("skills/planning_mcp.py"),
+    # Confluence is present in all phases — the server is small (5 tools),
+    # it starts without .env (the error only occurs when a tool is called).
+    "babok-confluence": _server("skills/integrations/confluence_mcp.py"),
+    # GetAnalyst skills (DB/REST API/UML Sequence) design without MCP — these
+    # three servers only register the finished artifact into the 5.1
+    # traceability graph (satisfies link), so they belong in every phase just
+    # like ch3 (KON-24).
+    "getanalyst-db-designer": _server("skills/analyst_db_designer_getanalyst_mcp.py"),
+    "getanalyst-restapi-designer": _server("skills/analyst_restapi_designer_getanalyst_mcp.py"),
+    "getanalyst-uml-sequence": _server("skills/analyst_uml_sequence_getanalyst_mcp.py"),
+}
+
+PHASES = {
+    "planning": {
+        "label": "Глава 3 — Планирование бизнес-анализа",
+        "hint": "Новый проект, выбор подхода, карта стейкхолдеров, план BA",
+        "tokens_saved": "33,000",
+        "servers": {
+            **BASE_SERVER,
+        }
+    },
+
+    "elicitation": {
+        "label": "Глава 4 — Выявление и сотрудничество",
+        "hint": "Интервью, воркшопы, анкеты, протоколы встреч",
+        "tokens_saved": "27,000",
+        "servers": {
+            **BASE_SERVER,
+            "babok-ch4-41": _server("skills/elicitation_mcp.py"),
+            "babok-ch4-42": _server("skills/elicitation_conduct_mcp.py"),
+            "babok-ch4-43": _server("skills/elicitation_confirm_mcp.py"),
+            "babok-ch4-44": _server("skills/elicitation_communicate_mcp.py"),
+            "babok-ch4-45": _server("skills/elicitation_collaborate_mcp.py"),
+        }
+    },
+
+    "lifecycle": {
+        "label": "Глава 5 — Управление жизненным циклом требований",
+        "hint": "Трассировка, приоритизация, CR, утверждение, поддержка",
+        "tokens_saved": "27,000",
+        "servers": {
+            **BASE_SERVER,
+            "babok-ch5-51": _server("skills/requirements_traceability_mcp.py"),
+            "babok-ch5-52": _server("skills/requirements_maintain_mcp.py"),
+            "babok-ch5-53": _server("skills/requirements_prioritize_mcp.py"),
+            "babok-ch5-54": _server("skills/requirements_assess_changes_mcp.py"),
+            "babok-ch5-55": _server("skills/requirements_approve_mcp.py"),
+        }
+    },
+
+    "analysis": {
+        "label": "Глава 6 — Анализ стратегии",
+        "hint": "Анализ текущего состояния (as-is), будущее состояние (to-be), GAP, оценка рисков, стратегия изменения",
+        "tokens_saved": "28,000",
+        "servers": {
+            **BASE_SERVER,
+            "babok-ch6-61": _server("skills/current_state_mcp.py"),
+            "babok-ch6-62": _server("skills/future_state_mcp.py"),
+            "babok-ch6-63": _server("skills/risk_assessment_mcp.py"),
+            "babok-ch6-64": _server("skills/change_strategy_mcp.py"),
+        }
+    },
+
+    "design": {
+        "label": "Глава 7 — Определение и проектирование требований",
+        "hint": "Спецификация, верификация, валидация, архитектура, дизайн, оценка ценности",
+        "tokens_saved": "18,000",
+        "servers": {
+            **BASE_SERVER,
+            "babok-ch7-71": _server("skills/requirements_spec_mcp.py"),
+            "babok-ch7-72": _server("skills/requirements_verify_mcp.py"),
+            "babok-ch7-73": _server("skills/requirements_validate_mcp.py"),
+            "babok-ch7-74": _server("skills/requirements_architecture_mcp.py"),
+            "babok-ch7-75": _server("skills/design_options_mcp.py"),
+            "babok-ch7-76": _server("skills/value_recommend_mcp.py"),
+        }
+    },
+
+    "full": {
+        "label": "Все главы (полный режим)",
+        "hint": "Все 22 сервера. Используй только если нужны инструменты из разных глав одновременно",
+        "tokens_saved": "0",
+        "servers": {
+            **BASE_SERVER,
+            "babok-ch4-41": _server("skills/elicitation_mcp.py"),
+            "babok-ch4-42": _server("skills/elicitation_conduct_mcp.py"),
+            "babok-ch4-43": _server("skills/elicitation_confirm_mcp.py"),
+            "babok-ch4-44": _server("skills/elicitation_communicate_mcp.py"),
+            "babok-ch4-45": _server("skills/elicitation_collaborate_mcp.py"),
+            "babok-ch5-51": _server("skills/requirements_traceability_mcp.py"),
+            "babok-ch5-52": _server("skills/requirements_maintain_mcp.py"),
+            "babok-ch5-53": _server("skills/requirements_prioritize_mcp.py"),
+            "babok-ch5-54": _server("skills/requirements_assess_changes_mcp.py"),
+            "babok-ch5-55": _server("skills/requirements_approve_mcp.py"),
+            "babok-ch6-61": _server("skills/current_state_mcp.py"),
+            "babok-ch6-62": _server("skills/future_state_mcp.py"),
+            "babok-ch6-63": _server("skills/risk_assessment_mcp.py"),
+            "babok-ch6-64": _server("skills/change_strategy_mcp.py"),
+            "babok-ch7-71": _server("skills/requirements_spec_mcp.py"),
+            "babok-ch7-72": _server("skills/requirements_verify_mcp.py"),
+            "babok-ch7-73": _server("skills/requirements_validate_mcp.py"),
+            "babok-ch7-74": _server("skills/requirements_architecture_mcp.py"),
+            "babok-ch7-75": _server("skills/design_options_mcp.py"),
+            "babok-ch7-76": _server("skills/value_recommend_mcp.py"),
+        }
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Files
+# ---------------------------------------------------------------------------
+
+MCP_FILE = Path(".mcp.json")
+STATE_FILE = Path(".phase_state")  # remembers the current phase
+
+
+def read_current_phase() -> str | None:
+    if STATE_FILE.exists():
+        return STATE_FILE.read_text(encoding="utf-8").strip()
+    return None
+
+
+def write_phase(phase: str):
+    config = {"mcpServers": PHASES[phase]["servers"]}
+    MCP_FILE.write_text(
+        json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    STATE_FILE.write_text(phase, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# UI
+# ---------------------------------------------------------------------------
+
+COLORS = {
+    "reset": "\033[0m",
+    "bold": "\033[1m",
+    "green": "\033[32m",
+    "yellow": "\033[33m",
+    "cyan": "\033[36m",
+    "gray": "\033[90m",
+    "red": "\033[31m",
+}
+
+
+def c(color: str, text: str) -> str:
+    return f"{COLORS[color]}{text}{COLORS['reset']}"
+
+
+def _confluence_env_set() -> bool:
+    """Checks whether the minimum required Confluence environment variables are set."""
+    return bool(os.environ.get("CONFLUENCE_URL") and os.environ.get("CONFLUENCE_API_TOKEN"))
+
+
+def show_status():
+    current = read_current_phase()
+    print()
+    print(c("bold", "Ai_RE_Project — переключатель фаз BABOK"))
+    print(c("gray", "─" * 55))
+
+    if current:
+        phase_info = PHASES[current]
+        print(f"  Текущая фаза: {c('green', current)} — {phase_info['label']}")
+        server_count = len(phase_info["servers"])
+        print(f"  Активных серверов: {c('cyan', str(server_count))} из {len(PHASES['full']['servers'])}")
+    else:
+        print(f"  Текущая фаза: {c('yellow', 'не задана')} (используется .mcp.json как есть)")
+
+    print()
+    print(c("bold", "Доступные фазы:"))
+    print()
+
+    for key, info in PHASES.items():
+        marker = c("green", "▶ ") if key == current else "  "
+        saved = info["tokens_saved"]
+        servers = len(info["servers"])
+        saved_str = f"экономия ~{saved} токенов" if saved != "0" else "полный набор"
+        print(f"{marker}{c('cyan', key):<22} {info['label']}")
+        print(f"   {c('gray', info['hint'])}")
+        print(f"   {c('gray', f'серверов: {servers} · {saved_str}')}")
+        print()
+
+    confluence_available = _confluence_env_set()
+    confluence_status = c("green", "настроен") if confluence_available else c("yellow", "не настроен — заполните .env")
+    print(c("gray", "─" * 55))
+    print(f"  Confluence: {confluence_status}")
+    print()
+    print(c("gray", "─" * 55))
+    print(f"  Использование: {c('bold', 'python phase.py <фаза>')}")
+    print(f"  После переключения: {c('yellow', '/exit')}, затем {c('yellow', 'claude --continue')}")
+    print()
+
+
+def switch_phase(phase: str):
+    if phase not in PHASES:
+        print(c("red", f"Ошибка: фаза '{phase}' не существует."))
+        print(f"Available: {', '.join(PHASES.keys())}")
+        sys.exit(1)
+
+    old_phase = read_current_phase()
+    write_phase(phase)
+
+    info = PHASES[phase]
+    server_count = len(info["servers"])
+    full_count = len(PHASES["full"]["servers"])
+
+    print()
+    print(c("green", "✓") + f" Фаза переключена: {c('bold', phase)}")
+    print(f"  {info['label']}")
+    print(f"  {c('gray', info['hint'])}")
+    print()
+    print(f"  Активных серверов: {c('cyan', str(server_count))} из {full_count}")
+
+    if info["tokens_saved"] != "0":
+        print(f"  Экономия контекста: ~{c('green', info['tokens_saved'])} токенов")
+
+    if old_phase and old_phase != phase:
+        print(f"  {c('gray', f'Предыдущая: {old_phase}')}")
+
+    print()
+    print(c("yellow", "  → Перезапусти Claude Code: /exit, затем: claude --continue"))
+    print()
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+def main():
+    if len(sys.argv) == 1:
+        show_status()
+    elif len(sys.argv) == 2:
+        switch_phase(sys.argv[1])
+    else:
+        print(c("red", "Использование: python phase.py [фаза]"))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,14 @@
+interface:
+  display_name: GetAnalyst UML Sequence
+  short_description: PlantUML Sequence по Use Case и интеграциям
+  default_prompt: Используй $uml-sequence, чтобы создать PlantUML-код UML Sequence-диаграммы
+    по моему Use Case.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

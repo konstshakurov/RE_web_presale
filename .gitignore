@@ -1,0 +1,56 @@
+.phase_state
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables (Confluence keys, etc.)
+.env
+.env.local
+#.env.*
+
+# Input materials: transcripts, regulations, confidential client documents
+input/*
+!input/README.md
+
+# Project artifacts: data for the product project, not part of the tool
+output/data/*
+output/reports/*
+# Previous generations of those same artifacts, kept by write_json_artifact so a
+# damaged file can be restored. Same content, same reason to stay out of the repo.
+output/.history/
+# Keep the folders themselves in the repository
+!output/data/.gitkeep
+!output/reports/.gitkeep
+
+# Competency 1 re-estimates made after project start — project-specific, not part of the tool
+estimate/*
+!estimate/.gitkeep
+
+# Generated automatically by: python phase.py <phase>
+.mcp.json
+
+# Editor and OS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local machine-specific / test scratch files.
+.claude/statusline-command.sh
+
+# Per-machine Claude Code settings, written by the tool itself. Ignored for the same
+# reason: it is machine-specific for every user who clones this.
+.claude/settings.local.json

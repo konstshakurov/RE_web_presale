@@ -1,0 +1,253 @@
+{
+  "version": "1.0.0",
+  "default_assumptions": {
+    "auth": {
+      "default": "JWT / OAuth2",
+      "description": "Стандартная аутентификация и авторизация"
+    },
+    "database": {
+        "default": "PostgreSQL",
+        "description": "Реляционная база данных"
+    },
+    "api": {
+      "default": "REST + JSON",
+      "description": "RESTful API с JSON payload"
+    },
+    "security": {
+      "default": "TLS 1.3, шифрование at rest (AES-256)",
+      "description": "Базовая безопасность"
+    },
+    "deployment": {
+      "default": "Облако (AWS / GCP / Azure)",
+      "description": "Cloud-first подход"
+    },
+    "containerization": {
+      "default": "Docker",
+      "description": "Контейнеризация"
+    },
+    "orchestration": {
+      "default": "Kubernetes (при > 3 сервисов)",
+      "description": "Оркестрация контейнеров"
+    },
+    "observability": {
+      "default": "Prometheus + Grafana",
+      "description": "Метрики и мониторинг"
+    },
+    "logging": {
+      "default": "Structured JSON logs",
+      "description": "Структурированное логирование"
+    },
+    "cicd": {
+      "default": "GitHub Actions / GitLab CI",
+      "description": "CI/CD pipeline"
+    },
+    "frontend": {
+      "default": "React / Vue / Angular (современный фреймворк)",
+      "description": "Современный frontend-фреймворк"
+    },
+    "backend": {
+      "default": "Node.js / Python / Go / Java (современный runtime)",
+      "description": "Современный backend-runtime"
+    },
+    "cache": {
+      "default": "Redis",
+      "description": "Кэширование"
+    },
+    "message_queue": {
+      "default": "RabbitMQ / Kafka (при event-driven)",
+      "description": "Очередь сообщений"
+    },
+    "language": {
+      "default": "Язык входных требований",
+      "description": "Язык артефактов соответствует языку запроса"
+    }
+  },
+  "team_context": {
+    "required_questions": [
+      {
+        "id": "team_size",
+        "question": "Каков размер команды разработки?",
+        "options": ["1-3 человека", "4-10 человек", "10-30 человек", "30+ человек"],
+        "critical": true
+      },
+      {
+        "id": "expertise",
+        "question": "Уровень экспертизы команды?",
+        "options": ["Junior (0-2 года)", "Mid (2-5 лет)", "Senior (5+ лет)", "Mix (разный уровень)"],
+        "critical": false
+      },
+      {
+        "id": "processes",
+        "question": "Какие процессы разработки используются?",
+        "options": ["Agile / Scrum", "Kanban", "Waterfall", "Нет формальных процессов"],
+        "critical": false
+      },
+      {
+        "id": "cicd",
+        "question": "Есть ли настроенный CI/CD?",
+        "options": ["Да, полностью настроен", "Частично, базовый", "Нет, нужно внедрять", "Ручное развёртывание"],
+        "critical": true
+      },
+      {
+        "id": "budget",
+        "question": "Уровень бюджета?",
+        "options": ["Ограниченный (open-source, free tier)", "Средний (готовы платить за managed services)", "Неограниченный (best-of-breed)"],
+        "critical": false
+      },
+      {
+        "id": "timeline",
+        "question": "Сроки проекта?",
+        "options": ["Срочно (MVP за 2-4 недели)", "Стандартные (1-3 месяца)", "Нет спешки (3+ месяца)"],
+        "critical": false
+      }
+    ]
+  },
+  "templates": {
+    "web-application": {
+      "name": "Веб-приложение",
+      "description": "Традиционные веб-приложения с фронтендом и бэкендом",
+      "artifacts": ["context-diagram", "container-diagram", "api-specification", "data-model", "deployment-diagram", "nfr-matrix", "technology-stack"],
+      "assumptions": {
+        "target": "Современные браузеры",
+        "auth": "Стандартная сессия/JWT",
+        "ui": "Адаптивный дизайн",
+        "hosting": "Облако или on-premise"
+      }
+    },
+    "microservices": {
+      "name": "Микросервисы",
+      "description": "Распределённая архитектура микросервисов",
+      "artifacts": ["context-diagram", "container-diagram", "system-pattern", "api-specification", "deployment-diagram", "security-architecture", "data-flow", "nfr-matrix", "architecture-decision-records"],
+      "assumptions": {
+        "communication": "Event-driven + синхронные API",
+        "infrastructure": "Kubernetes или управляемые контейнеры",
+        "observability": "Service mesh + distributed tracing",
+        "data": "Database-per-service"
+      }
+    },
+    "api-service": {
+      "name": "API-First Сервис",
+      "description": "API-центричные бэкенд-сервисы",
+      "artifacts": ["context-diagram", "container-diagram", "api-specification", "data-model", "nfr-matrix", "security-architecture", "technology-stack"],
+      "assumptions": {
+        "style": "REST или GraphQL",
+        "state": "Stateless сервисы",
+        "deployment": "Cloud-native, контейнеризованные",
+        "auth": "OAuth2 / API-ключи"
+      }
+    },
+    "enterprise-system": {
+      "name": "Корпоративная система",
+      "description": "Крупные корпоративные приложения (ERP, CRM, BPM)",
+      "artifacts": ["context-diagram", "container-diagram", "component-diagram", "deployment-diagram", "data-model", "api-specification", "integration-patterns", "security-architecture", "nfr-matrix", "architecture-decision-records", "technology-stack"],
+      "assumptions": {
+        "scale": "Большая аудитория, несколько подразделений",
+        "compliance": "Вероятны регуляторные требования",
+        "integration": "Ожидается интеграция с legacy-системами",
+        "auth": "Корпоративный SSO / LDAP / AD"
+      }
+    },
+    "data-platform": {
+      "name": "Data Platform",
+      "description": "Data-интенсивные системы (аналитика, пайплайны, хранилища)",
+      "artifacts": ["context-diagram", "container-diagram", "data-model", "data-flow", "deployment-diagram", "nfr-matrix", "security-architecture", "technology-stack"],
+      "assumptions": {
+        "processing": "Batch + streaming",
+        "scale": "Большие объёмы данных",
+        "governance": "Отслеживание lineage и качества данных",
+        "storage": "Раздельные compute и storage"
+      }
+    },
+    "real-time-system": {
+      "name": "Система реального времени",
+      "description": "Системы с низкими задержками (чат, гейминг, мониторинг, IoT)",
+      "artifacts": ["context-diagram", "container-diagram", "data-flow", "deployment-diagram", "nfr-matrix", "technology-stack", "system-pattern", "security-architecture"],
+      "assumptions": {
+        "latency": "Время ответа менее секунды",
+        "protocol": "WebSocket / gRPC / MQTT",
+        "scale": "Высокая конкурентность",
+        "reliability": "Требуется высокая доступность"
+      }
+    },
+    "mobile-backend": {
+      "name": "Мобильный бэкенд",
+      "description": "Бэкенд-сервисы для мобильных приложений",
+      "artifacts": ["context-diagram", "container-diagram", "api-specification", "data-model", "deployment-diagram", "security-architecture", "nfr-matrix", "technology-stack"],
+      "assumptions": {
+        "platforms": "iOS + Android",
+        "features": "Push-уведомления, офлайн-поддержка",
+        "auth": "Оптимизированный поток мобильной аутентификации",
+        "bandwidth": "Оптимизация под мобильные сети"
+      }
+    }
+  },
+  "profiles": {
+    "quick": {
+      "name": "Быстрый",
+      "description": "Быстрый обзор архитектуры для проектов на ранней стадии",
+      "depth": "shallow",
+      "artifact_modifiers": {
+        "api-specification": "только основные эндпоинты",
+        "data-model": "только сущности ядра",
+        "deployment-diagram": "только логическая схема",
+        "architecture-decision-records": "топ-2 решения"
+      },
+      "exclude_artifacts": ["component-diagram", "integration-patterns"],
+      "artifact_priority": ["context-diagram", "container-diagram", "technology-stack", "nfr-matrix"]
+    },
+    "standard": {
+      "name": "Стандартный",
+      "description": "Полный стандартный пакет для большинства проектов",
+      "depth": "medium",
+      "artifact_modifiers": {},
+      "exclude_artifacts": [],
+      "artifact_priority": ["context-diagram", "container-diagram", "api-specification", "data-model", "deployment-diagram", "security-architecture", "architecture-decision-records"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "Максимальная глубина для регулируемых/крупномасштабных систем",
+      "depth": "deep",
+      "artifact_modifiers": {
+        "api-specification": "полный OpenAPI со схемами",
+        "data-model": "полная с ограничениями",
+        "deployment-diagram": "многоокружная с сетевой конфигурацией",
+        "security-architecture": "с threat model",
+        "architecture-decision-records": "все значимые решения",
+        "compliance-mapping": "полная карта соответствия (SOC2/HIPAA/GDPR)",
+        "migration-strategy": "пошаговый план миграции с этапами"
+      },
+      "exclude_artifacts": [],
+      "extra_artifacts": ["compliance-mapping", "migration-strategy"],
+      "artifact_priority": ["architecture-decision-records", "security-architecture", "integration-patterns", "context-diagram", "container-diagram", "component-diagram", "deployment-diagram", "nfr-matrix"]
+    },
+    "startup": {
+      "name": "Стартап",
+      "description": "Лаконичный, но полный для быстрорастущих проектов",
+      "depth": "medium",
+      "artifact_modifiers": {
+        "technology-stack": "оптимизация по стоимости",
+        "deployment-diagram": "предпочтение managed-сервисам",
+        "architecture-decision-records": "решения по масштабированию и стоимости"
+      },
+      "exclude_artifacts": ["component-diagram"],
+      "artifact_priority": ["context-diagram", "container-diagram", "api-specification", "data-model", "nfr-matrix", "technology-stack", "security-architecture"]
+    }
+  },
+  "auto-detection": {
+    "template_keywords": {
+      "microservices": ["микросервис", "распределённ", "service mesh", "event-driven", "DDD", "bounded context", "микросервисная"],
+      "data-platform": ["data pipeline", "аналитик", "warehouse", "data lake", "ETL", "streaming", "batch processing", "пайплайн"],
+      "real-time-system": ["real-time", "низкие задержки", "чат", "messaging", "WebSocket", "IoT", "streaming", "реального времени"],
+      "enterprise-system": ["enterprise", "ERP", "CRM", "compliance", "regulated", "multi-tenant", "SaaS platform", "корпоративн", "регулируем"],
+      "mobile-backend": ["mobile", "iOS", "Android", "push notification", "offline", "app backend", "мобильн", "пуш"],
+      "web-application": ["web app", "SPA", "frontend", "dashboard", "portal", "SaaS", "веб-приложени", "SPA-приложени"],
+      "api-service": ["API", "REST", "GraphQL", "backend service", "API gateway", "REST API", "GraphQL API"]
+    },
+    "profile_keywords": {
+      "quick": ["прототип", "MVP", "POC", "proof of concept", "внутренний инструмент", "hackathon", "концепт"],
+      "startup": ["стартап", "lean", "fast", "agile", "small team", "стартап", "быстр", "малая команда"],
+      "enterprise": ["enterprise", "regulated", "compliance", "SOC2", "HIPAA", "GDPR", "large team", "banking", "healthcare", "finance", "регулируем", "крупн", "банковск", "медицинск"],
+      "standard": []
+    }
+  }
+}

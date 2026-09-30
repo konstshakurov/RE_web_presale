@@ -1,0 +1,1995 @@
+"""
+BABOK 5.5 — Approve Requirements
+MCP tools for approving requirements and creating a Requirements Baseline.
+
+Tools:
+  - prepare_approval_package    — prepare a requirements package for approval
+  - record_approval_decision    — record a stakeholder's decision
+  - close_approval_condition    — close a satisfied condition (Conditional)
+  - check_approval_status       — dashboard of the package's baseline readiness
+  - create_requirements_baseline — create the official Requirements Baseline
+
+Storage:
+  - Approval decisions: in the 5.1 repository nodes ({project}_traceability_repo.json)
+  - Baseline history: {project}_approval_history.json
+  - Approval Record: saved via save_artifact
+
+Integration:
+  In:  5.1 repository (graph+statuses), 5.3 priorities, 5.4 CR Records, 4.2 stakeholders,
+       7.2 verification evidence (req_verified in the repository history — reported, not gated),
+       3.1 BA plan (the approval ceremony, when `approach` is left empty — read through
+       the shared helpers in skills/common.py, no chapter imports another)
+  Out: Approval Record → 4.4 (communication), Chapter 6 (development)
+       approved statuses in the 5.1 repository
+
+# Ai_RE_Project. Authors: Konstantin Shakurov, Andrey Gerasimov
+"""
+
+import json
+import os
+from datetime import date, datetime
+from typing import Literal, Optional
+from mcp.server.fastmcp import FastMCP
+from skills.common import (write_json_artifact,
+    save_artifact, logger, DATA_DIR, data_path, normalize_project_id,
+    has_passed_verification, was_verification_forced, compute_approval_outcome,
+    APPROVAL_HISTORY_FILENAME,
+    read_json_artifact, guard_artifact_errors, parse_json_dict_list,
+    MUST_PRIORITIES,
+    find_spec_file, spec_section_body,
+    load_ba_plan, planned_timing_form, approach_to_timing_form,
+    planned_approval_timing, planned_approval_process, planned_decision_makers,
+    is_planned_decision_maker, reg_norm,
+    planned_party_status, party_aliases, PARTY_UNPLANNED, PARTY_UNBRIDGEABLE,
+    parse_platform_date, deciding_package, superseding_packages, list_with_cap,
+    load_approval_history, approval_outcome,
+)
+from skills.plural_ru import plural_ru
+
+mcp = FastMCP("BABOK_Requirements_Approve")
+
+REPO_FILENAME = "traceability_repo.json"
+# APPROVAL_HISTORY_FILENAME is imported from common: 5.1, 5.2 and 7.2 now read this
+# file too, and the name has to be agreed in one place. A consumer guessing a
+# producer's filename is the single most repeated defect in this codebase.
+
+# Допустимые статусы решений
+VALID_DECISIONS = {"approved", "conditional", "rejected", "abstained"}
+
+# Статусы требований в pipeline 5.5
+STATUS_PENDING = "pending_approval"
+STATUS_APPROVED = "approved"
+STATUS_CONDITIONAL = "conditional_approved"
+STATUS_REJECTED = "rejected"
+
+
+# ---------------------------------------------------------------------------
+# Утилиты — файловый слой
+# ---------------------------------------------------------------------------
+
+def _repo_path(project_name: str) -> str:
+    safe = normalize_project_id(project_name)
+    return data_path(project_name, f"{safe}_{REPO_FILENAME}")
+
+
+def _approval_history_path(project_name: str) -> str:
+    safe = normalize_project_id(project_name)
+    return data_path(project_name, f"{safe}_{APPROVAL_HISTORY_FILENAME}")
+
+
+def _load_repo(project_name: str) -> dict:
+    path = _repo_path(project_name)
+    if os.path.exists(path):
+        # Raises CorruptArtifactError, converted to a ❌ line by guard_artifact_errors
+        # at the tool boundary. A bare json.load here made a damaged file a protocol
+        # error in every downstream tool.
+        return read_json_artifact(path, "5.1 traceability repository")
+    return {"project": project_name, "requirements": [], "links": [], "history": []}
+
+
+def _save_repo(project_name: str, repo: dict) -> None:
+    path = _repo_path(project_name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    repo["updated"] = str(date.today())
+    write_json_artifact(path, repo)
+
+
+def _load_approval_history(project_name: str) -> dict:
+    path = _approval_history_path(project_name)
+    if os.path.exists(path):
+        # Raises CorruptArtifactError, converted to a ❌ line by guard_artifact_errors
+        # at the tool boundary. A bare json.load here made a damaged file a protocol
+        # error in every downstream tool.
+        return read_json_artifact(path, "5.5 approval history")
+    return {"project": project_name, "packages": {}, "baselines": []}
+
+
+def _save_approval_history(project_name: str, history: dict) -> None:
+    path = _approval_history_path(project_name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    history["updated"] = str(date.today())
+    write_json_artifact(path, history)
+
+
+def _find_node(repo: dict, node_id: str) -> Optional[dict]:
+    for r in repo["requirements"]:
+        if r["id"] == node_id:
+            return r
+    return None
+
+
+def _get_package(history: dict, package_id: str) -> Optional[dict]:
+    return history["packages"].get(package_id)
+
+
+def _get_req_approval_summary(package: dict, req_id: str) -> dict:
+    """Собирает все решения по конкретному требованию из всех стейкхолдеров."""
+    decisions = []
+    for sh_name, sh_data in package.get("stakeholder_decisions", {}).items():
+        for rd in sh_data.get("req_decisions", []):
+            if rd["req_id"] == req_id:
+                decisions.append({
+                    "stakeholder": sh_name,
+                    "raci": sh_data.get("raci", "consulted"),
+                    "decision": rd["decision"],
+                    "condition_text": rd.get("condition_text", ""),
+                    "condition_closed": rd.get("condition_closed", False),
+                    "rejection_reason": rd.get("rejection_reason", ""),
+                })
+    return {"req_id": req_id, "decisions": decisions}
+
+
+def _decisions_this_round_overrides(project_name: str, package_id: str,
+                                    req_ids: list) -> list:
+    """Rejections and conditions recorded in EARLIER rounds for these requirements.
+
+    Packages are rounds: where a requirement appears in several, the latest governs
+    (common.approval_outcome). So a rejection from an earlier round is genuinely
+    overridden here — and that is exactly the fact a reader of this record needs, since
+    it means someone with decision authority said no and this document goes past them.
+    """
+    history = load_approval_history(project_name)
+    if history is None:
+        return []
+    wanted = set(req_ids)
+    out = []
+    for other_id, other in history["packages"].items():
+        if other_id == package_id or not isinstance(other, dict):
+            continue
+        shared = wanted & set(other.get("req_ids") or [])
+        if not shared:
+            continue
+        for req_id in sorted(shared):
+            # Only where THIS package is the one that decides now.
+            decider_id, _ = deciding_package(project_name, req_id)
+            if decider_id != package_id:
+                continue
+            for sh_name, sh_data in (other.get("stakeholder_decisions") or {}).items():
+                for rd in sh_data.get("req_decisions", []):
+                    if rd.get("req_id") != req_id:
+                        continue
+                    if rd.get("decision") not in ("rejected", "conditional"):
+                        continue
+                    out.append({
+                        "req_id": req_id,
+                        "package_id": other_id,
+                        "stakeholder": sh_name,
+                        "raci": sh_data.get("raci", "—"),
+                        "decision": rd["decision"],
+                        "reason": rd.get("rejection_reason") or rd.get("condition_text") or "",
+                    })
+    return out
+
+
+def _compute_req_status(req_id: str, package: dict) -> str:
+    """Computes the final status of a requirement based on all stakeholder decisions.
+
+    The rule itself lives in `common.compute_approval_outcome`, because 5.1, 5.2 and
+    7.2 need the same verdict from the durable record and cannot import this module
+    (5.5 loads in the `lifecycle` phase, 7.2 in `design` — the phases never overlap).
+    Keeping a second copy here is precisely how this module's dashboard verdict and
+    baseline gate drifted apart once already.
+    """
+    return compute_approval_outcome(package, req_id)
+
+
+MIN_APPROVED_PCT = 70
+
+
+def _baseline_gate(package: dict) -> dict:
+    """THE readiness predicate for a baseline — the single source of truth.
+
+    Used by BOTH `check_approval_status` (which renders the "Ready / Not ready"
+    verdict) and `create_requirements_baseline` (which enforces it). These two used
+    to compute readiness separately and had already drifted: the dashboard applied
+    four gates, creation only two, so a package the dashboard called "🔴 Not ready"
+    could still be baselined — in the worst case producing an EMPTY baseline with no
+    warning. Any change to what "ready" means belongs here, once.
+
+    Returns the raw facts; callers do their own formatting.
+    """
+    req_ids = package.get("req_ids", [])
+    statuses = {rid: _compute_req_status(rid, package) for rid in req_ids}
+
+    counts = {STATUS_APPROVED: 0, STATUS_CONDITIONAL: 0, STATUS_REJECTED: 0, STATUS_PENDING: 0}
+    for status in statuses.values():
+        counts[status] = counts.get(status, 0) + 1
+
+    total = len(req_ids)
+    approved_pct = round(counts[STATUS_APPROVED] / total * 100) if total else 0
+
+    ar_rejections = []
+    open_conditions = []
+    overdue_conditions = []
+    today = date.today()
+
+    for sh_name, sh_data in package.get("stakeholder_decisions", {}).items():
+        raci = sh_data.get("raci", "consulted")
+        for rd in sh_data.get("req_decisions", []):
+            if rd["decision"] == "rejected" and raci in ("accountable", "responsible"):
+                ar_rejections.append({
+                    "req_id": rd["req_id"],
+                    "stakeholder": sh_name,
+                    "raci": raci,
+                    "reason": rd.get("rejection_reason", "—"),
+                })
+            if rd["decision"] == "conditional" and not rd.get("condition_closed"):
+                entry = {
+                    "req_id": rd["req_id"],
+                    "stakeholder": sh_name,
+                    "condition_text": rd.get("condition_text", "—"),
+                    "condition_deadline": rd.get("condition_deadline", ""),
+                    "condition_owner": rd.get("condition_owner", "—"),
+                }
+                open_conditions.append(entry)
+                if rd.get("condition_deadline"):
+                    # Both formats the platform writes; an unreadable one is UNKNOWN
+                    # and must say so. `date.fromisoformat` inside `except: pass` meant
+                    # a deadline written the chapter-4 way (`01.04.2025`, sixteen
+                    # months past) printed with no marker while the verdict stated
+                    # "not overdue" — and `overdue_conditions`, one of the four
+                    # baseline gates, could never fire on such data.
+                    parsed = parse_platform_date(rd["condition_deadline"])
+                    if parsed is None:
+                        entry["deadline_unreadable"] = True
+                    elif parsed < today:
+                        entry["overdue"] = True
+                        overdue_conditions.append(entry)
+
+    pending_reqs = [rid for rid in req_ids if statuses[rid] == STATUS_PENDING]
+    # An empty approved set is 0% and is therefore blocked by this same rule.
+    low_approval = approved_pct < MIN_APPROVED_PCT
+
+    return {
+        "statuses": statuses,
+        "counts": counts,
+        "total": total,
+        "approved_pct": approved_pct,
+        "ar_rejections": ar_rejections,
+        "pending_reqs": pending_reqs,
+        "open_conditions": open_conditions,
+        "overdue_conditions": overdue_conditions,
+        "low_approval": low_approval,
+        "can_baseline": not (ar_rejections or pending_reqs or overdue_conditions or low_approval),
+        # An A/R rejection is the ONE gate `force` must not lift: it is a named person
+        # with decision authority saying no, whereas the other three are process state
+        # (a missed date, an unanswered request, a percentage). A single boolean flag
+        # let an analyst forcing past a lapsed deadline also baseline over a live
+        # objection without ever being told. Overriding a person is a different
+        # decision from overriding a schedule, so it needs a different act.
+        "hard_block": bool(ar_rejections),
+        # What `force` WOULD lift here — named, so the Approval Record can list them
+        # instead of recording an undifferentiated "forced".
+        "forceable": [
+            name for name, present in (
+                ("незакрытые согласования", bool(pending_reqs)),
+                ("просроченные условия", bool(overdue_conditions)),
+                (f"согласовано меньше {MIN_APPROVED_PCT}%", low_approval),
+            ) if present
+        ],
+    }
+
+
+def _verification_state(repo: dict, package: dict) -> dict:
+    """Which requirements in the package passed 7.2 — live history ∪ stored snapshot.
+
+    5.5 does not gate on this (see `_baseline_gate`, deliberately unchanged): the BA
+    cannot fix it from here, because 7.2 lives in the `design` phase while 5.5 lives
+    in `lifecycle`. Instead the fact is reported, and lands in the Approval Record.
+
+    The snapshot is taken by `prepare_approval_package` before it overwrites `status`
+    with pending_approval. Live history wins where present — the BA may have gone to
+    7.2 after the package was prepared — so the snapshot only ever adds evidence.
+
+    `known` is False only for packages created before this check existed; their
+    verification state is genuinely unknowable, which is not the same as unverified.
+    """
+    snapshot = package.get("verification_snapshot")
+
+    verified, unverified, unknown, forced = [], [], [], []
+    for req_id in package.get("req_ids", []):
+        live = has_passed_verification(repo, req_id)
+        if live:
+            verified.append(req_id)
+            if was_verification_forced(repo, req_id):
+                forced.append(req_id)
+        elif snapshot is not None and req_id in snapshot:
+            (verified if snapshot[req_id] else unverified).append(req_id)
+        else:
+            # No snapshot entry AND the durable history is silent — genuinely
+            # unknowable. Judged PER REQUIREMENT, not per package: collapsing the
+            # whole package on `snapshot is None` threw away live history that was
+            # sitting right there, and produced a record that said verification
+            # could not be determined and then named a specific override.
+            unknown.append(req_id)
+
+    return {
+        # Kept for callers that only ask "is anything unknown here"; the per-id lists
+        # above are the authority.
+        "known": not unknown,
+        "verified": verified,
+        "unverified": unverified,
+        "unknown": unknown,
+        "forced": forced,
+    }
+
+
+def _get_cr_context(repo: dict, req_id: str) -> list:
+    """Ищет CR, затрагивающие требование (modifies-связи)."""
+    cr_refs = []
+    for lnk in repo.get("links", []):
+        if lnk.get("to") == req_id and lnk.get("relation") == "modifies":
+            cr_node = _find_node(repo, lnk["from"])
+            if cr_node and cr_node.get("type") == "change_request":
+                cr_refs.append({
+                    "cr_id": cr_node["id"],
+                    "title": cr_node.get("title", "—"),
+                    "status": cr_node.get("status", "unknown"),
+                    "decision": (cr_node.get("decision") or {}).get("verdict", "—"),
+                })
+    return cr_refs
+
+
+# ---------------------------------------------------------------------------
+# 5.5.1 — Подготовить пакет к согласованию
+# ---------------------------------------------------------------------------
+
+# The methodology is a 3.1 decision; before B3-1 the BA restated it here by hand and
+# nothing compared the two. Resolution order: explicit -> the planned timing form ->
+# the approach label. Plain "Hybrid" resolves to NEITHER of 5.5's two values, which is
+# exactly why element .4 (phases vs iterations) is the authoritative source rather
+# than the approach label.
+_FORM_TO_APPROACH = {"phases": "predictive", "iterations": "agile"}
+
+# `approach` selects the approval CEREMONY here — the four-option decision menu with a
+# response deadline, or "For Sprint Planning, the Product Owner approves the backlog".
+# The timing form answers a different question (cadence), and for these labels the two
+# answers genuinely differ: BOTH are produced only by REGULATORY_OVERRIDE, i.e. only
+# when regulatory_need=True, and their whole point is formal sign-off for audit.
+# Resolving them through the cadence handed exactly the regulated projects the informal
+# package, so the label pins the ceremony and outranks the form. Fixing one of the two
+# and leaving the other is the same defect: the second is reachable through the very
+# advice the docs give ("declare a timing form in 3.1b").
+_CEREMONY_BY_APPROACH = {
+    "Hybrid (Agile + compliance gates)": "predictive",
+    "Hybrid (с усиленным Governance)": "predictive",
+}
+
+
+def _plan_approach_label(plan) -> str:
+    """`ba_approach.recommended_approach` from a plan of any shape, or ""."""
+    if not isinstance(plan, dict):
+        return ""
+    section = plan.get("ba_approach")
+    if not isinstance(section, dict):
+        return ""
+    raw = section.get("recommended_approach")
+    return raw if isinstance(raw, str) else ""
+
+
+def _resolve_approach(project_name: str, approach: str) -> tuple:
+    """Returns (value, source_label, error). Only "" triggers resolution.
+
+    A non-empty value passes through unvalidated: it is the BA's explicit statement,
+    pydantic already checks it against the Literal in production, and rejecting it
+    here would change behaviour well beyond this feature.
+    """
+    if approach:
+        return approach, "указан в этом вызове", ""
+    plan, note = load_ba_plan(project_name)
+    label = _plan_approach_label(plan)
+    ceremony = _CEREMONY_BY_APPROACH.get(label.strip())
+    if ceremony:
+        return (ceremony,
+                f"из плана BA (3.1) — подход: {label} (формальное подписание)", "")
+    form = planned_timing_form(plan)
+    if form:
+        return (_FORM_TO_APPROACH[form],
+                f"из плана BA (3.1) — форма тайминга: {form}", "")
+    derived = approach_to_timing_form(label)
+    if derived:
+        return (_FORM_TO_APPROACH[derived],
+                f"из плана BA (3.1) — подход: {label}", "")
+    reason = (f"подход 3.1 `{label}` находится между predictive и adaptive"
+              if label else "план BA (3.1) его не задаёт")
+    error = (
+        f"❌ Не удалось определить методологию для этого пакета — {reason}.\n"
+        + (f"  {note}\n" if note else "")
+        + f"  Два способа это исправить:\n"
+        f"    • передать `approach=\"predictive\"` или `approach=\"agile\"` здесь, либо\n"
+        f"    • один раз записать это в 3.1 через `plan_ba_activities("
+        f"timing_form=\"phases\"|\"iterations\")` — тогда каждый пакет будет брать "
+        f"значение из плана.\n"
+        f"  Оно не угадывается: это значение печатается на пакете, который уходит "
+        f"на подпись."
+    )
+    return "", "", error
+
+
+def _governance_block(project_name: str) -> tuple:
+    """(markdown lines for the authority block, the deadline sentence or "").
+
+    BABOK 3.3 .4 — "the timing for the approvals" and who approves. Everything here
+    is NEW information: the package named no approver and stated no deadline, it only
+    pointed at a plan nothing read ("Response deadline: per the project's governance
+    plan."), printed inside a document that goes out for signature.
+
+    So a project without a governance plan gets a tool that says LESS than before —
+    never a dash, and never a refusal. That is the opposite of `_resolve_approach`
+    above, and deliberately so: `approach` was ALREADY a required input, so refusing
+    took nothing away, whereas refusing here would break every existing project.
+    """
+    plan, note = load_ba_plan(project_name)
+    days, timing_note, _timing_source = planned_approval_timing(plan)
+    process, process_source = planned_approval_process(plan)
+    approvers = planned_decision_makers(plan)
+
+    parts = []
+    if days:
+        parts.append(f"в течение {days} рабочих дней с момента получения пакета")
+    if timing_note:
+        parts.append(timing_note)
+    deadline = (f"Срок ответа: {'; '.join(parts)} "
+                f"(по плану governance 3.3)." if parts else "")
+
+    lines = []
+    # The template's approval sentence NAMES ROLES ("Requires sign-off from Sponsor +
+    # Product Owner"). Printed under a `**Approvers:**` line holding the BA's own list,
+    # it made this package — a signature request — state two different sets of
+    # approvers two lines apart, and a recipient could not tell which one binds them.
+    # It was harmless while it only sat in the 3.3 table with nothing beside it.
+    # So the generated wording is dropped once the BA has named the approvers: the
+    # authoritative answer to "who signs" is their list, not a criticality default.
+    show_process = bool(process) and (process_source == "заявлено в 3.3"
+                                      or not approvers)
+    if approvers or show_process:
+        lines = ["---", "", "## Полномочия на согласование (3.3)", ""]
+        if approvers:
+            lines.append(f"**Согласующие:** {', '.join(approvers)}  ")
+        if show_process:
+            lines.append(f"**Процесс:** {process} *({process_source})*  ")
+        lines.append("")
+    if note:
+        lines = ["", note, ""] + lines
+    return lines, deadline
+
+
+@mcp.tool()
+@guard_artifact_errors
+def prepare_approval_package(
+    project_name: str,
+    package_id: str,
+    package_title: str,
+    req_ids_json: str,
+    approach: Literal["predictive", "agile", ""] = "",
+    audience: Literal["business", "developer", "regulator", "all"] = "all",
+    sprint_number: str = "",
+) -> str:
+    """
+    BABOK 5.5 — Шаг 1: Подготовить пакет требований к согласованию.
+
+    Собирает требования из репозитория 5.1, добавляет контекст из 5.3 и 5.4,
+    формирует Approval Package для стейкхолдеров.
+
+    Args:
+        project_name:   Project name.
+        package_id:     Unique package ID. Recommended format: APKG-001.
+        package_title:  Package title (e.g.: "Feature: User Onboarding").
+        req_ids_json:   JSON list of requirement IDs for the package.
+                        Example: '["FR-001", "FR-002", "NFR-001"]'
+        approach:       Methodology: predictive (Waterfall) or agile (Scrum/Kanban).
+                        Leave empty to take it from the 3.1 BA plan — the planned
+                        timing form, or failing that the recommended approach.
+        audience:       Package audience:
+                        - business: business requirements and acceptance criteria
+                        - developer: functional + non-functional requirements
+                        - regulator: compliance requirements with traceability
+                        - all: full package for all audiences
+        sprint_number:  Sprint number (agile only, e.g.: "5").
+
+    Returns:
+        Markdown Approval Package для передачи стейкхолдерам.
+        Создаёт запись пакета в {project}_approval_history.json.
+    """
+    logger.info(f"prepare_approval_package: {package_id} / {project_name}")
+
+    # Shape, not just syntax: a scalar/object where a list of ids is expected must
+    # return a readable "❌", not a TypeError escaping the tool.
+    from skills.common import parse_json_str_list
+    req_ids, shape_error = parse_json_str_list(req_ids_json, "req_ids_json")
+    if shape_error:
+        return shape_error
+
+    if not req_ids:
+        return "❌ Ошибка: список требований не может быть пустым."
+
+    approach, approach_source, approach_error = _resolve_approach(
+        project_name, approach)
+    if approach_error:
+        return approach_error
+
+    repo = _load_repo(project_name)
+    history = _load_approval_history(project_name)
+
+    # Проверка: пакет уже существует?
+    if package_id in history["packages"]:
+        return (
+            f"⚠️ Пакет `{package_id}` уже существует для проекта `{project_name}`.\n"
+            f"Используйте другой ID или проверьте существующий пакет через `check_approval_status`."
+        )
+
+    # Проверка: требования существуют?
+    missing = [rid for rid in req_ids if not _find_node(repo, rid)]
+    if missing:
+        return (
+            f"⚠️ Следующие требования не найдены в репозитории: {missing}\n"
+            f"Проверьте ID или добавьте требования через `init_traceability_repo` (5.1)."
+        )
+
+    # Собираем данные по требованиям
+    req_details = []
+    cr_warnings = []
+    for rid in req_ids:
+        node = _find_node(repo, rid)
+        cr_refs = _get_cr_context(repo, rid)
+        if cr_refs:
+            # 5.4 CR statuses are open/approved/approved_modified/deferred/rejected;
+            # "under_change" belongs to the REQUIREMENT status vocabulary and was a
+            # dead branch here (one literal, two vocabularies).
+            open_crs = [c for c in cr_refs if c["status"] == "open"]
+            if open_crs:
+                cr_warnings.append((rid, open_crs))
+        # The graph node carries only metadata — 7.1 writes the statement and the
+        # acceptance criteria into the spec .md, never onto the node. Reading the
+        # node fields alone produced a signing package of bare titles: the
+        # stakeholder was asked to approve requirements they could not read.
+        # Fall back to the spec file the way 7.2's quality checks already do.
+        description = node.get("description", "")
+        acceptance = node.get("acceptance_criteria", "")
+        if not (description and acceptance):
+            spec_path = find_spec_file({**node, "id": rid}, project_name)
+            if spec_path:
+                try:
+                    with open(spec_path, "r", encoding="utf-8") as f:
+                        spec_text = f.read()
+                except OSError:
+                    spec_text = ""
+                if spec_text:
+                    if not description:
+                        # Заголовки секций — КОНТРАКТ с 7.1, а не текст этого файла:
+                        # искать надо ровно то, что 7.1 печатает по-русски.
+                        for header in ("Формулировка", "История", "Основной сценарий"):
+                            body = spec_section_body(spec_text, header)
+                            # drop the italic hint line the 7.1 template prepends
+                            body = "\n".join(
+                                l for l in body.split("\n")
+                                if not l.strip().startswith(">")).strip()
+                            if body:
+                                description = body
+                                break
+                    if not acceptance:
+                        acceptance = spec_section_body(spec_text, "Acceptance Criteria")
+        req_details.append({
+            "id": rid,
+            "title": node.get("title", "—"),
+            "type": node.get("type", "functional"),
+            "description": description,
+            "status": node.get("status", "unknown"),
+            "priority": node.get("priority", "—"),
+            "version": node.get("version", "1.0"),
+            "owner": node.get("owner", "—"),
+            "acceptance_criteria": acceptance,
+            "cr_refs": cr_refs,
+        })
+
+    # Создаём запись пакета в approval_history
+    package_record = {
+        "package_id": package_id,
+        "package_title": package_title,
+        "approach": approach,
+        # Where the methodology came from, carried on the record: the Approval Record
+        # prints it back for the auditor, and re-deriving it later would give a
+        # different answer once the plan changes — or none once it is gone.
+        "approach_source": approach_source,
+        "audience": audience,
+        "sprint_number": sprint_number,
+        "req_ids": req_ids,
+        "created_date": str(date.today()),
+        "stakeholder_decisions": {},
+        "baseline_version": None,
+        "status": "open",
+    }
+    history["packages"][package_id] = package_record
+    _save_approval_history(project_name, history)
+
+    # Snapshot 7.2 verification BEFORE the status is overwritten below. This is the
+    # last moment it can be read for a legacy repository, where the only evidence is
+    # the `verified` status itself — pending_approval erases it.
+    verification_snapshot = {rid: has_passed_verification(repo, rid) for rid in req_ids}
+    package_record["verification_snapshot"] = verification_snapshot
+    _save_approval_history(project_name, history)
+
+    # Update requirement statuses to pending_approval in the 5.1 repository
+    for rid in req_ids:
+        node = _find_node(repo, rid)
+        if node:
+            node["status"] = STATUS_PENDING
+    _save_repo(project_name, repo)
+
+    unverified_ids = [rid for rid, ok in verification_snapshot.items() if not ok]
+
+    # Build the Approval Package
+    approach_label = "Predictive / Waterfall" if approach == "predictive" else "Agile"
+    sprint_label = f" | Спринт: {sprint_number}" if sprint_number else ""
+
+    lines = [
+        f"<!-- BABOK 5.5 — Approval Package, Проект: {project_name}, Пакет: {package_id}, Дата: {date.today()} -->",
+        "",
+        f"# Approval Package: {package_title}",
+        f"**Проект:** {project_name}  ",
+        f"**Пакет:** {package_id}  ",
+        f"**Методология:** {approach_label}{sprint_label} ({approach_source})  ",
+        f"**Аудитория:** {audience}  ",
+        f"**Дата:** {date.today()}  ",
+        f"**Требований в пакете:** {len(req_ids)}  ",
+        "",
+        "---",
+        "",
+    ]
+
+    # Предупреждения об открытых CR
+    if cr_warnings:
+        lines += ["## ⚠️ Предупреждения: открытые Change Requests", ""]
+        for rid, open_crs in cr_warnings:
+            cr_list = ", ".join(f"`{c['cr_id']}` ({c['status']})" for c in open_crs)
+            lines.append(f"- `{rid}` затронуто открытыми CR: {cr_list}")
+        lines += ["", "Рекомендуется закрыть CR (5.4) перед согласованием.", ""]
+
+    # Требования по типам (фильтрация по audience)
+    if audience == "business":
+        filtered = [r for r in req_details if r["type"] in ("business", "stakeholder")]
+        if not filtered:
+            filtered = req_details
+    elif audience == "developer":
+        filtered = [r for r in req_details if r["type"] in ("functional", "non_functional", "transition")]
+        if not filtered:
+            filtered = req_details
+    elif audience == "regulator":
+        filtered = [r for r in req_details if r.get("regulatory") or "compliance" in r.get("title", "").lower()]
+        if not filtered:
+            filtered = req_details
+    else:
+        filtered = req_details
+
+    lines += ["## Требования для согласования", ""]
+
+    for req in filtered:
+        priority_str = f" | Приоритет: {req['priority']}" if req['priority'] != "—" else ""
+        lines += [
+            f"### {req['id']}: {req['title']}",
+            f"**Тип:** {req['type']} | **Версия:** {req['version']}{priority_str}  ",
+            f"**Owner:** {req['owner']}  ",
+        ]
+        if req.get("description"):
+            lines += ["", req["description"], ""]
+        if req.get("acceptance_criteria"):
+            lines += [f"**Критерии приёмки:** {req['acceptance_criteria']}", ""]
+        if req["cr_refs"]:
+            cr_info = "; ".join(f"{c['cr_id']} ({c['status']}/{c['decision']})" for c in req["cr_refs"])
+            lines += [f"**CR-история:** {cr_info}", ""]
+        lines.append("")
+
+    gov_lines, gov_deadline = _governance_block(project_name)
+
+    # Instructions for stakeholders
+    if approach == "predictive":
+        # A regulated hybrid signs off formally AND runs in sprints, so the header
+        # would otherwise read "Predictive / Waterfall | Sprint: 5" above an
+        # instruction block that never mentions the sprint.
+        cadence_note = (
+            f"\n\nРабота идёт спринтами (Спринт {sprint_number}); само подписание "
+            f"формальное — из-за комплаенс-гейтов проекта."
+            if sprint_number else "")
+        instruction = (
+            # Названия решений оставлены латиницей: это ЗНАЧЕНИЯ параметра `decision`,
+            # которые BA потом передаёт в `record_approval_decision`.
+            "Пожалуйста, рассмотрите требования и вынесите решение по каждому:\n"
+            "- **Approved** — согласовано без замечаний\n"
+            "- **Conditional** — согласовано при условии (условие укажите)\n"
+            "- **Rejected** — не согласовано (укажите причину)\n"
+            "- **Abstained** — воздерживаюсь"
+            # Was: "Response deadline: per the project's governance plan." — a pointer
+            # at a plan nothing read, printed on a document that goes out for
+            # signature. It now states the deadline, or says nothing at all.
+            + (f"\n\n{gov_deadline}" if gov_deadline else "")
+            + cadence_note
+        )
+    else:
+        sprint_ref = f" спринта {sprint_number}" if sprint_number else ""
+        instruction = (
+            f"Для Sprint Planning{sprint_ref}. Product Owner рассматривает и утверждает бэклог.\n"
+            "Требования, принятые в спринт, получат статус Approved и войдут в Sprint Baseline."
+            # The SLA answers "the timing for the approvals" (BABOK 3.3 .4) whatever
+            # the ceremony: a sprint package has a response window too. A project that
+            # planned no SLA sees this branch exactly as it was.
+            + (f"\n\n{gov_deadline}" if gov_deadline else "")
+        )
+
+    if unverified_ids:
+        ids_str = ", ".join(f"`{rid}`" for rid in unverified_ids)
+        lines += [
+            "---",
+            "",
+            "## ⚠️ Не верифицировано через 7.2",
+            "",
+            f"Эти требования не прошли верификацию (7.2): {ids_str}",
+            "",
+            "Согласование это не блокирует — решение остаётся за BA, — но факт будет "
+            "записан в Approval Record при создании baseline.",
+            "",
+            "Чтобы сперва их верифицировать (инструменты 7.2 живут в другой фазе):",
+            "",
+            "1. `python phase.py design`, затем перезапуск: `/exit` и `claude --continue`",
+            "2. `check_req_quality` → исправь найденное → `mark_req_verified`",
+            "3. `python phase.py lifecycle`, затем перезапуск так же, и продолжай здесь",
+            "",
+        ]
+
+    lines += gov_lines
+    lines += [
+        "---",
+        "",
+        "## Инструкция для стейкхолдеров",
+        "",
+        instruction,
+        "",
+        "---",
+        "",
+        "## Следующий шаг",
+        "",
+        f"После получения ответов стейкхолдеров — вызывайте `record_approval_decision`:",
+        f"  - `project_name`: \"{project_name}\"",
+        f"  - `package_id`: \"{package_id}\"",
+        f"  - `stakeholder_name`: имя стейкхолдера",
+        f"  - `decision`: approved / conditional / rejected / abstained",
+    ]
+
+    artifact_content = "\n".join(lines)
+    save_path = save_artifact(artifact_content, prefix=f"5_5_approval_package_{package_id}", project_id=project_name)
+
+    return artifact_content + save_path
+
+
+# ---------------------------------------------------------------------------
+# 5.5.2 — Зафиксировать решение стейкхолдера
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+@guard_artifact_errors
+def record_approval_decision(
+    project_name: str,
+    package_id: str,
+    stakeholder_name: str,
+    stakeholder_raci: Literal["accountable", "responsible", "consulted"],
+    decision: Literal["approved", "conditional", "rejected", "abstained"],
+    req_decisions_json: str = "[]",
+    rejection_reason: str = "",
+    comment: str = "",
+) -> str:
+    """
+    BABOK 5.5 — Шаг 2: Зафиксировать решение стейкхолдера по пакету.
+
+    Вызывается отдельно для каждого стейкхолдера (аналог add_stakeholder_scores в 5.3).
+    При rejected — автоматически анализирует контекст из 5.3 и 5.4 для флагования конфликтов.
+
+    Args:
+        project_name:       Название проекта.
+        package_id:         ID пакета (из prepare_approval_package).
+        stakeholder_name:   Имя или роль стейкхолдера.
+        stakeholder_raci:   Роль в RACI: accountable / responsible / consulted.
+                            Rejected от accountable/responsible = блокировщик baseline.
+                            Rejected от consulted = input для risk assessment.
+        decision:           Общее решение по пакету: approved / conditional / rejected / abstained.
+                            Используется если req_decisions_json пуст — применяется ко всем req.
+        req_decisions_json: JSON-список решений по отдельным требованиям пакета.
+                            Если передан — overrides общий decision для указанных req.
+                            Формат:
+                            [
+                              {"req_id": "FR-001", "decision": "approved"},
+                              {"req_id": "FR-002", "decision": "conditional",
+                               "condition_text": "Уточнить критерий приёмки",
+                               "condition_deadline": "2026-04-01",
+                               "condition_owner": "Иванов А."},
+                              {"req_id": "FR-003", "decision": "rejected",
+                               "rejection_reason": "За пределами скоупа"}
+                            ]
+                            If empty ([]) — decision applies to all requirements in the package.
+                            IMPORTANT: a PARTIAL list works the same way. `decision` is
+                            the stakeholder's blanket position and the list refines it,
+                            so any requirement you do not mention still receives
+                            `decision`. Listing only FR-001 as approved does NOT leave
+                            the rest pending — they are recorded as approved by this
+                            stakeholder too. To leave a requirement undecided, keep it
+                            out of the package.
+        rejection_reason:   Reason for rejection (required if decision=rejected
+                            and req_decisions_json is empty).
+        comment:            Additional comment from the stakeholder.
+
+    Returns:
+        Подтверждение записи решения, анализ конфликтов (при rejected),
+        обновлённые статусы требований.
+    """
+    logger.info(f"record_approval_decision: {package_id} / {stakeholder_name} / {project_name}")
+
+    # `rd["req_id"]` is indexed a few lines down, so a list of bare ids raised
+    # `TypeError: string indices must be integers` out of the tool. This one records
+    # an official approval decision — failing it with a stack trace leaves the analyst
+    # unsure whether the decision was stored.
+    req_decisions, shape_error = parse_json_dict_list(
+        req_decisions_json, "req_decisions_json",
+        example='[{"req_id": "FR-001", "decision": "approved"}]')
+    if shape_error:
+        return shape_error
+
+    history = _load_approval_history(project_name)
+    package = _get_package(history, package_id)
+    if not package:
+        return (
+            f"❌ Пакет `{package_id}` не найден для проекта `{project_name}`.\n"
+            f"Сначала выполните `prepare_approval_package`."
+        )
+
+    if package.get("status") == "baselined":
+        return f"⚠️ Пакет `{package_id}` уже переведён в baseline. Изменения невозможны."
+
+    repo = _load_repo(project_name)
+    req_ids = package["req_ids"]
+
+    # Если req_decisions пуст — применяем общий decision ко всем req
+    if not req_decisions:
+        if decision == "rejected" and not rejection_reason:
+            return "❌ При decision=rejected необходимо указать `rejection_reason`."
+        req_decisions = []
+        for rid in req_ids:
+            rd = {"req_id": rid, "decision": decision}
+            if decision == "rejected":
+                rd["rejection_reason"] = rejection_reason
+            req_decisions.append(rd)
+
+    # Валидация: все req_id из пакета?
+    unknown_reqs = [rd["req_id"] for rd in req_decisions if rd["req_id"] not in req_ids]
+    if unknown_reqs:
+        return (
+            f"⚠️ Требования {unknown_reqs} не входят в пакет `{package_id}`.\n"
+            f"Пакет содержит: {req_ids}"
+        )
+
+    # Валидация conditional
+    for rd in req_decisions:
+        if rd["decision"] == "conditional":
+            if not rd.get("condition_text"):
+                return (
+                    f"❌ Для conditional-одобрения требования `{rd['req_id']}` "
+                    f"необходимо указать `condition_text` в req_decisions."
+                )
+
+    # Для req не упомянутых в req_decisions — применяем общий decision
+    mentioned = {rd["req_id"] for rd in req_decisions}
+    for rid in req_ids:
+        if rid not in mentioned:
+            rd = {"req_id": rid, "decision": decision}
+            if decision == "rejected":
+                rd["rejection_reason"] = rejection_reason
+            req_decisions.append(rd)
+
+    # Анализ конфликтов при rejected — контекст из 5.3 и 5.4
+    conflict_analysis = []
+    for rd in req_decisions:
+        if rd["decision"] == "rejected":
+            req_id = rd["req_id"]
+            node = _find_node(repo, req_id)
+            conflicts = []
+
+            if node:
+                # Проверяем приоритет из 5.3
+                priority = node.get("priority", "")
+                # Both scales: 5.3 writes MoSCoW, 7.1 writes High/Medium/Low. Testing
+                # for `Must` alone meant this warning never fired on a project that
+                # specified requirements and never ran a prioritisation session.
+                if priority in MUST_PRIORITIES:
+                    conflicts.append(
+                        f"🔴 Приоритет {priority} — отклоняется критически важное требование"
+                    )
+                elif priority in ("Should", "Could", "Medium"):
+                    conflicts.append(f"🟡 Приоритет {priority} — рекомендуем пересмотреть необходимость")
+
+                # WSJF-скор если есть
+                wsjf = node.get("wsjf_score")
+                if wsjf and float(wsjf) > 2.0:
+                    conflicts.append(f"🟡 WSJF-скор {wsjf} (5.3) — высокая бизнес-ценность")
+
+            # Проверяем CR из 5.4
+            cr_refs = _get_cr_context(repo, req_id)
+            # 5.4 CR statuses are open/approved/approved_modified/deferred/rejected;
+            # "under_change" belongs to the REQUIREMENT status vocabulary and was a
+            # dead branch here (one literal, two vocabularies).
+            open_crs = [c for c in cr_refs if c["status"] == "open"]
+            if open_crs:
+                cr_list = ", ".join(f"`{c['cr_id']}` ({c['status']})" for c in open_crs)
+                conflicts.append(f"🟡 Открытые CR из 5.4: {cr_list} — требование под изменением")
+
+            if conflicts:
+                conflict_analysis.append({
+                    "req_id": req_id,
+                    "stakeholder": stakeholder_name,
+                    "raci": stakeholder_raci,
+                    "conflicts": conflicts,
+                })
+
+    # Сохраняем решение стейкхолдера
+    stakeholder_record = {
+        "stakeholder_name": stakeholder_name,
+        "raci": stakeholder_raci,
+        "overall_decision": decision,
+        "req_decisions": req_decisions,
+        "rejection_reason": rejection_reason,
+        "comment": comment,
+        "recorded_date": str(date.today()),
+    }
+
+    package["stakeholder_decisions"][stakeholder_name] = stakeholder_record
+    _save_approval_history(project_name, history)
+
+    # Обновляем статусы требований в репозитории 5.1
+    updated_statuses = {}
+    for rid in req_ids:
+        new_status = _compute_req_status(rid, package)
+        node = _find_node(repo, rid)
+        if node:
+            old_status = node.get("status", "unknown")
+            if old_status != new_status:
+                node["status"] = new_status
+                node.setdefault("history", []).append({
+                    "date": str(date.today()),
+                    "action": "approval_decision",
+                    "from": old_status,
+                    "to": new_status,
+                    "stakeholder": stakeholder_name,
+                    "raci": stakeholder_raci,
+                })
+            updated_statuses[rid] = new_status
+
+    _save_repo(project_name, repo)
+
+    # Формируем отчёт
+    decision_icon = {
+        "approved": "✅",
+        "conditional": "🟡",
+        "rejected": "❌",
+        "abstained": "⚪",
+    }.get(decision, "—")
+
+    lines = [
+        f"<!-- BABOK 5.5 — Approval Decision, Проект: {project_name}, Пакет: {package_id}, "
+        f"Стейкхолдер: {stakeholder_name}, Дата: {date.today()} -->",
+        "",
+        f"## {decision_icon} Решение зафиксировано: {stakeholder_name}",
+        "",
+        f"**Пакет:** {package_id} | **RACI:** {stakeholder_raci} | **Дата:** {date.today()}",
+        f"**Общее решение:** {decision}",
+    ]
+
+    if comment:
+        lines += [f"**Комментарий:** {comment}", ""]
+
+    # Детали по требованиям
+    lines += ["", "### Решения по требованиям", ""]
+    for rd in req_decisions:
+        rid = rd["req_id"]
+        dec = rd["decision"]
+        dec_icon = {"approved": "✅", "conditional": "🟡", "rejected": "❌", "abstained": "⚪"}.get(dec, "—")
+        node = _find_node(repo, rid)
+        title = node.get("title", "—") if node else "—"
+
+        line = f"- {dec_icon} `{rid}` {title}"
+        if dec == "conditional":
+            line += f"\n  → Условие: {rd.get('condition_text', '—')}"
+            if rd.get("condition_deadline"):
+                line += f" | Дедлайн: {rd['condition_deadline']}"
+            if rd.get("condition_owner"):
+                line += f" | Ответственный: {rd['condition_owner']}"
+        elif dec == "rejected":
+            line += f"\n  → Причина: {rd.get('rejection_reason', rejection_reason or '—')}"
+        lines.append(line)
+
+    lines.append("")
+
+    # Конфликты
+    if conflict_analysis:
+        lines += ["### ⚠️ Обнаруженные конфликты", ""]
+        for ca in conflict_analysis:
+            lines.append(f"**`{ca['req_id']}`** (отклонено {ca['stakeholder']}, роль: {ca['raci']}):")
+            for c in ca["conflicts"]:
+                lines.append(f"  - {c}")
+        lines += ["", "BA рекомендуется проанализировать конфликты перед созданием baseline.", ""]
+
+    # Совет по RACI при rejected от consulted
+    rejected_req_ids = [rd["req_id"] for rd in req_decisions if rd["decision"] == "rejected"]
+    if rejected_req_ids and stakeholder_raci == "consulted":
+        lines += [
+            f"ℹ️ **Роль {stakeholder_name} — Consulted.** Rejected от C не блокирует baseline.",
+            "Задокументируйте несогласие как управляемый риск в `check_approval_status`.",
+            "",
+        ]
+
+    # Обновлённые статусы
+    lines += ["### Статусы требований после решения", ""]
+    for rid, status in updated_statuses.items():
+        status_icon = {
+            STATUS_APPROVED: "✅",
+            STATUS_CONDITIONAL: "🟡",
+            STATUS_REJECTED: "❌",
+            STATUS_PENDING: "⏳",
+        }.get(status, "—")
+        lines.append(f"- {status_icon} `{rid}` → `{status}`")
+
+    lines += [
+        "",
+        "---",
+        "",
+        "## ➡️ Следующий шаг",
+        "",
+    ]
+
+    has_conditional = any(rd["decision"] == "conditional" for rd in req_decisions)
+    if has_conditional:
+        lines += [
+            "Есть условные одобрения. После выполнения условий вызовите `close_approval_condition`.",
+            "Затем проверьте готовность пакета через `check_approval_status`.",
+        ]
+    else:
+        lines += [
+            "Запишите решения остальных стейкхолдеров через `record_approval_decision`.",
+            "После всех решений — проверьте готовность через `check_approval_status`.",
+        ]
+
+    # BABOK 3.3 .1 — cross-check against the planned decision authority.
+    #
+    # It fires ONLY for accountable/responsible. A `consulted` stakeholder is a
+    # reviewer, and BABOK 3.3 .1 lists reviewer and SME as roles distinct from
+    # approver, so their absence from the plan's list is correct, not a finding.
+    #
+    # That makes the explicit `stakeholder_raci` the GUARD for this check rather than
+    # its input — which is how this seam avoids the conflict that got B3-2 declined
+    # once already. This value decides whether a rejection HARD BLOCKS the baseline
+    # (`force` does not lift it), so deriving it from a plan would silently change
+    # what blocks. It is read here and never written.
+    if stakeholder_raci in ("accountable", "responsible"):
+        plan, plan_note = load_ba_plan(project_name)
+        planned = planned_decision_makers(plan)
+        # Registry-bridged: 3.3 plans roles and this parameter is a person's name, so
+        # the unbridged comparison reported the actual Product Owner as an authority
+        # exception. PARTY_UNBRIDGEABLE stays silent — see `planned_party_status`.
+        if planned_party_status(project_name, planned,
+                                stakeholder_name) == PARTY_UNPLANNED:
+            lines += [
+                "",
+                f"⚠️ `{stakeholder_name}` записан как **{stakeholder_raci}**, но его нет "
+                f"среди запланированных лиц, принимающих решения (3.3): {', '.join(planned)}.",
+                "Решение остаётся ровно таким, каким записано — либо обновите 3.3 через "
+                "`plan_ba_governance`, либо подтвердите, что у этого человека есть полномочия.",
+            ]
+        if plan_note:
+            lines += ["", plan_note]
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# 5.5.3 — Закрыть условие (Conditional)
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+@guard_artifact_errors
+def close_approval_condition(
+    project_name: str,
+    package_id: str,
+    req_id: str,
+    stakeholder_name: str,
+    resolution_notes: str,
+) -> str:
+    """
+    BABOK 5.5 — Шаг 3 (при необходимости): Закрыть выполненное условие.
+
+    После выполнения условия conditional-одобрения обновляет статус
+    требования с conditional_approved на approved.
+
+    Args:
+        project_name:      Название проекта.
+        package_id:        ID пакета.
+        req_id:            ID требования с открытым условием.
+        stakeholder_name:  Имя стейкхолдера, выставившего условие.
+        resolution_notes:  Как условие было закрыто (что конкретно изменилось).
+
+    Returns:
+        Подтверждение закрытия условия, обновлённый статус требования.
+    """
+    logger.info(f"close_approval_condition: {package_id} / {req_id} / {project_name}")
+
+    history = _load_approval_history(project_name)
+    package = _get_package(history, package_id)
+    if not package:
+        return f"❌ Пакет `{package_id}` не найден. Сначала выполните `prepare_approval_package`."
+
+    sh_data = package["stakeholder_decisions"].get(stakeholder_name)
+    if not sh_data:
+        return (
+            f"❌ Стейкхолдер `{stakeholder_name}` не найден в пакете `{package_id}`.\n"
+            f"Доступные стейкхолдеры: {list(package['stakeholder_decisions'].keys())}"
+        )
+
+    # Ищем conditional-решение по req_id
+    condition_found = False
+    for rd in sh_data["req_decisions"]:
+        if rd["req_id"] == req_id and rd["decision"] == "conditional":
+            if rd.get("condition_closed"):
+                return f"⚠️ Условие по `{req_id}` от `{stakeholder_name}` уже закрыто."
+            rd["condition_closed"] = True
+            rd["condition_closed_date"] = str(date.today())
+            rd["resolution_notes"] = resolution_notes
+            condition_found = True
+            break
+
+    if not condition_found:
+        return (
+            f"❌ Открытое условие по требованию `{req_id}` от `{stakeholder_name}` не найдено.\n"
+            f"Проверьте req_id и stakeholder_name."
+        )
+
+    _save_approval_history(project_name, history)
+
+    # Пересчитываем статус требования
+    repo = _load_repo(project_name)
+    node = _find_node(repo, req_id)
+    new_status = _compute_req_status(req_id, package)
+    if node:
+        old_status = node.get("status", "unknown")
+        node["status"] = new_status
+        node.setdefault("history", []).append({
+            "date": str(date.today()),
+            "action": "condition_closed",
+            "from": old_status,
+            "to": new_status,
+            "stakeholder": stakeholder_name,
+            "resolution_notes": resolution_notes,
+        })
+    _save_repo(project_name, repo)
+
+    status_icon = "✅" if new_status == STATUS_APPROVED else "🟡"
+
+    return "\n".join([
+        f"<!-- BABOK 5.5 — Condition Closed, Проект: {project_name}, "
+        f"Пакет: {package_id}, Требование: {req_id}, Дата: {date.today()} -->",
+        "",
+        f"## ✅ Условие закрыто: {req_id}",
+        "",
+        f"**Стейкхолдер:** {stakeholder_name}  ",
+        f"**Дата закрытия:** {date.today()}  ",
+        f"**Описание:** {resolution_notes}  ",
+        "",
+        f"**Новый статус требования:** {status_icon} `{new_status}`",
+        "",
+        "---",
+        "",
+        "## ➡️ Следующий шаг",
+        "",
+        f"Проверьте готовность пакета `{package_id}` через `check_approval_status`.",
+    ])
+
+
+# ---------------------------------------------------------------------------
+# 5.5.4 — Дашборд готовности к baseline
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+@guard_artifact_errors
+def check_approval_status(
+    project_name: str,
+    package_id: str,
+) -> str:
+    """
+    BABOK 5.5 — Шаг 4: Дашборд готовности пакета к созданию baseline.
+
+    Анализирует все решения стейкхолдеров и даёт вердикт:
+    готов / не готов к baseline.
+
+    Args:
+        project_name:  Название проекта.
+        package_id:    ID пакета.
+
+    Returns:
+        Полный статус пакета: статистика одобрений, блокеры, открытые условия,
+        вердикт готовности к baseline.
+    """
+    logger.info(f"check_approval_status: {package_id} / {project_name}")
+
+    history = _load_approval_history(project_name)
+    package = _get_package(history, package_id)
+    if not package:
+        return f"❌ Пакет `{package_id}` не найден. Сначала выполните `prepare_approval_package`."
+
+    repo = _load_repo(project_name)
+    req_ids = package["req_ids"]
+
+    gate = _baseline_gate(package)
+    req_statuses = gate["statuses"]
+    counts = gate["counts"]
+    total = gate["total"]
+    approved_pct = gate["approved_pct"]
+
+    # Blockers: rejected by accountable/responsible (enriched with the title for display)
+    blockers = []
+    for b in gate["ar_rejections"]:
+        node = _find_node(repo, b["req_id"])
+        blockers.append({**b, "title": node.get("title", "—") if node else "—"})
+
+    open_conditions = gate["open_conditions"]
+    overdue_conditions = gate["overdue_conditions"]
+
+    # 7.2 verification — reported, never gated. See `_verification_state`.
+    vstate = _verification_state(repo, package)
+
+    # Стейкхолдеры без решения (если пакет был отправлен, но ответа нет)
+    # Мы не храним "ожидаемый список" — показываем тех кто ответил
+    responding_stakeholders = list(package["stakeholder_decisions"].keys())
+
+    # Verdict — from the shared gate, so the dashboard and create_requirements_baseline
+    # can never disagree about readiness.
+    can_baseline = gate["can_baseline"]
+    verdict_reasons = []
+
+    if blockers:
+        verdict_reasons.append(
+            f"🔴 {len(blockers)} "
+            f"{plural_ru(len(blockers), 'отказ', 'отказа', 'отказов')} "
+            f"от стейкхолдеров Accountable/Responsible")
+
+    if overdue_conditions:
+        n = len(overdue_conditions)
+        verdict_reasons.append(
+            f"🔴 {n} {plural_ru(n, 'просроченное условие', 'просроченных условия', 'просроченных условий')}")
+
+    unreadable_deadlines = [c for c in open_conditions if c.get("deadline_unreadable")]
+    if unreadable_deadlines:
+        # "Not overdue" is a claim, and it cannot be made about a deadline nobody could
+        # read. Say what is actually known.
+        n = len(unreadable_deadlines)
+        verdict_reasons.append(
+            f"🟡 у {n} {plural_ru(n, 'условия', 'условий', 'условий')} не удалось "
+            f"прочитать срок — просрочены они или нет, НЕИЗВЕСТНО")
+
+    if open_conditions and not overdue_conditions and not unreadable_deadlines:
+        # Not blocking, but flag it
+        n = len(open_conditions)
+        verdict_reasons.append(
+            f"🟡 {n} {plural_ru(n, 'открытое условие', 'открытых условия', 'открытых условий')} "
+            f"(не просрочены)")
+
+    if counts[STATUS_PENDING] > 0:
+        n = counts[STATUS_PENDING]
+        verdict_reasons.append(
+            f"🔴 {n} {plural_ru(n, 'требование', 'требования', 'требований')} "
+            f"всё ещё в статусе pending_approval")
+
+    if gate["low_approval"]:
+        verdict_reasons.append(f"🔴 Согласовано лишь {approved_pct}% требований (минимум 70%)")
+
+    # Consulted-rejected (не блокирует, но отмечаем)
+    consulted_rejected = []
+    for sh_name, sh_data in package["stakeholder_decisions"].items():
+        if sh_data["raci"] == "consulted":
+            for rd in sh_data["req_decisions"]:
+                if rd["decision"] == "rejected":
+                    consulted_rejected.append({
+                        "req_id": rd["req_id"],
+                        "stakeholder": sh_name,
+                        "reason": rd.get("rejection_reason", "—"),
+                    })
+
+    # Формируем отчёт
+    verdict_icon = "✅" if can_baseline else ("🟡" if not blockers and not counts[STATUS_PENDING] else "🔴")
+
+    lines = [
+        f"<!-- BABOK 5.5 — Approval Status, Проект: {project_name}, Пакет: {package_id}, Дата: {date.today()} -->",
+        "",
+        f"## 📊 Статус пакета: {package_id} — {package.get('package_title', '—')}",
+        "",
+        f"**Проект:** {project_name} | **Дата:** {date.today()}",
+        f"**Методология:** {package.get('approach', '—')}",
+        f"**Стейкхолдеры ответили:** {', '.join(responding_stakeholders) if responding_stakeholders else '(нет ответов)'}",
+        "",
+        "### Статистика одобрений",
+        "",
+        f"| Статус | Кол-во | % |",
+        f"|--------|--------|---|",
+        f"| ✅ Approved | {counts[STATUS_APPROVED]} | {approved_pct}% |",
+        f"| 🟡 Conditional (открытые условия) | {counts[STATUS_CONDITIONAL]} | {round(counts[STATUS_CONDITIONAL]/total*100) if total else 0}% |",
+        f"| ❌ Rejected | {counts[STATUS_REJECTED]} | {round(counts[STATUS_REJECTED]/total*100) if total else 0}% |",
+        f"| ⏳ Pending | {counts[STATUS_PENDING]} | {round(counts[STATUS_PENDING]/total*100) if total else 0}% |",
+        f"| **Итого** | **{total}** | **100%** |",
+        "",
+    ]
+
+    if vstate["verified"] or vstate["unverified"]:
+        v_count = len(vstate["verified"])
+        v_icon = "✅" if v_count == total else "🟡"
+        lines += [f"{v_icon} **Верифицировано (7.2): {v_count} из {total}**", ""]
+        if vstate["unverified"]:
+            ids_str = ", ".join(f"`{rid}`" for rid in vstate["unverified"])
+            lines += [
+                f"Не верифицировано: {ids_str} — согласование это не блокирует, но факт "
+                f"записывается в Approval Record.",
+                "",
+            ]
+        if vstate["unknown"]:
+            unknown_str = ", ".join(f"`{rid}`" for rid in vstate["unknown"])
+            lines += [
+                f"Верификация неизвестна: {unknown_str} — записи нет ни за, ни против "
+                f"(пакет старше самой проверки).",
+                "",
+            ]
+        if vstate["forced"]:
+            forced_str = ", ".join(f"`{rid}`" for rid in vstate["forced"])
+            lines += [f"Верифицировано с обходом (открытые блокеры): {forced_str}", ""]
+    else:
+        lines += [
+            "⚪ **Верифицировано (7.2): неизвестно** — этот пакет создан до того, как "
+            "проверка верификации появилась.",
+            "",
+        ]
+
+    if blockers:
+        lines += ["### 🔴 Блокеры (Rejected от Accountable/Responsible)", ""]
+        for b in blockers:
+            lines.append(f"- `{b['req_id']}` {b['title']} — отклонено `{b['stakeholder']}` ({b['raci']}): {b['reason']}")
+        lines.append("")
+
+    if open_conditions:
+        lines += ["### 🟡 Открытые условия (Conditional)", ""]
+        for c in open_conditions:
+            overdue_flag = " ⚠️ ПРОСРОЧЕНО" if c.get("overdue") else (
+                " ⚠️ СРОК НЕЧИТАЕМ" if c.get("deadline_unreadable") else "")
+            deadline_str = f" | Срок: {c['condition_deadline']}{overdue_flag}" if c['condition_deadline'] else ""
+            lines.append(
+                f"- `{c['req_id']}` — {c['condition_text']}"
+                f"{deadline_str} | Ответственный: {c['condition_owner']}"
+            )
+        lines.append("")
+
+    if consulted_rejected:
+        lines += ["### ℹ️ Отклонения от Consulted (не блокируют baseline)", ""]
+        for cr in consulted_rejected:
+            lines.append(f"- `{cr['req_id']}` — отклонено `{cr['stakeholder']}` (consulted): {cr['reason']}")
+        lines += ["", "Рекомендуется задокументировать как управляемый риск.", ""]
+
+    # A package is modelled as a ROUND: where a requirement appears in several, the
+    # LATEST one governs (common.approval_outcome — a settled decision, so a
+    # re-submission after rework can be decided). That rule lived only inside the
+    # computation, so an overtaken round went on rendering as though it were live:
+    # `🔴 Verdict: Not ready for baseline` over a rejection a newer round had already
+    # overturned, with nothing saying so. Two live documents of one project
+    # contradicting each other.
+    superseded_by = superseding_packages(project_name, package_id, package)
+    fully_superseded = superseded_by and len(superseded_by) == len(package.get("req_ids") or [])
+    if superseded_by:
+        later = sorted(set(superseded_by.values()))
+        listed = ", ".join(f"`{p}`" for p in later)
+        if fully_superseded:
+            lines += [
+                f"> 📦 **Этот раунд вытеснен раундом {listed}.** По каждому его требованию "
+                f"с тех пор принято новое решение, и главенствует более поздний раунд — "
+                f"вердикт ниже описывает решения ЭТОГО раунда, а не текущую позицию "
+                f"проекта.",
+                "",
+            ]
+        else:
+            rows = ", ".join(f"`{rid}` → `{pid}`" for rid, pid in sorted(superseded_by.items()))
+            lines += [
+                f"> 📦 **По {len(superseded_by)} "
+                f"{plural_ru(len(superseded_by), 'требованию', 'требованиям', 'требованиям')} "
+                f"этого раунда с тех пор принял решение более поздний:** {rows}. "
+                f"Для них главенствует поздний раунд.",
+                "",
+            ]
+
+    # Verdict
+    verdict_word = "Готов к baseline" if can_baseline else "Не готов к baseline"
+    if fully_superseded:
+        verdict_icon, verdict_word = "📦", "Вытеснен — этот раунд больше ничего не решает"
+    lines += [
+        "---",
+        "",
+        f"## {verdict_icon} Вердикт: {verdict_word}",
+        "",
+    ]
+
+    if verdict_reasons:
+        for reason in verdict_reasons:
+            lines.append(f"- {reason}")
+        lines.append("")
+
+    if fully_superseded:
+        # The verdict one line above says this round decides nothing. Inviting a
+        # baseline right under it is the document contradicting itself — and the
+        # invitation was the harmful half: following it produced a signed record over
+        # decisions a later round had already replaced.
+        governing = sorted(set(superseded_by.values()))
+        lines += [
+            "Из этого раунда ничего не подписывается. По требованиям заново принял "
+            "решение раунд "
+            + list_with_cap(governing, formatter=lambda p: f"`{p}`")
+            + " — фиксируйте baseline по нему, либо откройте новый раунд, если позиция "
+              "снова изменилась.",
+        ]
+    elif can_baseline:
+        lines += [
+            "Все обязательные условия выполнены. Можно создавать Requirements Baseline.",
+            "",
+            "➡️ Вызовите `create_requirements_baseline`:",
+            f"  - `project_name`: \"{project_name}\"",
+            f"  - `package_id`: \"{package_id}\"",
+            f"  - `baseline_version`: \"v1.0\" (или sprint-N для agile)",
+            f"  - `decided_by`: уполномоченный стейкхолдер",
+        ]
+    else:
+        lines += ["Устраните блокеры перед созданием baseline."]
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# 5.5.5 — Создать Requirements Baseline
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+@guard_artifact_errors
+def create_requirements_baseline(
+    project_name: str,
+    package_id: str,
+    baseline_version: str,
+    decided_by: str,
+    force: bool = False,
+) -> str:
+    """
+    BABOK 5.5 — Шаг 5: Создать official Requirements Baseline.
+
+    Фиксирует snapshot пакета в {project}_approval_history.json.
+    Обновляет статусы требований в репозитории 5.1 на 'approved'.
+    Генерирует Approval Record (Markdown) через save_artifact.
+
+    Args:
+        project_name:      Project name.
+        package_id:        Package ID (must have gone through check_approval_status).
+        baseline_version:  Baseline version: v1.0, v1.1, sprint-5, etc.
+        decided_by:        Who is confirming the baseline creation (sponsor / PO).
+        force:             True — baseline despite PROCESS obstacles: pending
+                           approvals, overdue conditions, approval below the minimum.
+                           Each override is named in the Approval Record.
+                           It does NOT lift a rejection from an Accountable or
+                           Responsible stakeholder — overriding a person who said no
+                           is a different decision from overriding a lapsed date, and
+                           one flag for both hid the former behind the latter.
+                           (open conditions, consulted-rejected).
+                           False (по умолчанию) — блокировать при наличии блокеров.
+
+    Returns:
+        A summary of the baseline and the next steps. The Approval Record itself is
+        the Markdown artifact written via save_artifact — the return value is not it.
+        Updated approved statuses in the 5.1 repository.
+    """
+    logger.info(f"create_requirements_baseline: {package_id} / {baseline_version} / {project_name}")
+
+    history = _load_approval_history(project_name)
+    package = _get_package(history, package_id)
+    if not package:
+        return f"❌ Пакет `{package_id}` не найден. Сначала выполните `prepare_approval_package`."
+
+    if package.get("status") == "baselined":
+        return (
+            f"⚠️ Пакет `{package_id}` уже имеет baseline `{package.get('baseline_version')}`.\n"
+            f"Для нового baseline создайте новый пакет с другим package_id."
+        )
+
+    repo = _load_repo(project_name)
+    req_ids = package["req_ids"]
+
+    # 7.2 verification — reported in the record, never gated (see `_verification_state`).
+    vstate = _verification_state(repo, package)
+
+    # Readiness gate — the SAME predicate check_approval_status renders, so the
+    # dashboard's "Ready / Not ready" verdict is the real contract. force=True is
+    # the deliberate override.
+    gate = _baseline_gate(package)
+    statuses = gate["statuses"]
+    pending_reqs = gate["pending_reqs"]
+    approved_pct = gate["approved_pct"]
+
+    # An A/R rejection is not forceable. `force` covers process state — a lapsed
+    # deadline, an unanswered request, a percentage — but a named person with decision
+    # authority saying no is a different kind of obstacle, and one flag for both meant
+    # an analyst forcing past the former silently baselined over the latter.
+    if gate["hard_block"]:
+        lines = [
+            "❌ Baseline заблокирован отказом стейкхолдера Accountable/Responsible — "
+            "это НЕ снимается флагом `force`:",
+            "",
+        ]
+        for b in gate["ar_rejections"]:
+            lines.append(
+                f"  - `{b['req_id']}` отклонено: {b['stakeholder']} ({b['raci']}) "
+                f"— {b.get('reason') or '—'}"
+            )
+        lines += [
+            "",
+            "Человек с правом решения сказал «нет». Урегулируйте это с ним и запишите "
+            "новое решение через `record_approval_decision`; либо уберите требование "
+            "из пакета и подготовьте новый.",
+        ]
+        if gate["forceable"]:
+            lines.append(
+                f"\n(Для справки, `force` покрыл бы: "
+                f"{', '.join(gate['forceable'])}.)"
+            )
+        return "\n".join(lines)
+
+    if not gate["can_baseline"] and not force:
+        lines = ["❌ Baseline заблокирован:", ""]
+        if pending_reqs:
+            lines.append(f"**Требования в статусе pending_approval:** {pending_reqs}")
+        if gate["overdue_conditions"]:
+            overdue = ", ".join(f"`{c['req_id']}` ({c['stakeholder']})"
+                                for c in gate["overdue_conditions"])
+            lines.append(f"**Просроченные условия:** {overdue}")
+        if gate["low_approval"]:
+            lines.append(f"**Согласовано лишь {approved_pct}% требований** "
+                         f"(минимум {MIN_APPROVED_PCT}%).")
+        lines += [
+            "",
+            "Устраните перечисленное выше либо используйте `force=true`, чтобы создать "
+            "baseline принудительно. `force` снимет ровно следующее: "
+            f"{', '.join(gate['forceable'])} — и каждый пункт будет назван в "
+            "Approval Record.",
+        ]
+        return "\n".join(lines)
+
+    # Проверяем открытые conditional (предупреждения, не блокируют при force)
+    open_conditions = []
+    for sh_name, sh_data in package["stakeholder_decisions"].items():
+        for rd in sh_data["req_decisions"]:
+            if rd["decision"] == "conditional" and not rd.get("condition_closed"):
+                open_conditions.append({
+                    "req_id": rd["req_id"],
+                    "stakeholder": sh_name,
+                    "condition_text": rd.get("condition_text", "—"),
+                    "condition_deadline": rd.get("condition_deadline", ""),
+                })
+
+    # Update approved requirement statuses in the 5.1 repository
+    #
+    # A requirement of this package may since have been decided AGAIN by a later round,
+    # and the later round governs — the same rule `approval_outcome` applies everywhere
+    # else. Re-deriving the outcome from this package alone let a round that no longer
+    # decides anything sign off a requirement the governing round had rejected: the
+    # record listed it as approved over the rejecting stakeholder's own name, and
+    # `status: approved` went into the 5.1 graph.
+    #
+    # This is NOT a gate. The baseline still gets created, and a requirement whose LATER
+    # round approved it is baselined by that later round exactly as before — refusing on
+    # decisions taken in other packages is the regression that would break re-submission
+    # after rework.
+    overtaken = superseding_packages(project_name, package_id, package)
+    approved_reqs = []
+    for rid in req_ids:
+        if rid in overtaken:
+            continue
+        status = _compute_req_status(rid, package)
+        node = _find_node(repo, rid)
+        if node:
+            if status == STATUS_APPROVED:
+                node["status"] = STATUS_APPROVED
+                approved_reqs.append(rid)
+                node.setdefault("history", []).append({
+                    "date": str(date.today()),
+                    "action": "baselined",
+                    "baseline_version": baseline_version,
+                    "decided_by": decided_by,
+                })
+            elif status == STATUS_CONDITIONAL and force:
+                node["status"] = STATUS_CONDITIONAL
+                node.setdefault("history", []).append({
+                    "date": str(date.today()),
+                    "action": "baselined_with_open_condition",
+                    "baseline_version": baseline_version,
+                    "decided_by": decided_by,
+                })
+
+    _save_repo(project_name, repo)
+
+    # Snapshot baseline в approval_history
+    baseline_snapshot = {
+        "baseline_version": baseline_version,
+        "package_id": package_id,
+        "package_title": package.get("package_title", "—"),
+        "approach": package.get("approach", "—"),
+        "created_date": str(date.today()),
+        "decided_by": decided_by,
+        "approved_req_ids": approved_reqs,
+        "open_conditions": open_conditions,
+        "force_created": force and bool(gate["forceable"] or open_conditions),
+        # WHICH gates the override actually lifted. "force_created: true" alone told a
+        # later reader that a rule was bypassed but not which one, so the record could
+        # not answer the question an auditor asks first.
+        "forced_gates": gate["forceable"] if force else [],
+        "stakeholder_summary": {
+            sh_name: {
+                "raci": sh_data["raci"],
+                "overall_decision": sh_data["overall_decision"],
+                "recorded_date": sh_data.get("recorded_date", "—"),
+            }
+            for sh_name, sh_data in package["stakeholder_decisions"].items()
+        },
+    }
+
+    history["baselines"].append(baseline_snapshot)
+    package["status"] = "baselined"
+    package["baseline_version"] = baseline_version
+    _save_approval_history(project_name, history)
+
+    # Генерируем Approval Record
+    approach_label = "Predictive / Waterfall" if package.get("approach") == "predictive" else "Agile"
+    # Name what was overridden. "Created forcibly" alone is the same failure as
+    # recording nothing: the reader learns a rule was bypassed but not which one.
+    forced_gates = gate["forceable"] if force else []
+    if forced_gates:
+        force_warning = (
+            "\n\n> ⚠️ **Baseline зафиксирован с `force`.** Обойдены следующие гейты: "
+            + ", ".join(forced_gates)
+            + (". Открытые условия остаются." if open_conditions else ".")
+        )
+    elif force and open_conditions:
+        force_warning = (
+            "\n\n> ⚠️ Baseline создан с `force=true`. "
+            "Открытые условия остаются."
+        )
+    else:
+        force_warning = ""
+
+    record_lines = [
+        f"<!-- BABOK 5.5 — Approval Record, Проект: {project_name}, "
+        f"Baseline: {baseline_version}, Дата: {date.today()} -->",
+        "",
+        f"# Requirements Baseline: {baseline_version}",
+        f"**Проект:** {project_name}  ",
+        f"**Пакет:** {package_id} — {package.get('package_title', '—')}  ",
+        f"**Методология:** {approach_label}"
+        + (f" ({package.get('approach_source')})" if package.get("approach_source")
+           else "") + "  ",
+        f"**Создан:** {date.today()}  ",
+        f"**Подтвердили:** {decided_by}  ",
+        f"**Требований в baseline:** {len(approved_reqs)}  ",
+        force_warning,
+        "",
+        "---",
+        "",
+        "## Одобренные требования",
+        "",
+    ]
+
+    if not approved_reqs:
+        record_lines.append("*(нет — ни одно требование пакета не получило полного согласования)*")
+    for rid in approved_reqs:
+        node = _find_node(repo, rid)
+        title = node.get("title", "—") if node else "—"
+        version = node.get("version", "—") if node else "—"
+        priority = node.get("priority", "—") if node else "—"
+        record_lines.append(f"- ✅ `{rid}` {title} (v{version}, приоритет: {priority})")
+
+    # What this round is NOT entitled to sign off. Silence here would be the same defect
+    # one step later: the requirement would simply be missing from the record, and a
+    # reader comparing it against the package would find a requirement that went in and
+    # never came out.
+    if overtaken:
+        record_lines += ["", "---", "", "## Решено более поздним раундом", "",
+                         "Эти требования входили в пакет, но более поздний раунд принял "
+                         "по ним решение заново, и главенствует он. Этот baseline их не "
+                         "подписывает:", ""]
+        for rid, later_pkg in sorted(overtaken.items()):
+            node = _find_node(repo, rid)
+            title = node.get("title", "—") if node else "—"
+            record_lines.append(
+                f"- 📦 `{rid}` {title} — решено пакетом `{later_pkg}` "
+                f"(исход там: **{approval_outcome(project_name, rid)}**)")
+
+    # What THIS round overturned. A requirement rejected in an earlier round and
+    # approved here is decided by this one (the settled "latest round governs" rule),
+    # and the reversal is the single most consequential fact in the document — a person
+    # with decision authority said no, and this record supersedes them. It used to
+    # appear nowhere: the new record was silent, the old package still printed its
+    # rejection as current, and the reversal was in no audit trail at all.
+    overturned = _decisions_this_round_overrides(project_name, package_id, req_ids)
+    if overturned:
+        record_lines += ["", "---", "", "## Решения, которые этот раунд отменяет", ""]
+        for item in overturned:
+            record_lines.append(
+                f"- `{item['req_id']}` — решение **{item['decision']}**, "
+                f"`{item['stakeholder']}` ({item['raci']}), пакет `{item['package_id']}`"
+                + (f" — {item['reason']}" if item.get("reason") else "")
+            )
+        record_lines += [
+            "",
+            "Эти прежние решения больше не главенствуют: раунд, записанный здесь, "
+            "более поздний. Убедитесь, что возражавшие люди согласны с переменой.",
+        ]
+
+    record_lines += ["", "---", "", "## Решения стейкхолдеров", ""]
+    if not baseline_snapshot["stakeholder_summary"]:
+        record_lines.append("*(нет — по этому пакету никто не записал решения)*")
+    for sh_name, sh_summary in baseline_snapshot["stakeholder_summary"].items():
+        icon = {"approved": "✅", "conditional": "🟡", "rejected": "❌", "abstained": "⚪"}.get(
+            sh_summary["overall_decision"], "—"
+        )
+        record_lines.append(
+            f"- {icon} **{sh_name}** ({sh_summary['raci']}) — "
+            f"{sh_summary['overall_decision']} ({sh_summary['recorded_date']})"
+        )
+
+    if open_conditions:
+        record_lines += ["", "---", "", "## 🟡 Открытые условия (risk)", ""]
+        for oc in open_conditions:
+            record_lines.append(
+                f"- `{oc['req_id']}` — {oc['condition_text']}"
+                + (f" | Дедлайн: {oc['condition_deadline']}" if oc['condition_deadline'] else "")
+            )
+        record_lines += [
+            "",
+            "> Условия должны быть закрыты через `close_approval_condition` "
+            "и зафиксированы в следующем baseline.",
+        ]
+
+    # The record speaks about the BASELINE, so every statement here is scoped to what
+    # actually entered it. Reporting over the whole package named rejected and pending
+    # requirements as "approved without verification" — a false statement inside an
+    # official artifact, in the very feature whose thesis is that the record must be
+    # trustworthy. The dashboard above is different: there the package IS the subject.
+    baselined = set(approved_reqs)
+    unverified_in_baseline = [r for r in vstate["unverified"] if r in baselined]
+    unknown_in_baseline = [r for r in vstate["unknown"] if r in baselined]
+    forced_in_baseline = [r for r in vstate["forced"] if r in baselined]
+
+    if unverified_in_baseline or unknown_in_baseline or forced_in_baseline:
+        record_lines += ["", "---", "", "## Верификация 7.2", ""]
+
+    if unverified_in_baseline:
+        ids_str = list_with_cap(unverified_in_baseline, cap=20)
+        n = len(unverified_in_baseline)
+        record_lines += [
+            "### ⚠️ Вошло в baseline без верификации 7.2",
+            "",
+            f"**{n} {plural_ru(n, 'требование', 'требования', 'требований')}** вошло в "
+            f"baseline, не пройдя верификацию (7.2): {ids_str}",
+            "",
+            "> Согласование — это решение стейкхолдера; верификация — проверка качества.",
+            "> Эти требования вносят в baseline неизмеренный риск качества.",
+            "",
+        ]
+
+    if unknown_in_baseline:
+        ids_str = ", ".join(f"`{rid}`" for rid in unknown_in_baseline)
+        record_lines += [
+            "### ⚪ Верификация 7.2 неизвестна",
+            "",
+            f"Записи нет ни за, ни против для: {ids_str}. Этот пакет старше самой "
+            f"проверки, поэтому определить, прошли они 7.2 или нет, невозможно — а это "
+            f"не то же самое, что сказать, будто они её не прошли.",
+            "",
+        ]
+
+    if forced_in_baseline:
+        forced_str = ", ".join(f"`{rid}`" for rid in forced_in_baseline)
+        record_lines += [
+            "### Верифицировано с обходом",
+            "",
+            f"Блокеры 7.2 были открыты и обойдены сознательно: {forced_str}",
+            "",
+        ]
+
+    # BABOK 3.3 .1 — who was PLANNED to hold approval authority, and who of them
+    # actually spoke. A fact for the official record, not a gate: `_baseline_gate`
+    # is untouched by B3-2. Matched with the same `is_planned_decision_maker` the
+    # warning in record_approval_decision uses, so the record and the warning cannot
+    # disagree about who counts as an authority.
+    plan, plan_note = load_ba_plan(project_name)
+    planned_authority = planned_decision_makers(plan)
+    if plan_note and not planned_authority:
+        # Same rule as the 5.3 report: without this the Approval Record of a project
+        # whose plan is corrupt is byte-identical to one that never planned governance,
+        # and this is the document an auditor reads.
+        record_lines += ["", "---", "", "## Governance (3.3)", "", plan_note, ""]
+    if planned_authority:
+        # RACI-guarded on BOTH sides of the block. It was guarded only on the
+        # "signed without being planned" list, so a planned approver recorded as
+        # `consulted` — a reviewer whose rejection explicitly does NOT block the
+        # baseline — counted as having responded and suppressed the "no decision
+        # recorded from" line. The record then showed the planned authority as having
+        # spoken when it never exercised authority at all.
+        authority_decisions = {
+            name: sh for name, sh in package["stakeholder_decisions"].items()
+            if sh.get("raci") in ("accountable", "responsible")}
+        responded = [name for name in authority_decisions
+                     if is_planned_decision_maker(plan, name, project_name)]
+        responded_keys = set()
+        for name in responded:
+            responded_keys |= party_aliases(project_name, name)
+        silent = [a for a in planned_authority if reg_norm(a) not in responded_keys]
+        # Who signed WITHOUT being planned. `record_approval_decision` already warns
+        # about this, but that warning lives only in the tool's reply; the Approval
+        # Record is the durable document, and filtering the responder list down to
+        # planned names left it silent about who actually carried the baseline.
+        # B2-bis's rule: recorded without being stated is the same as hidden.
+        # RACI-guarded, exactly like the warning — `consulted` is a reviewer and is
+        # legitimately absent from the approver list, so naming them here would turn an
+        # ordinary review into an authority exception.
+        # Registry-bridged like every other governance match, and only a definite
+        # PARTY_UNPLANNED is named: with no registry, a planned ROLE and a typed NAME
+        # cannot be compared, and this document is signed.
+        unplanned_authority, unmatched_authority = [], []
+        for name in authority_decisions:
+            status = planned_party_status(project_name, planned_authority, name)
+            if status == PARTY_UNPLANNED:
+                unplanned_authority.append(name)
+            elif status == PARTY_UNBRIDGEABLE:
+                # Neither list claimed them, so on a project with no registry the
+                # record read "Responded: nobody" three lines under that person's own
+                # signature — the very defect the unplanned-signer line was added to
+                # close, reintroduced by the silence rule that protects them from a
+                # false accusation. Silence is right for the accusation, not for the
+                # roll-call.
+                unmatched_authority.append(name)
+        record_lines += [
+            "",
+            "---",
+            "",
+            "## Governance (3.3)",
+            "",
+            f"**Запланированные полномочия на согласование (3.3):** {', '.join(planned_authority)}  ",
+            # "No decision recorded from" was false whenever the named person had in
+            # fact recorded a `consulted` review — printed twenty lines above, in this
+            # same document. The RACI reading is the intended one; the sentence has to
+            # say which kind of decision it means.
+            # Trailing hard break: without it the ⚠️ line below renders joined onto
+            # this one as a single paragraph.
+            (f"**Ответили (accountable/responsible):** "
+             f"{', '.join(responded) or 'никто'}."
+             + (f" Решения о согласовании не записано от: {', '.join(silent)}."
+                if silent else "")
+             + "  "),
+        ]
+        if unmatched_authority:
+            record_lines.append(
+                f"ℹ️ Решение приняли также: {', '.join(unmatched_authority)} — платформа "
+                f"не может определить, входят ли они в запланированные полномочия: 3.3 "
+                f"планирует роли, а эта запись называет людей. Заполните реестр "
+                f"стейкхолдеров (3.2 / 4.2), чтобы связать одно с другим.  ")
+        if unplanned_authority:
+            record_lines.append(
+                f"⚠️ Приняли решение, не будучи названными в плане 3.3: "
+                f"{', '.join(unplanned_authority)}.  ")
+        record_lines.append("")
+
+    # Built from what the baseline actually contains. As fixed text it advised handing
+    # a list of approved requirements to development over a baseline holding NONE, next
+    # to two section headings with no body and no word saying they were empty.
+    record_lines += ["", "---", "", "## Следующие шаги", ""]
+    if approved_reqs:
+        n = len(approved_reqs)
+        record_lines += [
+            "1. Передайте Approval Record стейкхолдерам через `prepare_communication_package` (4.4)",
+            f"2. Передайте {n} согласованных "
+            f"{plural_ru(n, 'требование', 'требования', 'требований')} в разработку (Глава 6)",
+            "3. Любые изменения согласованных требований — только через `open_cr` (5.4)",
+        ]
+    else:
+        record_lines += [
+            "⚠️ **В этом baseline нет ни одного согласованного требования.** Передавать "
+            "в разработку нечего, и ничто здесь не означает, что скоуп согласован.",
+            "",
+            "1. Проверьте статус пакета через `check_approval_status` — он назовёт, что "
+            "ожидает решения, что отклонено и что условно",
+            "2. Соберите недостающие решения через `record_approval_decision`, затем "
+            "зафиксируйте новую версию baseline",
+        ]
+    record_lines += [
+        "",
+        "---",
+        "",
+        "*Сгенерировано: Ai_RE_Project BABOK 5.5*",
+    ]
+
+    artifact_content = "\n".join(record_lines)
+    save_path = save_artifact(artifact_content, prefix=f"5_5_approval_record_{baseline_version}", project_id=project_name)
+
+    # Финальный вывод
+    output_lines = [
+        f"## ✅ Requirements Baseline создан: {baseline_version}",
+        "",
+        f"**Проект:** {project_name} | **Пакет:** {package_id}  ",
+        f"**Подтвердил:** {decided_by} | **Дата:** {date.today()}  ",
+        f"**Одобрено требований:** {len(approved_reqs)} из {len(req_ids)}",
+        "",
+    ]
+
+    if open_conditions and force:
+        output_lines += [
+            f"⚠️ Baseline создан с {len(open_conditions)} открытыми условиями.",
+            "Необходимо закрыть их через `close_approval_condition`.",
+            "",
+        ]
+
+    # The same warning the Approval Record carries. The analyst reads THIS string in the
+    # chat and does not always open the file, so the epilogue advising them to hand a
+    # list of approved requirements to development had to stop being fixed text: over a
+    # baseline holding none, step 2 is advice nobody can act on.
+    if not approved_reqs:
+        output_lines += [
+            "⚠️ **В этом baseline нет ни одного согласованного требования.** Передавать "
+            "в разработку нечего, и ничто здесь не означает, что скоуп согласован.",
+            "",
+            "### Следующие шаги",
+            "",
+            "1. Проверьте, чего не хватает, через `check_approval_status` — он назовёт, "
+            "что ожидает решения, что отклонено и что условно",
+            "2. Соберите решения через `record_approval_decision`, затем зафиксируйте "
+            "новую версию baseline",
+            "",
+            save_path,
+        ]
+    else:
+        output_lines += [
+            "### Следующие шаги",
+            "",
+            "1. Передайте Approval Record стейкхолдерам через `prepare_communication_package` (4.4)",
+            "2. Передайте список согласованных требований в разработку (Глава 6)",
+            "3. Любые изменения согласованных требований — только через `open_cr` (5.4)",
+            "",
+            save_path,
+        ]
+
+    return "\n".join(output_lines)
+
+
+# ---------------------------------------------------------------------------
+# Точка входа
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    mcp.run()

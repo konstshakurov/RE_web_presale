@@ -1,0 +1,15 @@
+{
+  "project_id": "re_web_presale",
+  "initiative_type": "process_improvement",
+  "analysis_depth": "light",
+  "known_goals": "Сократить время подбора кандидата на потребность до 1 минуты: система рекомендует кандидата, пользователь выбирает, система назначает кандидата, меняет статус и прикрепляет заранее подготовленное CV. Скрининг остаётся вне системы, его результат вносится комментарием в потребность.",
+  "elements_in_scope": [
+    "business_needs",
+    "capabilities",
+    "technology",
+    "policies"
+  ],
+  "has_current_state_data": true,
+  "created": "2026-10-01",
+  "updated": "2026-10-01"
+}

@@ -1,0 +1,15 @@
+{
+  "project_id": "re_web_presale",
+  "initiative_type": "process_improvement",
+  "analysis_depth": "light",
+  "known_problems": "Подбор кандидатов на потребности (Jira) выполняется вручную и медленно: потребность читают, кандидата выбирают устно; РО или пресейл нажимает «Поиск кандидата»/«НАЙМ» (меняется статус, исполнитель — нажавший), затем вручную прикрепляет CV и нажимает «Кандидат назначен» (смена статуса).",
+  "elements_in_scope": [
+    "business_needs",
+    "capabilities",
+    "technology",
+    "policies"
+  ],
+  "session_ids_imported": [],
+  "created": "2026-10-01",
+  "updated": "2026-10-01"
+}

@@ -14,15 +14,12 @@ __pycache__/
 input/*
 !input/README.md
 
-# Project artifacts: data for the product project, not part of the tool
-output/data/*
-output/reports/*
+# Project artifacts (output/data, output/reports) are versioned in this repo:
+# it is the working repository of one product project (re_web_presale), not the
+# shared platform. Re-check them for secrets and personal data before each commit.
 # Previous generations of those same artifacts, kept by write_json_artifact so a
 # damaged file can be restored. Same content, same reason to stay out of the repo.
 output/.history/
-# Keep the folders themselves in the repository
-!output/data/.gitkeep
-!output/reports/.gitkeep
 
 # Competency 1 re-estimates made after project start — project-specific, not part of the tool
 estimate/*

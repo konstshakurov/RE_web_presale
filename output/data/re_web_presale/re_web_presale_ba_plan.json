@@ -1,0 +1,112 @@
+{
+  "project_id": "re_web_presale",
+  "created": "2026-09-30",
+  "updated": "2026-09-30",
+  "ba_approach": {
+    "change_frequency": "Low",
+    "uncertainty": "Low",
+    "regulatory_need": false,
+    "recommended_approach": "Predictive (Waterfall)",
+    "techniques": [
+      "Document Analysis",
+      "Financial Analysis",
+      "Business Rules Analysis"
+    ],
+    "ba_notes": "Внутренний проект СимбирСофт: web-приложение (on-premise, LDAP) для подключения аналитиков на продуктовые проекты и в аутстафф. Контракт заключён, оценок/сроков/бюджета нет. Часть ФТ уже есть. Разработка только ИИ-агентами; этап 1 — MVP, далее Версия 2. ИБ-требования (НФТ, не внешний комплаенс): а) креды интеграций (Jira и др.) хранить безопасно по современным правилам; б) CV, данные о компетенциях и навыках — в отдельной БД на бэкенде (сейчас CV лежат файлами в корпоративном облаке).",
+    "decided_on": "2026-09-30"
+  },
+  "stakeholder_engagement": {
+    "stakeholders": [
+      {
+        "name": "Константин",
+        "role": "Руководитель направления Аналитики; единственный канал требований и принимающий решения (фильтрует требования от других сторон и вносит их от своего имени)",
+        "influence": "High",
+        "interest": "High",
+        "attitude": "Champion",
+        "contact": "",
+        "quadrant": "Key Players",
+        "strategy": "Manage Closely — вовлекать в каждое решение",
+        "comm_frequency": "Еженедельно"
+      },
+      {
+        "name": "Евгения",
+        "role": "Руководитель отдела; источник требований, работает через Константина",
+        "influence": "Medium",
+        "interest": "High",
+        "attitude": "Neutral",
+        "contact": "",
+        "quadrant": "Subjects",
+        "strategy": "Keep Informed — демонстрации, Sprint Review",
+        "comm_frequency": "Раз в две недели"
+      },
+      {
+        "name": "Дмитрий",
+        "role": "Руководитель отдела; источник требований, работает через Константина",
+        "influence": "Medium",
+        "interest": "High",
+        "attitude": "Neutral",
+        "contact": "",
+        "quadrant": "Subjects",
+        "strategy": "Keep Informed — демонстрации, Sprint Review",
+        "comm_frequency": "Раз в две недели"
+      }
+    ],
+    "total": 3,
+    "updated_on": "2026-09-30"
+  },
+  "governance": {
+    "project_criticality": "Medium",
+    "decision_makers": [
+      "Константин"
+    ],
+    "change_control": "Изменения требований принимает Константин единолично, без формального CR и CAB; требования от других сторон поступают через него.",
+    "approval_process": "Product Owner + Lead BA",
+    "review_cycle": "Ревью раз в две недели, ретроспективы",
+    "escalation_path": "BA → PO → PM",
+    "approval_sla_days": 0,
+    "approval_timing_note": "",
+    "prioritization": {
+      "technique": "MoSCoW",
+      "participants": [
+        "Константин"
+      ],
+      "criteria": [
+        "ценность для Presale",
+        "трудоёмкость разработки"
+      ]
+    },
+    "declared": [
+      "change_control"
+    ],
+    "carried_over": [],
+    "ba_notes": "Единый канал требований и принимающий решения — Константин (руководитель направления Аналитики). Евгения и Дмитрий (руководители отделов) — источники требований через него.",
+    "defined_on": "2026-09-30",
+    "updated_on": "2026-09-30"
+  },
+  "information_management": {
+    "storage_tools": [
+      "Репозиторий GitHub (output/ — артефакты БА и СА по правилам платформы)",
+      "Linear (задачи Pre.<Роль>-N)"
+    ],
+    "traceability_level": "High",
+    "traceability_description": "Полная трассировка: Бизнес-цели → Требования → Тест-кейсы → Код",
+    "traceability_source": "",
+    "artifact_types": [],
+    "access_rules": "Редактирует Константин (аналитик). Агенты Arch, Dev, QA читают. Руководители отделов (Евгения, Дмитрий) — только чтение в GitHub; вносить изменения пока не будут.",
+    "ba_notes": "Весь проект и артефакты хранятся в GitHub. Результаты аналитики БА и СА сохраняются в output/ по правилам платформы; задачи ведутся в Linear.",
+    "abstraction_levels": [],
+    "reuse": {
+      "target_scope": "",
+      "repository": "",
+      "categories": []
+    },
+    "attributes": {
+      "preset": "",
+      "additional": []
+    },
+    "defined_on": "2026-09-30"
+  },
+  "performance": {},
+  "status": "finalized",
+  "finalized_on": "2026-09-30"
+}

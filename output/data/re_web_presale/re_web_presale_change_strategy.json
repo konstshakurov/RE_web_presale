@@ -1,0 +1,355 @@
+{
+  "project_id": "re_web_presale",
+  "created": "2026-10-01",
+  "updated": "2026-10-01",
+  "scope": {
+    "project_id": "re_web_presale",
+    "change_type": "technology_implementation",
+    "time_horizon_months": 3,
+    "methodology": "agile",
+    "source_project_ids": [
+      "re_web_presale"
+    ],
+    "ba_notes": "Горизонт 3 мес — ДОПУЩЕНИЕ ассистента: аналитик сказал «сделать максимально быстро», числа нет. Разработка ведётся аналитиком вместе с ИИ-агентами, код хранится в Git. Сначала локальное развёртывание, затем запрос сервера у Support и развёртывание на нём. Поэтапный запуск: этап 1 — чтение Jira, компетенции из CV, рекомендация без записи в Jira; этап 2 — запись в Jira от имени пользователя (зависит от Application Link, RK-001).",
+    "created": "2026-10-01"
+  },
+  "imported_context": {
+    "business_needs": [
+      {
+        "id": "BN-001",
+        "title": "Быстрый обоснованный подбор кандидата на потребность",
+        "priority": "High",
+        "source_project": "re_web_presale"
+      }
+    ],
+    "business_goals": [
+      {
+        "id": "BG-001",
+        "title": "Подбор кандидата за 1 минуту и назначение в срок",
+        "source_project": "re_web_presale"
+      }
+    ],
+    "risks": [
+      {
+        "id": "RK-001",
+        "description": "Если администратор Jira СимбирСофт не согласует Application Link (OAuth 1.0a) ил",
+        "zone": "medium",
+        "risk_score": 12,
+        "response_strategy": "mitigate",
+        "source_project": "re_web_presale"
+      }
+    ],
+    "gaps": [
+      {
+        "element": "capabilities",
+        "element_label": "Возможности и процессы",
+        "change_type": "improve",
+        "complexity": "high",
+        "gap_summary": "Текущее: Подбор кандидата на потребность выполняется вручную в Jira. 1) Приходит потребно... → Целевое: Для потребности ",
+        "source_project": "re_web_presale"
+      },
+      {
+        "element": "technology",
+        "element_label": "Технологии и инфраструктура",
+        "change_type": "improve",
+        "complexity": "high",
+        "gap_summary": "Текущее: Весь процесс идёт в Jira Server 8.13.0 (обновить пока нельзя), проект ANALYTICS.... → Целевое: Веб-приложение р",
+        "source_project": "re_web_presale"
+      },
+      {
+        "element": "policies",
+        "element_label": "Политики",
+        "change_type": "improve",
+        "complexity": "high",
+        "gap_summary": "Текущее: Регламент сроков: нажать «Поиск кандидата» в течение 1 часа после прихода потреб... → Целевое: Регламент сроков",
+        "source_project": "re_web_presale"
+      },
+      {
+        "element": "business_needs",
+        "element_label": "Бизнес-потребности",
+        "change_type": "improve",
+        "complexity": "high",
+        "gap_summary": "Текущее: Подбор кандидата на потребность занимает слишком много времени и держится на вни... → Целевое: Потребность BN-0",
+        "source_project": "re_web_presale"
+      }
+    ]
+  },
+  "solution_scope": {
+    "capabilities": [
+      {
+        "name": "Чтение потребностей, сотрудников и правил клиента из Jira с локальным кэшем",
+        "category": "technology",
+        "description": "Опрос Jira и кэш: потребности каждые 5 минут, сотрудники раз в час и по кнопке, правила клиента при открытии с кэшем 1 час. Работает без записи в Jira.",
+        "gap_severity": "high",
+        "gap_source": "6.2:technology",
+        "in_scope": true
+      },
+      {
+        "name": "Структурированные компетенции из CV",
+        "category": "data",
+        "description": "Отдельная БД CV: компетенции кандидатов в виде, пригодном для сопоставления с потребностью. Ручная загрузка и сопоставление «папка/файлы → карточка Jira».",
+        "gap_severity": "high",
+        "gap_source": "6.2:technology",
+        "in_scope": true
+      },
+      {
+        "name": "Рекомендация кандидата с обоснованием",
+        "category": "process",
+        "description": "Для потребности показывается рекомендованный кандидат с процентом соответствия и обоснованием, рядом правила клиента. Выбор остаётся за человеком. Обезличивание текста для внешней LLM с предпросмотром.",
+        "gap_severity": "high",
+        "gap_source": "6.2:capabilities",
+        "in_scope": true
+      },
+      {
+        "name": "Запись в Jira от имени пользователя",
+        "category": "technology",
+        "description": "Назначение кандидата, смена статуса, прикрепление заранее подготовленного корпоративного CV, комментарий о скрининге. Вход через LDAP и список разрешённых пользователей, OAuth 1.0a (Application Link).",
+        "gap_severity": "high",
+        "gap_source": "6.2:capabilities",
+        "in_scope": true
+      },
+      {
+        "name": "Соблюдение правил и политик в приложении",
+        "category": "process",
+        "description": "Недоступные для назначения статусы сотрудников, показ только заполненных правил клиента, причина отказа Jira как есть, повторная авторизация при 401, шифрование токенов, внутренний контур.",
+        "gap_severity": "low",
+        "gap_source": "6.2:policies",
+        "in_scope": true
+      }
+    ],
+    "explicitly_excluded": [
+      "Автоматизация скрининга кандидата (остаётся перепиской вне системы; результат вносится комментарием вручную)",
+      "Адаптация CV под шаблон клиента — решение не принято, в скоуп не входит до уточнения",
+      "Вебхуки Jira (используется опрос с кэшем)",
+      "Метрики качества LLM (решение ISS-006)",
+      "Доступ к приложению извне внутреннего контура",
+      "Расширение требований по ПДн сверх принятого"
+    ],
+    "scope_summary": "Веб-приложение поверх Jira Server 8.13.0 даёт рекомендацию кандидата на потребность с обоснованием, а после выбора выполняет назначение, смену статуса и прикрепление CV. Запуск поэтапный: сначала чтение и рекомендация, затем запись в Jira. Скрининг, адаптация CV под шаблон клиента и вебхуки в скоуп не входят."
+  },
+  "enterprise_readiness": {
+    "dimensions": {
+      "leadership_commitment": {
+        "score": 3,
+        "rationale": "Позиция спонсора не получена, поддержка со стороны инициатора (РН/пресейл) есть. Средняя оценка из-за нехватки данных."
+      },
+      "cultural_readiness": {
+        "score": 4,
+        "rationale": "Инициатор — сам будущий пользователь, процесс ручной и ему неудобен; пользователи (РО, РН, пресейл) заинтересованы в ускорении. Рекомендация без права решения не угрожает их роли."
+      },
+      "resource_availability": {
+        "score": 3,
+        "rationale": "Разработка силами аналитика и ИИ-агентов; состав команды, бюджет и срок не определены, сервер ещё предстоит запросить у Support."
+      },
+      "operational_readiness": {
+        "score": 3,
+        "rationale": "Процесс понятен и описан, регламент 1 ч / 24 ч есть. Базовое время подбора не измерено, компетенции в CV не структурированы."
+      },
+      "technical_readiness": {
+        "score": 2,
+        "rationale": "Jira 8.13.0 без PAT, Application Link не согласован (заявка подана 01.10.2026), собственного сервера нет, нужна заявка в Support."
+      },
+      "change_history": {
+        "score": 3,
+        "rationale": "Сведений об истории изменений в организации нет, поставлена средняя оценка."
+      }
+    },
+    "readiness_score": 3.0,
+    "verdict": "proceed_with_caution",
+    "assessed_on": "2026-10-01"
+  },
+  "change_strategy": {
+    "options": [
+      {
+        "option_id": "OPT-000",
+        "name": "Do Nothing (статус-кво)",
+        "strategy_type": "do_nothing",
+        "investment_level": "low",
+        "timeline_months": 0,
+        "linked_risks": [],
+        "risk_impact": "exacerbates",
+        "pros": [
+          "Нет затрат на изменение",
+          "Нет операционного риска внедрения"
+        ],
+        "cons": [
+          "Бизнес-потребности остаются нереализованными",
+          "Конкурентное отставание продолжается",
+          "Текущие проблемы усугубляются со временем"
+        ],
+        "weighted_score": 3.0,
+        "selected": false,
+        "auto_added": true,
+        "scores_detail": {
+          "alignment_to_goals": 1,
+          "risk_mitigation": 3,
+          "cost": 5,
+          "time_to_value": 1,
+          "org_readiness_fit": 5,
+          "feasibility": 5
+        }
+      },
+      {
+        "option_id": "OPT-001",
+        "name": "Поэтапно: чтение и рекомендация, затем запись в Jira",
+        "strategy_type": "phased",
+        "investment_level": "medium",
+        "timeline_months": 3,
+        "linked_risks": [
+          "RK-001"
+        ],
+        "risk_impact": "mitigates",
+        "pros": [
+          "Этап 1 даёт ценность без Application Link: рекомендация и обоснование уже ускоряют подбор",
+          "Снижает RK-001: ожидание ответа Support не блокирует старт",
+          "Локальное развёртывание сначала, сервер запрашивается параллельно",
+          "Быстрая обратная связь от пользователей по качеству рекомендаций"
+        ],
+        "cons": [
+          "До этапа 2 назначение, статус и CV остаются ручными, цель в 1 минуту достигается не полностью",
+          "Авторизацию нужно проектировать так, чтобы её можно было заменить без переделки",
+          "Два релиза вместо одного"
+        ],
+        "weighted_score": 4.0,
+        "selected": true,
+        "scores_detail": {
+          "alignment_to_goals": 4,
+          "risk_mitigation": 5,
+          "cost": 3,
+          "time_to_value": 4,
+          "org_readiness_fit": 4,
+          "feasibility": 4
+        }
+      },
+      {
+        "option_id": "OPT-002",
+        "name": "Всё сразу: чтение, рекомендация и запись в Jira одним релизом",
+        "strategy_type": "big_bang",
+        "investment_level": "medium",
+        "timeline_months": 3,
+        "linked_risks": [
+          "RK-001"
+        ],
+        "risk_impact": "exacerbates",
+        "pros": [
+          "Полная цель сразу: выбор, назначение, статус и CV без ручной рутины",
+          "Один релиз и одно обучение пользователей"
+        ],
+        "cons": [
+          "Старт зависит от согласования Application Link: пока ответа Support нет, ценности нет совсем",
+          "Ошибки рекомендации и записи в Jira вскрываются одновременно",
+          "Хуже подходит при технической готовности 2 из 5"
+        ],
+        "weighted_score": 3.05,
+        "selected": false,
+        "scores_detail": {
+          "alignment_to_goals": 5,
+          "risk_mitigation": 2,
+          "cost": 3,
+          "time_to_value": 2,
+          "org_readiness_fit": 2,
+          "feasibility": 3
+        }
+      },
+      {
+        "option_id": "OPT-003",
+        "name": "Пилот на одном отделе, затем раскатка",
+        "strategy_type": "pilot_first",
+        "investment_level": "low",
+        "timeline_months": 4,
+        "linked_risks": [
+          "RK-001"
+        ],
+        "risk_impact": "neutral",
+        "pros": [
+          "Качество рекомендаций проверяется на реальных потребностях узкой группой",
+          "Малый риск для остальных пользователей"
+        ],
+        "cons": [
+          "Дольше: добавляется раскатка",
+          "Не снимает зависимость записи в Jira от Application Link",
+          "Нужен отдел-пилот и его РО, их пока никто не назначил"
+        ],
+        "weighted_score": 3.55,
+        "selected": false,
+        "scores_detail": {
+          "alignment_to_goals": 4,
+          "risk_mitigation": 3,
+          "cost": 4,
+          "time_to_value": 3,
+          "org_readiness_fit": 4,
+          "feasibility": 3
+        }
+      }
+    ],
+    "selected_option_id": "OPT-001",
+    "rejected_alternatives": [
+      {
+        "option_id": "OPT-000",
+        "name": "Do Nothing (статус-кво)",
+        "weighted_score": 3.0,
+        "rationale": "Уступил OPT-001 по взвешенной оценке: 3.00 vs 4.00"
+      },
+      {
+        "option_id": "OPT-002",
+        "name": "Всё сразу: чтение, рекомендация и запись в Jira одним релизом",
+        "weighted_score": 3.05,
+        "rationale": "Уступил OPT-001 по взвешенной оценке: 3.05 vs 4.00"
+      },
+      {
+        "option_id": "OPT-003",
+        "name": "Пилот на одном отделе, затем раскатка",
+        "weighted_score": 3.55,
+        "rationale": "Уступил OPT-001 по взвешенной оценке: 3.55 vs 4.00"
+      }
+    ],
+    "opportunity_cost": "Выбрав поэтапный запуск, отказываемся от немедленной полной цели в 1 минуту (назначение, статус и CV остаются ручными до этапа 2) и от единого релиза. Получаем раннюю ценность без зависимости от Application Link. Пилот на одном отделе отвергнут: узкая группа не снимает риск Application Link и добавляет срок раскатки.",
+    "criteria_weights_used": {
+      "alignment_to_goals": 25,
+      "risk_mitigation": 20,
+      "cost": 20,
+      "time_to_value": 15,
+      "org_readiness_fit": 10,
+      "feasibility": 10
+    },
+    "compared_on": "2026-10-01"
+  },
+  "transition_states": [
+    {
+      "phase": 1,
+      "name": "Локально: чтение Jira, компетенции из CV, рекомендация",
+      "duration_months": 2,
+      "capabilities_delivered": [
+        "Чтение потребностей, сотрудников и правил клиента из Jira с локальным кэшем",
+        "Структурированные компетенции из CV",
+        "Рекомендация кандидата с обоснованием",
+        "Соблюдение правил и политик в приложении"
+      ],
+      "gaps_closed": [
+        "Сопоставление потребности и кандидатов делается вручную по памяти",
+        "Правила клиента разбросаны по полям и комментариям эпика",
+        "Компетенции кандидатов лежат только в CV-файлах"
+      ],
+      "risks_remaining": [
+        "RK-001"
+      ],
+      "value_realizable": "Выбор кандидата с рекомендацией и обоснованием, правила клиента на одном экране. Работает локально, под Git, без записи в Jira: назначение, смена статуса и прикрепление CV остаются ручными. В это время запрашивается сервер у Support."
+    },
+    {
+      "phase": 2,
+      "name": "Сервер от Support и запись в Jira от имени пользователя",
+      "duration_months": 1,
+      "capabilities_delivered": [
+        "Запись в Jira от имени пользователя"
+      ],
+      "gaps_closed": [
+        "Назначение кандидата, смена статуса и прикрепление CV выполняются вручную",
+        "Комментарий о скрининге вносится вручную в Jira"
+      ],
+      "risks_remaining": [],
+      "value_realizable": "Полная цель: после выбора система сама назначает кандидата, меняет статус и прикрепляет готовое CV; выбор до ~1 минуты. Приложение развёрнуто на сервере в контуре компании. Условие старта: согласован Application Link и выдан сервер."
+    }
+  ],
+  "status": "finalized",
+  "finalized_on": "2026-10-01"
+}

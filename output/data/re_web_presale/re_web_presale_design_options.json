@@ -1,0 +1,527 @@
+{
+  "project_id": "re_web_presale",
+  "change_strategy_ref": "",
+  "options": [
+    {
+      "option_id": "OPT-001",
+      "title": "Поэтапная разработка: этап 1 чтение Jira и рекомендация, этап 2 запись от имени пользователя",
+      "approach": "build",
+      "components": [
+        "Веб-UI (Потребности, Сотрудники, Резюме, Настройки)",
+        "Бэкенд API",
+        "Интеграция с Jira (чтение, опрос и кэш)",
+        "БД приложения и отдельная БД CV",
+        "LLM-шлюз с обезличиванием (внутренняя и внешняя модель)",
+        "Вход через LDAP",
+        "Этап 2: OAuth 1.0a к Jira и запись (назначение, статус, комментарий, вложения)"
+      ],
+      "improvement_opportunities": [
+        {
+          "type": "efficiency",
+          "description": "Рекомендация кандидата с % и обоснованием вместо ручного просмотра CV: выбор за 1 минуту"
+        },
+        {
+          "type": "information_access",
+          "description": "Единый список потребностей, правил клиента и CV сотрудников вместо ручного поиска по Jira и файлам"
+        },
+        {
+          "type": "efficiency",
+          "description": "Этап 2: автоматическое назначение, смена статуса и вложения за одно действие"
+        },
+        {
+          "type": "new_capability",
+          "description": "Адаптация CV под шаблон клиента через LLM"
+        }
+      ],
+      "effectiveness_measures": [
+        "Время от открытия потребности до выбора кандидата до 1 минуты",
+        "Доля потребностей с назначением в течение 24 часов: 100%",
+        "Нулевая утечка ПДн при отправке во внешнюю LLM (проверка на 5–10 примерах)"
+      ],
+      "notes": "Соответствует стратегии 6.4 (phased, горизонт 3 мес — допущение). Этап 1 не зависит от Application Link и ценность даёт сразу: компетенции из CV, сопоставление, рекомендация; запись в Jira на этапе 1 вручную. Этап 2 зависит от AS-001. Разработка аналитиком с ИИ-агентами, код в Git, сначала локально, затем сервер от Support.",
+      "vendor_notes": "",
+      "created": "2026-10-02",
+      "updated": "2026-10-02"
+    },
+    {
+      "option_id": "OPT-002",
+      "title": "Полная версия сразу, с записью в Jira, после согласования Application Link",
+      "approach": "build",
+      "components": [
+        "Веб-UI (Потребности, Сотрудники, Резюме, Настройки)",
+        "Бэкенд API",
+        "Интеграция с Jira (чтение и запись)",
+        "OAuth 1.0a / Application Link",
+        "БД приложения и отдельная БД CV",
+        "LLM-шлюз с обезличиванием",
+        "Вход через LDAP"
+      ],
+      "improvement_opportunities": [
+        {
+          "type": "efficiency",
+          "description": "Весь цикл подбора и назначения в одном инструменте с самого запуска"
+        },
+        {
+          "type": "information_access",
+          "description": "Единый список потребностей, правил клиента и CV"
+        },
+        {
+          "type": "new_capability",
+          "description": "Адаптация CV под шаблон клиента через LLM"
+        }
+      ],
+      "effectiveness_measures": [
+        "Время от открытия потребности до выбора кандидата до 1 минуты",
+        "Доля потребностей с назначением в течение 24 часов: 100%",
+        "Нулевая утечка ПДн при отправке во внешнюю LLM"
+      ],
+      "notes": "Один выпуск без промежуточного этапа. Запуск блокируется до ответа Support по Application Link (AS-001), сроки неизвестны. Выгодно только если ответ придёт быстро. Не соответствует стратегии 6.4 (phased).",
+      "vendor_notes": "",
+      "created": "2026-10-02",
+      "updated": "2026-10-02"
+    },
+    {
+      "option_id": "OPT-003",
+      "title": "Запись в Jira через сервисную учётную запись (обход Application Link)",
+      "approach": "build",
+      "components": [
+        "Веб-UI (Потребности, Сотрудники, Резюме, Настройки)",
+        "Бэкенд API",
+        "Интеграция с Jira под общей сервисной учёткой (Basic auth)",
+        "БД приложения и отдельная БД CV",
+        "LLM-шлюз с обезличиванием",
+        "Вход через LDAP"
+      ],
+      "improvement_opportunities": [
+        {
+          "type": "efficiency",
+          "description": "Запись в Jira доступна сразу, без ожидания Application Link"
+        },
+        {
+          "type": "information_access",
+          "description": "Единый список потребностей, правил клиента и CV"
+        }
+      ],
+      "effectiveness_measures": [
+        "Время от открытия потребности до выбора кандидата до 1 минуты",
+        "Доля потребностей с назначением в течение 24 часов: 100%"
+      ],
+      "notes": "Только для сравнения. Противоречит решению пользователя: действия в Jira от имени конкретного пользователя и права = права пользователя (BR-001, FR-009, FR-025). Все записи шли бы от одной учётки, исполнитель потребности был бы неверен. Интеграции и API-доступ в СимбирСофт оформляются только заявкой в Support, так что и сервисная учётка потребует той же заявки.",
+      "vendor_notes": "",
+      "created": "2026-10-02",
+      "updated": "2026-10-02"
+    }
+  ],
+  "allocation": {
+    "FR-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-002": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-003": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-004": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-005": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-006": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-007": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-008": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-009": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-010": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-011": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-012": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-013": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-014": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-015": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-016": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-017": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-018": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-019": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-020": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-021": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-022": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-023": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-024": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-025": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-026": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "FR-027": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-028": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-029": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-030": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-031": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-032": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-033": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-034": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-035": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-036": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-037": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-038": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-039": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "FR-040": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-002": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-003": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-004": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-005": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-006": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-007": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-008": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "NFR-009": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "NFR-010": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-002": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-003": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-005": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-006": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-007": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-008": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-009": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BR-010": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "UC-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "UC-002": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "UC-003": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "UC-004": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "UC-005": {
+      "version": "v2",
+      "option_id": "OPT-001",
+      "rationale": "Запись в Jira, зависит от AS-001",
+      "source": "manual"
+    },
+    "UC-006": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "BP-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "DD-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    },
+    "ERD-001": {
+      "version": "v1",
+      "option_id": "OPT-001",
+      "rationale": "MVP",
+      "source": "manual"
+    }
+  },
+  "created": "2026-10-02",
+  "updated": "2026-10-02"
+}

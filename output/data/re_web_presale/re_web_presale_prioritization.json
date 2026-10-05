@@ -1,0 +1,368 @@
+{
+  "project": "re_web_presale",
+  "sessions": [
+    {
+      "label": "MVP scope",
+      "method": "MoSCoW",
+      "wsjf_scale": null,
+      "quadrant_mapping": null,
+      "capacity": null,
+      "capacity_unit": null,
+      "date": "2026-10-02",
+      "status": "closed",
+      "stakeholder_scores": {
+        "Константин": {
+          "FR-001": "Must",
+          "FR-002": "Must",
+          "FR-003": "Must",
+          "FR-004": "Must",
+          "FR-005": "Must",
+          "FR-020": "Must",
+          "FR-021": "Must",
+          "FR-022": "Must",
+          "FR-023": "Must",
+          "FR-024": "Must",
+          "FR-027": "Must",
+          "FR-028": "Must",
+          "FR-029": "Must",
+          "FR-030": "Must",
+          "FR-031": "Must",
+          "FR-034": "Must",
+          "FR-035": "Must",
+          "FR-036": "Must",
+          "FR-037": "Must",
+          "FR-039": "Must",
+          "FR-008": "Must",
+          "FR-025": "Must",
+          "NFR-001": "Must",
+          "NFR-002": "Must",
+          "NFR-003": "Must",
+          "NFR-006": "Must",
+          "NFR-007": "Must",
+          "NFR-008": "Must",
+          "NFR-010": "Must",
+          "FR-009": "Should",
+          "FR-010": "Should",
+          "FR-011": "Should",
+          "FR-018": "Should",
+          "FR-026": "Should",
+          "FR-012": "Should",
+          "FR-015": "Should",
+          "FR-017": "Should",
+          "FR-032": "Should",
+          "FR-040": "Should",
+          "NFR-004": "Should",
+          "NFR-005": "Should",
+          "NFR-009": "Should",
+          "FR-006": "Could",
+          "FR-007": "Could",
+          "FR-013": "Could",
+          "FR-014": "Could",
+          "FR-016": "Could",
+          "FR-019": "Could",
+          "FR-033": "Could",
+          "FR-038": "Could",
+          "UC-001": "Must",
+          "UC-003": "Must",
+          "UC-005": "Must",
+          "UC-006": "Must",
+          "UC-002": "Should",
+          "UC-004": "Should",
+          "BP-001": "Must",
+          "DD-001": "Must",
+          "ERD-001": "Must",
+          "BR-001": "Must",
+          "BR-003": "Must",
+          "BR-005": "Must",
+          "BR-007": "Must",
+          "BR-008": "Must",
+          "BR-010": "Must",
+          "BR-002": "Should",
+          "BR-006": "Should",
+          "BR-009": "Could"
+        }
+      },
+      "conflicts": [],
+      "dependency_violations": [],
+      "aggregated": {
+        "FR-016": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-025": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "NFR-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "UC-005": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "NFR-003": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-005": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-009": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "NFR-006": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-040": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-009": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-018": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "DD-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "NFR-005": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "NFR-002": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-037": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-038": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-029": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-021": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-019": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-007": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-012": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-002": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-035": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-030": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-010": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-017": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "BR-002": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "NFR-008": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BP-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-010": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "BR-008": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-031": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-024": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-026": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-022": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-039": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-015": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "BR-003": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-020": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-013": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "NFR-010": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-007": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-028": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "UC-003": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-033": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-008": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "NFR-007": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-014": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "FR-027": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "ERD-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-011": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "NFR-009": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-005": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "UC-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-032": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "NFR-004": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-023": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-034": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-036": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-006": {
+          "priority": "Could",
+          "weighted_score": 2.0
+        },
+        "UC-006": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "FR-003": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "BR-006": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-004": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "UC-002": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        },
+        "FR-001": {
+          "priority": "Must",
+          "weighted_score": 4.0
+        },
+        "UC-004": {
+          "priority": "Should",
+          "weighted_score": 3.0
+        }
+      },
+      "result": {},
+      "stakeholder_influence": {
+        "Константин": "High"
+      },
+      "closed_at": "2026-10-02"
+    }
+  ]
+}

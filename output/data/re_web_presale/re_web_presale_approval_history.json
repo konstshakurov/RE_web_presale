@@ -1,0 +1,564 @@
+{
+  "project": "re_web_presale",
+  "packages": {
+    "APKG-001": {
+      "package_id": "APKG-001",
+      "package_title": "Требования к веб-приложению подбора кандидатов на потребности (Presale), MVP",
+      "approach": "agile",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004",
+        "NFR-005",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001"
+      ],
+      "created_date": "2026-10-02",
+      "stakeholder_decisions": {
+        "Константин": {
+          "stakeholder_name": "Константин",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-008",
+              "decision": "conditional",
+              "condition_text": "Запись в Jira от имени пользователя: подтвердить на практике (пробная интеграция) либо по ответу Support по Application Link (RK-001/AS-001). Разработку не блокировать: сначала реализуется чтение (этап 1), способ авторизации для записи подбирается пробным путём.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "conditional",
+              "condition_text": "Способ авторизации в Jira от имени пользователя (OAuth 1.0a / Application Link или рабочая альтернатива) подтвердить пробной интеграцией или ответом Support. Не ждать ответа, идти методом проб.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "conditional",
+              "condition_text": "Смена статуса в Jira зависит от способа авторизации (FR-025); подтвердить после пробной интеграции.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "conditional",
+              "condition_text": "Шаги авторизации в Jira (OAuth 1.0a) уточнить по итогам пробной интеграции или ответа Support.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "DD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "ERD-001",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Не зацикливаться на Application Link: идти методом проб, ответ Support учесть, когда придёт. Срок условий 02.11.2026 — допущение ассистента, не названо пользователем.",
+          "recorded_date": "2026-10-02"
+        }
+      },
+      "baseline_version": "v1.0",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-001": true,
+        "FR-002": true,
+        "FR-003": true,
+        "FR-004": true,
+        "FR-005": true,
+        "FR-006": true,
+        "FR-007": true,
+        "FR-008": true,
+        "FR-009": true,
+        "FR-010": true,
+        "FR-011": true,
+        "FR-012": true,
+        "FR-013": true,
+        "FR-014": true,
+        "FR-015": true,
+        "FR-016": true,
+        "FR-017": true,
+        "FR-018": true,
+        "FR-019": true,
+        "FR-020": true,
+        "FR-021": true,
+        "FR-022": true,
+        "FR-023": true,
+        "FR-024": true,
+        "FR-025": true,
+        "FR-026": true,
+        "FR-027": true,
+        "FR-028": true,
+        "FR-029": true,
+        "FR-030": true,
+        "FR-031": true,
+        "FR-032": true,
+        "FR-033": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-036": true,
+        "FR-037": true,
+        "FR-038": true,
+        "FR-039": true,
+        "FR-040": true,
+        "NFR-001": true,
+        "NFR-002": true,
+        "NFR-003": true,
+        "NFR-004": true,
+        "NFR-005": true,
+        "NFR-006": true,
+        "NFR-007": true,
+        "NFR-008": true,
+        "NFR-009": true,
+        "NFR-010": true,
+        "BR-001": true,
+        "BR-002": true,
+        "BR-003": true,
+        "BR-005": true,
+        "BR-006": true,
+        "BR-007": true,
+        "BR-008": true,
+        "BR-009": true,
+        "BR-010": true,
+        "UC-001": true,
+        "UC-002": true,
+        "UC-003": true,
+        "UC-004": true,
+        "UC-005": true,
+        "UC-006": true,
+        "BP-001": true,
+        "DD-001": true,
+        "ERD-001": true
+      }
+    }
+  },
+  "baselines": [
+    {
+      "baseline_version": "v1.0",
+      "package_id": "APKG-001",
+      "package_title": "Требования к веб-приложению подбора кандидатов на потребности (Presale), MVP",
+      "approach": "agile",
+      "created_date": "2026-10-02",
+      "decided_by": "Константин",
+      "approved_req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004",
+        "NFR-005",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001"
+      ],
+      "open_conditions": [
+        {
+          "req_id": "FR-008",
+          "stakeholder": "Константин",
+          "condition_text": "Запись в Jira от имени пользователя: подтвердить на практике (пробная интеграция) либо по ответу Support по Application Link (RK-001/AS-001). Разработку не блокировать: сначала реализуется чтение (этап 1), способ авторизации для записи подбирается пробным путём.",
+          "condition_deadline": "2026-11-02"
+        },
+        {
+          "req_id": "FR-025",
+          "stakeholder": "Константин",
+          "condition_text": "Способ авторизации в Jira от имени пользователя (OAuth 1.0a / Application Link или рабочая альтернатива) подтвердить пробной интеграцией или ответом Support. Не ждать ответа, идти методом проб.",
+          "condition_deadline": "2026-11-02"
+        },
+        {
+          "req_id": "FR-026",
+          "stakeholder": "Константин",
+          "condition_text": "Смена статуса в Jira зависит от способа авторизации (FR-025); подтвердить после пробной интеграции.",
+          "condition_deadline": "2026-11-02"
+        },
+        {
+          "req_id": "UC-005",
+          "stakeholder": "Константин",
+          "condition_text": "Шаги авторизации в Jira (OAuth 1.0a) уточнить по итогам пробной интеграции или ответа Support.",
+          "condition_deadline": "2026-11-02"
+        }
+      ],
+      "force_created": true,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-10-02"
+        }
+      }
+    }
+  ],
+  "updated": "2026-10-02"
+}

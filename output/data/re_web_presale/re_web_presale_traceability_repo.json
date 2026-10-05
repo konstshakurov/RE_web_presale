@@ -1,0 +1,6085 @@
+{
+  "project": "re_web_presale",
+  "formality_level": "Standard",
+  "created": "2026-10-02",
+  "updated": "2026-10-02",
+  "requirements": [
+    {
+      "id": "FR-001",
+      "type": "functional",
+      "title": "Раздел новых потребностей со ставками",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_001_раздел_новых_потребностей_со_с.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-002",
+      "type": "functional",
+      "title": "Список сотрудников со статусами и фильтром",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_002_список_сотрудников_со_статусам.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-003",
+      "type": "functional",
+      "title": "Профиль сотрудника с кратким опытом",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_003_профиль_сотрудника_с_кратким_о.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-004",
+      "type": "functional",
+      "title": "Хранение сотрудников и нескольких CV",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_004_хранение_сотрудников_и_несколь.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-005",
+      "type": "functional",
+      "title": "Рекомендация кандидата с % соответствия и обоснованием",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_005_рекомендация_кандидата_с_%_соо.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "success_criteria": {
+        "baseline": "Время от открытия потребности до выбора кандидата: к замеру (выгрузка дат смены статусов из Jira)",
+        "target": "До 1 минуты",
+        "measurement_method": "Замер на пилоте: время от нажатия «Сопоставить» до подтверждения «Назначить» по выборке потребностей",
+        "kpi_ref": "BG-001",
+        "set_date": "2026-10-02"
+      },
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-006",
+      "type": "functional",
+      "title": "Проверка CV на противоречия",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_006_проверка_cv_на_противоречия.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-007",
+      "type": "functional",
+      "title": "Диалог с LLM в контексте потребности или CV",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_007_диалог_с_llm_в_контексте_потре.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-008",
+      "type": "functional",
+      "title": "Назначение сотрудника на потребность с передачей в Jira",
+      "version": "1.0",
+      "status": "conditional_approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_008_назначение_сотрудника_на_потре.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "success_criteria": {
+        "baseline": "Доля потребностей с назначением в течение 24 часов: к замеру (выгрузка из Jira)",
+        "target": "100%",
+        "measurement_method": "Выгрузка дат смены статусов потребностей из Jira за период после запуска",
+        "kpi_ref": "BG-001",
+        "set_date": "2026-10-02"
+      },
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined_with_open_condition",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-009",
+      "type": "functional",
+      "title": "Исполнитель потребности = пользователь, проведший назначение",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_009_исполнитель_потребности_=_поль.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-010",
+      "type": "functional",
+      "title": "Повторное назначение на уже назначенную потребность",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_010_повторное_назначение_на_уже_на.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-011",
+      "type": "functional",
+      "title": "Статусы «Кандидатов нет» и «Найм»",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_011_статусы_«кандидатов_нет»_и_«на.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-012",
+      "type": "functional",
+      "title": "Рекомендации по адаптации CV и сопроводительное письмо",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_012_рекомендации_по_адаптации_cv_и.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-013",
+      "type": "functional",
+      "title": "Комментарий с результатом скрининга в Jira",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_013_комментарий_с_результатом_скри.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-014",
+      "type": "functional",
+      "title": "Выявление дублей потребностей",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_014_выявление_дублей_потребностей.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-015",
+      "type": "functional",
+      "title": "Показ правил и условий клиента",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_015_показ_правил_и_условий_клиента.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-016",
+      "type": "functional",
+      "title": "История отправок сотрудника клиентам",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_016_история_отправок_сотрудника_кл.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-017",
+      "type": "functional",
+      "title": "Сделать CV по шаблону клиента",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_017_сделать_cv_по_шаблону_клиента.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-018",
+      "type": "functional",
+      "title": "Ввод ставки при назначении",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_018_ввод_ставки_при_назначении.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-019",
+      "type": "functional",
+      "title": "Средняя и медианная ставки за период",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_019_средняя_и_медианная_ставки_за_.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-020",
+      "type": "functional",
+      "title": "Отображение статуса потребности (19 статусов)",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_020_отображение_статуса_потребност.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-021",
+      "type": "functional",
+      "title": "Управление списком разрешённых пользователей",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_021_управление_списком_разрешённых.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-022",
+      "type": "functional",
+      "title": "Добавление файла сотрудника в разделе «Резюме»",
+      "version": "2.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_022_загрузка_cv_из_папок_и_сопоста.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-023",
+      "type": "functional",
+      "title": "Обезличивание текста перед отправкой во внешнюю LLM",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_023_обезличивание_текста_перед_отп.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-024",
+      "type": "functional",
+      "title": "Вход по корпоративному LDAP",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_024_вход_по_корпоративному_ldap.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-025",
+      "type": "functional",
+      "title": "Авторизация в Jira от имени пользователя (OAuth 1.0a)",
+      "version": "1.0",
+      "status": "conditional_approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_025_авторизация_в_jira_от_имени_по.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined_with_open_condition",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-026",
+      "type": "functional",
+      "title": "Смена статуса потребности по переходам Jira",
+      "version": "1.0",
+      "status": "conditional_approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_026_смена_статуса_потребности_по_п.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined_with_open_condition",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-027",
+      "type": "functional",
+      "title": "Основное CV — главный источник компетенций",
+      "version": "2.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_027_пометка_корпоративного_cv_флаж.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-028",
+      "type": "functional",
+      "title": "Синхронизация данных из Jira (опрос и кэш)",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_028_синхронизация_данных_из_jira_(.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-029",
+      "type": "functional",
+      "title": "Поведение при отказах Jira",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_029_поведение_при_отказах_jira.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-030",
+      "type": "functional",
+      "title": "Настройка LLM-провайдеров",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_030_настройка_llm-провайдеров.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-001",
+      "type": "non_functional",
+      "title": "Число пользователей",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_001_число_пользователей.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-002",
+      "type": "non_functional",
+      "title": "Нагрузка по потребностям",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_002_нагрузка_по_потребностям.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-003",
+      "type": "non_functional",
+      "title": "Доступность",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_003_доступность.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-004",
+      "type": "non_functional",
+      "title": "Срок хранения данных",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_004_срок_хранения_данных.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-005",
+      "type": "non_functional",
+      "title": "Журнал действий",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_005_журнал_действий.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-006",
+      "type": "non_functional",
+      "title": "Защита токенов и ключей",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_006_защита_токенов_и_ключей.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-007",
+      "type": "non_functional",
+      "title": "Отдельная БД для CV",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_007_отдельная_бд_для_cv.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-008",
+      "type": "non_functional",
+      "title": "Актуальность данных из Jira",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_008_актуальность_данных_из_jira.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-009",
+      "type": "non_functional",
+      "title": "Время записи в Jira",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_009_время_записи_в_jira.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "NFR-010",
+      "type": "non_functional",
+      "title": "Таймаут LLM",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\nfr_010_таймаут_llm.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-001",
+      "type": "business_rule",
+      "title": "Права на операции в Jira определяет Jira",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_001_права_на_операции_в_jira_опред.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-002",
+      "type": "business_rule",
+      "title": "Кто предлагает ставку",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_002_кто_предлагает_ставку.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-003",
+      "type": "business_rule",
+      "title": "Состав ставки: валюта, НДС, единица",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_003_состав_ставки_валюта,_ндс,_ед.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-005",
+      "type": "business_rule",
+      "title": "Потребности направления Аналитики",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_005_потребности_направления_аналит.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-006",
+      "type": "business_rule",
+      "title": "Правила клиентов только информируют",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_006_правила_клиентов_только_информ.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-007",
+      "type": "business_rule",
+      "title": "Корпоративный формат CV",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_007_корпоративный_формат_cv.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-008",
+      "type": "business_rule",
+      "title": "Разные workflow потребностей и сотрудников",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_008_разные_workflow_потребностей_и.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-009",
+      "type": "business_rule",
+      "title": "НДС для расчёта статистики ставок",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_009_ндс_для_расчёта_статистики_ста.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BR-010",
+      "type": "business_rule",
+      "title": "Статус, а не резолюция",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\br_010_статус,_а_не_резолюция.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Клиентская служба (клиентские менеджеры)",
+          "declared": "2026-10-02",
+          "note": "Ведут потребности в Jira, ставят статусы, задают ставку и признак НДС; приложение читает и меняет данные их потребностей."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-001",
+      "type": "use_case",
+      "title": "Подобрать кандидата и назначить на потребность",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_001_подобрать_кандидата_и_назначит.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-002",
+      "type": "use_case",
+      "title": "Сменить статус потребности",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_002_сменить_статус_потребности.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-003",
+      "type": "use_case",
+      "title": "Добавить файл сотрудника в разделе «Резюме»",
+      "version": "2.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_003_загрузить_cv_сотрудников_из_па.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-004",
+      "type": "use_case",
+      "title": "Сделать CV по шаблону клиента",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_004_сделать_cv_по_шаблону_клиента.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-005",
+      "type": "use_case",
+      "title": "Войти в приложение и авторизоваться в Jira",
+      "version": "1.0",
+      "status": "conditional_approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_005_войти_в_приложение_и_авторизов.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        },
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined_with_open_condition",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "UC-006",
+      "type": "use_case",
+      "title": "Управлять доступом пользователей и настройками LLM",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_006_управлять_доступом_пользовател.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Константин",
+          "declared": "2026-10-02",
+          "note": "Руководитель направления Аналитики: единственный канал требований и принимающий решения; отвечает за сроки, риски (Application Link), политику LLM и ПДн."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "BP-001",
+      "type": "business_process",
+      "title": "Подбор и назначение аналитика на потребность (to-be)",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\bp_001_подбор_и_назначение_аналитика_.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "DD-001",
+      "type": "data_dictionary",
+      "title": "Основные сущности приложения",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\dd_001_основные_сущности_приложения.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "ERD-001",
+      "type": "erd",
+      "title": "Основные сущности приложения подбора кандидатов",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\erd_001_основные_сущности_приложения_п.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-031",
+      "type": "functional",
+      "title": "Структура приложения: разделы",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_031_структура_приложения_разделы.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-032",
+      "type": "functional",
+      "title": "Фильтры раздела «Резюме»",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_032_фильтры_раздела_«резюме».md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-033",
+      "type": "functional",
+      "title": "Дополнительная заметка о сотруднике",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_033_дополнительная_заметка_о_сотру.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-034",
+      "type": "functional",
+      "title": "Таблица потребностей и кнопка синхронизации",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_034_таблица_потребностей_и_кнопка_.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-035",
+      "type": "functional",
+      "title": "Фильтр потребностей по группам статусов",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_035_фильтр_потребностей_по_группам.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-036",
+      "type": "functional",
+      "title": "Сопоставление потребности с кандидатами",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_036_сопоставление_потребности_с_ка.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Евгения",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: её сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Дмитрий",
+          "declared": "2026-10-02",
+          "note": "Руководитель отдела: его сотрудники подбирают кандидатов и назначают их на потребности; получает требования через Константина."
+        },
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-037",
+      "type": "functional",
+      "title": "Просмотр CV в окне",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_037_просмотр_cv_в_окне.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-038",
+      "type": "functional",
+      "title": "Логотип и фирменный вид интерфейса",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Could",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_038_логотип_и_фирменный_вид_интерф.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-039",
+      "type": "functional",
+      "title": "Замена основного CV с архивом прежних версий",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Must",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_039_замена_основного_cv_с_архивом_.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    },
+    {
+      "id": "FR-040",
+      "type": "functional",
+      "title": "Скачивание и удаление файлов сотрудника",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Should",
+      "owner": "Руководитель направления Аналитики",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_040_скачивание_и_удаление_файлов_с.md",
+      "added": "2026-10-02",
+      "last_reviewed": "2026-10-02",
+      "stakeholders": [
+        {
+          "name": "Presale-менеджеры (выбранные)",
+          "declared": "2026-10-02",
+          "note": "Основные пользователи системы: подбирают кандидатов, ведут резюме, назначают на потребности."
+        }
+      ],
+      "history": [
+        {
+          "date": "2026-10-02",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-02",
+          "action": "baselined",
+          "baseline_version": "v1.0",
+          "decided_by": "Константин"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "BP-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Бизнес-процесс to-be реализует бизнес-цель BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-002",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-003",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-004",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-005",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-006",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Сценарий обеспечивает достижение BG-001 (артефакт 6.2)",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-001",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-005",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-006",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-007",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-008",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-009",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-010",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-014",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-015",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-016",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-018",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-019",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-020",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-034",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-035",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-036",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-037",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-011",
+      "to": "UC-002",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-002",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-013",
+      "to": "UC-002",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-002",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-026",
+      "to": "UC-002",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-002",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-002",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-003",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-004",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-022",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-027",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-032",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-033",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-012",
+      "to": "UC-004",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-004",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-017",
+      "to": "UC-004",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-004",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-024",
+      "to": "UC-005",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-005",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-025",
+      "to": "UC-005",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-005",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-021",
+      "to": "UC-006",
+      "relation": "derives",
+      "rationale": "FR выведено из сценария UC-006",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-026",
+      "to": "BR-001",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-018",
+      "to": "BR-002",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-002",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-001",
+      "to": "BR-003",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-018",
+      "to": "BR-003",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-019",
+      "to": "BR-003",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-003",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-001",
+      "to": "BR-005",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-005",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-014",
+      "to": "BR-005",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-005",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-016",
+      "to": "BR-005",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-005",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-015",
+      "to": "BR-006",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-006",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-003",
+      "to": "BR-007",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-007",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-017",
+      "to": "BR-007",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-007",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-002",
+      "to": "BR-008",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-008",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-020",
+      "to": "BR-008",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-008",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-035",
+      "to": "BR-008",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-008",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-019",
+      "to": "BR-009",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-009",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-014",
+      "to": "BR-010",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-010",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-020",
+      "to": "BR-010",
+      "relation": "derives",
+      "rationale": "FR выведено из бизнес-правила BR-010",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-023",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "Обезличивание — предусловие обращения к LLM в подборе кандидата",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-028",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "Данные потребностей из Jira нужны для подбора",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-029",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "Поведение при отказах Jira в сценарии подбора",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-030",
+      "to": "UC-006",
+      "relation": "derives",
+      "rationale": "Настройка LLM-провайдеров — часть администрирования",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-031",
+      "to": "UC-001",
+      "relation": "derives",
+      "rationale": "Структура разделов — основа сценариев приложения",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-038",
+      "to": "FR-031",
+      "relation": "derives",
+      "rationale": "Фирменный вид — часть общей структуры интерфейса",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-039",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "Замена основного CV — вариант работы с файлами сотрудника",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "FR-040",
+      "to": "UC-003",
+      "relation": "derives",
+      "rationale": "Скачивание и удаление файлов сотрудника",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-001",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Ограничение масштаба для достижения BG-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-002",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Ограничение нагрузки для достижения BG-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-003",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Доступность — условие подбора в срок",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-004",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Срок хранения данных — ограничение решения",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-005",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Журнал действий — контроль назначений",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-006",
+      "to": "FR-025",
+      "relation": "derives",
+      "rationale": "Защита токенов Jira",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-007",
+      "to": "FR-004",
+      "relation": "derives",
+      "rationale": "Отдельная БД для хранения CV",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-008",
+      "to": "FR-028",
+      "relation": "derives",
+      "rationale": "Актуальность данных синхронизации с Jira",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-009",
+      "to": "FR-008",
+      "relation": "derives",
+      "rationale": "Время записи назначения в Jira",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "NFR-010",
+      "to": "FR-005",
+      "relation": "derives",
+      "rationale": "Таймаут LLM при рекомендации",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-001",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Бизнес-правило интеграции с Jira, поддерживает BG-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-002",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Правило ставки при назначении",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-003",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Состав ставки при назначении",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-005",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Границы потребностей направления",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-006",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Правила клиентов при подборе",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-007",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Корпоративный формат CV",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-008",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Workflow потребностей и сотрудников",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-009",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "НДС в статистике ставок",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "BR-010",
+      "to": "BG-001",
+      "relation": "derives",
+      "rationale": "Статус вместо резолюции",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "DD-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "Словарь данных поддерживает BG-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "ERD-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "rationale": "ERD поддерживает BG-001",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-001",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Сценарий реализует шаги to-be процесса подбора и назначения",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-002",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Смена статуса — шаг to-be процесса",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-003",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Загрузка файлов сотрудника обеспечивает данные для подбора в to-be процессе",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-004",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Подготовка CV по шаблону клиента — шаг to-be процесса",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-005",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Вход и авторизация в Jira — предусловие to-be процесса",
+      "added": "2026-10-02"
+    },
+    {
+      "from": "UC-006",
+      "to": "BP-001",
+      "relation": "derives",
+      "rationale": "Доступ пользователей и настройки LLM — обеспечивающая функция to-be процесса",
+      "added": "2026-10-02"
+    }
+  ],
+  "history": [
+    {
+      "action": "requirement_added",
+      "req_id": "FR-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-002",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-003",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-004",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-005",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-006",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-007",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-008",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-009",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-010",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-011",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-012",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-013",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-014",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-015",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-016",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-017",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-018",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-019",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-020",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-021",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-022",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-023",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-024",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-025",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-026",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-027",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-028",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-029",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-030",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-002",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-003",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-004",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-005",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-006",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-007",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-008",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-009",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "NFR-010",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-002",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-003",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-005",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-006",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-007",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-008",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-009",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BR-010",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-002",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-003",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-004",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-005",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "UC-006",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "BP-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "DD-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "ERD-001",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-031",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-032",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-033",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-034",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-035",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-036",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-037",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-038",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "FR-022",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "2.0"
+        },
+        "title": {
+          "from": "Загрузка CV из папок и сопоставление с карточками",
+          "to": "Добавление файла сотрудника в разделе «Резюме»"
+        }
+      },
+      "reason": "Часть 2 ФТ: папочная загрузка CV отменена, файлы грузятся вручную по одному",
+      "note": "",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "FR-027",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "2.0"
+        },
+        "title": {
+          "from": "Пометка корпоративного CV флажком",
+          "to": "Основное CV — главный источник компетенций"
+        }
+      },
+      "reason": "Часть 2 ФТ: флажок корпоративного CV отменён, основное CV — источник компетенций",
+      "note": "",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "UC-003",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "2.0"
+        },
+        "title": {
+          "from": "Загрузить CV сотрудников из папок",
+          "to": "Добавить файл сотрудника в разделе «Резюме»"
+        }
+      },
+      "reason": "Часть 2 ФТ: сценарий переписан под ручное добавление файла в разделе «Резюме»",
+      "note": "",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_removed",
+      "from": "FR-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BP-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-002",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-003",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-004",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-005",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-006",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-001",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-005",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-006",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-007",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-008",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-009",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-010",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-014",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-015",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-016",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-018",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-019",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-020",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-034",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-035",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-036",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-037",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-011",
+      "to": "UC-002",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-013",
+      "to": "UC-002",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-026",
+      "to": "UC-002",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-002",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-003",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-004",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-022",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-027",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-032",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-033",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-012",
+      "to": "UC-004",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-017",
+      "to": "UC-004",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-024",
+      "to": "UC-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-025",
+      "to": "UC-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-021",
+      "to": "UC-006",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-026",
+      "to": "BR-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-018",
+      "to": "BR-002",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-001",
+      "to": "BR-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-018",
+      "to": "BR-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-019",
+      "to": "BR-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-001",
+      "to": "BR-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-014",
+      "to": "BR-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-016",
+      "to": "BR-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-015",
+      "to": "BR-006",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-003",
+      "to": "BR-007",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-017",
+      "to": "BR-007",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-002",
+      "to": "BR-008",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-020",
+      "to": "BR-008",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-035",
+      "to": "BR-008",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-019",
+      "to": "BR-009",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-014",
+      "to": "BR-010",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-020",
+      "to": "BR-010",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-039",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-040",
+      "source": "7.1_spec",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-002",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-003",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-004",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-005",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-006",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-007",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-008",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-009",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-010",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-011",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-012",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-013",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-014",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-015",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-016",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-017",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-018",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-019",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-020",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-021",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-022",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-023",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-024",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-025",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-026",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-027",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-028",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-029",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-030",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-031",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-032",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-033",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-034",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-035",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-036",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-037",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-038",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-039",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "FR-040",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-002",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-003",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-004",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-005",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-006",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-007",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-008",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-009",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "NFR-010",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-002",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-003",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-005",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-006",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-007",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-008",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-009",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BR-010",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-002",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-003",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-004",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-005",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "UC-006",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "BP-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "DD-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_verified",
+      "req_id": "ERD-001",
+      "old_status": "draft",
+      "new_status": "verified",
+      "source": "7.2_verify",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "success_criteria_set",
+      "req_id": "FR-005",
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "success_criteria_set",
+      "req_id": "FR-008",
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-002",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-003",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-004",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-005",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-006",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-007",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-009",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-010",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-011",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-012",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-013",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-014",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-015",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-016",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-017",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-018",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-019",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-020",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-021",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-022",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-023",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-024",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-027",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-028",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-029",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-030",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-031",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-032",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-033",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-034",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-035",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-036",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-037",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-038",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-039",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "FR-040",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-002",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-003",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-004",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-005",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-006",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-007",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-008",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-009",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "NFR-010",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-002",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-003",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-005",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-006",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-007",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-008",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-009",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BR-010",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "UC-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "UC-002",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "UC-003",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "UC-004",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "UC-006",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "BP-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "DD-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "req_validated",
+      "req_id": "ERD-001",
+      "old_status": "verified",
+      "new_status": "validated",
+      "force": true,
+      "source": "7.3_validate",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "stakeholder_interest_declared",
+      "stakeholder": "Евгения",
+      "req_ids": [
+        "UC-001",
+        "UC-002",
+        "UC-004",
+        "FR-001",
+        "FR-005",
+        "FR-008",
+        "FR-017",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-014",
+        "FR-015"
+      ],
+      "source": "7.4_architecture",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "stakeholder_interest_declared",
+      "stakeholder": "Дмитрий",
+      "req_ids": [
+        "UC-001",
+        "UC-002",
+        "UC-004",
+        "FR-001",
+        "FR-005",
+        "FR-008",
+        "FR-017",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-014",
+        "FR-015"
+      ],
+      "source": "7.4_architecture",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "stakeholder_interest_declared",
+      "stakeholder": "Клиентская служба (клиентские менеджеры)",
+      "req_ids": [
+        "FR-001",
+        "FR-011",
+        "FR-013",
+        "FR-015",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-026",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-009",
+        "BR-010"
+      ],
+      "source": "7.4_architecture",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "stakeholder_interest_declared",
+      "stakeholder": "Presale-менеджеры (выбранные)",
+      "req_ids": [
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "FR-002",
+        "FR-003",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-012",
+        "FR-017",
+        "FR-022",
+        "FR-032",
+        "FR-033",
+        "FR-036",
+        "FR-037",
+        "FR-039",
+        "FR-040",
+        "NFR-003"
+      ],
+      "source": "7.4_architecture",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "stakeholder_interest_declared",
+      "stakeholder": "Константин",
+      "req_ids": [
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "FR-005",
+        "FR-008",
+        "FR-017",
+        "FR-023",
+        "FR-025",
+        "FR-030",
+        "NFR-003",
+        "NFR-004",
+        "NFR-005",
+        "NFR-006",
+        "BR-001",
+        "BR-007"
+      ],
+      "source": "7.4_architecture",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-023",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-028",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-029",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-030",
+      "to": "UC-006",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-031",
+      "to": "UC-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-038",
+      "to": "FR-031",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-039",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "FR-040",
+      "to": "UC-003",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-001",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-002",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-003",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-004",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-005",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-006",
+      "to": "FR-025",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-007",
+      "to": "FR-004",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-008",
+      "to": "FR-028",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-009",
+      "to": "FR-008",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "NFR-010",
+      "to": "FR-005",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-001",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-002",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-003",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-005",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-006",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-007",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-008",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-009",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "BR-010",
+      "to": "BG-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "DD-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "ERD-001",
+      "to": "BG-001",
+      "relation": "satisfies",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-001",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-002",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-003",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-004",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-005",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "action": "link_added",
+      "from": "UC-006",
+      "to": "BP-001",
+      "relation": "derives",
+      "date": "2026-10-02"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-016",
+      "old_priority": "Low",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-025",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-001",
+      "old_priority": "Low",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-005",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-003",
+      "old_priority": "Low",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-005",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-009",
+      "old_priority": "Low",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-006",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-040",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-009",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-018",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "DD-001",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-005",
+      "old_priority": "Low",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-002",
+      "old_priority": "Low",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-037",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-038",
+      "old_priority": "Low",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-029",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-021",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-019",
+      "old_priority": "Low",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-007",
+      "old_priority": "Medium",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-012",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-002",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-035",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-001",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-030",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-010",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-017",
+      "old_priority": "High",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-002",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-008",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BP-001",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-010",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-008",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-031",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-024",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-026",
+      "old_priority": "High",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-022",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-039",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-015",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-003",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-020",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-013",
+      "old_priority": "Low",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-010",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-007",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-028",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-003",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-033",
+      "old_priority": "Medium",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-008",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-007",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-014",
+      "old_priority": "Medium",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-027",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "ERD-001",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-011",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-009",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-005",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-001",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-032",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "NFR-004",
+      "old_priority": "Low",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-023",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-034",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-036",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-006",
+      "old_priority": "Medium",
+      "new_priority": "Could",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-006",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-003",
+      "old_priority": "Medium",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "BR-006",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-004",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-002",
+      "old_priority": "Medium",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "FR-001",
+      "old_priority": "High",
+      "new_priority": "Must",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    },
+    {
+      "date": "2026-10-02",
+      "action": "priority_updated",
+      "req_id": "UC-004",
+      "old_priority": "High",
+      "new_priority": "Should",
+      "session": "MVP scope",
+      "method": "MoSCoW"
+    }
+  ]
+}

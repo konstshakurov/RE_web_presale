@@ -1,0 +1,354 @@
+{
+  "project_id": "re_web_presale",
+  "value_assessments": {
+    "OPT-001": {
+      "option_id": "OPT-001",
+      "benefits": [
+        {
+          "type": "operational",
+          "description": "Сокращение времени выбора кандидата до 1 минуты за счёт рекомендации с обоснованием (с этапа 1)",
+          "magnitude": "High",
+          "tangibility": "tangible",
+          "confidence": "Medium"
+        },
+        {
+          "type": "operational",
+          "description": "Единый список потребностей, правил клиента и CV вместо ручного поиска по Jira и файлам",
+          "magnitude": "Medium",
+          "tangibility": "tangible",
+          "confidence": "High"
+        },
+        {
+          "type": "strategic",
+          "description": "Достижение регламента: назначение в течение 24 часов для всех потребностей (этап 2)",
+          "magnitude": "High",
+          "tangibility": "tangible",
+          "confidence": "Medium"
+        },
+        {
+          "type": "user_experience",
+          "description": "Адаптация CV под шаблон клиента через LLM, автоматические операции после выбора",
+          "magnitude": "Medium",
+          "tangibility": "intangible",
+          "confidence": "Medium"
+        }
+      ],
+      "costs": {
+        "components": [
+          {
+            "component": "Разработка этапа 1 (чтение Jira, CV, рекомендация, UI)",
+            "cost_items": [
+              {
+                "category": "development",
+                "description": "Разработка аналитиком с ИИ-агентами, ~2 месяца (допущение)",
+                "magnitude": "Medium"
+              }
+            ]
+          },
+          {
+            "component": "Разработка этапа 2 (OAuth, запись в Jira)",
+            "cost_items": [
+              {
+                "category": "development",
+                "description": "Запись в Jira и OAuth, ~1 месяц",
+                "magnitude": "Low"
+              }
+            ]
+          },
+          {
+            "component": "Инфраструктура",
+            "cost_items": [
+              {
+                "category": "operations",
+                "description": "Сначала локально, затем сервер от Support; LLM (внутренняя и внешняя по API-ключу)",
+                "magnitude": "Low"
+              },
+              {
+                "category": "maintenance",
+                "description": "Поддержка интеграции с Jira 8.13 и справочников",
+                "magnitude": "Low"
+              }
+            ]
+          }
+        ],
+        "opportunity_cost": "Время аналитика отвлекается от проектной работы"
+      },
+      "risks": [
+        {
+          "description": "Application Link не будет согласован (AS-001, RK-001): этап 2 не запустится",
+          "probability": "Medium",
+          "impact": "Medium",
+          "mitigation": "Этап 1 даёт ценность без записи; запись в Jira вручную"
+        },
+        {
+          "description": "Качество рекомендации LLM не подтверждено метриками (AS-003)",
+          "probability": "Medium",
+          "impact": "Medium",
+          "mitigation": "Решение остаётся за человеком, экспертная оценка РО на пилоте"
+        }
+      ],
+      "notes": "Рекомендуемый вариант 7.5. Ценность этапа 1 не зависит от Application Link.",
+      "risks_source": "manual",
+      "assessed_at": "2026-10-02",
+      "value_score": 5.12,
+      "score_breakdown": {
+        "benefits_score": 2.75,
+        "alignment_score": 1.0,
+        "cost_score": 1.25,
+        "risk_penalty": 0.0,
+        "formula": "2.75×2.0 + 1.0×1.5 - 1.25×1.5 - 0.0×1.0"
+      }
+    },
+    "OPT-002": {
+      "option_id": "OPT-002",
+      "benefits": [
+        {
+          "type": "operational",
+          "description": "Сокращение времени выбора кандидата до 1 минуты (после запуска полной версии)",
+          "magnitude": "High",
+          "tangibility": "tangible",
+          "confidence": "Medium"
+        },
+        {
+          "type": "operational",
+          "description": "Единый список потребностей, правил клиента и CV",
+          "magnitude": "Medium",
+          "tangibility": "tangible",
+          "confidence": "High"
+        },
+        {
+          "type": "strategic",
+          "description": "Назначение в течение 24 часов для всех потребностей",
+          "magnitude": "High",
+          "tangibility": "tangible",
+          "confidence": "Medium"
+        },
+        {
+          "type": "user_experience",
+          "description": "Адаптация CV под шаблон клиента, автоматические операции после выбора",
+          "magnitude": "Medium",
+          "tangibility": "intangible",
+          "confidence": "Medium"
+        }
+      ],
+      "costs": {
+        "components": [
+          {
+            "component": "Разработка полной версии",
+            "cost_items": [
+              {
+                "category": "development",
+                "description": "Полная версия одним выпуском, ~3 месяца (допущение)",
+                "magnitude": "Medium"
+              }
+            ]
+          },
+          {
+            "component": "Инфраструктура",
+            "cost_items": [
+              {
+                "category": "operations",
+                "description": "Сервер от Support, LLM по API-ключу",
+                "magnitude": "Low"
+              },
+              {
+                "category": "maintenance",
+                "description": "Поддержка интеграции с Jira 8.13",
+                "magnitude": "Low"
+              }
+            ]
+          }
+        ],
+        "opportunity_cost": "Весь выпуск откладывается до ответа Support по Application Link; до этого ценности нет"
+      },
+      "risks": [
+        {
+          "description": "Application Link не будет согласован или задержится (AS-001): запуск всего решения блокируется",
+          "probability": "Medium",
+          "impact": "High",
+          "mitigation": "Нет: промежуточной ценности без Application Link вариант не даёт"
+        },
+        {
+          "description": "Качество рекомендации LLM не подтверждено метриками (AS-003)",
+          "probability": "Medium",
+          "impact": "Medium",
+          "mitigation": "Решение остаётся за человеком"
+        }
+      ],
+      "notes": "Один выпуск; весь срок зависит от ответа Support.",
+      "risks_source": "manual",
+      "assessed_at": "2026-10-02",
+      "value_score": 5.0,
+      "score_breakdown": {
+        "benefits_score": 2.75,
+        "alignment_score": 1.0,
+        "cost_score": 1.333,
+        "risk_penalty": 0.0,
+        "formula": "2.75×2.0 + 1.0×1.5 - 1.333×1.5 - 0.0×1.0"
+      }
+    },
+    "OPT-003": {
+      "option_id": "OPT-003",
+      "benefits": [
+        {
+          "type": "operational",
+          "description": "Время выбора кандидата до 1 минуты",
+          "magnitude": "High",
+          "tangibility": "tangible",
+          "confidence": "Medium"
+        },
+        {
+          "type": "operational",
+          "description": "Единый список потребностей, правил клиента и CV",
+          "magnitude": "Medium",
+          "tangibility": "tangible",
+          "confidence": "High"
+        },
+        {
+          "type": "strategic",
+          "description": "Запись в Jira доступна без Application Link, но от общей учётки (исполнитель и права неверны)",
+          "magnitude": "Low",
+          "tangibility": "tangible",
+          "confidence": "Low"
+        }
+      ],
+      "costs": {
+        "components": [
+          {
+            "component": "Разработка",
+            "cost_items": [
+              {
+                "category": "development",
+                "description": "Разработка полной версии без OAuth, ~2,5 месяца",
+                "magnitude": "Medium"
+              }
+            ]
+          },
+          {
+            "component": "Инфраструктура и доступ",
+            "cost_items": [
+              {
+                "category": "operations",
+                "description": "Заявка в Support на сервисную учётку всё равно нужна",
+                "magnitude": "Low"
+              },
+              {
+                "category": "maintenance",
+                "description": "Переделка при переходе на доступ от имени пользователя",
+                "magnitude": "Medium"
+              }
+            ]
+          }
+        ],
+        "opportunity_cost": "Исполнители потребностей в Jira неверны, возможна ручная правка"
+      },
+      "risks": [
+        {
+          "description": "Нарушено решение заказчика: действия в Jira от имени пользователя, права = права пользователя (BR-001, FR-009, FR-025)",
+          "probability": "High",
+          "impact": "High",
+          "mitigation": "Нет"
+        },
+        {
+          "description": "Запрет или отказ Support на общую сервисную учётку для записи",
+          "probability": "Medium",
+          "impact": "High",
+          "mitigation": "Нет"
+        }
+      ],
+      "notes": "Только для сравнения; 3 требования невыполнимы (FR-009, FR-025, BR-001).",
+      "risks_source": "manual",
+      "assessed_at": "2026-10-02",
+      "value_score": 1.83,
+      "score_breakdown": {
+        "benefits_score": 2.167,
+        "alignment_score": 0.0,
+        "cost_score": 1.667,
+        "risk_penalty": 0.0,
+        "formula": "2.167×2.0 + 0.0×1.5 - 1.667×1.5 - 0.0×1.0"
+      }
+    }
+  },
+  "created": "2026-10-02",
+  "updated": "2026-10-02",
+  "comparison": {
+    "scores": {
+      "OPT-001": 5.12,
+      "OPT-002": 5.0,
+      "OPT-003": 1.83
+    },
+    "breakdowns": {
+      "OPT-001": {
+        "benefits_score": 2.75,
+        "alignment_score": 1.0,
+        "cost_score": 1.25,
+        "risk_penalty": 0.0,
+        "formula": "2.75×2.0 + 1.0×1.5 - 1.25×1.5 - 0.0×1.0"
+      },
+      "OPT-002": {
+        "benefits_score": 2.75,
+        "alignment_score": 1.0,
+        "cost_score": 1.333,
+        "risk_penalty": 0.0,
+        "formula": "2.75×2.0 + 1.0×1.5 - 1.333×1.5 - 0.0×1.0"
+      },
+      "OPT-003": {
+        "benefits_score": 2.167,
+        "alignment_score": 0.0,
+        "cost_score": 1.667,
+        "risk_penalty": 0.0,
+        "formula": "2.167×2.0 + 0.0×1.5 - 1.667×1.5 - 0.0×1.0"
+      }
+    },
+    "ranking": [
+      "OPT-001",
+      "OPT-002",
+      "OPT-003"
+    ],
+    "winner": "OPT-001",
+    "generated_at": "2026-10-02"
+  },
+  "recommendation": {
+    "recommendation_type": "recommend_option",
+    "recommended_option_id": "OPT-001",
+    "parallel_option_ids": [],
+    "rationale": "Рекомендуется OPT-001, поэтапная разработка. Этап 1 (чтение Jira, CV, рекомендация кандидата, правила клиента, адаптация CV) даёт основную ценность по BG-001 без Application Link: выбор кандидата за 1 минуту. Этап 2 (запись в Jira от имени пользователя: назначение, статус, комментарий, вложения) запускается после согласования Application Link (AS-001); до этого запись выполняется вручную. OPT-002 имеет почти такую же ценность, но весь выпуск блокируется ответом Support без срока: до него ценности нет. OPT-003 нарушает решение заказчика (действия в Jira от имени пользователя, права = права пользователя), делает FR-009, FR-025 и BR-001 невыполнимыми и всё равно требует заявки в Support. Value Score: OPT-001 5,12; OPT-002 5,0; OPT-003 1,83. Штраф за риски в расчёте равен 0 (формат рисков не распознан инструментом), поэтому разрыв между OPT-001 и OPT-002 в баллах мал; решающий аргумент качественный: независимость ценности от AS-001. Решение остаётся за спонсором.",
+    "success_metrics": [
+      {
+        "metric": "Время от открытия потребности до выбора кандидата",
+        "baseline": "к замеру (выгрузка дат смены статусов из Jira)",
+        "target": "до 1 минуты",
+        "measurement_method": "Замер на пилоте: от нажатия «Сопоставить» до подтверждения выбора, по выборке потребностей"
+      },
+      {
+        "metric": "Доля потребностей с назначением в течение 24 часов",
+        "baseline": "к замеру (выгрузка из Jira)",
+        "target": "100%",
+        "measurement_method": "Выгрузка дат смены статусов потребностей из Jira за период после запуска этапа 2"
+      },
+      {
+        "metric": "Утечка ПДн при отправке во внешнюю LLM",
+        "baseline": "не применимо (новая функция)",
+        "target": "0 на 5–10 реальных примерах",
+        "measurement_method": "Приёмочная проверка FR-023 на реальных потребностях и CV"
+      }
+    ],
+    "risks_acknowledged": [
+      {
+        "description": "AS-001: Application Link не согласован, этап 2 откладывается; мера: этап 1 даёт ценность без записи, запись в Jira вручную"
+      },
+      {
+        "description": "AS-002: горизонт 3 месяца и срок достижения BG-001 не подтверждены спонсором"
+      },
+      {
+        "description": "AS-003: качество рекомендации LLM оценивается экспертно, без метрик"
+      },
+      {
+        "description": "BG-001 не узел графа 5.1: формальная трассировка к цели не распознаётся инструментами 7.3/7.4"
+      }
+    ],
+    "notes": "Baseline по обоим KPI не замерен, срок достижения не задан. Устаревшие файлы в specs/ (fr_022/fr_027 старые) и связи UC→BP, NFR→FR, UC-003→FR-039/040 в графе 5.1 ожидают фазы lifecycle.",
+    "created": "2026-10-02",
+    "updated": "2026-10-02"
+  }
+}

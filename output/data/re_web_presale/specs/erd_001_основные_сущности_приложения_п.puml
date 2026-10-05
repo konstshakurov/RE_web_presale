@@ -1,0 +1,95 @@
+@startuml erd_001_основные_сущности_пр
+hide methods
+hide stereotypes
+
+skinparam classBackgroundColor #FAFAFA
+skinparam classBorderColor #AAAAAA
+skinparam backgroundColor #FFFFFF
+
+title ERD — Основные сущности приложения подбора кандидатов
+
+entity "Need" as Need {
+  + jira_key : Integer [PK]
+  --
+  epic_key FK
+  title String
+  status String
+  status_group String
+  requirements_tags JSON
+  rate_amount Decimal
+}
+
+entity "Employee" as Employee {
+  + jira_key : Integer [PK]
+  --
+  full_name String
+  status String
+  assignable Boolean
+  note Text
+}
+
+entity "Client" as Client {
+  + epic_key : Integer [PK]
+  --
+  name String
+  rules_cache JSON
+}
+
+entity "EmployeeFile" as EmployeeFile {
+  + id : Integer [PK]
+  --
+  employee_key FK
+  client_epic_key FK
+  kind Enum
+  extracted_text Text
+  skills_tags JSON
+  is_archived Boolean
+}
+
+entity "Recommendation" as Recommendation {
+  + id : Integer [PK]
+  --
+  need_key FK
+  employee_key FK
+  cv_file_id FK
+  match_percent Integer
+  rationale Text
+}
+
+entity "StatusGroup" as StatusGroup {
+  + id : Integer [PK]
+  --
+  name String
+  statuses JSON
+}
+
+entity "AppUser" as AppUser {
+  + ldap_login : Integer [PK]
+  --
+  role Enum
+  active Boolean
+}
+
+entity "LlmProvider" as LlmProvider {
+  + id : Integer [PK]
+  --
+  name String
+  url String
+  is_external Boolean
+  is_default Boolean
+}
+
+entity "AppSetting" as AppSetting {
+  + key : Integer [PK]
+  --
+  value String
+}
+
+Need }o--|| Client : "относится к"
+EmployeeFile }o--|| Employee : "принадлежит"
+EmployeeFile }o--|| Client : "шаблон клиента"
+Recommendation }o--|| Need : "для"
+Recommendation }o--|| Employee : "оценивает"
+Recommendation }o--|| EmployeeFile : "по основному CV"
+
+@enduml

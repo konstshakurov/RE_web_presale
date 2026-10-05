@@ -1,0 +1,32 @@
+@startuml uc_diagram_re_web_presale_use_cases
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam backgroundColor #FFFFFF
+skinparam usecase {
+  BackgroundColor #FAFAFA
+  BorderColor #AAAAAA
+}
+
+title Use Case Diagram — Веб-приложение подбора кандидатов
+
+actor "Администратор приложения" as A1
+actor "РН / РО / Presale-менеджер" as A2
+
+rectangle "Веб-приложение подбора кандидатов" {
+    usecase "Подобрать кандидата и назначить на потребность" as UC001
+    usecase "Сменить статус потребности" as UC002
+    usecase "Добавить файл сотрудника в разделе «Резюме»" as UC003
+    usecase "Сделать CV по шаблону клиента" as UC004
+    usecase "Войти в приложение и авторизоваться в Jira" as UC005
+    usecase "Управлять доступом пользователей и настройками LLM" as UC006
+}
+
+A2 --> UC001
+A2 --> UC002
+A2 --> UC003
+A2 --> UC004
+A2 --> UC005
+A1 --> UC006
+
+@enduml

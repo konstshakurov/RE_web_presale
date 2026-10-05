@@ -1,0 +1,7 @@
+# Необязательный оверлей: монтирует db/migrations (каталог KON-29) в init PostgreSQL.
+# Основной стенд работает и без него (каталога db/ может не быть).
+# Раскладка (допущение): db/migrations/app_db/*.sql и db/migrations/cv_db/*.sql
+services:
+  db:
+    volumes:
+      - ./db/migrations:/migrations:ro

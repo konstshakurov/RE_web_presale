@@ -1,0 +1,54 @@
+# Заготовка для переноса в корпоративный GitLab (KON-32). Не проверена на GitLab Runner.
+# Зеркалит .github/workflows/ci.yml. Для db-isolation/images нужен runner с Docker (dind или shell).
+stages: [lint_test, build, verify]
+
+backend:
+  stage: lint_test
+  image: python:3.12-slim
+  script:
+    - cd backend
+    - pip install -r requirements-dev.txt
+    - ruff check .
+    - pytest
+
+frontend:
+  stage: lint_test
+  image: node:22-alpine
+  script:
+    - cd frontend
+    - npm ci
+    - npm run lint
+    - npm test
+    - npm run build
+
+secrets:
+  stage: lint_test
+  image: alpine:3.20
+  before_script: [apk add --no-cache bash git grep findutils]
+  script:
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    - bash scripts/check_secrets.sh
+
+images:
+  stage: build
+  image: docker:27
+  services: [docker:27-dind]
+  script:
+    - docker build -t re_web_presale-backend ./backend
+    - docker build -t re_web_presale-frontend ./frontend
+
+db-isolation:
+  stage: verify
+  image: docker:27
+  services: [docker:27-dind]
+  before_script: [apk add --no-cache bash openssl docker-cli-compose]
+  script:
+    - |
+      {
+        echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+        echo "APP_RW_PASSWORD=$(openssl rand -hex 16)"
+        echo "CV_RW_PASSWORD=$(openssl rand -hex 16)"
+        echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
+      } > .env
+    - docker compose up -d --wait db
+    - bash scripts/check_db_isolation.sh

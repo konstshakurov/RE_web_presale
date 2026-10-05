@@ -2,7 +2,7 @@
   "project": "re_web_presale",
   "formality_level": "Standard",
   "created": "2026-10-02",
-  "updated": "2026-10-02",
+  "updated": "2026-10-05",
   "requirements": [
     {
       "id": "FR-001",
@@ -2468,6 +2468,19 @@
           "decided_by": "Константин"
         }
       ]
+    },
+    {
+      "id": "COMP-DB-ReWebPresale",
+      "type": "component",
+      "title": "Физическая модель — re_web_presale (app_db + cv_db, PostgreSQL 16)",
+      "version": "1.0",
+      "status": "confirmed",
+      "priority": "",
+      "owner": "",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\comp_db_rewebpresale_физическая_модель_—_re_web_pre.md",
+      "added": "2026-10-05",
+      "last_reviewed": "2026-10-05"
     }
   ],
   "links": [
@@ -3107,6 +3120,13 @@
       "relation": "derives",
       "rationale": "Доступ пользователей и настройки LLM — обеспечивающая функция to-be процесса",
       "added": "2026-10-02"
+    },
+    {
+      "from": "COMP-DB-ReWebPresale",
+      "to": "ERD-001",
+      "relation": "satisfies",
+      "rationale": "Физическая модель реализует все 9 сущностей ERD-001: Need, Client, AppUser, LlmProvider, AppSetting, StatusGroup в app_db; Employee, EmployeeFile, Recommendation в cv_db (ADR-003). Отклонения: JSON-атрибуты нормализованы, токены и ключи в secret_store, межбазовые связи мягкие.",
+      "added": "2026-10-05"
     }
   ],
   "history": [
@@ -6080,6 +6100,19 @@
       "new_priority": "Should",
       "session": "MVP scope",
       "method": "MoSCoW"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "COMP-DB-ReWebPresale",
+      "source": "getanalyst_db_designer",
+      "date": "2026-10-05"
+    },
+    {
+      "action": "link_added",
+      "from": "COMP-DB-ReWebPresale",
+      "to": "ERD-001",
+      "relation": "satisfies",
+      "date": "2026-10-05"
     }
   ]
 }

@@ -1,0 +1,67 @@
+name: ci
+
+# Переносимый pipeline: те же команды в .gitlab-ci.yml (заготовка в корне).
+on:
+  push:
+    paths-ignore: ["output/**", "docs/**", "architecture/**", "skills/**"]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  secrets-and-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check_secrets.sh
+      - name: Проверка compose на шаблоне окружения
+        run: |
+          cp .env.example .env
+          for v in POSTGRES_PASSWORD APP_RW_PASSWORD CV_RW_PASSWORD APP_DB_URL CV_DB_URL APP_ENC_KEY TEST_LDAP_DOMAIN TEST_LDAP_ADMIN_PASSWORD; do
+            sed -i "s|^$v=.*|$v=ci-placeholder|" .env
+          done
+          docker compose --profile ldap-test config -q
+
+  images:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t re_web_presale-backend ./backend
+      - run: docker build -t re_web_presale-frontend ./frontend
+
+  db-isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Поднять db с одноразовыми паролями и проверить изоляцию ролей
+        run: |
+          {
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "APP_RW_PASSWORD=$(openssl rand -hex 16)"
+            echo "CV_RW_PASSWORD=$(openssl rand -hex 16)"
+            echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
+          } > .env
+          docker compose up -d --wait db
+          bash scripts/check_db_isolation.sh

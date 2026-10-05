@@ -1,0 +1,128 @@
+# Локальный стенд re_web_presale (KON-32).
+# Запуск: cp .env.example .env; заполнить; docker compose up --build
+# Тестовый LDAP: docker compose --profile ldap-test up --build
+# Миграции KON-29 (необязательно): docker compose -f docker-compose.yml -f docker-compose.migrations.yml up
+name: re_web_presale
+
+x-backend-env: &backend-env
+  APP_DB_URL: ${APP_DB_URL:?задайте APP_DB_URL в .env}
+  CV_DB_URL: ${CV_DB_URL:?задайте CV_DB_URL в .env}
+  APP_ENC_KEY: ${APP_ENC_KEY:?задайте APP_ENC_KEY в .env}
+  APP_ENC_KEY_ID: ${APP_ENC_KEY_ID:-k1}
+  ADMIN_LOGINS: ${ADMIN_LOGINS:-}
+  LDAP_URL: ${LDAP_URL:-}
+  LDAP_BASE_DN: ${LDAP_BASE_DN:-}
+  LDAP_USER_FILTER: ${LDAP_USER_FILTER:-}
+  LDAP_BIND_DN: ${LDAP_BIND_DN:-}
+  LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD:-}
+  LDAP_USE_TLS: ${LDAP_USE_TLS:-false}
+  JIRA_BASE_URL: ${JIRA_BASE_URL:-}
+  LLM_BASE_URL: ${LLM_BASE_URL:-}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env}
+      APP_RW_PASSWORD: ${APP_RW_PASSWORD:?задайте APP_RW_PASSWORD в .env}
+      CV_RW_PASSWORD: ${CV_RW_PASSWORD:?задайте CV_RW_PASSWORD в .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/01-init-roles-dbs.sh:/docker-entrypoint-initdb.d/01-init-roles-dbs.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [internal]
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment: *backend-env
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 4s
+      retries: 5
+      start_period: 10s
+    networks: [internal]
+
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    environment: *backend-env
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # воркер каждые 30 с обновляет файл-пульс
+      test: ["CMD", "python", "-c", "import os,sys,time; sys.exit(0 if time.time()-os.path.getmtime('/tmp/worker.heartbeat') < 90 else 1)"]
+      interval: 30s
+      timeout: 4s
+      retries: 3
+      start_period: 15s
+    networks: [internal]
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [internal]
+
+  proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      # локально только на loopback; TLS и внутренний контур настраиваются при деплое (KON-49)
+      - "127.0.0.1:${PROXY_PORT:-8080}:80"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [internal]
+
+  ldap-test:
+    # Только для разработки; реальные параметры LDAP не названы (конфиг api через env)
+    profiles: [ldap-test]
+    image: osixia/openldap:1.5.0
+    restart: unless-stopped
+    environment:
+      LDAP_ORGANISATION: "Test Org"
+      LDAP_DOMAIN: ${TEST_LDAP_DOMAIN:?задайте TEST_LDAP_DOMAIN в .env}
+      LDAP_ADMIN_PASSWORD: ${TEST_LDAP_ADMIN_PASSWORD:?задайте TEST_LDAP_ADMIN_PASSWORD в .env}
+      LDAP_LOG_LEVEL: "0"
+      LDAP_TLS: "false"
+    ports:
+      - "127.0.0.1:1389:389"
+    volumes:
+      - ldapdata:/var/lib/ldap
+      - ldapconf:/etc/ldap/slapd.d
+    networks: [internal]
+
+volumes:
+  pgdata:
+  ldapdata:
+  ldapconf:
+
+networks:
+  internal:

@@ -51,3 +51,12 @@ desktop.ini
 # Per-machine Claude Code settings, written by the tool itself. Ignored for the same
 # reason: it is machine-specific for every user who clones this.
 .claude/settings.local.json
+
+# DevOps (KON-32): local secrets and build artifacts
+.env.*
+!.env.example
+node_modules/
+frontend/dist/
+.ruff_cache/
+.pytest_cache/
+secrets/

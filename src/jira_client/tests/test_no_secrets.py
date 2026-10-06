@@ -114,12 +114,19 @@ class TestNoSecretsInCode:
         assert list(headers) == ["Cookie"]
         assert headers["Cookie"].startswith("JSESSIONID=")
 
-    def test_password_is_not_required_by_default(self):
-        """Пароль не должен требоваться для работы клиента (UC-005, NFR-006)."""
-        from jira_client.auth import SessionLoginProvider
+    def test_password_is_not_required_to_read(self):
+        """Чтение не требует пароля: работает на сессионной cookie (UC-005, NFR-006).
 
-        with pytest.raises(PermissionError):
-            SessionLoginProvider(base_url="https://jira.example.internal")
+        Вход по паролю включён решением владельца 05.10 (ADR-005), но сам
+        пароль в конфигурации клиента по-прежнему не обязателен и не хранится.
+        """
+        from jira_client.auth import SessionLoginProvider
+        from jira_client.config import JiraConfig
+
+        config = JiraConfig(base_url="https://jira.example.internal", auth_mode="cookie", session_token="t")
+        config.validate()  # без пароля и без JIRA_PASSWORD
+        provider = SessionLoginProvider(base_url=config.base_url)
+        assert "password" not in str(provider.describe())
 
     def test_env_example_has_no_secret_values(self):
         path = os.path.join(MODULE_ROOT, ".env.example")
@@ -211,6 +218,103 @@ class TestNoRuntimeSecretLeakage:
         blob = json.dumps(client.last_call, ensure_ascii=False, default=str)
         assert "token" not in blob.lower()
         assert "Cookie" not in blob
+
+
+class TestLoginDoesNotLeak:
+    """Вход по паролю включён, но пароль нигде не сохраняется (Dev-18, NFR-006).
+
+    Обезличенные данные: значения ниже существуют только в этом тесте.
+    """
+
+    USERNAME = "probe-user"
+    PASSWORD = "temporary-login-password"
+
+    @staticmethod
+    def _provider(handler):
+        import httpx
+
+        from jira_client.auth import SessionLoginProvider
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        return SessionLoginProvider("https://jira.example.internal", http_client=client)
+
+    @classmethod
+    def _ok_handler(cls, seen: dict):
+        import httpx
+
+        def handler(request):
+            seen["body"] = request.content.decode("utf-8")
+            return httpx.Response(
+                200,
+                json={"session": {"name": "JSESSIONID", "value": "test-session-token"}},
+                headers={"content-type": "application/json"},
+            )
+
+        return handler
+
+    @classmethod
+    def _refused_handler(cls, **headers):
+        import httpx
+
+        def handler(request):
+            return httpx.Response(
+                401,
+                json={"errorMessages": ["Ошибка доступа"], "errors": {}},
+                headers={"content-type": "application/json", **headers},
+            )
+
+        return handler
+
+    def test_password_reaches_the_wire_only(self):
+        """Пароль уходит в тело запроса и не остаётся в объекте провайдера."""
+        seen: dict = {}
+        provider = self._provider(self._ok_handler(seen))
+        session = provider.login(self.USERNAME, self.PASSWORD)
+
+        assert json.loads(seen["body"])["password"] == self.PASSWORD
+        assert json.loads(seen["body"])["username"] == self.USERNAME
+        state = {k: v for k, v in vars(provider).items() if k != "_http_client"}
+        for text in (repr(provider), str(provider.describe()), repr(provider.last_call), repr(state)):
+            assert self.PASSWORD not in text, "пароль утёк в %r" % text
+        assert self.PASSWORD not in str(session.describe())
+        assert self.PASSWORD not in repr(session)
+
+    def test_password_not_in_exception_on_refused_login(self):
+        from jira_client.errors import JiraLoginError
+
+        provider = self._provider(
+            self._refused_handler(**{"x-seraph-loginreason": "AUTHENTICATED_FAILED"})
+        )
+        with pytest.raises(JiraLoginError) as exc:
+            provider.login(self.USERNAME, self.PASSWORD)
+        assert self.PASSWORD not in str(exc.value)
+        assert self.PASSWORD not in repr(exc.value.__dict__)
+        assert exc.value.login_reason == "auth_failed"
+
+    def test_password_not_in_exception_on_network_failure(self):
+        import httpx
+
+        from jira_client.errors import JiraUnavailableError
+
+        def handler(request):
+            raise httpx.ConnectError("connection refused")
+
+        with pytest.raises(JiraUnavailableError) as exc:
+            self._provider(handler).login(self.USERNAME, self.PASSWORD)
+        assert self.PASSWORD not in str(exc.value)
+
+    def test_password_is_never_a_literal_in_client_code(self):
+        """Пароль в коде клиента — только результат вычисления, не литерал.
+
+        Проверяются файлы самого модуля; тесты содержат обезличенные
+        заглушки и в проверку не входят.
+        """
+        assignment = re.compile(r"""password\s*=\s*["']""")
+        for path in _python_files(MODULE_ROOT):
+            if os.sep + "tests" + os.sep in path:
+                continue
+            for line in _read(path).splitlines():
+                assert not assignment.search(line), "литерал пароля в %s" % path
 
 
 class TestRepositoryScope:

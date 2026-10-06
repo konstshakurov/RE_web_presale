@@ -212,17 +212,24 @@ class TestSearchPaged:
 
 class TestIncrementalSearch:
     def test_jql_shape(self, client_factory):
+        """Регрессия: ``ORDER BY`` не должен склеиваться через `` AND `` —
+        Jira 8.13 отклоняет такой JQL кодом 400 (найдено живой пробой)."""
         client, calls = client_factory(_ok(_search_page([], 0, 0)))
         list(client.search_updated_since("2026-10-05 09:00"))
         jql = calls[0].params["jql"]
-        assert 'project = ANALYTICS' in jql
-        assert 'updated > "2026-10-05 09:00"' in jql
-        assert "ORDER BY updated ASC" in jql
+        assert jql == (
+            'project = ANALYTICS AND updated > "2026-10-05 09:00" '
+            "ORDER BY updated ASC, key ASC"
+        )
+        assert " AND ORDER BY" not in jql
 
     def test_issuetype_filter_is_optional(self, client_factory):
         client, calls = client_factory(_ok(_search_page([], 0, 0)))
         list(client.search_updated_since("2026-10-05 09:00", issuetype="Demand"))
-        assert "issuetype = Demand" in calls[0].params["jql"]
+        assert calls[0].params["jql"] == (
+            "project = ANALYTICS AND issuetype = Demand AND updated > \"2026-10-05 09:00\" "
+            "ORDER BY updated ASC, key ASC"
+        )
 
     def test_ordering_by_updated_is_mandatory(self, client_factory):
         """Без сортировки инкрементальный обход теряет задачи."""
@@ -275,6 +282,41 @@ class TestEpicChildren:
         page = client.epic_children("SA-0001")
         assert page.total == 282
         assert page.is_last is True
+
+
+class TestGetEpic:
+    """``GET /rest/agile/1.0/epic/{key}`` — сам эпик (Dev-18)."""
+
+    def test_uses_agile_endpoint(self, client_factory):
+        client, calls = client_factory(_ok({"id": "1", "key": "SA-0001"}))
+        client.get_epic("SA-0001")
+        assert calls[0].path == "/rest/agile/1.0/epic/SA-0001"
+
+    def test_default_fields_are_epic_read_fields(self, client_factory):
+        from jira_client import fields as F
+
+        client, calls = client_factory(_ok({"key": "SA-0001"}))
+        client.get_epic("SA-0001")
+        assert calls[0].params["fields"] == ",".join(F.EPIC_READ_FIELDS)
+
+    def test_field_list_is_configurable(self, client_factory):
+        client, calls = client_factory(_ok({"key": "SA-0001"}))
+        client.get_epic("SA-0001", fields=["summary", "status"])
+        assert calls[0].params["fields"] == "summary,status"
+
+    def test_missing_epic_raises_not_found(self, client_factory):
+        client, _ = client_factory(_ok(NOT_FOUND_BODY, status=404))
+        with pytest.raises(JiraNotFoundError):
+            client.get_epic("SA-0001")
+
+    def test_epic_link_field_is_canonical(self, client_factory):
+        """Связь «эпик ↔ потребность» читается как customfield_10101 (FR-028)."""
+        from jira_client import fields as F
+
+        assert F.EPIC_LINK == "customfield_10101"
+        client, calls = client_factory(_ok({"key": "SA-0001"}))
+        client.get_epic("SA-0001", fields=["summary", F.EPIC_LINK])
+        assert calls[0].params["fields"] == "summary,customfield_10101"
 
 
 class TestTransitions:

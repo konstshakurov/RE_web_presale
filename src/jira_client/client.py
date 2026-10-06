@@ -380,12 +380,11 @@ class JiraClient:
         Сортировка по ``updated ASC`` обязательна: без неё «инкрементальный»
         обход повторно прочитает старые задачи и потеряет часть новых.
         """
-        parts = ["project = %s" % project]
+        conditions = ["project = %s" % project]
         if issuetype:
-            parts.append("issuetype = %s" % issuetype)
-        parts.append('updated > %s' % jql_quote(since))
-        parts.append("ORDER BY updated ASC, key ASC")
-        jql = " AND ".join(parts)
+            conditions.append("issuetype = %s" % issuetype)
+        conditions.append("updated > %s" % jql_quote(since))
+        jql = " AND ".join(conditions) + " ORDER BY updated ASC, key ASC"
         return self.search_paged(jql, fields=fields, max_pages=max_pages)
 
     def epic_children(
@@ -442,6 +441,29 @@ class JiraClient:
             pages += 1
             if page.is_last:
                 return
+
+    def get_epic(
+        self,
+        epic_key: str,
+        *,
+        fields: Optional[Sequence[str]] = None,
+    ) -> Dict[str, Any]:
+        """``GET /rest/agile/1.0/epic/{key}`` — сам эпик (Dev-18).
+
+        Тот же Agile API, что и у детей эпика, поэтому эпик и его дети
+        читаются в одном стиле. Список полей настраивается вызовом: по
+        умолчанию ``EPIC_READ_FIELDS``.
+
+        Поле связи «эпик ↔ потребность» — ``customfield_10101`` (``Epic Link``);
+        это канонический выбор по замыслу. Альтернатива ``customfield_11032``
+        остаётся открытым вопросом владельцу процесса.
+        """
+        wanted = list(fields) if fields else list(F.EPIC_READ_FIELDS)
+        return self.request(
+            "GET",
+            "/rest/agile/1.0/epic/%s" % epic_key,
+            params={"fields": ",".join(wanted)},
+        )
 
     def get_transitions(self, issue_key: str) -> List[Transition]:
         """``GET /rest/api/2/issue/{key}/transitions?expand=transitions.fields``.

@@ -73,7 +73,7 @@ def _as_float(raw: Optional[str], default: float) -> float:
     return value
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class JiraConfig:
     """Параметры подключения к Jira. Секреты присутствуют только в памяти."""
 
@@ -129,6 +129,13 @@ class JiraConfig:
             "timeout": self.timeout,
             "verify_tls": self.verify_tls,
         }
+
+    def __repr__(self) -> str:
+        """Сокрытие секретов: сгенерированный ``repr`` dataclass показывал бы
+        ``session_token`` и ``password`` целиком (критерий Dev-18, NFR-006)."""
+        return "JiraConfig(%s)" % ", ".join(
+            "%s=%r" % (key, value) for key, value in self.safe_summary().items()
+        )
 
     # -- сборка из окружения ------------------------------------------------
 

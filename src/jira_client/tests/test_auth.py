@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Аутентификация: сессионная cookie, Basic и заблокированный обмен пароля."""
+"""Аутентификация: сессионная cookie, Basic и вход по паролю (Dev-18)."""
 
 from __future__ import annotations
 
@@ -76,12 +76,23 @@ def test_build_auth_cookie_mode_custom_name():
 
 
 class TestSessionLoginProvider:
-    """Обмен пароля на сессию заблокирован: UC-005 и NFR-006 запрещают это."""
+    """Обмен пароля на сессию включён решением владельца 05.10 (ADR-005).
 
-    def test_disabled_by_default(self):
-        with pytest.raises(PermissionError) as exc:
-            SessionLoginProvider(base_url="https://jira.example.internal")
-        assert "UC-005" in str(exc.value)
+    Ограничение, которое осталось, — пароль живёт только в теле одного
+    запроса и нигде не сохраняется (NFR-006).
+    """
+
+    BASE = "https://jira.example.internal"
+
+    def test_login_is_available_without_any_flag(self):
+        """Флаг ``enabled`` убран: вход — явная работающая операция (Dev-18)."""
+        provider = SessionLoginProvider(base_url=self.BASE)
+        assert callable(provider.login)
+        assert provider.cookie_name == "JSESSIONID"
+
+    def test_missing_base_url_is_rejected(self):
+        with pytest.raises(ValueError):
+            SessionLoginProvider(base_url="")
 
     def test_body_shape_confirmed_by_probe(self):
         """Форма ``{"username", "password"}`` подтверждена пробой.
@@ -90,20 +101,63 @@ class TestSessionLoginProvider:
         400 «Unrecognized field "session" (Class
         com.atlassian.jira.rest.auth.AuthParams)».
         """
-        provider = SessionLoginProvider(
-            base_url="https://jira.example.internal", enabled=True
-        )
+        provider = SessionLoginProvider(base_url=self.BASE)
         assert provider.request_body("u", "p") == {"username": "u", "password": "p"}
 
     def test_request_body_requires_both_parts(self):
-        provider = SessionLoginProvider(
-            base_url="https://jira.example.internal", enabled=True
-        )
+        provider = SessionLoginProvider(base_url=self.BASE)
         with pytest.raises(ValueError):
             provider.request_body("u", "")
 
     def test_endpoint_is_rest_auth_session(self):
-        provider = SessionLoginProvider(
-            base_url="https://jira.example.internal", enabled=True
-        )
+        provider = SessionLoginProvider(base_url=self.BASE)
         assert provider.endpoint == "/rest/auth/1/session"
+
+    def test_describe_has_no_secret_keys(self):
+        """Безопасное описание для логов: ни паролей, ни токенов."""
+        provider = SessionLoginProvider(base_url=self.BASE)
+        described = provider.describe()
+        assert "password" not in str(described)
+        assert "token" not in str(described)
+        assert described["endpoint"] == "/rest/auth/1/session"
+
+    def test_repr_has_no_secret_keys(self):
+        provider = SessionLoginProvider(base_url=self.BASE)
+        assert "password" not in repr(provider)
+        assert "token" not in repr(provider)
+
+
+class TestSessionToken:
+    """``SessionToken`` — результат входа; значение cookie является секретом."""
+
+    TOKEN = "секретное-значение-cookie"
+
+    def _token(self):
+        from datetime import datetime, timezone
+
+        from jira_client.auth import SessionToken
+
+        return SessionToken(
+            cookie_name="JSESSIONID",
+            token=self.TOKEN,
+            created_at=datetime(2026, 10, 6, 12, 0, tzinfo=timezone.utc),
+            username="пользователь",
+        )
+
+    def test_repr_hides_token(self):
+        assert self.TOKEN not in repr(self._token())
+
+    def test_describe_hides_token_and_username(self):
+        token = self._token()
+        described = str(token.describe())
+        assert self.TOKEN not in described
+        assert "пользователь" not in described
+        assert token.describe()["token_set"] is True
+        assert token.describe()["username_set"] is True
+
+    def test_created_at_is_reported(self):
+        token = self._token()
+        assert token.describe()["created_at"].startswith("2026-10-06T12:00")
+
+    def test_cookie_header_value_is_usable(self):
+        assert self._token().cookie_header_value() == "JSESSIONID=" + self.TOKEN

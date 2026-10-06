@@ -13,11 +13,15 @@
     сервисной/диагностической пробы: владелец решил, что техническая учётка
     проекту не нужна.
 ``SessionLoginProvider``
-    ``POST /rest/auth/1/session`` с телом ``{"username": ..., "password": ...}``.
-    Форма запроса подтверждена пробой, но сам метод требует пароль пользователя
-    и потому оставлен **отключённым**: закладывать хранение паролей в код
-    запрещено UC-005 и NFR-006. Класс существует как документированная точка
-    расширения и не вызывается клиентом по умолчанию.
+    ``POST /rest/auth/1/session`` с телом ``{"username": ..., "password": ...}``
+    — обмен паролем на сессионную cookie. Включён решением владельца 05.10
+    (ADR-005, Dev-18): логин и пароль Jira совпадают с LDAP, поэтому один ввод
+    пароля при входе в приложение используется и для создания сессии Jira.
+
+**Пароль не сохраняется.** Он существует только как тело одного HTTP-запроса:
+не пишется в атрибуты, не попадает в ``repr``, в логи, в ``last_call``, в
+исключения и в трассировку. Хранится только сессионный токен, и приложение
+держит его зашифрованным (``TokenVault``, NFR-006).
 
 Секреты никуда не логируются: у всех стратегий есть безопасное описание.
 """
@@ -25,8 +29,34 @@
 from __future__ import annotations
 
 import base64
+import time
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, Mapping, Optional, Tuple
+
+import httpx
+
+from .config import DEFAULT_SESSION_COOKIE, DEFAULT_TIMEOUT
+from .errors import (
+    JiraError,
+    JiraLoginError,
+    JiraTimeoutError,
+    JiraUnavailableError,
+    classify_login_failure,
+    error_for_response,
+    parse_error_body,
+)
+
+#: Эндпоинт создания сессии. Форма тела подтверждена пробой KON-30.
+SESSION_LOGIN_ENDPOINT = "/rest/auth/1/session"
+
+#: Форма тела: плоская. Вложенная форма ``{"session": {...}}`` Jira 8.13.0
+#: отклоняет: 400 «Unrecognized field "session" (Class
+#: com.atlassian.jira.rest.auth.AuthParams)».
+SESSION_LOGIN_BODY_FIELDS = ("username", "password")
+
+#: Единый User-Agent: в логах Jira видно, кто именно выполнил запрос.
+USER_AGENT = "re_web_presale-jira-client/1.0"
 
 
 class AuthStrategy:
@@ -93,37 +123,250 @@ class BasicAuth(AuthStrategy):
         return "<BasicAuth username_set=True password=***>"
 
 
-#: Форма тела, подтверждённая пробой (см. probe_raw: плоское тело дало
-#: 401 c x-seraph-loginreason: AUTHENTICATED_FAILED, вложенное {"session": ...} —
-#: 400 "Unrecognized field \"session\" (Class com.atlassian.jira.rest.auth.AuthParams)").
-SESSION_LOGIN_BODY_FIELDS = ("username", "password")
+@dataclass(frozen=True, repr=False)
+class SessionToken:
+    """Результат входа: имя cookie и её значение.
 
-
-@dataclass
-class SessionLoginProvider:
-    """Обмен логина и пароля на сессионный токен через ``/rest/auth/1/session``.
-
-    НЕ вызывается клиентом по умолчанию. Оставлен потому, что без него
-    невосстановима истёкшая сессия, а это операция, требующая пароля, и её
-    применение должно быть отдельно согласовано с владельцем (см. отчёт
-    KON-30, раздел «Риски»).
+    ``token`` — секрет (NFR-006): он не попадает в ``repr``, в ``str``, в
+    ``describe`` и в логи. Наружу приложение получает его только зашифрованным
+    (``TokenVault``).
     """
 
-    base_url: str
-    enabled: bool = False
-    endpoint: str = "/rest/auth/1/session"
+    #: Имя cookie, которое Jira установила в ответе (``JSESSIONID`` по умолчанию).
+    cookie_name: str
+    #: Значение cookie — то, что уходит в заголовок ``Cookie``. Секрет.
+    token: str
+    #: Когда сессия создана (UTC). Нужно Dev-18 для оценки времени жизни.
+    created_at: datetime
+    #: Логин, которому принадлежит сессия. Никогда не выводится в логи.
+    username: str = ""
 
-    def __post_init__(self) -> None:
-        if not self.enabled:
-            raise PermissionError(
-                "Обмен пароля на сессию отключён: он требует хранения пароля "
-                "пользователя (UC-005, NFR-006). Включать только по решению владельца."
-            )
+    def cookie_header_value(self) -> str:
+        """Значение заголовка ``Cookie`` — используется только внутри клиента."""
+        return "%s=%s" % (self.cookie_name, self.token)
 
-    def request_body(self, username: str, password: str) -> Mapping[str, str]:
+    def describe(self) -> Dict[str, Any]:
+        """Безопасное описание для логов и отчётов: без значения токена."""
+        return {
+            "mode": "session_cookie",
+            "cookie": self.cookie_name,
+            "token_set": bool(self.token),
+            "token_length": len(self.token),
+            "username_set": bool(self.username),
+            "created_at": self.created_at.isoformat(timespec="seconds"),
+        }
+
+    def __repr__(self) -> str:
+        return "<SessionToken cookie=%s token=*** created_at=%s>" % (
+            self.cookie_name,
+            self.created_at.isoformat(timespec="seconds"),
+        )
+
+
+class SessionLoginProvider:
+    """Обмен логина и пароля на сессионную cookie (ADR-005, Dev-18).
+
+    ``login(username, password)`` выполняет ровно один запрос
+    ``POST /rest/auth/1/session`` и возвращает :class:`SessionToken`.
+
+    Повторов нет, лимит — тот же, что у всего клиента (10 с, NFR-009).
+
+    **Пароль не сохраняется.** Он передаётся только в теле запроса и
+    удаляется сразу после отправки; в атрибутах объекта, в ``describe``,
+    в исключениях и в ``last_call`` его нет.
+    """
+
+    #: Путь эндпоинта. Меняется только вместе с версией Jira.
+    endpoint: str = SESSION_LOGIN_ENDPOINT
+
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        cookie_name: str = DEFAULT_SESSION_COOKIE,
+        timeout: float = DEFAULT_TIMEOUT,
+        verify_tls: bool = True,
+        http_client: Optional[httpx.Client] = None,
+    ) -> None:
+        if not base_url:
+            raise ValueError("Нужен base_url сервера Jira")
+        self.base_url = base_url.rstrip("/")
+        self.cookie_name = cookie_name or DEFAULT_SESSION_COOKIE
+        self.timeout = float(timeout)
+        self.verify_tls = bool(verify_tls)
+        self._http_client = http_client
+        #: Последний вызов: путь, код, длительность. Без тела и без заголовков.
+        self.last_call: Dict[str, Any] = {}
+
+    # -- служебное ----------------------------------------------------------
+
+    def describe(self) -> Dict[str, Any]:
+        """Безопасное описание: никаких логинов, паролей и токенов."""
+        return {
+            "mode": "session_login",
+            "endpoint": self.endpoint,
+            "base_url": self.base_url,
+            "cookie": self.cookie_name,
+            "timeout": self.timeout,
+            "verify_tls": self.verify_tls,
+        }
+
+    def __repr__(self) -> str:
+        return "<SessionLoginProvider base_url=%s endpoint=%s>" % (self.base_url, self.endpoint)
+
+    def _url(self) -> str:
+        return self.base_url + self.endpoint
+
+    @staticmethod
+    def request_body(username: str, password: str) -> Dict[str, str]:
+        """Тело запроса. Плоская форма — подтверждена пробой KON-30."""
         if not username or not password:
             raise ValueError("Нужны и логин, и пароль")
         return {"username": username, "password": password}
+
+    # -- вход ---------------------------------------------------------------
+
+    def login(self, username: str, password: str) -> SessionToken:
+        """Войти в Jira и вернуть сессионную cookie.
+
+        Исключения по причинам отказа:
+
+        * :class:`JiraLoginError` — ``login_reason`` ``auth_failed`` или
+          ``login_blocked`` (Jira просит подтвердить вход в браузере);
+        * :class:`JiraUnavailableError` — сеть/TLS: Jira недоступна;
+        * :class:`JiraTimeoutError` — превышен лимит 10 с (NFR-009).
+
+        Тело запроса (в нём пароль) ни в одно из исключений не попадает.
+        """
+        body = self.request_body(username, password)
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+        }
+
+        owns_client = self._http_client is None
+        client = self._http_client or httpx.Client(
+            timeout=self.timeout,
+            verify=self.verify_tls,
+            follow_redirects=False,
+        )
+        started = time.perf_counter()
+        try:
+            response = client.post(self._url(), json=body, headers=headers, timeout=self.timeout)
+        except httpx.TimeoutException as exc:
+            elapsed = (time.perf_counter() - started) * 1000.0
+            self.last_call = {
+                "method": "POST",
+                "path": self.endpoint,
+                "status": None,
+                "ms": round(elapsed, 1),
+                "outcome": "timeout",
+            }
+            raise JiraTimeoutError(
+                "Превышен лимит %.0f с на вызов Jira (NFR-009)" % self.timeout,
+                timeout=self.timeout,
+                method="POST",
+                path=self.endpoint,
+            ) from exc
+        except httpx.HTTPError as exc:
+            elapsed = (time.perf_counter() - started) * 1000.0
+            self.last_call = {
+                "method": "POST",
+                "path": self.endpoint,
+                "status": None,
+                "ms": round(elapsed, 1),
+                "outcome": "network",
+            }
+            # Тип и текст исключения httpx не содержат тело запроса, поэтому
+            # пароль в сообщение не попадает.
+            raise JiraUnavailableError(
+                "%s: %s" % (type(exc).__name__, exc), method="POST", path=self.endpoint
+            ) from exc
+        finally:
+            # Пароль живёт только в теле одного запроса.
+            body.clear()
+            if owns_client:
+                client.close()
+
+        elapsed = (time.perf_counter() - started) * 1000.0
+        self.last_call = {
+            "method": "POST",
+            "path": self.endpoint,
+            "status": response.status_code,
+            "ms": round(elapsed, 1),
+            "bytes": len(response.content),
+            "outcome": "ok" if response.status_code < 400 else "error",
+        }
+
+        if response.status_code >= 400:
+            if response.status_code in (401, 403):
+                raise self._login_error(response)
+            raise error_for_response(response, method="POST", path=self.endpoint)
+
+        cookie_name, token = self._extract_session(response)
+        return SessionToken(
+            cookie_name=cookie_name,
+            token=token,
+            created_at=datetime.now(timezone.utc),
+            username=username,
+        )
+
+    # -- разбор ответа ------------------------------------------------------
+
+    def _login_error(self, response: httpx.Response) -> JiraLoginError:
+        """Собрать исключение отказа входа. Тело **запроса** здесь не участвует."""
+        parsed = parse_error_body(response.content, response.headers.get("content-type", ""))
+        return JiraLoginError(
+            parsed["summary"],
+            status=response.status_code,
+            code=parsed["code"],
+            login_reason=classify_login_failure(response),
+            field_errors=parsed["field_errors"],
+            body_head=parsed["raw_head"],
+            is_json=parsed["is_json"],
+            method="POST",
+            path=self.endpoint,
+        )
+
+    def _extract_session(self, response: httpx.Response) -> Tuple[str, str]:
+        """Достать имя cookie и её значение из успешного ответа.
+
+        Jira отдаёт и JSON ``{"session": {"name", "value"}}``, и
+        ``Set-Cookie``; проба KON-30 читала заголовок. Поддерживаются обе
+        формы, в порядке приоритета: документированная, затем заголовок.
+        """
+        payload = self._json_payload(response)
+        if isinstance(payload, Mapping):
+            session = payload.get("session")
+            if isinstance(session, Mapping):
+                value = session.get("value")
+                if value:
+                    return str(session.get("name") or self.cookie_name), str(value)
+
+        for header in response.headers.get_list("set-cookie"):
+            name, _, rest = header.partition("=")
+            name = name.strip()
+            value = rest.split(";", 1)[0].strip()
+            if value and (name == self.cookie_name or not name):
+                return name or self.cookie_name, value
+
+        raise JiraError(
+            "Jira ответила %s, но не прислала сессионную cookie" % response.status_code,
+            status=response.status_code,
+            method="POST",
+            path=self.endpoint,
+        )
+
+    @staticmethod
+    def _json_payload(response: httpx.Response) -> Any:
+        content_type = (response.headers.get("content-type") or "").lower()
+        if "json" not in content_type:
+            return None
+        try:
+            return response.json()
+        except ValueError:
+            return None
 
 
 def build_auth(

@@ -100,6 +100,76 @@ def needs_reauthorization(reason: str) -> bool:
     return reason in REASONS_NEED_REAUTH
 
 
+# ---------------------------------------------------------------------------
+# Отказ входа: POST /rest/auth/1/session (Dev-18)
+# ---------------------------------------------------------------------------
+#
+# Это **отдельный** набор причин от ``AUTH_REASON_*``: вход требует пароля, и
+# приложение обязано различать три несводимые ситуации — «неверный пароль»
+# (показать форму заново), «Jira просит подтвердить вход в браузере»
+# (повтор по REST не поможет) и «Jira недоступна» (повторить позже).
+# Смешивание третьей со второй привело бы к тому, что недоступная Jira
+# выглядела бы как неверный пароль.
+
+#: Неверный логин или пароль (401, ``x-seraph-loginreason: AUTHENTICATED_FAILED``).
+LOGIN_REASON_AUTH_FAILED = "auth_failed"
+#: CAPTCHA либо блокировка: Jira требует ввести данные через браузер
+#: (``x-seraph-loginreason: AUTHENTICATION_DENIED``).
+LOGIN_REASON_BLOCKED = "login_blocked"
+#: Сетевой сбой, TLS, таймаут: пароль не проверялся, повторять бессмысленно.
+LOGIN_REASON_UNAVAILABLE = "jira_unavailable"
+
+#: Заголовок, которым Jira Server объясняет отказ входа.
+SERAPH_LOGIN_REASON_HEADER = "x-seraph-loginreason"
+#: Значение заголовка при неверном логине или пароле.
+SERAPH_AUTH_FAILED = "AUTHENTICATED_FAILED"
+#: Значения заголовка при отказе в доступе к самому входу (CAPTCHA, блокировка).
+SERAPH_AUTHENTICATION_DENIED = "AUTHENTICATION_DENIED"
+
+#: Причины отказа входа, которые вообще могут прийти из ``classify_login_failure``.
+LOGIN_REASONS = frozenset({LOGIN_REASON_AUTH_FAILED, LOGIN_REASON_BLOCKED})
+
+#: Текст для пользователя. HTML-страницу Jira показывать нельзя (Dev-18),
+#: поэтому отказ переводится в короткое объяснение.
+LOGIN_HINTS: Dict[str, str] = {
+    LOGIN_REASON_AUTH_FAILED: "Неверный логин или пароль Jira.",
+    LOGIN_REASON_BLOCKED: (
+        "Jira требует подтвердить вход через браузер (CAPTCHA или блокировка). "
+        "Повторный запрос по REST в такой ситуации не поможет."
+    ),
+}
+
+
+def classify_login_failure(response) -> str:
+    """Причина отказа ``POST /rest/auth/1/session``.
+
+    Признаки, зафиксированные пробой KON-30 на живой Jira 8.13.0:
+
+    * ``x-seraph-loginreason: AUTHENTICATED_FAILED`` — неверный логин или пароль;
+    * ``x-seraph-loginreason: AUTHENTICATION_DENIED`` — Jira просит пройти
+      проверку через браузер; REST-повтором это не лечится.
+
+    Если заголовка нет, причина берётся из тела ответа, но «Вы не
+    авторизованы» трактуется как отказ в доступе к входу, а не как неверный
+    пароль.
+
+    Сетевые ошибки сюда не попадают: ``httpx`` их превращает в
+    ``JiraTimeoutError`` / ``JiraUnavailableError``, и они обязаны
+    различаться с «неверным паролём» (Dev-18).
+    """
+    header = (response.headers.get(SERAPH_LOGIN_REASON_HEADER) or "").strip().upper()
+    if header == SERAPH_AUTHENTICATION_DENIED:
+        return LOGIN_REASON_BLOCKED
+    if header == SERAPH_AUTH_FAILED:
+        return LOGIN_REASON_AUTH_FAILED
+    if response.status_code in (401, 403):
+        parsed = parse_error_body(response.content, response.headers.get("content-type", ""))
+        reason = classify_auth_failure(parsed["summary"], is_json=parsed["is_json"])
+        if reason == AUTH_REASON_NO_PERMISSION:
+            return LOGIN_REASON_BLOCKED
+    return LOGIN_REASON_AUTH_FAILED
+
+
 def _as_text(value: Any) -> str:
     if value is None:
         return ""
@@ -243,6 +313,41 @@ class JiraAuthError(JiraError):
     @property
     def needs_reauthorization(self) -> bool:
         return needs_reauthorization(self.reason or AUTH_REASON_UNKNOWN)
+
+
+class JiraLoginError(JiraAuthError):
+    """Отказ ``POST /rest/auth/1/session``: вход не выполнен.
+
+    ``login_reason`` — ``auth_failed`` (неверный логин или пароль) либо
+    ``login_blocked`` (Jira требует подтвердить вход в браузере). Отказ
+    ``jira_unavailable`` сюда не попадает: сеть, TLS и таймаут дают
+    ``JiraUnavailableError`` / ``JiraTimeoutError`` и путать их с неверным
+    паролём нельзя (Dev-18).
+
+    Тело запроса, в котором находится пароль, в исключение не попадает:
+    ``summary`` и ``body_head`` берутся только из **ответа** Jira.
+    """
+
+    def __init__(
+        self,
+        summary: str = "",
+        *,
+        login_reason: str = LOGIN_REASON_AUTH_FAILED,
+        **kw: Any,
+    ) -> None:
+        self.login_reason = login_reason
+        kw.setdefault("reason", login_reason)
+        super().__init__(summary, **kw)
+
+    @property
+    def hint(self) -> str:
+        """Короткий текст для пользователя. HTML-страница Jira не показывается."""
+        return LOGIN_HINTS.get(self.login_reason, "")
+
+    def _render(self) -> str:
+        base = super()._render()
+        hint = self.hint
+        return ("%s %s" % (base, hint)).strip() if hint else base
 
 
 class JiraPermissionError(JiraError):

@@ -52,6 +52,9 @@ with JiraClient() as client:                     # конфиг из перем�
     # Дети эпика — Agile API, не JQL с `parent`
     for issue in client.iter_epic_children("SA-1234"):
         ...
+
+    # Сам эпик — тот же Agile API; список полей настраивается
+    epic = client.get_epic("SA-1234", fields=["summary", "description"])
 ```
 
 ### Запись
@@ -86,6 +89,7 @@ client.transition("ANALYTICS-1234", transition.id,
 | Исключение | Когда |
 |---|---|
 | `JiraAuthError` | 401, сессии нет или она истекла → нужна повторная авторизация |
+| `JiraLoginError` | отказ `POST /rest/auth/1/session`: `login_reason` = `auth_failed` либо `login_blocked` (см. «Вход по паролю») |
 | `JiraPermissionError` | 401 с текстом «Вы не авторизованы…» либо 403 — прав не хватает |
 | `JiraNotFoundError` | 404 |
 | `JiraBadRequestError` | 400, в том числе ошибки JQL; `.field_errors` содержит ошибки полей |
@@ -110,11 +114,59 @@ Jira Server 8.13.0 отдаёт «сессия истекла» и «нет пр
 | `cookie` | `Cookie: JSESSIONID=<токен>` | **основной.** Токен, а не пароль: шифруется и хранится (NFR-006) |
 | `basic` | `Authorization: Basic` | только диагностическая проба или техническая учётка |
 
-Обмен логина и пароля на сессию (`POST /rest/auth/1/session`) реализован
-классом `SessionLoginProvider`, но **выключен**: он требует пароль
-пользователя, а UC-005 и NFR-006 это запрещают. Класс — документированная
-точка расширения, клиент её не вызывает. Попытка включить его без явного
-решения владельца поднимает `PermissionError`.
+### Вход по паролю
+
+Обмен логина и пароля на сессию (`POST /rest/auth/1/session`) выполняет
+`SessionLoginProvider`. Включён решением владельца 05.10 в рамках ADR-005:
+логин и пароль Jira совпадают с LDAP, поэтому один ввод пароля при входе в
+приложение создаёт и сессию Jira.
+
+```python
+from jira_client import SessionLoginProvider
+
+provider = SessionLoginProvider("https://jira.simbirsoft.com")
+session = provider.login(username, password)   # POST /rest/auth/1/session
+
+# session.cookie_name == "JSESSIONID", session.created_at — время входа (UTC)
+client = JiraClient(auth=build_auth(
+    auth_mode="cookie",
+    session_token=session.token,
+    session_cookie=session.cookie_name,
+))
+```
+
+**Пароль не сохраняется.** Он существует только как тело одного запроса:
+не пишется в атрибуты объекта, не попадает в `repr`, в `last_call`, в
+исключения и в трассировку, удаляется сразу после отправки. Хранится только
+сессионный токен, и приложение держит его зашифрованным (`TokenVault`,
+NFR-006).
+
+Тело запроса — **плоское** `{"username", "password"}`. Вложенная форма
+`{"session": {...}}` Jira 8.13.0 отклоняет: 400 «Unrecognized field
+`session` (Class `com.atlassian.jira.rest.auth.AuthParams`)».
+
+Требуется только непустые логин и пароль; `basic`-режим для входа не нужен.
+
+### Классификация отказов входа
+
+Отказы входа — отдельный набор причин, не сводимый к «неверный пароль»:
+
+| Признак | Признак в ответе Jira | Что делать |
+|---|---|---|
+| `auth_failed` | 401, `x-seraph-loginreason: AUTHENTICATED_FAILED` | показать форму заново |
+| `login_blocked` | 401, `x-seraph-loginreason: AUTHENTICATION_DENIED` | объяснить про CAPTCHA/вход в браузере; повтор по REST не поможет |
+| `jira_unavailable` | сеть, TLS, таймаут, 5xx | повторить позже; пароль **не** переспрашивать |
+
+Все три поднимаются `JiraLoginError.login_reason` (кроме `jira_unavailable` —
+это `JiraUnavailableError` / `JiraTimeoutError`) и переводятся адаптером в
+единую карту `backend/app/integrations/jira/errors.py`.
+
+HTML-страницу, которую Jira отдаёт вместо JSON, показывать нельзя: тело
+сжимается до одной строки без разметки, а к отказу входа добавляется
+короткий текст `JiraLoginError.hint`.
+
+При отказе входа тело **запроса** (в нём пароль) в исключение не попадает —
+`summary` и `body_head` берутся только из ответа Jira.
 
 ## Хранение секретов (NFR-006)
 
@@ -131,9 +183,11 @@ assert vault.open(sealed) == token
 при ошибке.
 
 Секреты не попадают в логи: у стратегий аутентификации переопределён
-`__repr__`, `JiraConfig.safe_summary()` отдаёт только признаки
-«задано / не задано», а `client.last_call` содержит путь, код и длительность —
-без тела и заголовков. Это проверяется тестами в `tests/test_no_secrets.py`.
+`__repr__`, у `JiraConfig` и `SessionToken` — тоже (иначе dataclass показал бы
+`session_token` и `password` целиком), `JiraConfig.safe_summary()` отдаёт
+только признаки «задано / не задано», а `client.last_call` содержит путь, код
+и длительность — без тела и заголовков. Это проверяется тестами в
+`tests/test_no_secrets.py`, включая сценарий входа по паролю.
 
 ## Тесты
 
@@ -142,9 +196,17 @@ cd src\jira_client
 python -m pytest
 ```
 
-237 тестов, покрытие 97%. Сеть не используется: применяется
+308 тестов, покрытие 97%. Сеть не используется: применяется
 `httpx.MockTransport`. Фикстуры обезличены — реальных ключей задач, имён и
 адресов в них нет, что проверяется отдельным набором тестов.
+
+Интеграционные тесты адаптера (порт `JiraPort`, карта ошибок, `TokenVault`)
+живут рядом с ним и запускаются отдельно:
+
+```bash
+cd backend
+python -m pytest                      # 40 тестов
+```
 
 ## Границы модуля
 
@@ -157,5 +219,9 @@ python -m pytest
   и не является источником `allowedValues`.
 * CORS на экземпляре не включён: браузер не может ходить в REST Jira
   напрямую, нужен серверный посредник.
-* Сессия Jira конечна по времени. Восстановление возможно только с паролем
-  пользователя — см. «Открытые вопросы» в отчёте.
+* Сессия Jira конечна по времени. Восстановление — повторный ввод того же
+  пароля через `SessionLoginProvider.login()` (ADR-005); измеренное время
+  жизни сессии — в [`architecture/probes/KON-34_report.md`](../../architecture/probes/KON-34_report.md).
+* Поле эпика — `customfield_10101` (`Epic Link`) в паре с Agile API.
+  Альтернатива `customfield_11032` остаётся открытым вопросом владельца
+  процесса; выбор фиксируется `JiraClient` и адаптером (`epic_link_field`).

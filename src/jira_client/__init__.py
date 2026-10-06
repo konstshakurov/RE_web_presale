@@ -19,13 +19,26 @@
 Секреты в коде отсутствуют и не попадают в логи: у стратегий аутентификации
 переопределён ``__repr__``, а ``JiraConfig.safe_summary()`` отдаёт только
 признаки «задано / не задано».
+
+Вход по паролю (решение владельца 05.10, ADR-005)::
+
+    from jira_client import SessionLoginProvider
+
+    session = SessionLoginProvider("https://jira.example.internal").login(user, password)
+    # session.token — сессионная cookie; пароль после вызова нигде не хранится.
+
+Отказ входа различается по признакам: ``auth_failed`` (неверный пароль),
+``login_blocked`` (Jira просит подтвердить вход в браузере) и
+``jira_unavailable`` (сеть или таймаут) — это не одно и то же.
 """
 
 from .auth import (
     AnonymousAuth,
     AuthStrategy,
     BasicAuth,
+    SESSION_LOGIN_ENDPOINT,
     SessionLoginProvider,
+    SessionToken,
     SessionTokenAuth,
     build_auth,
 )
@@ -39,10 +52,14 @@ from .errors import (
     AUTH_REASON_NO_CREDENTIALS,
     AUTH_REASON_NO_PERMISSION,
     AUTH_REASON_UNKNOWN,
+    LOGIN_REASON_AUTH_FAILED,
+    LOGIN_REASON_BLOCKED,
+    LOGIN_REASON_UNAVAILABLE,
     JiraAuthError,
     JiraBadRequestError,
     JiraConflictError,
     JiraError,
+    JiraLoginError,
     JiraNotFoundError,
     JiraPermissionError,
     JiraRateLimitedError,
@@ -50,6 +67,7 @@ from .errors import (
     JiraTimeoutError,
     JiraUnavailableError,
     classify_auth_failure,
+    classify_login_failure,
     error_for_response,
     needs_reauthorization,
     parse_error_body,
@@ -83,6 +101,8 @@ __all__ = [
     "SessionTokenAuth",
     "BasicAuth",
     "SessionLoginProvider",
+    "SessionToken",
+    "SESSION_LOGIN_ENDPOINT",
     "build_auth",
     # шифрование
     "TokenVault",
@@ -99,9 +119,11 @@ __all__ = [
     "JiraServerError",
     "JiraTimeoutError",
     "JiraUnavailableError",
+    "JiraLoginError",
     "parse_error_body",
     "error_for_response",
     "classify_auth_failure",
+    "classify_login_failure",
     "needs_reauthorization",
     "AUTH_REASON_NO_CREDENTIALS",
     "AUTH_REASON_LOGIN_REQUIRED",
@@ -109,6 +131,9 @@ __all__ = [
     "AUTH_REASON_FAILED",
     "AUTH_REASON_INVALID_COOKIE",
     "AUTH_REASON_UNKNOWN",
+    "LOGIN_REASON_AUTH_FAILED",
+    "LOGIN_REASON_BLOCKED",
+    "LOGIN_REASON_UNAVAILABLE",
     # модели
     "Attachment",
     "Comment",

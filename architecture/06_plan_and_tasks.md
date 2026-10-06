@@ -61,7 +61,7 @@ KON-31 остаётся родителем (Linear parentId); закрывает
 
 | Linear | Задача | Роль / область | Зависит от | Требования | Срок |
 |---|---|---|---|---|---|
-| KON-50 | Pre.Dev-16 Backend: конфиг, app_repo, secrets, фильтр логов, seed админов | Dev, `backend/` | KON-32, 29 (готово) | NFR-006, FR-024, FR-021 | 07.10 |
+| KON-50 | Pre.Dev-16 Backend: конфиг, app_repo, secrets, фильтр логов, seed админов | Dev, `backend/` | KON-32, 29 (готово) | NFR-006, FR-024, FR-021 | 07.10 (готово 06.10) |
 | KON-51 | Pre.Dev-17 Backend: LDAP-вход, серверные сессии, проверка списка, CSRF, OpenAPI | Dev, `backend/` | KON-50 | FR-024, FR-021, UC-006, NFR-006 | 09.10 |
 | KON-52 | Pre.Dev-18 Backend: сессия Jira при входе (A4), шифрованный токен, блокировка Jira при отказе | Dev, `backend/` | KON-51 (связь: KON-34) | UC-005 (ред. A4), FR-029, NFR-006 | 10.10 |
 | KON-53 | Pre.Dev-19 Backend: админ-API списка допущенных, немедленный отзыв | Dev, `backend/` | KON-52 | FR-021, UC-006, FR-031, NFR-001 | 11.10 |

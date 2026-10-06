@@ -60,3 +60,4 @@ frontend/dist/
 .ruff_cache/
 .pytest_cache/
 secrets/
+!backend/app/secrets/

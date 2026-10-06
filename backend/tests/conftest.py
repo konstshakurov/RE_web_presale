@@ -95,5 +95,7 @@ def error_response(messages, status: int = 401, headers=None) -> httpx.Response:
     return response({"errorMessages": list(messages), "errors": {}}, status, headers)
 
 
-def session_response(value: str = FAKE_RAW_TOKEN, cookie_name: str = "JSESSIONID") -> httpx.Response:
+def session_response(
+    value: str = FAKE_RAW_TOKEN, cookie_name: str = "JSESSIONID"
+) -> httpx.Response:
     return response({"session": {"name": cookie_name, "value": value}})

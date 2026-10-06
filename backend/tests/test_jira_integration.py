@@ -20,13 +20,13 @@ from app.integrations.jira import (
     CODE_LOGIN_BLOCKED,
     CODE_NEEDS_REAUTHORIZATION,
     CODE_NO_PERMISSION,
-    JiraIntegrationError,
-    JiraPort,
     OPERATIONAL_CODES,
     SESSION_JIRA_UNAVAILABLE,
     SESSION_NEEDS_REAUTHORIZATION,
     SESSION_NO_PERMISSION,
     SESSION_OK,
+    JiraIntegrationError,
+    JiraPort,
 )
 
 from .conftest import FAKE_RAW_TOKEN, error_response, response, session_response
@@ -373,7 +373,10 @@ class TestGetIssue:
     ISSUE_PATH = "/rest/api/2/issue/%s" % DEMAND_KEY
 
     def test_reads_issue_with_configurable_fields(self, adapter_factory):
-        payload = {"key": DEMAND_KEY, "fields": {"summary": "запрос", "status": {"name": "Открыта"}}}
+        payload = {
+            "key": DEMAND_KEY,
+            "fields": {"summary": "запрос", "status": {"name": "Открыта"}},
+        }
         adapter, session, handler = _signed_in(
             adapter_factory, lambda: response(payload), read_fields=("summary", "status")
         )

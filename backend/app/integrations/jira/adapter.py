@@ -22,7 +22,6 @@ from dataclasses import replace
 from typing import Any, Dict, Iterator, List, Mapping, Optional, Sequence
 
 import httpx
-
 from jira_client import (
     AUTH_REASON_FAILED,
     AUTH_REASON_NO_CREDENTIALS,
@@ -314,7 +313,9 @@ def _check_from(result: Any) -> SessionCheck:
     if result.get("ok"):
         return SessionCheck(state=SESSION_OK, reason=reason or "ok", status=status, summary=summary)
     if reason == AUTH_REASON_NO_PERMISSION:
-        return SessionCheck(state=SESSION_NO_PERMISSION, reason=reason, status=status, summary=summary)
+        return SessionCheck(
+            state=SESSION_NO_PERMISSION, reason=reason, status=status, summary=summary
+        )
     if result.get("needs_reauthorization") or reason == AUTH_REASON_FAILED:
         # ``auth_failed`` на /myself означает, что cookie не прошла проверку:
         # сессии нет, нужен повторный ввод пароля.
@@ -322,7 +323,9 @@ def _check_from(result: Any) -> SessionCheck:
             state=SESSION_NEEDS_REAUTHORIZATION, reason=reason, status=status, summary=summary
         )
     # Сбой Jira (5xx, сеть, неизвестное): ждём и повторяем, пароль не спрашиваем.
-    return SessionCheck(state=SESSION_JIRA_UNAVAILABLE, reason=reason, status=status, summary=summary)
+    return SessionCheck(
+        state=SESSION_JIRA_UNAVAILABLE, reason=reason, status=status, summary=summary
+    )
 
 
 __all__ = ["JiraAdapter"]

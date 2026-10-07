@@ -75,6 +75,9 @@ class Settings:
     ldap_bind_dn: str = ""
     ldap_bind_password: Secret = Secret("")
     ldap_use_tls: bool = False
+    ldap_timeout_sec: float = 5.0
+    session_ttl_hours: float = 8.0  # допущение ADR-008
+    session_cookie_secure: bool = True  # False только для http-стенда
     jira_base_url: str = ""
     llm_base_url: str = ""
 
@@ -89,6 +92,16 @@ class Settings:
 
 def _truthy(raw: str) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _positive_float(get, name: str, default: str) -> float:
+    try:
+        value = float(get(name, default))
+    except ValueError:
+        raise ConfigError(f"{name} должен быть числом") from None
+    if value <= 0:
+        raise ConfigError(f"{name} должен быть больше нуля")
+    return value
 
 
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:
@@ -117,6 +130,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         ldap_bind_dn=get("LDAP_BIND_DN"),
         ldap_bind_password=Secret(get("LDAP_BIND_PASSWORD")),
         ldap_use_tls=_truthy(get("LDAP_USE_TLS", "false")),
+        ldap_timeout_sec=_positive_float(get, "LDAP_TIMEOUT_SEC", "5"),
+        session_ttl_hours=_positive_float(get, "SESSION_TTL_HOURS", "8"),
+        session_cookie_secure=_truthy(get("SESSION_COOKIE_SECURE", "true")),
         jira_base_url=get("JIRA_BASE_URL"),
         llm_base_url=get("LLM_BASE_URL"),
     )

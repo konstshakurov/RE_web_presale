@@ -48,7 +48,7 @@ jobs:
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t re_web_presale-backend ./backend
+      - run: docker build -t re_web_presale-backend -f backend/Dockerfile .
       - run: docker build -t re_web_presale-frontend ./frontend
 
   db-isolation:

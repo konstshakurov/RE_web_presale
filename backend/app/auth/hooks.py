@@ -9,7 +9,7 @@ from collections.abc import Callable, Iterable
 
 log = logging.getLogger(__name__)
 
-#: (login, password) -> None. Пока список пуст (сессия Jira подключается в KON-52).
+#: (login, password) -> None. Хук сессии Jira подключается в main (KON-52).
 AfterLoginHook = Callable[[str, str], None]
 
 

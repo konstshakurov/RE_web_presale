@@ -12,9 +12,25 @@ from .auth import Ldap3Adapter
 from .auth import router as auth_router
 from .bootstrap import seed_admins
 from .config import load_settings
+from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .logging_setup import configure_logging
+from .secrets import SecretStore
 
 log = logging.getLogger(__name__)
+
+
+def _build_jira_adapter(settings):
+    """JiraAdapter, если задан JIRA_BASE_URL и доступен jira_client; иначе None (вход в Jira
+    «не включён», вход в приложение работает)."""
+    if not settings.jira_base_url:
+        return None
+    try:
+        from .integrations.jira import JiraAdapter
+
+        return JiraAdapter()
+    except Exception as exc:  # noqa: BLE001 - нет пакета/ключа: не роняем приложение
+        log.warning("Jira-адаптер не создан: %s", type(exc).__name__)
+        return None
 
 
 @asynccontextmanager
@@ -30,7 +46,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.repo = repo
     # без LDAP_URL приложение стартует, но /auth/login отвечает 503
     app.state.ldap = Ldap3Adapter.from_settings(settings) if settings.ldap_url else None
-    app.state.after_login_hooks = []  # точка расширения для KON-52 (сессия Jira)
+    jira_adapter = _build_jira_adapter(settings)
+    app.state.jira_session = JiraSessionService(
+        JiraClientSessionAdapter(jira_adapter) if jira_adapter else DisabledJiraSession(),
+        SecretStore(repo, settings.enc_key_bytes(), settings.enc_key_id),
+    )
+    app.state.after_login_hooks = [app.state.jira_session.after_login_hook]
     seed_admins(repo, settings.admin_logins)
     try:
         yield

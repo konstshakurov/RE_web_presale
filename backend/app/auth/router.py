@@ -41,7 +41,17 @@ class Section(BaseModel):
 
 
 class JiraStatus(BaseModel):
-    state: str = Field(description="Заглушка до KON-52: not_checked")
+    state: str = Field(
+        description="ok | blocked (отказ Jira: пароль, права, подтверждение входа) | "
+        "unavailable (Jira недоступна или вход не включён) | not_checked"
+    )
+    code: str = Field("", description="auth_failed | login_blocked | no_permission | "
+                      "jira_unavailable | not_enabled | jira_error; пусто при ok")
+    message: str = Field("", description="Текст отказа Jira как есть (FR-029)")
+
+
+class JiraReloginRequest(BaseModel):
+    password: str = Field(max_length=1024, repr=False)
 
 
 class MeResponse(BaseModel):
@@ -52,12 +62,20 @@ class MeResponse(BaseModel):
     csrf_token: str = Field(description="Заголовок X-CSRF-Token на изменяющих запросах")
 
 
-def _me(ctx: SessionContext, settings: Settings) -> MeResponse:
+def _jira_status(state, login: str) -> JiraStatus:
+    service = getattr(state, "jira_session", None)
+    if service is None:
+        return JiraStatus(state="not_checked")
+    info = service.status(login)
+    return JiraStatus(state=info.state, code=info.code, message=info.message)
+
+
+def _me(ctx: SessionContext, settings: Settings, jira: JiraStatus) -> MeResponse:
     is_admin = ctx.role == "admin"
     return MeResponse(
         login=ctx.login,
         role=ctx.role,
-        jira_status=JiraStatus(state="not_checked"),
+        jira_status=jira,
         sections=[Section(**s) for s in SECTIONS if is_admin or not s["admin_only"]],
         csrf_token=csrf_token(settings.enc_key_bytes(), ctx.session_id),
     )
@@ -110,7 +128,11 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
     )
     run_after_login(getattr(state, "after_login_hooks", ()), user.ldap_login, password)
     log.info("вход выполнен: %s", user.ldap_login)
-    return _me(SessionContext(user.ldap_login, user.role, session_id), settings)
+    return _me(
+        SessionContext(user.ldap_login, user.role, session_id),
+        settings,
+        _jira_status(state, user.ldap_login),
+    )
 
 
 @router.post("/logout", status_code=204, responses={401: {}, 403: {"description": "CSRF"}})
@@ -123,4 +145,27 @@ def logout(
 
 @router.get("/me", response_model=MeResponse, responses={401: {}})
 def me(request: Request, ctx: SessionContext = Depends(authenticated)) -> MeResponse:
-    return _me(ctx, request.app.state.settings)
+    state = request.app.state
+    return _me(ctx, state.settings, _jira_status(state, ctx.login))
+
+
+@router.post(
+    "/jira-relogin",
+    response_model=MeResponse,
+    responses={401: {}, 403: {"description": "CSRF"}, 503: {"description": "Jira не настроена"}},
+)
+def jira_relogin(
+    body: JiraReloginRequest,
+    request: Request,
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> MeResponse:
+    """Повторный ввод пароля при истёкшей сессии Jira. Как вход LDAP не проверяется;
+    пароль только в памяти запроса, отказ Jira становится jira_status, а не ошибкой HTTP."""
+    state = request.app.state
+    service = getattr(state, "jira_session", None)
+    if service is None:
+        raise HTTPException(status_code=503, detail="Сессия Jira не настроена")
+    if not body.password:
+        raise HTTPException(status_code=422, detail="Пароль не указан")
+    service.establish(ctx.login, body.password)
+    return _me(ctx, state.settings, _jira_status(state, ctx.login))

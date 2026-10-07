@@ -14,10 +14,36 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "JiraReloginRequest": {
+        "properties": {
+          "password": {
+            "maxLength": 1024,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "title": "JiraReloginRequest",
+        "type": "object"
+      },
       "JiraStatus": {
         "properties": {
+          "code": {
+            "default": "",
+            "description": "auth_failed | login_blocked | no_permission | jira_unavailable | not_enabled | jira_error; пусто при ok",
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "description": "Текст отказа Jira как есть (FR-029)",
+            "title": "Message",
+            "type": "string"
+          },
           "state": {
-            "description": "Заглушка до KON-52: not_checked",
+            "description": "ok | blocked (отказ Jira: пароль, права, подтверждение входа) | unavailable (Jira недоступна или вход не включён) | not_checked",
             "title": "State",
             "type": "string"
           }
@@ -167,6 +193,65 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/auth/jira-relogin": {
+      "post": {
+        "description": "Повторный ввод пароля при истёкшей сессии Jira. Как вход LDAP не проверяется;\nпароль только в памяти запроса, отказ Jira становится jira_status, а не ошибкой HTTP.",
+        "operationId": "jira_relogin_auth_jira_relogin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JiraReloginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "CSRF"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Jira не настроена"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Jira Relogin",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "description": "LDAP bind, затем проверка списка допущенных, затем сессия (cookie HttpOnly).",

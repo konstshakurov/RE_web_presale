@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "AddUserRequest": {
+        "properties": {
+          "login": {
+            "description": "Логин LDAP; приводится к нижнему регистру, 1..128 символов",
+            "title": "Login",
+            "type": "string"
+          }
+        },
+        "required": [
+          "login"
+        ],
+        "title": "AddUserRequest",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -110,6 +124,38 @@
         "title": "MeResponse",
         "type": "object"
       },
+      "PatchUserRequest": {
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "user",
+                  "admin"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "title": "PatchUserRequest",
+        "type": "object"
+      },
       "Section": {
         "properties": {
           "admin_only": {
@@ -131,6 +177,45 @@
           "admin_only"
         ],
         "title": "Section",
+        "type": "object"
+      },
+      "UserOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "login": {
+            "title": "Login",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "role",
+          "active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserOut",
         "type": "object"
       },
       "ValidationError": {
@@ -193,6 +278,175 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/users": {
+      "get": {
+        "operationId": "list_users_admin_users_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserOut"
+                  },
+                  "title": "Response List Users Admin Users Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "List Users",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "Добавить логин; отозванный снова active=true. Повтор для активного: 200, без изменений.",
+        "operationId": "add_user_admin_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "201": {
+            "description": "Добавлен или возвращён"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Add User",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{login}": {
+      "patch": {
+        "description": "active=false отзывает доступ и немедленно все сессии пользователя (UC-006 1а).",
+        "operationId": "patch_user_admin_users__login__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "login",
+            "required": true,
+            "schema": {
+              "title": "Login",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "404": {
+            "description": "Нет в списке"
+          },
+          "409": {
+            "description": "Нельзя отозвать или понизить последнего активного администратора"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Patch User",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/auth/jira-relogin": {
       "post": {
         "description": "Повторный ввод пароля при истёкшей сессии Jira. Как вход LDAP не проверяется;\nпароль только в памяти запроса, отказ Jira становится jira_status, а не ошибкой HTTP.",

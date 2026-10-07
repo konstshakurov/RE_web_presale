@@ -18,6 +18,21 @@ class AppUser:
     active: bool
 
 
+@dataclass(frozen=True)
+class AppUserDetail:
+    ldap_login: str
+    role: str
+    active: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+#: Итоги update_user
+UPDATED, NOT_FOUND, LAST_ADMIN = "updated", "not_found", "last_admin"
+
+_DETAIL = "ldap_login, role, active, created_at, updated_at"
+
+
 class AppRepo:
     def __init__(self, pool: ConnectionPool) -> None:
         self._pool = pool
@@ -48,6 +63,81 @@ class AppRepo:
                 "SELECT ldap_login, role, active FROM app.app_user ORDER BY ldap_login"
             ).fetchall()
         return [AppUser(*r) for r in rows]
+
+    def list_users_detail(self) -> list[AppUserDetail]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                f"SELECT {_DETAIL} FROM app.app_user ORDER BY ldap_login"
+            ).fetchall()
+        return [AppUserDetail(*r) for r in rows]
+
+    def get_user_detail(self, login: str) -> AppUserDetail | None:
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                f"SELECT {_DETAIL} FROM app.app_user WHERE ldap_login = %s", (login,)
+            ).fetchone()
+        return AppUserDetail(*row) if row else None
+
+    def add_user(self, login: str) -> tuple[AppUserDetail, bool]:
+        """Добавить в список допущенных; ранее отозванный снова active=true (роль сохраняется).
+        (пользователь, изменено): False, если уже был активен (идемпотентно)."""
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "INSERT INTO app.app_user (ldap_login, role, active) VALUES (%s, 'user', true) "
+                f"ON CONFLICT (ldap_login) DO NOTHING RETURNING {_DETAIL}",
+                (login,),
+            ).fetchone()
+            if row is None:
+                row = conn.execute(
+                    "UPDATE app.app_user SET active = true, updated_at = now() "
+                    f"WHERE ldap_login = %s AND active = false RETURNING {_DETAIL}",
+                    (login,),
+                ).fetchone()
+            if row is not None:
+                return AppUserDetail(*row), True
+            row = conn.execute(
+                f"SELECT {_DETAIL} FROM app.app_user WHERE ldap_login = %s", (login,)
+            ).fetchone()
+        return AppUserDetail(*row), False
+
+    def update_user(
+        self, login: str, active: bool | None = None, role: str | None = None
+    ) -> str:
+        """Изменить active/role одной транзакцией; при active=false сессии отзываются тут же.
+
+        Нельзя оставить систему без активного админа: активные админы блокируются
+        FOR UPDATE, поэтому два параллельных отзыва не обойдут проверку. Итог:
+        UPDATED | NOT_FOUND | LAST_ADMIN.
+        """
+        with self._pool.connection() as conn:
+            admins = [
+                r[0]
+                for r in conn.execute(
+                    "SELECT ldap_login FROM app.app_user "
+                    "WHERE role = 'admin' AND active = true ORDER BY ldap_login FOR UPDATE"
+                ).fetchall()
+            ]
+            cur = conn.execute(
+                "SELECT role, active FROM app.app_user WHERE ldap_login = %s FOR UPDATE", (login,)
+            ).fetchone()
+            if cur is None:
+                return NOT_FOUND
+            new_role = cur[0] if role is None else role
+            new_active = cur[1] if active is None else active
+            if login in admins and not (new_role == "admin" and new_active) and len(admins) <= 1:
+                return LAST_ADMIN
+            conn.execute(
+                "UPDATE app.app_user SET role = %s, active = %s, updated_at = now() "
+                "WHERE ldap_login = %s",
+                (new_role, new_active, login),
+            )
+            if not new_active:
+                conn.execute(
+                    "UPDATE app.app_session SET revoked_at = now() "
+                    "WHERE ldap_login = %s AND revoked_at IS NULL",
+                    (login,),
+                )
+        return UPDATED
 
     # --- app_session (ADR-008): хранится только SHA-256 идентификатора ---
 

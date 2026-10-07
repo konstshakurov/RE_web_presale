@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from .app_repo import AppRepo, create_pool
 from .auth import Ldap3Adapter
 from .auth import router as auth_router
+from .auth.admin import router as admin_router
 from .bootstrap import seed_admins
 from .config import load_settings
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
@@ -63,6 +64,7 @@ app = FastAPI(title="re_web_presale api", lifespan=lifespan)
 
 
 app.include_router(auth_router)
+app.include_router(admin_router)
 
 
 @app.get("/health")

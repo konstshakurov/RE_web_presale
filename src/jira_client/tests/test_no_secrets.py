@@ -227,7 +227,7 @@ class TestLoginDoesNotLeak:
     """
 
     USERNAME = "probe-user"
-    PASSWORD = "temporary-login-password"
+    PASSWORD = "FAKE_temporary-login-password"
 
     @staticmethod
     def _provider(handler):

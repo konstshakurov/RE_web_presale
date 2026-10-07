@@ -15,7 +15,7 @@ DSN = os.environ.get("TEST_APP_DB_URL")
 pytestmark = pytest.mark.skipif(not DSN, reason="TEST_APP_DB_URL не задан (стенд БД недоступен)")
 
 LOGIN = "dev16-test-admin"
-TOKEN = "JSESSIONID-DB-TEST-0123456789"
+TOKEN = "FAKE_JSESSIONID-DB-TEST-0123456789"
 
 
 @pytest.fixture()

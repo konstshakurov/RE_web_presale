@@ -37,7 +37,7 @@ SEARCH_PATH = "/rest/api/2/search"
 
 #: Обезличенные данные: значатся только в этом тесте.
 PROBE_USER = "probe-user"
-PROBE_PASSWORD = "temporary-login-password"
+FAKE_PROBE_PASSWORD = "FAKE_temporary-login-password"
 
 #: Синтетические ключи: номера меньше сотни (правило фикстур KON-30).
 DEMAND_KEY = "ANALYTICS-1"
@@ -97,7 +97,7 @@ class TestLogin:
         handler = router(**login_routes())
         adapter = adapter_factory(handler)
 
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert session.cookie_name == "JSESSIONID"
         assert session.created_at.tzinfo is not None
@@ -115,14 +115,14 @@ class TestLogin:
         handler = router(**login_routes())
         adapter = adapter_factory(handler)
 
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         body = json.loads(request_to(handler, ENDPOINT).content.decode("utf-8"))
         assert set(body) == {"username", "password"}
-        assert body["password"] == PROBE_PASSWORD
+        assert body["password"] == FAKE_PROBE_PASSWORD
 
         for text in (repr(session), str(session.describe()), str(adapter.describe())):
-            assert PROBE_PASSWORD not in text
+            assert FAKE_PROBE_PASSWORD not in text
             assert FAKE_RAW_TOKEN not in text
 
     def test_wrong_password_is_auth_failed(self, adapter_factory):
@@ -134,10 +134,10 @@ class TestLogin:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_AUTH_FAILED
-        assert PROBE_PASSWORD not in str(exc.value)
+        assert FAKE_PROBE_PASSWORD not in str(exc.value)
 
     def test_captcha_is_login_blocked(self, adapter_factory):
         handler = router(
@@ -148,7 +148,7 @@ class TestLogin:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_LOGIN_BLOCKED
         assert exc.value.code != CODE_AUTH_FAILED
@@ -161,7 +161,7 @@ class TestLogin:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_JIRA_UNAVAILABLE
         assert exc.value.code != CODE_AUTH_FAILED
@@ -174,7 +174,7 @@ class TestLogin:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_JIRA_UNAVAILABLE
 
@@ -183,7 +183,7 @@ class TestLogin:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_JIRA_UNAVAILABLE
 
@@ -198,7 +198,7 @@ class TestCheckSession:
     def _signed_in(adapter_factory, read):
         handler = router(default=read, **login_routes())
         adapter = adapter_factory(handler)
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
         return adapter, session, handler
 
     def test_ok_after_login(self, adapter_factory):
@@ -240,7 +240,7 @@ class TestCheckSession:
             raise httpx.ConnectError("connection refused")
 
         adapter = adapter_factory(handler)
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         check = adapter.check_session(session.sealed_token)
 
@@ -254,7 +254,7 @@ class TestCheckSession:
             raise httpx.ReadTimeout("read timed out")
 
         adapter = adapter_factory(handler)
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert adapter.check_session(session.sealed_token).state == SESSION_JIRA_UNAVAILABLE
 
@@ -317,7 +317,7 @@ def _signed_in(adapter_factory, read, **overrides):
     """Адаптер, вошедший в Jira; ``read`` — ответ на любой чтительный запрос."""
     handler = router(default=read, **login_routes())
     adapter = adapter_factory(handler, **overrides)
-    session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+    session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
     return adapter, session, handler
 
 
@@ -530,7 +530,7 @@ class TestUnifiedErrorMap:
             raise httpx.ConnectError("connection refused")
 
         adapter = adapter_factory(handler)
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         with pytest.raises(JiraIntegrationError) as exc:
             adapter.get_issue(session.sealed_token, DEMAND_KEY)
@@ -548,7 +548,7 @@ class TestUnifiedErrorMap:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
         assert not isinstance(exc.value, httpx.HTTPError)
         assert exc.value.code == CODE_JIRA_UNAVAILABLE
 
@@ -566,7 +566,7 @@ class TestNoSecrets:
     def test_adapter_repr_and_describe_hide_everything(self, adapter_factory):
         handler = router(**login_routes())
         adapter = adapter_factory(handler)
-        session = adapter.login(PROBE_USER, PROBE_PASSWORD)
+        session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         for text in (
             repr(adapter),
@@ -575,7 +575,7 @@ class TestNoSecrets:
             str(session.describe()),
             repr(handler.calls),
         ):
-            assert PROBE_PASSWORD not in text
+            assert FAKE_PROBE_PASSWORD not in text
             assert FAKE_RAW_TOKEN not in text
             assert PROBE_USER not in text
 
@@ -584,15 +584,15 @@ class TestNoSecrets:
         config = make_config(
             session_token=FAKE_RAW_TOKEN,
             username=PROBE_USER,
-            password=PROBE_PASSWORD,
+            password=FAKE_PROBE_PASSWORD,
         )
         adapter = adapter_factory(handler, config=config)
 
         text = repr(config)
         assert FAKE_RAW_TOKEN not in text
-        assert PROBE_PASSWORD not in text
+        assert FAKE_PROBE_PASSWORD not in text
         assert "session_token_set=True" in text
-        assert PROBE_PASSWORD not in str(adapter.describe())
+        assert FAKE_PROBE_PASSWORD not in str(adapter.describe())
 
     def test_error_carries_code_but_not_credentials(self, adapter_factory):
         handler = router(
@@ -603,8 +603,8 @@ class TestNoSecrets:
         adapter = adapter_factory(handler)
 
         with pytest.raises(JiraIntegrationError) as exc:
-            adapter.login(PROBE_USER, PROBE_PASSWORD)
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
-        assert PROBE_PASSWORD not in str(exc.value)
-        assert PROBE_PASSWORD not in repr(exc.value.describe())
+        assert FAKE_PROBE_PASSWORD not in str(exc.value)
+        assert FAKE_PROBE_PASSWORD not in repr(exc.value.describe())
         assert exc.value.describe()["code"] == CODE_AUTH_FAILED

@@ -34,7 +34,7 @@ ENDPOINT = "/rest/auth/1/session"
 
 #: Обезличенные данные. Секретом не являются и в настоящих системах не значатся.
 USERNAME = "probe-user"
-PASSWORD = "temporary-login-password"
+PASSWORD = "FAKE_temporary-login-password"
 
 #: Токен в ответе фиктивный, тоже не является секретом.
 FAKE_SESSION = "FAKESESSIONTOKENVALUE"

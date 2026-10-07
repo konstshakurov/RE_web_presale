@@ -12,7 +12,7 @@ from app.secrets import (
     seal,
 )
 
-TOKEN = "JSESSIONID-VALUE-0123456789"
+TOKEN = "FAKE_JSESSIONID-VALUE-0123456789"
 KEY = os.urandom(32)
 
 

@@ -29,7 +29,7 @@ from app.secrets import SealedSecret, SecretStore
 from tests.conftest import FAKE_RAW_TOKEN, error_response, session_response
 from tests.unit.test_auth import KEY, PASSWORD, FakeLdap, FakeRepo, login, make_settings
 
-TOKEN = "SEALED-JIRA-TOKEN-aZ09xyzQ-0001"
+TOKEN = "FAKE_SEALED-JIRA-TOKEN-aZ09xyzQ-0001"
 REFUSAL = "Jira: недостаточно прав для входа (текст отказа)"
 
 
@@ -153,11 +153,11 @@ def test_relogin_replaces_token_no_duplicates(client, env):
     _, repo, port, service = env
     me = login(client).json()
     first = repo.rows["ivan"]
-    port.token = "SEALED-JIRA-TOKEN-NEW-0002"
+    port.token = "FAKE_SEALED-JIRA-TOKEN-NEW-0002"
     r = relogin(client, me)
     assert r.status_code == 200 and r.json()["jira_status"]["state"] == "ok"
     assert list(repo.rows) == ["ivan"] and repo.rows["ivan"] != first
-    assert service.get_user_jira_token("ivan") == "SEALED-JIRA-TOKEN-NEW-0002"
+    assert service.get_user_jira_token("ivan") == "FAKE_SEALED-JIRA-TOKEN-NEW-0002"
     login(client)  # повторный вход тоже заменяет
     assert list(repo.rows) == ["ivan"]
 
@@ -208,8 +208,8 @@ def test_openapi_has_relogin_without_token(env):
 
 def test_real_adapter_success_returns_sealed_not_raw(adapter_factory):
     adapter = JiraClientSessionAdapter(adapter_factory(lambda req: session_response()))
-    token = adapter.login("u", PASSWORD)
-    assert token and FAKE_RAW_TOKEN not in token
+    sealed = adapter.login("u", PASSWORD)
+    assert sealed and FAKE_RAW_TOKEN not in sealed
 
 
 def test_real_adapter_refusal_is_blocked_without_password(adapter_factory):

@@ -4,9 +4,9 @@ import logging
 
 from app.logging_setup import REDACTED, configure_logging, redact
 
-PASSWORD = "Sup3r-Pass-w0rd"
-TOKEN = "abcDEF0123456789token"
-COOKIE = "JSESSIONID=ZZZ999sessionvalue; atlassian.xsrf.token=XSRF777value"
+PASSWORD = "FAKE_Sup3r-Pass-w0rd"
+TOKEN = "FAKE_abcDEF0123456789token"
+COOKIE = "FAKE_JSESSIONID=ZZZ999sessionvalue; atlassian.xsrf.token=XSRF777value"
 ENC = "S0VZLUtFWS1LRVktS0VZLUtFWS1LRVktS0VZLUtFWS0="
 
 

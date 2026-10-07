@@ -97,11 +97,11 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
         raise HTTPException(status_code=503, detail=LDAP_DOWN)
 
     login_name = normalize_login(body.login)
-    password = body.password
-    if not login_name or not password:
+    pw = body.password
+    if not login_name or not pw:
         raise HTTPException(status_code=401, detail=DENIED)
     try:
-        ok = ldap.authenticate(login_name, password)
+        ok = ldap.authenticate(login_name, pw)
     except LdapUnavailable:
         raise HTTPException(status_code=503, detail=LDAP_DOWN) from None
     if not ok:
@@ -126,7 +126,7 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
         samesite="lax",
         path="/",
     )
-    run_after_login(getattr(state, "after_login_hooks", ()), user.ldap_login, password)
+    run_after_login(getattr(state, "after_login_hooks", ()), user.ldap_login, pw)
     log.info("вход выполнен: %s", user.ldap_login)
     return _me(
         SessionContext(user.ldap_login, user.role, session_id),

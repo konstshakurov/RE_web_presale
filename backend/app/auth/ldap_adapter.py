@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import ssl
 from urllib.parse import urlparse
 
@@ -45,11 +46,12 @@ class Ldap3Adapter:
         self._filter = user_filter
         self._bind_dn = bind_dn
         self._bind_password = bind_password
-        self._timeout = timeout
+        # ldap3 на Linux упаковывает таймауты через struct: нужен int
+        self._timeout = max(1, math.ceil(timeout))
         scheme = urlparse(url).scheme
         self._starttls = use_tls and scheme == "ldap"
         tls = Tls(validate=ssl.CERT_REQUIRED) if (use_tls or scheme == "ldaps") else None
-        self._server = Server(url, get_info="NONE", connect_timeout=timeout, tls=tls)
+        self._server = Server(url, get_info="NONE", connect_timeout=self._timeout, tls=tls)
 
     @classmethod
     def from_settings(cls, s: Settings) -> Ldap3Adapter:

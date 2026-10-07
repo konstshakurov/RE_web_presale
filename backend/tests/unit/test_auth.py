@@ -325,3 +325,11 @@ def test_openapi_file_is_current_and_documents_csrf():
     spec = json.loads(render())
     assert "CsrfToken" in spec["components"]["securitySchemes"]
     assert "/auth/login" in spec["paths"] and "/auth/me" in spec["paths"]
+
+
+def test_adapter_timeouts_are_int():
+    # ldap3 на Linux упаковывает connect_timeout через struct: float вызывает struct.error
+    a = Ldap3Adapter("ldap://x:389", "dc=x", "(uid={login})", timeout=5.0)
+    assert isinstance(a._server.connect_timeout, int) and a._server.connect_timeout == 5
+    a = Ldap3Adapter("ldap://x:389", "dc=x", "(uid={login})", timeout=0.3)
+    assert a._server.connect_timeout == 1

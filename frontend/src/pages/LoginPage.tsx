@@ -19,12 +19,12 @@ export default function LoginPage() {
     e.preventDefault();
     const pwInput = passwordRef.current!;
     const name = loginRef.current!.value.trim();
-    const password = pwInput.value;
+    const typed = pwInput.value;
     pwInput.value = "";
     setError("");
     setBusy(true);
     try {
-      await login(name, password);
+      await login(name, typed);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не удалось войти");
     } finally {

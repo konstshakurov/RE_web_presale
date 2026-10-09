@@ -7,8 +7,10 @@ CREATE TABLE app.app_user (
     active boolean NOT NULL DEFAULT true,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
+    display_name text,  -- V004 (KON-60): ФИО из LDAP cn, NULL - cn не получен
     CONSTRAINT app_user_login_chk CHECK (ldap_login = lower(ldap_login) AND length(ldap_login) BETWEEN 1 AND 128),
-    CONSTRAINT app_user_role_chk CHECK (role IN ('user', 'admin'))
+    CONSTRAINT app_user_role_chk CHECK (role IN ('user', 'admin')),
+    CONSTRAINT app_user_display_name_chk CHECK (length(display_name) BETWEEN 1 AND 256)
 );
 
 CREATE TABLE app.app_session (

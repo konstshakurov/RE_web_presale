@@ -75,7 +75,7 @@ erDiagram
 
 | Таблица | Назначение | Ключ | Ограничения и заметки |
 |---------|-----------|------|------------------------|
-| `app_user` | список допущенных (FR-021) | `ldap_login` | роль user/admin, `active` |
+| `app_user` | список допущенных (FR-021) | `ldap_login` | роль user/admin, `active`; `display_name text NULL` (ФИО из LDAP `cn`, 1..256 символов, обновляется при каждом входе; NULL — показывается логин; e-mail не хранится) — V004, KON-60 |
 | `app_session` | серверные сессии (ADR-008) | `session_hash` (sha256, 32 байта) | сам cookie не хранится; `expires_at > created_at` |
 | `llm_provider` | LLM-провайдеры (FR-030) | `id` | уникальное имя, единственный `is_default` (partial unique), таймаут 1..3600 |
 | `secret_store` | шифрованные секреты | `id` | `kind` jira_session/llm_key, владелец или провайдер строго по виду, nonce = 12 байт, ciphertext >= 16 байт, по одной записи на пользователя/провайдера |
@@ -173,7 +173,7 @@ erDiagram
 ## 10. Порядок применения
 
 1. `bootstrap/00_roles_and_databases.sql` (суперпользователь, один раз; пароли через `-v app_rw_password=... -v cv_rw_password=...`, в репозитории паролей нет).
-2. `app_db`: V001 ядро, V002 кэш Jira, V003 права.
+2. `app_db`: V001 ядро, V002 кэш Jira, V003 права, V004 `app_user.display_name` (KON-60, 09.10.2026).
 3. `cv_db`: V001 сотрудники и файлы, V002 рекомендации, V003 архив основного CV, V004 права.
 4. Тестовые данные (только тест): `seed/app_db_seed.sql`, `seed/cv_db_seed.sql`; очистка `*_seed.down.sql`.
 5. Откат: `<версия>.down.sql` в обратном порядке; `apply.sh up|down <db> [N]` автоматизирует прогон и ведёт `meta.schema_migration`.

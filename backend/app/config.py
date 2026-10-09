@@ -68,6 +68,7 @@ class Settings:
     app_db_url: Secret = field(repr=True)  # в URL есть пароль роли
     enc_key: Secret = field(repr=True)
     enc_key_id: str = "k1"
+    cv_db_url: Secret = Secret("")  # роль cv_rw; нужен синхронизации сотрудников (KON-35)
     admin_logins: tuple[str, ...] = ()
     ldap_url: str = ""
     ldap_base_dn: str = ""
@@ -87,7 +88,7 @@ class Settings:
 
     def secret_values(self) -> list[str]:
         """Значения секретов для фильтра логов."""
-        values = [self.app_db_url, self.enc_key, self.ldap_bind_password]
+        values = [self.app_db_url, self.cv_db_url, self.enc_key, self.ldap_bind_password]
         return [s.reveal() for s in values if s]
 
 
@@ -124,6 +125,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         app_db_url=Secret(get("APP_DB_URL")),
         enc_key=Secret(get("APP_ENC_KEY")),
         enc_key_id=key_id,
+        cv_db_url=Secret(get("CV_DB_URL")),
         admin_logins=parse_admin_logins(get("ADMIN_LOGINS")),
         ldap_url=get("LDAP_URL"),
         ldap_base_dn=get("LDAP_BASE_DN"),

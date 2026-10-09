@@ -15,6 +15,212 @@
         "title": "AddUserRequest",
         "type": "object"
       },
+      "EmployeeOut": {
+        "properties": {
+          "assignable": {
+            "title": "Assignable",
+            "type": "boolean"
+          },
+          "extra_experience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra Experience"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "jira_key": {
+            "title": "Jira Key",
+            "type": "string"
+          },
+          "jira_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jira Url"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "note_author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Author"
+          },
+          "note_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Updated At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "synced_at": {
+            "format": "date-time",
+            "title": "Synced At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jira_key",
+          "full_name",
+          "status",
+          "assignable",
+          "synced_at"
+        ],
+        "title": "EmployeeOut",
+        "type": "object"
+      },
+      "EmployeesPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EmployeeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/SyncStamp"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "statuses",
+          "sync"
+        ],
+        "title": "EmployeesPage",
+        "type": "object"
+      },
+      "EpicOut": {
+        "properties": {
+          "epic_key": {
+            "title": "Epic Key",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SyncErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Когда правила получены из Jira",
+            "title": "Fetched At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "needs_total": {
+            "description": "Потребностей клиента в кэше",
+            "title": "Needs Total",
+            "type": "integer"
+          },
+          "rules": {
+            "description": "Только заполненные поля правил клиента (FR-015)",
+            "items": {
+              "$ref": "#/components/schemas/RuleOut"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "stale": {
+            "description": "true - Jira отказала, показан кэш",
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "required": [
+          "epic_key",
+          "name",
+          "rules",
+          "stale",
+          "needs_total"
+        ],
+        "title": "EpicOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -136,6 +342,225 @@
         "title": "MeResponse",
         "type": "object"
       },
+      "NeedGroups": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/StatusGroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "statuses": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/SyncStamp"
+          }
+        },
+        "required": [
+          "groups",
+          "statuses",
+          "sync"
+        ],
+        "title": "NeedGroups",
+        "type": "object"
+      },
+      "NeedOut": {
+        "properties": {
+          "assignee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignee"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "employee_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Key"
+          },
+          "epic_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epic Key"
+          },
+          "epic_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Клиент; пока эпик не загружен - epic_key",
+            "title": "Epic Name"
+          },
+          "jira_created_at": {
+            "format": "date-time",
+            "title": "Jira Created At",
+            "type": "string"
+          },
+          "jira_key": {
+            "title": "Jira Key",
+            "type": "string"
+          },
+          "jira_updated_at": {
+            "format": "date-time",
+            "title": "Jira Updated At",
+            "type": "string"
+          },
+          "jira_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ссылка на задачу в Jira (нужен JIRA_BASE_URL)",
+            "title": "Jira Url"
+          },
+          "rate": {
+            "$ref": "#/components/schemas/Rate"
+          },
+          "requirements_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements Text"
+          },
+          "status": {
+            "description": "Статус Jira как есть (не резолюция, BR-010)",
+            "title": "Status",
+            "type": "string"
+          },
+          "synced_at": {
+            "format": "date-time",
+            "title": "Synced At",
+            "type": "string"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jira_key",
+          "title",
+          "status",
+          "rate",
+          "jira_created_at",
+          "jira_updated_at",
+          "synced_at"
+        ],
+        "title": "NeedOut",
+        "type": "object"
+      },
+      "NeedsPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NeedOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/SyncStamp"
+          },
+          "total": {
+            "description": "Число потребностей по фильтру (без учёта limit/offset)",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "sync"
+        ],
+        "title": "NeedsPage",
+        "type": "object"
+      },
       "PatchUserRequest": {
         "properties": {
           "active": {
@@ -168,6 +593,155 @@
         "title": "PatchUserRequest",
         "type": "object"
       },
+      "Rate": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RUB | USD | KZT",
+            "title": "Currency"
+          },
+          "includes_vat": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includes Vat"
+          },
+          "proposer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposer"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "title": "Rate",
+        "type": "object"
+      },
+      "RefreshRequest": {
+        "properties": {
+          "scope": {
+            "enum": [
+              "needs",
+              "employees"
+            ],
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "title": "RefreshRequest",
+        "type": "object"
+      },
+      "RefreshResult": {
+        "properties": {
+          "busy": {
+            "default": false,
+            "description": "true - опрос уже идёт, повторно не запускался",
+            "title": "Busy",
+            "type": "boolean"
+          },
+          "fetched": {
+            "default": 0,
+            "title": "Fetched",
+            "type": "integer"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "scope": {
+            "enum": [
+              "needs",
+              "employees"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "skipped": {
+            "default": 0,
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/SyncStamp"
+          },
+          "upserted": {
+            "default": 0,
+            "title": "Upserted",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "ok",
+          "sync"
+        ],
+        "title": "RefreshResult",
+        "type": "object"
+      },
+      "RuleOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "value"
+        ],
+        "title": "RuleOut",
+        "type": "object"
+      },
       "Section": {
         "properties": {
           "admin_only": {
@@ -189,6 +763,163 @@
           "admin_only"
         ],
         "title": "Section",
+        "type": "object"
+      },
+      "StatusCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ],
+        "title": "StatusCount",
+        "type": "object"
+      },
+      "StatusGroupOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null у виртуальных групп 'all' и 'other'",
+            "title": "Id"
+          },
+          "key": {
+            "description": "Значение параметра group: число (id), 'other' или 'all'",
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "count"
+        ],
+        "title": "StatusGroupOut",
+        "type": "object"
+      },
+      "SyncErrorBody": {
+        "description": "Тело отказа «Обновить» / эпика: причина как есть (FR-029).",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "state": {
+            "description": "needs_reauthorization | no_permission | unavailable | blocked | not_enabled | error",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "code",
+          "message"
+        ],
+        "title": "SyncErrorBody",
+        "type": "object"
+      },
+      "SyncStamp": {
+        "description": "Штамп «актуально на» и состояние опроса (FR-028, FR-029).",
+        "properties": {
+          "code": {
+            "default": "",
+            "description": "Код последнего отказа Jira; пусто, если опрос успешен",
+            "title": "Code",
+            "type": "string"
+          },
+          "interval_sec": {
+            "description": "Период опроса",
+            "title": "Interval Sec",
+            "type": "number"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "«Актуально на»",
+            "title": "Last Success At"
+          },
+          "message": {
+            "default": "",
+            "description": "Текст отказа Jira как есть (FR-029)",
+            "title": "Message",
+            "type": "string"
+          },
+          "paused": {
+            "default": false,
+            "title": "Paused",
+            "type": "boolean"
+          },
+          "scope": {
+            "enum": [
+              "needs",
+              "employees"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "stale": {
+            "description": "true - данные из кэша могут отставать: показать пометку",
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "state": {
+            "description": "ok | never_synced | paused (опрос приостановлен: нет активных пользователей) | needs_reauthorization (сессия Jira истекла) | no_permission | jira_unavailable | jira_error | not_enabled | error",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "state",
+          "stale",
+          "interval_sec"
+        ],
+        "title": "SyncStamp",
         "type": "object"
       },
       "UserOut": {
@@ -643,6 +1374,512 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/sync/employees": {
+      "get": {
+        "operationId": "list_employees_sync_employees_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignable",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assignable"
+            }
+          },
+          {
+            "description": "Поиск по ФИО",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Поиск по ФИО",
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeesPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List Employees",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/epics/{epic_key}": {
+      "get": {
+        "description": "Эпик клиента с правилами и условиями (FR-015) при открытии: кэш 1 час; при отказе Jira\nи наличии кэша - кэш с ``stale = true`` и ``error``; без кэша - код отказа и текст Jira.",
+        "operationId": "get_epic_sync_epics__epic_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "epic_key",
+            "required": true,
+            "schema": {
+              "title": "Epic Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Refresh",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpicOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Epic",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/needs": {
+      "get": {
+        "operationId": "list_needs_sync_needs_get",
+        "parameters": [
+          {
+            "description": "Группа статусов: id группы, 'other' (Прочие) или 'all' (по умолчанию)",
+            "in": "query",
+            "name": "group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(all|other|\\d{1,9})$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Группа статусов: id группы, 'other' (Прочие) или 'all' (по умолчанию)",
+              "title": "Group"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "epic_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Epic Key"
+            }
+          },
+          {
+            "description": "Поиск по ключу и названию",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Поиск по ключу и названию",
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "created",
+              "enum": [
+                "created",
+                "updated"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeedsPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List Needs",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/needs/groups": {
+      "get": {
+        "description": "Группы статусов со счётчиками (FR-035): состав групп хранится в «Настройках»;\n'Прочие' и 'Все статусы' считаются здесь, поэтому потребность не пропадает из интерфейса.",
+        "operationId": "need_groups_sync_needs_groups_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeedGroups"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Need Groups",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/refresh": {
+      "post": {
+        "description": "«Обновить» / «Синхронизировать»: немедленный опрос Jira токеном самого пользователя.\nИнкрементальный; при отказе - код ответа и текст Jira как есть, кэш остаётся прежним.",
+        "operationId": "refresh_sync_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Нет прав в Jira"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Сессия Jira истекла или отказ Jira (поля state/code/message)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Jira отклонила запрос; message - текст Jira как есть"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncErrorBody"
+                }
+              }
+            },
+            "description": "Jira недоступна"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Refresh",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/status": {
+      "get": {
+        "description": "Штампы обеих областей (для шапки интерфейса).",
+        "operationId": "sync_status_sync_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SyncStamp"
+                  },
+                  "title": "Response Sync Status Sync Status Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Sync Status",
+        "tags": [
+          "sync"
+        ]
       }
     }
   }

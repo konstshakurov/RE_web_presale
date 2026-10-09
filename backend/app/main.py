@@ -16,6 +16,8 @@ from .config import load_settings
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .logging_setup import configure_logging
 from .secrets import SecretStore
+from .sync.factory import build_sync_service, open_cv_pool
+from .sync.router import router as sync_router
 
 log = logging.getLogger(__name__)
 
@@ -54,9 +56,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     app.state.after_login_hooks = [app.state.jira_session.after_login_hook]
     seed_admins(repo, settings.admin_logins)
+    cv_pool = open_cv_pool(settings)
+    app.state.sync = build_sync_service(settings, pool, cv_pool, jira_adapter)
     try:
         yield
     finally:
+        if cv_pool is not None:
+            cv_pool.close()
         pool.close()
 
 
@@ -65,6 +71,7 @@ app = FastAPI(title="re_web_presale api", lifespan=lifespan)
 
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(sync_router)
 
 
 @app.get("/health")

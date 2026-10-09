@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 
 import logo from "../assets/logo.png";
 import { useAuth } from "../auth/AuthContext";
+import { shortName } from "../lib/shortName";
 
 // Разделы верхнего меню (FR-031); «Настройки» только при role=admin.
 const SECTIONS = [
@@ -26,7 +27,7 @@ export default function Header() {
               </NavLink>
             ))}
           </nav>
-          <span className="topbar__user">{user.display_name || user.login}</span>
+          <span className="topbar__user">{shortName(user.display_name, user.login)}</span>
           <button type="button" onClick={() => void logout()}>
             Выйти
           </button>

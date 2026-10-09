@@ -317,10 +317,13 @@ class SyncRepo:
                 (epic_key, name, summary, json.dumps(rules, ensure_ascii=False)),
             )
 
-    def count_epic_needs(self, epic_key: str) -> int:
+    def count_epic_needs(self, epic_key: str, key_prefix: str | None = None) -> int:
+        """Потребности эпика; ``key_prefix`` (``ANALYTICS-``) отсекает чужие направления."""
         with self._app.connection() as conn:
             return conn.execute(
-                "SELECT count(*) FROM app.jira_need WHERE epic_key = %s", (epic_key,)
+                "SELECT count(*) FROM app.jira_need WHERE epic_key = %s"
+                " AND (%s::text IS NULL OR starts_with(jira_key, %s::text))",
+                (epic_key, key_prefix, key_prefix),
             ).fetchone()[0]
 
     # --- сотрудники (cv_db) ---

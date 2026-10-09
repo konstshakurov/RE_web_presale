@@ -38,7 +38,7 @@ function ok(body: unknown) {
 
 describe("имя пользователя в шапке", () => {
   it("показывает ФИО, если оно есть (в том числе после перезагрузки: /auth/me)", async () => {
-    fetchMock.mockResolvedValue(ok(me("Тестовый Пользователь")));
+    fetchMock.mockResolvedValue(ok(me("Тестовый Пользователь Отчествович")));
     renderNeeds();
     expect(await screen.findByText("Тестовый Пользователь")).toBeInTheDocument();
     expect(screen.queryByText("test.user")).not.toBeInTheDocument();

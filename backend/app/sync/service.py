@@ -17,10 +17,12 @@ from ..logging_setup import redact
 from ..secrets import SecretsError, SecretStore
 from .mapping import (
     EMPLOYEE_FIELDS,
+    EPIC_CHILD_FIELDS,
     EPIC_FIELDS,
     KEY_RE,
     NEED_FIELDS,
     NeedRow,
+    is_need_of,
     jql_time,
     map_employee,
     map_epic_rules,
@@ -399,8 +401,12 @@ class SyncService:
         summary = fields.get("summary") if isinstance(fields.get("summary"), str) else None
         name = (epic.get("name") if isinstance(epic, dict) else None) or summary or epic_key
         # дети эпика - только Agile API (parent в Jira 8.13 не работает)
-        children = self._jira.get_epic_children(token, epic_key, fields=NEED_FIELDS)
-        rows = [r for r in (map_need(i) for i in children if isinstance(i, dict)) if r]
+        # эпик содержит потребности всех направлений (QA, BACK, ...): берём только аналитику
+        children = self._jira.get_epic_children(token, epic_key, fields=EPIC_CHILD_FIELDS)
+        s = self._settings
+        mine = [i for i in children
+                if isinstance(i, dict) and is_need_of(i, s.need_project, s.need_issuetype)]
+        rows = [r for r in (map_need(i) for i in mine) if r]
         # связь с эпиком даёт сам Agile API, даже если Epic Link в ответе не пришёл
         rows = [r if r.epic_key == epic_key else replace(r, epic_key=epic_key) for r in rows]
         self._repo.save_epic(epic_key, str(name), summary, map_epic_rules(fields))
@@ -410,5 +416,6 @@ class SyncService:
         return EpicView(
             epic_key=row.epic_key, name=row.name, summary=row.summary,
             rules=row.rules or [], fetched_at=row.rules_fetched_at, stale=stale, error=error,
-            needs_total=self._repo.count_epic_needs(row.epic_key),
+            needs_total=self._repo.count_epic_needs(
+                row.epic_key, f"{self._settings.need_project}-"),
         )

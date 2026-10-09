@@ -33,6 +33,8 @@ NEED_FIELDS: tuple[str, ...] = (
     F_EPIC_LINK, F_REQUIREMENTS, F_CONTRACT,
     F_RATE, F_RATE_VAT, F_RATE_CURRENCY, F_RATE_UNIT, F_RATE_PROPOSER, F_PROFILE,
 )
+#: Дети эпика приходят со всех направлений: проект и тип нужны для отбора потребностей аналитики.
+EPIC_CHILD_FIELDS: tuple[str, ...] = (*NEED_FIELDS, "project", "issuetype")
 EMPLOYEE_FIELDS: tuple[str, ...] = (
     "summary", "status", "updated", F_EXTRA_EXPERIENCE, F_PROFILE, F_VACATION,
 )
@@ -224,6 +226,28 @@ def map_need(issue: dict[str, Any]) -> NeedRow | None:
         rate_dropped=dropped,
         employee_login=_profile_login(fields.get(F_PROFILE)),
     )
+
+
+def is_need_of(issue: dict[str, Any], project: str, issuetype: str) -> bool:
+    """Задача относится к направлению аналитики: проект и тип совпадают с настройкой.
+
+    Если Jira прислала ``fields.project.key`` / ``fields.issuetype.name`` - сверяем их; иначе
+    проект определяется по префиксу ключа, а тип считается неопределённым (не отсекает).
+    """
+    key = issue.get("key")
+    if not isinstance(key, str):
+        return False
+    fields = issue.get("fields") if isinstance(issue.get("fields"), dict) else {}
+    proj = fields.get("project")
+    proj_key = proj.get("key") if isinstance(proj, dict) else None
+    if isinstance(proj_key, str) and proj_key:
+        if proj_key != project:
+            return False
+    elif key.rsplit("-", 1)[0] != project:
+        return False
+    itype = fields.get("issuetype")
+    name = _text(itype.get("name")) if isinstance(itype, dict) else None
+    return name is None or name == issuetype
 
 
 def map_employee(issue: dict[str, Any]) -> EmployeeRow | None:

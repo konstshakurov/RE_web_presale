@@ -129,6 +129,17 @@ def test_epic_stub_created_and_real_epic_not_overwritten(repo):
     assert repo.count_epic_needs(f"{P}E-1") == 1
 
 
+def test_count_epic_needs_prefix_excludes_other_directions(repo):
+    other = map_need(issue("KONTQA-1", "Требуется кандидат", customfield_10101=f"{P}E-1"))
+    repo.upsert_needs([need(1, customfield_10101=f"{P}E-1"), other])
+    try:
+        assert repo.count_epic_needs(f"{P}E-1") == 2
+        assert repo.count_epic_needs(f"{P}E-1", f"{P}-") == 1
+    finally:
+        with repo._app.connection() as c:
+            c.execute("DELETE FROM app.jira_need WHERE jira_key = 'KONTQA-1'")
+
+
 def test_status_groups_filter_other_and_counters(repo, pools):
     repo.upsert_needs([
         need(1, "Требуется кандидат"), need(2, "Интервью не пройдено"),

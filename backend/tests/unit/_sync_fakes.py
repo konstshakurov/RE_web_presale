@@ -93,8 +93,9 @@ class FakeSyncRepo:
     def save_epic(self, key, name, summary, rules):
         self.epics[key] = EpicRow(key, name, summary, rules, FIXED_NOW[0])
 
-    def count_epic_needs(self, key):
-        return sum(1 for n in self.needs.values() if n.epic_key == key)
+    def count_epic_needs(self, key, key_prefix=None):
+        return sum(1 for n in self.needs.values()
+                   if n.epic_key == key and (not key_prefix or n.jira_key.startswith(key_prefix)))
 
 
 FIXED_NOW = [T0]
@@ -131,6 +132,7 @@ class FakeJira:
 
     def get_epic_children(self, token, key, *, fields=None, max_pages=50):
         self.calls.append(("children", token, key))
+        self.children_fields = tuple(fields or ())
         return list(self.children)
 
 

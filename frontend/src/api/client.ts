@@ -1,4 +1,14 @@
-import type { LoginRequest, MeResponse } from "./types";
+import type {
+  EpicOut,
+  LoginRequest,
+  MeResponse,
+  NeedGroups,
+  NeedsPage,
+  NeedsQuery,
+  RefreshResult,
+  SyncErrorBody,
+  SyncScope,
+} from "./types";
 
 // nginx проксирует /api/ на api; сессия — HttpOnly cookie, CSRF — заголовок на изменяющих запросах.
 export const API_BASE = "/api";
@@ -8,6 +18,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public detail: SyncErrorBody | null = null, // разобранный detail отказа /sync (state, code, message)
   ) {
     super(message);
   }
@@ -24,9 +35,14 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
   onUnauthorized = handler;
 }
 
+function isSyncError(detail: unknown): detail is SyncErrorBody {
+  return typeof detail === "object" && detail !== null && typeof (detail as SyncErrorBody).state === "string";
+}
+
 function errorText(status: number, body: unknown): string {
   const detail = (body as { detail?: unknown } | null)?.detail;
   if (typeof detail === "string" && detail) return detail;
+  if (isSyncError(detail) && detail.message) return detail.message; // текст отказа Jira как есть
   if (status === 422) return "Проверьте введённые данные";
   if (status >= 500) return "Сервис временно недоступен, повторите позже";
   return `Ошибка запроса (${status})`;
@@ -62,7 +78,8 @@ export async function request<T>(
     } catch {
       /* тело не JSON */
     }
-    throw new ApiError(res.status, errorText(res.status, data));
+    const detail = (data as { detail?: unknown } | null)?.detail;
+    throw new ApiError(res.status, errorText(res.status, data), isSyncError(detail) ? detail : null);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -74,4 +91,15 @@ export const api = {
   login: (data: LoginRequest) =>
     request<MeResponse>("POST", "/auth/login", data, { redirectOn401: false }),
   logout: () => request<void>("POST", "/auth/logout"),
+  needs: (q: NeedsQuery) => {
+    const p = new URLSearchParams();
+    p.set("group", q.group);
+    if (q.q) p.set("q", q.q);
+    p.set("limit", String(Math.min(q.limit, 500)));
+    p.set("offset", String(q.offset));
+    return request<NeedsPage>("GET", `/sync/needs?${p}`);
+  },
+  needGroups: () => request<NeedGroups>("GET", "/sync/needs/groups"),
+  refresh: (scope: SyncScope) => request<RefreshResult>("POST", "/sync/refresh", { scope }),
+  epic: (key: string) => request<EpicOut>("GET", `/sync/epics/${encodeURIComponent(key)}`),
 };

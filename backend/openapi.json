@@ -95,6 +95,18 @@
             "title": "Csrf Token",
             "type": "string"
           },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ФИО из LDAP (cn); null, если не получено - показывать login",
+            "title": "Display Name"
+          },
           "jira_status": {
             "$ref": "#/components/schemas/JiraStatus"
           },

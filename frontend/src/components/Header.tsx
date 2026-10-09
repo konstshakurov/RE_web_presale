@@ -26,7 +26,7 @@ export default function Header() {
               </NavLink>
             ))}
           </nav>
-          <span className="topbar__user">{user.login}</span>
+          <span className="topbar__user">{user.display_name || user.login}</span>
           <button type="button" onClick={() => void logout()}>
             Выйти
           </button>

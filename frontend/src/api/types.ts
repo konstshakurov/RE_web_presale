@@ -13,6 +13,7 @@ export interface Section {
 
 export interface MeResponse {
   login: string;
+  display_name?: string | null; // ФИО из LDAP; нет - показываем login
   role: "user" | "admin" | string;
   jira_status: JiraStatus;
   sections: Section[];

@@ -56,6 +56,9 @@ class JiraReloginRequest(BaseModel):
 
 class MeResponse(BaseModel):
     login: str
+    display_name: str | None = Field(
+        None, description="ФИО из LDAP (cn); null, если не получено - показывать login"
+    )
     role: str
     jira_status: JiraStatus
     sections: list[Section]
@@ -74,11 +77,18 @@ def _me(ctx: SessionContext, settings: Settings, jira: JiraStatus) -> MeResponse
     is_admin = ctx.role == "admin"
     return MeResponse(
         login=ctx.login,
+        display_name=ctx.display_name,
         role=ctx.role,
         jira_status=jira,
         sections=[Section(**s) for s in SECTIONS if is_admin or not s["admin_only"]],
         csrf_token=csrf_token(settings.enc_key_bytes(), ctx.session_id),
     )
+
+
+def _cn(profile, login_name: str) -> str | None:
+    """cn из профиля LDAP; адаптер подставляет логин, если cn не прочитан - это не имя."""
+    name = (getattr(profile, "full_name", "") or "").strip()
+    return name if name and name != login_name else None
 
 
 @router.post(
@@ -101,7 +111,11 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
     if not login_name or not pw:
         raise HTTPException(status_code=401, detail=DENIED)
     try:
-        ok = ldap.authenticate(login_name, pw)
+        if hasattr(ldap, "authenticate_profile"):
+            profile = ldap.authenticate_profile(login_name, pw)
+            ok = profile is not None
+        else:
+            profile, ok = None, ldap.authenticate(login_name, pw)
     except LdapUnavailable:
         raise HTTPException(status_code=503, detail=LDAP_DOWN) from None
     if not ok:
@@ -113,6 +127,9 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
         log.info("вход отклонён: нет в списке допущенных")
         raise HTTPException(status_code=401, detail=DENIED)  # тот же текст, сессии нет
 
+    display_name = _cn(profile, login_name)
+    if display_name:
+        repo.set_display_name(user.ldap_login, display_name)  # обновляется при каждом входе
     session_id = new_session_id()
     repo.create_session(
         hash_session_id(session_id), user.ldap_login, expires_at(settings.session_ttl_hours)
@@ -129,7 +146,9 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeRespons
     run_after_login(getattr(state, "after_login_hooks", ()), user.ldap_login, pw)
     log.info("вход выполнен: %s", user.ldap_login)
     return _me(
-        SessionContext(user.ldap_login, user.role, session_id),
+        SessionContext(
+            user.ldap_login, user.role, session_id, display_name or user.display_name
+        ),
         settings,
         _jira_status(state, user.ldap_login),
     )

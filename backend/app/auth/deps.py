@@ -24,6 +24,7 @@ class SessionContext:
     login: str
     role: str
     session_id: str
+    display_name: str | None = None
 
 
 def _unauthorized() -> HTTPException:
@@ -46,7 +47,10 @@ def authenticated(
         repo.revoke_session(h)  # отзыв доступа действует немедленно (FR-021, UC-006)
         raise _unauthorized()
     repo.touch_session(h)
-    return SessionContext(login=user.ldap_login, role=user.role, session_id=session_id)
+    return SessionContext(
+        login=user.ldap_login, role=user.role, session_id=session_id,
+        display_name=user.display_name,
+    )
 
 
 def authenticated_csrf(

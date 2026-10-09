@@ -16,6 +16,7 @@ class AppUser:
     ldap_login: str
     role: str
     active: bool
+    display_name: str | None = None  # ФИО из LDAP (cn), KON-60
 
 
 @dataclass(frozen=True)
@@ -52,10 +53,23 @@ class AppRepo:
     def get_user(self, login: str) -> AppUser | None:
         with self._pool.connection() as conn:
             row = conn.execute(
-                "SELECT ldap_login, role, active FROM app.app_user WHERE ldap_login = %s",
+                "SELECT ldap_login, role, active, display_name FROM app.app_user "
+                "WHERE ldap_login = %s",
                 (login,),
             ).fetchone()
         return AppUser(*row) if row else None
+
+    def set_display_name(self, login: str, display_name: str) -> None:
+        """Сохранить ФИО из LDAP (при каждом входе); пустое не пишется, прежнее остаётся."""
+        name = display_name.strip()[:256]
+        if not name:
+            return
+        with self._pool.connection() as conn:
+            conn.execute(
+                "UPDATE app.app_user SET display_name = %s "
+                "WHERE ldap_login = %s AND display_name IS DISTINCT FROM %s",
+                (name, login, name),
+            )
 
     def list_users(self) -> list[AppUser]:
         with self._pool.connection() as conn:

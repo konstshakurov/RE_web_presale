@@ -1,0 +1,47 @@
+# Вымышленные тестовые пользователи для KON-56 (домен qa.example.test, не реальный).
+# Пароли в репозитории не хранятся: плейсхолдеры FAKE_PW_* подставляет load_seed.sh
+# из переменных окружения QA_LDAP_PW_* (локальный .env).
+# Раскладка DN повторяет схему FreeIPA: uid=<login>,cn=users,cn=accounts,<base>.
+
+dn: cn=accounts,dc=qa,dc=example,dc=test
+objectClass: organizationalRole
+cn: accounts
+
+dn: cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: organizationalRole
+cn: users
+
+# Администратор приложения (в списке допущенных, role=admin)
+dn: uid=qa-admin,cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: inetOrgPerson
+uid: qa-admin
+cn: QA Admin Fiction
+sn: Admin
+mail: qa-admin@qa.example.test
+userPassword: FAKE_PW_ADMIN
+
+# Обычный пользователь (в списке допущенных, role=user)
+dn: uid=qa-user,cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: inetOrgPerson
+uid: qa-user
+cn: QA User Fiction
+sn: User
+mail: qa-user@qa.example.test
+userPassword: FAKE_PW_USER
+
+# Верный LDAP, но НЕ в списке допущенных приложения
+dn: uid=qa-outsider,cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: inetOrgPerson
+uid: qa-outsider
+cn: QA Outsider Fiction
+sn: Outsider
+mail: qa-outsider@qa.example.test
+userPassword: FAKE_PW_OUTSIDER
+
+# Верный LDAP; в тестах заводится в списке и затем отзывается (UC-006 1а)
+dn: uid=qa-revoked,cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: inetOrgPerson
+uid: qa-revoked
+cn: QA Revoked Fiction
+sn: Revoked
+userPassword: FAKE_PW_REVOKED

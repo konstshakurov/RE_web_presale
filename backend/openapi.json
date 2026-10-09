@@ -30,6 +30,7 @@
                 "type": "null"
               }
             ],
+            "description": "Подробнее об опыте (customfield_13504) - «описание» FR-002",
             "title": "Extra Experience"
           },
           "full_name": {
@@ -93,6 +94,18 @@
             "format": "date-time",
             "title": "Synced At",
             "type": "string"
+          },
+          "vacation_plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Поле Jira «Отпуск» как есть (FR-002)",
+            "title": "Vacation Plan"
           }
         },
         "required": [

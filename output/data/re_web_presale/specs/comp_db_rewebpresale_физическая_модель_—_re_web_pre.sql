@@ -112,19 +112,22 @@ CREATE TABLE app.jira_need (
     jira_created_at timestamptz NOT NULL,
     jira_updated_at timestamptz NOT NULL,
     synced_at timestamptz NOT NULL DEFAULT now(),
+    employee_login text,  -- V006 (KON-61): 'Профиль сотрудника' customfield_10707, нижний регистр
     CONSTRAINT jira_need_key_chk CHECK (jira_key ~ '^[A-Z][A-Z0-9_]*-[0-9]+$'),
     CONSTRAINT jira_need_contract_chk CHECK (contract_type IS NULL OR contract_type IN ('Прямой контракт', 'Субподрядчик')),
     CONSTRAINT jira_need_currency_chk CHECK (rate_currency IS NULL OR rate_currency IN ('RUB', 'USD', 'KZT')),
     CONSTRAINT jira_need_proposer_chk CHECK (rate_proposer IS NULL OR rate_proposer IN ('от клиента', 'от производства')),
     CONSTRAINT jira_need_rate_chk CHECK (rate_amount IS NULL OR rate_amount >= 0),
     CONSTRAINT jira_need_rate_cur_chk CHECK (rate_amount IS NULL OR rate_currency IS NOT NULL),
-    CONSTRAINT jira_need_vat_rub_chk CHECK (rate_amount IS NULL OR rate_currency IS DISTINCT FROM 'RUB' OR rate_includes_vat IS NOT NULL)
+    CONSTRAINT jira_need_vat_rub_chk CHECK (rate_amount IS NULL OR rate_currency IS DISTINCT FROM 'RUB' OR rate_includes_vat IS NOT NULL),
+    CONSTRAINT jira_need_employee_login_chk CHECK (employee_login IS NULL OR (employee_login = lower(employee_login) AND length(employee_login) BETWEEN 1 AND 128))
 );
 CREATE INDEX jira_need_status_updated_idx ON app.jira_need (status, jira_updated_at DESC);
 CREATE INDEX jira_need_created_idx ON app.jira_need (jira_created_at DESC);
 CREATE INDEX jira_need_updated_idx ON app.jira_need (jira_updated_at DESC);
 CREATE INDEX jira_need_epic_idx ON app.jira_need (epic_key) WHERE epic_key IS NOT NULL;
 CREATE INDEX jira_need_employee_idx ON app.jira_need (employee_key, jira_created_at DESC) WHERE employee_key IS NOT NULL;
+CREATE INDEX jira_need_employee_login_idx ON app.jira_need (employee_login) WHERE employee_login IS NOT NULL;
 
 CREATE TABLE app.jira_need_tag (
     need_key text NOT NULL REFERENCES app.jira_need (jira_key) ON DELETE CASCADE,
@@ -142,9 +145,14 @@ CREATE TABLE app.sync_state (
     last_error text,
     last_error_at timestamptz,
     initial_load_done boolean NOT NULL DEFAULT false,
+    last_error_code text,  -- V005 (KON-35)
     CONSTRAINT sync_state_scope_chk CHECK (scope IN ('needs'))
 );
 INSERT INTO app.sync_state (scope) VALUES ('needs');
+-- V007 (KON-61): начальные данные app.status_group / status_group_status (FR-035):
+-- 1 Без кандидата = Требуется кандидат, Поиск кандидата, Найм, Отказ по кандидату, Интервью не пройдено;
+-- 2 Кандидат назначен; 3 Интервью = Подготовка к интервью, Интервью состоялось, Интервью пройдено, Интервью не пройдено;
+-- 4 Закреплён = Закреплен за проектом. 'Прочие' и 'Все статусы' виртуальные.
 
 -- ===== cv_db =====
 CREATE SCHEMA cv;
@@ -159,12 +167,17 @@ CREATE TABLE cv.employee (
     note_author text,
     note_updated_at timestamptz,
     synced_at timestamptz NOT NULL DEFAULT now(),
+    jira_login text,        -- V006 (KON-61): 'Профиль сотрудника' 10707, не UNIQUE
+    vacation_plan text,     -- V006: поле 'Отпуск' 10814 как есть (FR-002); NULL - поле пусто
     CONSTRAINT employee_key_chk CHECK (jira_key ~ '^[A-Z][A-Z0-9_]*-[0-9]+$'),
     CONSTRAINT employee_name_chk CHECK (length(btrim(full_name)) > 0),
-    CONSTRAINT employee_note_chk CHECK (note IS NULL OR (note_author IS NOT NULL AND note_updated_at IS NOT NULL))
+    CONSTRAINT employee_note_chk CHECK (note IS NULL OR (note_author IS NOT NULL AND note_updated_at IS NOT NULL)),
+    CONSTRAINT employee_login_chk CHECK (jira_login IS NULL OR (jira_login = lower(jira_login) AND length(jira_login) BETWEEN 1 AND 128)),
+    CONSTRAINT employee_vacation_plan_chk CHECK (vacation_plan IS NULL OR length(vacation_plan) BETWEEN 1 AND 128)
 );
 CREATE INDEX employee_status_idx ON cv.employee (status);
 CREATE INDEX employee_assignable_idx ON cv.employee (assignable) WHERE assignable;
+CREATE INDEX employee_login_idx ON cv.employee (jira_login) WHERE jira_login IS NOT NULL;
 
 CREATE TABLE cv.sync_state (
     scope text PRIMARY KEY,
@@ -173,6 +186,7 @@ CREATE TABLE cv.sync_state (
     last_attempt_at timestamptz,
     last_error text,
     last_error_at timestamptz,
+    last_error_code text,  -- V005 (KON-35)
     CONSTRAINT cv_sync_state_scope_chk CHECK (scope IN ('employees'))
 );
 INSERT INTO cv.sync_state (scope) VALUES ('employees');

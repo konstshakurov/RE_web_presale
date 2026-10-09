@@ -106,7 +106,9 @@ class EmployeeOut(BaseModel):
     full_name: str
     status: str
     assignable: bool
-    extra_experience: str | None = None
+    extra_experience: str | None = Field(
+        None, description="Подробнее об опыте (customfield_13504) - «описание» FR-002")
+    vacation_plan: str | None = Field(None, description="Поле Jira «Отпуск» как есть (FR-002)")
     note: str | None = None
     note_author: str | None = None
     note_updated_at: datetime | None = None

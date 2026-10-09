@@ -22,14 +22,20 @@ F_RATE_CURRENCY = "customfield_20811"
 F_RATE_UNIT = "customfield_20812"
 F_RATE_PROPOSER = "customfield_21105"
 F_EXTRA_EXPERIENCE = "customfield_13504"
+#: «Профиль сотрудника» (тип user): у потребности и у карточки сотрудника; значение - логин.
+#: Не customfield_11515: там числовой «ID пользователя», не логин.
+F_PROFILE = "customfield_10707"
+F_VACATION = "customfield_10814"  # «Отпуск», radiobuttons; даты 10815/10816 не нужны
 
 #: Только нужные поля (FR-028): без списка Jira отдаёт сотни полей.
 NEED_FIELDS: tuple[str, ...] = (
     "summary", "description", "status", "created", "updated", "assignee", "reporter",
     F_EPIC_LINK, F_REQUIREMENTS, F_CONTRACT,
-    F_RATE, F_RATE_VAT, F_RATE_CURRENCY, F_RATE_UNIT, F_RATE_PROPOSER,
+    F_RATE, F_RATE_VAT, F_RATE_CURRENCY, F_RATE_UNIT, F_RATE_PROPOSER, F_PROFILE,
 )
-EMPLOYEE_FIELDS: tuple[str, ...] = ("summary", "status", "updated", F_EXTRA_EXPERIENCE)
+EMPLOYEE_FIELDS: tuple[str, ...] = (
+    "summary", "status", "updated", F_EXTRA_EXPERIENCE, F_PROFILE, F_VACATION,
+)
 
 #: Правила и условия клиента на эпике (FR-015): поле Jira -> название для пользователя.
 EPIC_RULE_FIELDS: dict[str, str] = {
@@ -78,6 +84,8 @@ class NeedRow:
     jira_created_at: datetime
     jira_updated_at: datetime
     rate_dropped: bool = False  # ставка в Jira есть, но схема её не принимает
+    employee_login: str | None = None  # «Профиль сотрудника», нижний регистр
+    employee_key: str | None = None  # проставляет sync по cv.employee.jira_login, не mapping
 
 
 @dataclass(frozen=True)
@@ -87,6 +95,8 @@ class EmployeeRow:
     status: str
     assignable: bool
     extra_experience: str | None
+    jira_login: str | None = None
+    vacation_plan: str | None = None  # значение «Отпуск» как есть, пусто -> None
 
 
 def parse_jira_dt(value: Any) -> datetime | None:
@@ -129,6 +139,18 @@ def _login(value: Any) -> str | None:
         v = value.get("name") or value.get("key")
         return v.strip() if isinstance(v, str) and v.strip() else None
     return None
+
+
+def _profile_login(value: Any) -> str | None:
+    """Логин из поля типа user в нижнем регистре; ``name``, иначе ``key``. Пусто -> None."""
+    login = _login(value)
+    return login.lower() if login and len(login) <= 128 else None
+
+
+def _vacation_plan(value: Any) -> str | None:
+    """Значение option «Отпуск» как есть («не указано» тоже хранится как есть)."""
+    text = _text(value)
+    return text if text and len(text) <= 128 else None
 
 
 def _amount(value: Any) -> Decimal | None:
@@ -200,6 +222,7 @@ def map_need(issue: dict[str, Any]) -> NeedRow | None:
         jira_created_at=created,
         jira_updated_at=updated,
         rate_dropped=dropped,
+        employee_login=_profile_login(fields.get(F_PROFILE)),
     )
 
 
@@ -219,6 +242,8 @@ def map_employee(issue: dict[str, Any]) -> EmployeeRow | None:
         status=status,
         assignable=status not in NOT_ASSIGNABLE_STATUSES,
         extra_experience=_text(fields.get(F_EXTRA_EXPERIENCE)),
+        jira_login=_profile_login(fields.get(F_PROFILE)),
+        vacation_plan=_vacation_plan(fields.get(F_VACATION)),
     )
 
 

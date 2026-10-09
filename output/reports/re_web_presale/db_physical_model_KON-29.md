@@ -80,22 +80,22 @@ erDiagram
 | `llm_provider` | LLM-провайдеры (FR-030) | `id` | уникальное имя, единственный `is_default` (partial unique), таймаут 1..3600 |
 | `secret_store` | шифрованные секреты | `id` | `kind` jira_session/llm_key, владелец или провайдер строго по виду, nonce = 12 байт, ciphertext >= 16 байт, по одной записи на пользователя/провайдера |
 | `app_setting` | настройки (jql_needs, vat_percent, max_file_mb) | `key` | формат ключа `[a-z0-9_]` |
-| `status_group`, `status_group_status` | группы статусов (FR-035) | `id`; `(group_id, status_name)` | статус в нескольких группах допустим |
+| `status_group`, `status_group_status` | группы статусов (FR-035) | `id`; `(group_id, status_name)` | статус в нескольких группах допустим; 4 группы заполнены миграцией V007 (Без кандидата, Кандидат назначен, Интервью, Закреплён; 11 пар, «Интервью не пройдено» в двух группах); «Прочие» и «Все статусы» виртуальные |
 | `jira_epic` | Client: эпик с правилами | `epic_key` | `rules_cache jsonb` + `rules_fetched_at` |
-| `jira_need` | Need: кэш потребности | `jira_key` | см. п. 6 |
+| `jira_need` | Need: кэш потребности | `jira_key` | см. п. 6; `employee_login text NULL` (V006, KON-61) — «Профиль сотрудника» `customfield_10707`, нижний регистр, CHECK 1..128, частичный индекс; `employee_key` ставится, только если логин однозначно найден в `cv.employee.jira_login`, иначе NULL (FK нет, ADR-003); валюты RUB/USD/KZT, EUR/GBR не применяются (решение владельца 09.10) |
 | `jira_need_tag` | теги потребности | `(need_key, tag)` | теги в нижнем регистре |
-| `sync_state` | состояние опроса потребностей | `scope = 'needs'` | курсор, штамп, ошибка |
+| `sync_state` | состояние опроса потребностей | `scope = 'needs'` | курсор, штамп, ошибка; `last_error_code text NULL` (V005, KON-35: needs_reauthorization, no_permission, jira_unavailable, jira_error, not_enabled, error; NULL - последний опрос успешен) |
 
 ### cv_db, схема `cv`
 
 | Таблица | Назначение | Ключ | Ограничения и заметки |
 |---------|-----------|------|------------------------|
-| `employee` | Employee: кэш карточки Jira + заметка | `jira_key` | заметка всегда с автором и датой (FR-033) |
+| `employee` | Employee: кэш карточки Jira + заметка | `jira_key` | заметка всегда с автором и датой (FR-033); V006 (KON-61): `jira_login` («Профиль сотрудника» 10707, не UNIQUE — дубль означает неоднозначное сопоставление, CHECK нижний регистр 1..128, частичный индекс), `vacation_plan` (поле «Отпуск» 10814 как есть, CHECK длины 1..128; даты отпусков и задачи VACATION-* не хранятся); «описание» FR-002 = `extra_experience` (customfield_13504, решение владельца 09.10); `customfield_11515` — числовой ID, логином не является и не хранится |
 | `employee_file` | метаданные файлов | `id` | вид, клиент шаблона, архив, извлечённый текст, см. п. 7 |
 | `employee_file_content` | байты файла | `file_id` | 1..10 МБ |
 | `employee_file_skill` | навыки основного CV | `(file_id, tag)` | пересчёт при замене файла |
 | `recommendation` | кэш оценок LLM | `id` | уникальность `(need_key, cv_file_id, model)`, составной FK на основное CV того же сотрудника |
-| `sync_state` | состояние опроса сотрудников | `scope = 'employees'` | штамп «актуально на» |
+| `sync_state` | состояние опроса сотрудников | `scope = 'employees'` | штамп «актуально на»; `last_error_code text NULL` (V005, коды как в app_db) |
 
 ## 5. Трассировка ERD-001 → таблицы
 
@@ -173,7 +173,7 @@ erDiagram
 ## 10. Порядок применения
 
 1. `bootstrap/00_roles_and_databases.sql` (суперпользователь, один раз; пароли через `-v app_rw_password=... -v cv_rw_password=...`, в репозитории паролей нет).
-2. `app_db`: V001 ядро, V002 кэш Jira, V003 права, V004 `app_user.display_name` (KON-60, 09.10.2026).
+2. `app_db`: V001 ядро, V002 кэш Jira, V003 права, V004 `app_user.display_name` (KON-60), V005 `sync_state.last_error_code` (KON-35), V006 `jira_need.employee_login` (KON-61), V007 заполнение групп статусов (KON-61); cv_db дополнительно: V005 `sync_state.last_error_code`, V006 поля сотрудника для синхронизации (KON-61) — все 09.10.2026.
 3. `cv_db`: V001 сотрудники и файлы, V002 рекомендации, V003 архив основного CV, V004 права.
 4. Тестовые данные (только тест): `seed/app_db_seed.sql`, `seed/cv_db_seed.sql`; очистка `*_seed.down.sql`.
 5. Откат: `<версия>.down.sql` в обратном порядке; `apply.sh up|down <db> [N]` автоматизирует прогон и ведёт `meta.schema_migration`.

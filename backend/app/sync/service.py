@@ -20,6 +20,7 @@ from .mapping import (
     EPIC_FIELDS,
     KEY_RE,
     NEED_FIELDS,
+    NeedRow,
     jql_time,
     map_employee,
     map_epic_rules,
@@ -237,7 +238,7 @@ class SyncService:
         res = SyncResult(scope=SCOPE_NEEDS, ok=True, fetched=len(issues))
         res.skipped = len(issues) - len(rows)
         res.rates_dropped = sum(1 for r in rows if r.rate_dropped)
-        res.upserted = self._repo.upsert_needs(rows)
+        res.upserted = self._repo.upsert_needs(self._link_employees(rows))
         self._repo.record_attempt_success(SCOPE_NEEDS, started)
         return res
 
@@ -252,8 +253,40 @@ class SyncService:
         res = SyncResult(scope=SCOPE_EMPLOYEES, ok=True, fetched=len(issues))
         res.skipped = len(issues) - len(rows)
         res.upserted = self._repo.upsert_employees(rows)
+        self._reconcile_employees()
         self._repo.record_attempt_success(SCOPE_EMPLOYEES, started)
         return res
+
+    def _login_map(self) -> dict[str, str] | None:
+        """Карта логин -> ключ карточки (только однозначные); None, если cv_db не доступна."""
+        if not self._repo.has_cv:
+            return None
+        try:
+            return self._repo.employee_login_map()
+        except Exception:  # noqa: BLE001 - связь с сотрудником вторична, опрос из-за неё не падает
+            log.warning("карта логинов сотрудников недоступна", exc_info=True)
+            return None
+
+    def _link_employees(self, rows: list[NeedRow]) -> list[NeedRow]:
+        """employee_key = карточка с логином из «Профиля сотрудника», только если она одна;
+        иначе None (не угадываем)."""
+        mapping = self._login_map()
+        if mapping is None:
+            return rows
+        return [
+            replace(r, employee_key=mapping.get(r.employee_login)) if r.employee_login else r
+            for r in rows
+        ]
+
+    def _reconcile_employees(self) -> None:
+        """После опроса сотрудников: пересверить employee_key потребностей в кэше."""
+        mapping = self._login_map()
+        if mapping is None:
+            return
+        try:
+            self._repo.reconcile_need_employees(mapping)
+        except Exception:  # noqa: BLE001
+            log.warning("сверка потребностей с сотрудниками не выполнена", exc_info=True)
 
     def _run_scope(self, scope: str, logins: list[str]) -> SyncResult:
         """Опрос под блокировкой. Перебирает токены: отвергнутый (401) пропускается, остальные
@@ -371,7 +404,7 @@ class SyncService:
         # связь с эпиком даёт сам Agile API, даже если Epic Link в ответе не пришёл
         rows = [r if r.epic_key == epic_key else replace(r, epic_key=epic_key) for r in rows]
         self._repo.save_epic(epic_key, str(name), summary, map_epic_rules(fields))
-        self._repo.upsert_needs(rows)
+        self._repo.upsert_needs(self._link_employees(rows))
 
     def _epic_view(self, row: EpicRow, *, stale: bool, error: SyncError | None) -> EpicView:
         return EpicView(

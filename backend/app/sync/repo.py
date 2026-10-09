@@ -66,14 +66,14 @@ _STATE_COLS = (
 _NEED_COLS = (
     "jira_key, title, description, requirements_text, status, epic_key, assignee, author, "
     "contract_type, rate_amount, rate_currency, rate_includes_vat, rate_unit, rate_proposer, "
-    "jira_created_at, jira_updated_at"
+    "jira_created_at, jira_updated_at, employee_login, employee_key"
 )
 _NEED_UPSERT = (
     f"INSERT INTO app.jira_need ({_NEED_COLS}) VALUES "
     "(%(jira_key)s, %(title)s, %(description)s, %(requirements_text)s, %(status)s, %(epic_key)s, "
     "%(assignee)s, %(author)s, %(contract_type)s, %(rate_amount)s, %(rate_currency)s, "
     "%(rate_includes_vat)s, %(rate_unit)s, %(rate_proposer)s, %(jira_created_at)s, "
-    "%(jira_updated_at)s) "
+    "%(jira_updated_at)s, %(employee_login)s, %(employee_key)s) "
     "ON CONFLICT (jira_key) DO UPDATE SET title = EXCLUDED.title, "
     "description = EXCLUDED.description, requirements_text = EXCLUDED.requirements_text, "
     "status = EXCLUDED.status, epic_key = EXCLUDED.epic_key, assignee = EXCLUDED.assignee, "
@@ -81,7 +81,12 @@ _NEED_UPSERT = (
     "rate_amount = EXCLUDED.rate_amount, rate_currency = EXCLUDED.rate_currency, "
     "rate_includes_vat = EXCLUDED.rate_includes_vat, rate_unit = EXCLUDED.rate_unit, "
     "rate_proposer = EXCLUDED.rate_proposer, jira_created_at = EXCLUDED.jira_created_at, "
-    "jira_updated_at = EXCLUDED.jira_updated_at, synced_at = now() "
+    "jira_updated_at = EXCLUDED.jira_updated_at, employee_login = EXCLUDED.employee_login, "
+    # ключ сотрудника не затирается, пока логин тот же, а карточку не нашли (cv_db недоступна)
+    "employee_key = CASE WHEN EXCLUDED.employee_login IS NULL THEN NULL "
+    "WHEN EXCLUDED.employee_login IS NOT DISTINCT FROM app.jira_need.employee_login "
+    "THEN COALESCE(EXCLUDED.employee_key, app.jira_need.employee_key) "
+    "ELSE EXCLUDED.employee_key END, synced_at = now() "
     # старый ответ не затирает более свежую строку (эпик открыт параллельно с опросом)
     "WHERE app.jira_need.jira_updated_at <= EXCLUDED.jira_updated_at"
 )
@@ -217,6 +222,24 @@ class SyncRepo:
             conn.cursor().executemany(_NEED_UPSERT, params)
         return len(rows)
 
+    def reconcile_need_employees(self, mapping: dict[str, str]) -> int:
+        """Сверяет employee_key кэша потребностей с однозначной картой логин -> ключ карточки:
+        проставляет найденное, сбрасывает ключи, которые больше не однозначны. Число изменённых."""
+        logins, keys = list(mapping), list(mapping.values())
+        with self._app.connection() as conn, conn.transaction():
+            set_ = conn.execute(
+                "UPDATE app.jira_need n SET employee_key = m.k "
+                "FROM unnest(%s::text[], %s::text[]) AS m (l, k) "
+                "WHERE n.employee_login = m.l AND n.employee_key IS DISTINCT FROM m.k",
+                (logins, keys),
+            ).rowcount
+            cleared = conn.execute(
+                "UPDATE app.jira_need SET employee_key = NULL WHERE employee_key IS NOT NULL "
+                "AND (employee_login IS NULL OR NOT employee_login = ANY(%s::text[]))",
+                (logins,),
+            ).rowcount
+        return set_ + cleared
+
     def list_needs(
         self, f: NeedFilter, *, limit: int, offset: int, sort: str = "created"
     ) -> tuple[list[dict[str, Any]], int]:
@@ -302,20 +325,33 @@ class SyncRepo:
 
     # --- сотрудники (cv_db) ---
 
+    def employee_login_map(self) -> dict[str, str]:
+        """Логин -> ключ карточки только там, где карточка с этим логином ровно одна."""
+        with self._pool_for(SCOPE_EMPLOYEES).connection() as conn:
+            rows = conn.execute(
+                "SELECT jira_login, min(jira_key) FROM cv.employee WHERE jira_login IS NOT NULL "
+                "GROUP BY jira_login HAVING count(*) = 1"
+            ).fetchall()
+        return {r[0]: r[1] for r in rows}
+
     def upsert_employees(self, rows: list[EmployeeRow]) -> int:
         """Идемпотентный upsert; заметка и авторство заметки (FR-033) не затираются."""
         if not rows:
             return 0
         params = [
-            (r.jira_key, r.full_name, r.status, r.assignable, r.extra_experience) for r in rows
+            (r.jira_key, r.full_name, r.status, r.assignable, r.extra_experience, r.jira_login,
+             r.vacation_plan)
+            for r in rows
         ]
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn, conn.transaction():
             conn.cursor().executemany(
                 "INSERT INTO cv.employee (jira_key, full_name, status, assignable, "
-                "extra_experience) VALUES (%s, %s, %s, %s, %s) "
+                "extra_experience, jira_login, vacation_plan) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s) "
                 "ON CONFLICT (jira_key) DO UPDATE SET full_name = EXCLUDED.full_name, "
                 "status = EXCLUDED.status, assignable = EXCLUDED.assignable, "
-                "extra_experience = EXCLUDED.extra_experience, synced_at = now()",
+                "extra_experience = EXCLUDED.extra_experience, jira_login = EXCLUDED.jira_login, "
+                "vacation_plan = EXCLUDED.vacation_plan, synced_at = now()",
                 params,
             )
         return len(rows)
@@ -340,8 +376,9 @@ class SyncRepo:
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn:
             total = conn.execute(f"SELECT count(*) FROM cv.employee{where}", params).fetchone()[0]
             cur = conn.execute(
-                "SELECT jira_key, full_name, status, assignable, extra_experience, note, "
-                "note_author, note_updated_at, synced_at FROM cv.employee"
+                "SELECT jira_key, full_name, status, assignable, extra_experience, "
+                "vacation_plan, note, note_author, note_updated_at, synced_at "
+                "FROM cv.employee"
                 f"{where} ORDER BY full_name, jira_key LIMIT %s OFFSET %s",
                 [*params, limit, offset],
             )

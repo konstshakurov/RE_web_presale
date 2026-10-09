@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import contextlib
+from dataclasses import replace
 from datetime import UTC, datetime
 
 from app.sync.repo import EpicRow, Poller, SyncStateRow
@@ -67,6 +68,19 @@ class FakeSyncRepo:
         for r in rows:
             self.needs[r.jira_key] = r
         return len(rows)
+
+    def employee_login_map(self):
+        by: dict[str, list[str]] = {}
+        for e in self.employees.values():
+            if getattr(e, "jira_login", None):
+                by.setdefault(e.jira_login, []).append(e.jira_key)
+        return {k: v[0] for k, v in by.items() if len(v) == 1}
+
+    def reconcile_need_employees(self, mapping):
+        for k, n in list(self.needs.items()):
+            key = mapping.get(n.employee_login) if n.employee_login else None
+            self.needs[k] = replace(n, employee_key=key)
+        return 0
 
     def upsert_employees(self, rows):
         for r in rows:

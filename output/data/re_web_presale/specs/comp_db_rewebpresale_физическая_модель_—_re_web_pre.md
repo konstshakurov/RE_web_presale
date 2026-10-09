@@ -3,6 +3,7 @@
 PostgreSQL 16, две базы: `app_db` (схема `app`) и `cv_db` (схема `cv`), роли `app_rw` и `cv_rw` без доступа к чужой БД (ADR-003, NFR-007). Полный документ: `output/reports/re_web_presale/db_physical_model_KON-29.md`. Миграции: `db/migrations/`, тестовые данные: `db/seed/`.
 
 ## Изменения
+- 09.10.2026, KON-35: `last_error_code` в `sync_state` обеих БД (V005). KON-61: `jira_need.employee_login` (V006 app_db), заполнение групп статусов FR-035 (V007 app_db), `cv.employee.jira_login/vacation_plan` (V006 cv_db; «описание» FR-002 = `extra_experience`, customfield_13504; даты отпусков и задачи VACATION-* не хранятся). Сопоставление потребность -> сотрудник по логину «Профиль сотрудника» (10707), `employee_key` только при однозначном совпадении. Валюты EUR/GBR не применяются (решение владельца).
 - 09.10.2026, KON-60, миграция app_db V004: `app_user.display_name text NULL` (ФИО из LDAP `cn`, длина 1..256, обновляется при каждом входе; NULL — в интерфейсе показывается логин). E-mail не хранится.
 
 ## app_db

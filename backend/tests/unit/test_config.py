@@ -48,3 +48,9 @@ def test_repr_hides_secrets():
 def test_admin_logins_parsing():
     assert parse_admin_logins("Ivan, petr;IVAN  sidor\n") == ("ivan", "petr", "sidor")
     assert parse_admin_logins("") == ()
+
+
+def test_ldap_bind_template_is_read():
+    tpl = "uid={login},cn=users,dc=example,dc=test"
+    assert load_settings(env(LDAP_BIND_TEMPLATE=tpl)).ldap_bind_template == tpl
+    assert load_settings(env()).ldap_bind_template == ""

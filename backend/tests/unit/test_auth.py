@@ -10,6 +10,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
+from ldap3 import BASE
 
 from app.app_repo.repo import AppUser
 from app.auth import (
@@ -19,7 +20,8 @@ from app.auth import (
     require_admin,
     router,
 )
-from app.auth.ldap_adapter import Ldap3Adapter, build_filter
+from app.auth.ldap_adapter import Ldap3Adapter, build_bind_dn, build_filter
+from app.auth.ldap_port import LdapProfile
 from app.auth.sessions import hash_session_id
 from app.config import ConfigError, Secret, Settings
 from app.logging_setup import configure_logging
@@ -333,3 +335,112 @@ def test_adapter_timeouts_are_int():
     assert isinstance(a._server.connect_timeout, int) and a._server.connect_timeout == 5
     a = Ldap3Adapter("ldap://x:389", "dc=x", "(uid={login})", timeout=0.3)
     assert a._server.connect_timeout == 1
+
+
+# --- прямой bind по LDAP_BIND_TEMPLATE (без сети: Connection заменён фейком) ---
+
+TEMPLATE = "uid={login},cn=users,cn=accounts,dc=example,dc=test"
+FAKE_USER_PW = "FAKE_user_pw_1"
+
+
+class _Entry:
+    def __init__(self, attrs):
+        self.entry_attributes_as_dict = attrs
+
+
+class FakeConn:
+    """Минимальный Connection: пароль проверяется по таблице, search читает запись."""
+
+    instances: list = []
+    accounts: dict = {}
+    attrs: dict = {"cn": ["Test User"], "mail": ["user@example.test"]}
+    search_error: Exception | None = None
+
+    def __init__(self, server, user=None, password=None, **kw):
+        self.user, self.password, self.bound, self.entries = user, password, False, []
+        self.searches: list = []
+        FakeConn.instances.append(self)
+
+    def bind(self):
+        from ldap3.core.exceptions import LDAPInvalidCredentialsResult
+
+        if not self.password or FakeConn.accounts.get(self.user) != self.password:
+            raise LDAPInvalidCredentialsResult()
+        self.bound = True
+
+    def unbind(self):
+        self.bound = False
+
+    def search(self, base, flt, **kw):
+        self.searches.append((base, flt, kw))
+        if FakeConn.search_error:
+            raise FakeConn.search_error
+        self.entries = [_Entry(FakeConn.attrs)] if FakeConn.attrs is not None else []
+
+
+@pytest.fixture()
+def direct(monkeypatch):
+    FakeConn.instances, FakeConn.search_error = [], None
+    FakeConn.attrs = {"cn": ["Test User"], "mail": ["user@example.test"]}
+    FakeConn.accounts = {"uid=ivan,cn=users,cn=accounts,dc=example,dc=test": FAKE_USER_PW}
+    monkeypatch.setattr("app.auth.ldap_adapter.Connection", FakeConn)
+    return Ldap3Adapter("ldap://h:389/", "", "", bind_template=TEMPLATE, timeout=2.4)
+
+
+def test_template_requires_placeholder_and_skips_filter_requirements():
+    with pytest.raises(ConfigError):
+        Ldap3Adapter("ldap://h", "", "", bind_template="uid=fixed,dc=x")
+    Ldap3Adapter("ldap://h", "", "", bind_template=TEMPLATE)  # base_dn/filter не нужны
+
+
+def test_build_bind_dn_escapes_login():
+    dn = build_bind_dn(TEMPLATE, "a,uid=admin+x")
+    assert dn.startswith("uid=a\,uid\=admin\+x,cn=users")
+    assert build_bind_dn(TEMPLATE, "ivan") == "uid=ivan,cn=users,cn=accounts,dc=example,dc=test"
+
+
+def test_direct_bind_reads_profile_without_service_account(direct):
+    p = direct.authenticate_profile("ivan", FAKE_USER_PW)
+    assert p == LdapProfile("Test User", "user@example.test")
+    assert len(FakeConn.instances) == 1  # поиска DN и служебной учётки нет
+    c = FakeConn.instances[0]
+    assert c.user == "uid=ivan,cn=users,cn=accounts,dc=example,dc=test"
+    base, flt, kw = c.searches[0]
+    assert base == c.user and kw["search_scope"] == BASE and kw["attributes"] == ["cn", "mail"]
+    assert direct.authenticate("ivan", FAKE_USER_PW) is True
+
+
+def test_direct_bind_wrong_password_and_empty(direct):
+    assert direct.authenticate("ivan", "FAKE_wrong") is False
+    assert direct.authenticate("ivan", "") is False
+    assert direct.authenticate("nobody", FAKE_USER_PW) is False
+    assert all(not c.searches for c in FakeConn.instances)  # профиль только после bind
+
+
+def test_direct_bind_injection_login_cannot_target_other_dn(direct):
+    assert direct.authenticate("ivan,cn=x", FAKE_USER_PW) is False
+    assert FakeConn.instances[-1].user.startswith(r"uid=ivan\,cn\=x,")
+
+
+@pytest.mark.parametrize("attrs", [None, {}, {"cn": [], "mail": []}])
+def test_profile_missing_attrs_falls_back_to_login(direct, attrs):
+    FakeConn.attrs = attrs
+    assert direct.authenticate_profile("ivan", FAKE_USER_PW) == LdapProfile("ivan", "")
+
+
+def test_profile_read_failure_does_not_break_login(direct):
+    from ldap3.core.exceptions import LDAPInsufficientAccessRightsResult
+
+    FakeConn.search_error = LDAPInsufficientAccessRightsResult()
+    assert direct.authenticate_profile("ivan", FAKE_USER_PW) == LdapProfile("ivan", "")
+
+
+def test_url_with_trailing_slash_is_accepted():
+    a = Ldap3Adapter("ldap://freeipa.example.test:389/", "", "", bind_template=TEMPLATE)
+    assert a._server.host == "freeipa.example.test" and a._server.port == 389
+    assert a._server.ssl is False
+
+
+def test_settings_pass_bind_template():
+    s = make_settings(ldap_url="ldap://h:389/", ldap_bind_template=TEMPLATE, ldap_timeout_sec=5.0)
+    assert Ldap3Adapter.from_settings(s)._bind_template == TEMPLATE

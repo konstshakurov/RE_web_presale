@@ -73,6 +73,7 @@ class Settings:
     ldap_base_dn: str = ""
     ldap_user_filter: str = ""
     ldap_bind_dn: str = ""
+    ldap_bind_template: str = ""  # DN с {login}: прямой bind без поиска
     ldap_bind_password: Secret = Secret("")
     ldap_use_tls: bool = False
     ldap_timeout_sec: float = 5.0
@@ -128,6 +129,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         ldap_base_dn=get("LDAP_BASE_DN"),
         ldap_user_filter=get("LDAP_USER_FILTER"),
         ldap_bind_dn=get("LDAP_BIND_DN"),
+        ldap_bind_template=get("LDAP_BIND_TEMPLATE"),
         ldap_bind_password=Secret(get("LDAP_BIND_PASSWORD")),
         ldap_use_tls=_truthy(get("LDAP_USE_TLS", "false")),
         ldap_timeout_sec=_positive_float(get, "LDAP_TIMEOUT_SEC", "5"),

@@ -1,11 +1,20 @@
 """Порт LDAP: проверка пары логин/пароль. Детали сервера наружу не раскрываются."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol
 
 
 class LdapUnavailable(RuntimeError):
     """Сервер LDAP недоступен, таймаут или сбой протокола. Текст без деталей сервера."""
+
+
+@dataclass(frozen=True)
+class LdapProfile:
+    """Данные записи пользователя после bind: ФИО (cn; при отсутствии - логин) и mail."""
+
+    full_name: str
+    mail: str = ""
 
 
 class LdapPort(Protocol):

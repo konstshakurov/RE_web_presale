@@ -22,7 +22,7 @@ pdf, txt, xls, xlsx, ppt, pptx, png, jpg, jpeg; текст не извлекае
 ## Шлюз LLM (KON-37)
 Модуль `app/llm_gateway`; все обращения к LLM только через него (ADR-007). Миграция app_db V008 (колонка
 `llm_provider.model`, очередь `llm_task`). Внутренняя Qwen (OpenAI-совместимый API) создаётся при старте из
-`LLM_BASE_URL` (по умолчанию адрес из архитектуры), `LLM_MODEL`, ключ `LLM_API_KEY` (только env; ключи
+`LLM_BASE_URL` (по умолчанию адрес из архитектуры), `LLM_MODEL` (по умолчанию `qwen/qwen3.6-35b-a3b`), ключ `LLM_API_KEY` (только env; ключи
 админских провайдеров - шифртекстом в `secret_store`, `kind=llm_key`). Внешний провайдер: обезличивание
 (regex, словари из кэша Jira и CV и админский словарь, natasha NER) -> предпросмотр -> подтверждение
 (`POST /llm/tasks/{id}/confirm`) -> worker вызывает с таймаутом провайдера (по умолчанию 120 с) -> обратная

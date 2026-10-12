@@ -13,6 +13,10 @@ from dataclasses import dataclass, field
 KEY_BYTES = 32
 
 
+# Модель внутренней Qwen по умолчанию (выбор владельца 12.10); переопределяется LLM_MODEL.
+DEFAULT_LLM_MODEL = "qwen/qwen3.6-35b-a3b"
+
+
 class ConfigError(RuntimeError):
     """Конфиг неполон или неверен. Значения секретов в текст не попадают."""
 
@@ -171,7 +175,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         jira_base_url=get("JIRA_BASE_URL"),
         llm_base_url=get("LLM_BASE_URL"),
         llm_api_key=Secret(get("LLM_API_KEY")),
-        llm_model=get("LLM_MODEL"),
+        llm_model=get("LLM_MODEL").strip() or DEFAULT_LLM_MODEL,
         llm_task_ttl_days=_int_range(get, "LLM_TASK_TTL_DAYS", 7, 1, 365),
     )
     settings.enc_key_bytes()  # проверка формата ключа при запуске

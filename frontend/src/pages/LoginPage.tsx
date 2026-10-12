@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import logo from "../assets/logo.png";
 import Header from "../components/Header";
 
 // Возврат на маршрут, с которого увела потеря сессии; только внутренние пути.
@@ -46,6 +47,7 @@ export default function LoginPage() {
       <Header />
       <main className="content">
         <form className="login" method="post" onSubmit={(e) => void onSubmit(e)}>
+          <img className="login__logo" src={logo} alt="" />
           <h1>Вход</h1>
           <label>
             Логин

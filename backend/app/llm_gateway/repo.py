@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from psycopg import errors
+from psycopg import Rollback, errors
 
 from ..secrets.crypto import SealedSecret
 
@@ -251,6 +251,25 @@ class LlmRepo:
                 (task_id,),
             )
             return cur.rowcount == 1
+
+    def confirm_tasks(self, task_ids: list[str]) -> bool:
+        """Групповое подтверждение: все задачи awaiting_confirmation -> queued одной транзакцией.
+        Если хотя бы одна уже не ждёт подтверждения - не меняется ни одна (False)."""
+        ids = sorted(set(task_ids))
+        if not ids:
+            return False
+        ok = False
+        with self._pool.connection() as conn, conn.transaction():
+            rows = conn.execute(
+                "UPDATE app.llm_task SET status = 'queued', confirmed_at = now(), "
+                "updated_at = now() WHERE id = ANY(%s::uuid[]) "
+                "AND status = 'awaiting_confirmation' RETURNING id",
+                (ids,),
+            ).fetchall()
+            if len(rows) != len(ids):
+                raise Rollback  # выход из блока откатывает транзакцию без исключения наружу
+            ok = True
+        return ok
 
     def cancel_task(self, task_id: str) -> bool:
         """Отмена не завершённой задачи; текст и подстановки удаляются."""

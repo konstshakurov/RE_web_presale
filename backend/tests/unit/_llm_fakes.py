@@ -165,6 +165,14 @@ class FakeLlmRepo:
         t.update(status=QUEUED, confirmed_at=NOW)
         return True
 
+    def confirm_tasks(self, task_ids):
+        ids = set(task_ids)
+        if not ids or any(self.tasks[i]["status"] != AWAITING for i in ids):
+            return False
+        for i in ids:
+            self.tasks[i].update(status=QUEUED, confirmed_at=NOW)
+        return True
+
     def cancel_task(self, task_id):
         t = self.tasks[task_id]
         if t["status"] not in (AWAITING, QUEUED, RUNNING):

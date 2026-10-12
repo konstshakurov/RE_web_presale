@@ -289,3 +289,26 @@ def test_key_roundtrip_encrypted_and_not_in_provider_row(env):
     assert env.store.load_llm_key(env.external.id) == FAKE_PROVIDER_KEY
     assert FAKE_PROVIDER_KEY not in repr(env.repo.get_provider(env.external.id))
     assert env.repo.get_provider(env.external.id).has_key is True
+
+
+def test_confirm_many_is_atomic_and_owner_checked(env):
+    """Групповое подтверждение прогона (FR-023): все задачи разом либо ни одной."""
+    ids = [env.gateway.submit("ivan", "match", f"{PROMPT} #{i}", provider_id=env.external.id).id
+           for i in range(3)]
+    other = env.gateway.submit("petr", "match", PROMPT, provider_id=env.external.id).id
+    with pytest.raises(GatewayError) as e:
+        env.gateway.confirm_many("ivan", [*ids, other])        # чужая задача - как «не найдена»
+    assert e.value.code == "task_not_found"
+    assert all(env.repo.tasks[i]["status"] == AWAITING for i in ids)
+
+    env.gateway.cancel("ivan", ids[1])                          # одна уже не ждёт подтверждения
+    with pytest.raises(GatewayError) as e:
+        env.gateway.confirm_many("ivan", ids)
+    assert e.value.code == "not_awaiting_confirmation"
+    assert [env.repo.tasks[i]["status"] for i in (ids[0], ids[2])] == [AWAITING, AWAITING]
+    assert env.gateway.run_next() is None and env.client.calls == []
+
+    views = env.gateway.confirm_many("ivan", [ids[0], ids[2]])
+    assert [v.status for v in views] == [QUEUED, QUEUED]
+    with pytest.raises(GatewayError):
+        env.gateway.confirm_many("ivan", [])

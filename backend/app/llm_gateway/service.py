@@ -173,6 +173,15 @@ class LlmGateway:
                 "not_awaiting_confirmation", "Задача не ожидает подтверждения отправки")
         return self.get(owner_login, task_id)
 
+    def confirm_many(self, owner_login: str, task_ids: list[str]) -> list[TaskView]:
+        """Групповое подтверждение прогона (FR-023): все задачи владельца разом или ни одной.
+        Подтверждается тот предпросмотр, который пользователь видел (текст задач неизменен)."""
+        rows = [self._own(owner_login, t) for t in task_ids]
+        if not rows or not self._repo.confirm_tasks([r.id for r in rows]):
+            raise GatewayError(
+                "not_awaiting_confirmation", "Прогон не ожидает подтверждения отправки")
+        return [self.get(owner_login, r.id) for r in rows]
+
     def cancel(self, owner_login: str, task_id: str) -> TaskView:
         row = self._own(owner_login, task_id)
         if not self._repo.cancel_task(row.id):

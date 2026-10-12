@@ -206,3 +206,17 @@ def test_dictionary_sources_and_custom_dictionary(env):
     got = src.load_custom()
     assert got.projects == ("Проект-Тест-37",)
     assert "Проект-Тест-37" in src.load().projects
+
+
+def test_group_confirm_is_all_or_nothing_in_one_transaction(env):
+    pool, repo, _, gw, svc, _ = env
+    p = _ext(svc)
+    ids = [gw.submit(USER, "chat", f"запрос {i}", provider_id=p.id).id for i in range(3)]
+    assert repo.cancel_task(ids[1])
+    assert repo.confirm_tasks(ids) is False                 # одна не ждёт: откат всей группы
+    assert repo.get_task(ids[0]).status == "awaiting_confirmation"
+    assert repo.get_task(ids[2]).status == "awaiting_confirmation"
+    assert repo.confirm_tasks([ids[0], ids[2]]) is True
+    assert [repo.get_task(i).status for i in (ids[0], ids[2])] == [QUEUED, QUEUED]
+    assert repo.get_task(ids[0]).confirmed_at is not None
+    assert repo.confirm_tasks([ids[0]]) is False and repo.confirm_tasks([]) is False

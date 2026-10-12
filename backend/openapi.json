@@ -539,11 +539,23 @@
       "LimitsOut": {
         "properties": {
           "cv_extensions": {
+            "description": "Форматы main_cv и extra_cv: только doc, docx",
             "items": {
               "type": "string"
             },
             "title": "Cv Extensions",
             "type": "array"
+          },
+          "extensions_by_kind": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "Допустимые расширения по типу файла: main_cv, extra_cv, materials",
+            "title": "Extensions By Kind",
+            "type": "object"
           },
           "materials_extensions": {
             "items": {
@@ -589,6 +601,7 @@
           "upload_kinds",
           "cv_extensions",
           "materials_extensions",
+          "extensions_by_kind",
           "text_extraction"
         ],
         "title": "LimitsOut",
@@ -2337,7 +2350,7 @@
         ]
       },
       "post": {
-        "description": "Загрузить ОДИН файл: тело запроса - содержимое файла (Content-Type любой).\n\nНедопустимый формат и файл больше лимита отклоняются, в карточку не попадают (FR-022 п. 3).\nОсновное CV заменяет прежнее, прежнее уходит в архив (FR-039); текст извлекается при\nзагрузке (DOC/DOCX/TXT, FR-027): сбой извлечения не отменяет загрузку, статус ``error``.",
+        "description": "Загрузить ОДИН файл: тело запроса - содержимое файла (Content-Type любой).\n\nНедопустимый формат и файл больше лимита отклоняются, в карточку не попадают (FR-022 п. 3).\nОсновное CV заменяет прежнее, прежнее уходит в архив (FR-039); текст извлекается при\nзагрузке (только CV: DOC/DOCX, FR-027): сбой извлечения не отменяет загрузку, статус ``error``.",
         "operationId": "upload_file_cv_employees__employee_key__files_post",
         "parameters": [
           {

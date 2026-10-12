@@ -104,8 +104,10 @@ class LimitsOut(BaseModel):
     max_file_bytes: int
     max_file_mb_ceiling: int = Field(description="Потолок 10 МБ задан в БД (ADR-009)")
     upload_kinds: dict[str, str] = Field(description="Тип файла -> название")
-    cv_extensions: list[str]
+    cv_extensions: list[str] = Field(description="Форматы main_cv и extra_cv: только doc, docx")
     materials_extensions: list[str]
+    extensions_by_kind: dict[str, list[str]] = Field(
+        description="Допустимые расширения по типу файла: main_cv, extra_cv, materials")
     text_extraction: list[str] = Field(description="Расширения, из которых извлекается текст")
 
 
@@ -164,6 +166,7 @@ def get_limits(request: Request, _: SessionContext = Depends(authenticated)) -> 
         max_file_mb=mb, max_file_bytes=mb * 1024 * 1024, max_file_mb_ceiling=HARD_MAX_MB,
         upload_kinds={k: KIND_TITLES[k] for k in UPLOAD_KINDS},
         cv_extensions=sorted(CV_EXTENSIONS), materials_extensions=sorted(MATERIAL_EXTENSIONS),
+        extensions_by_kind={k: sorted(allowed_extensions(k)) for k in UPLOAD_KINDS},
         text_extraction=sorted(EXTRACTABLE),
     )
 
@@ -221,7 +224,7 @@ async def upload_file(
 
     Недопустимый формат и файл больше лимита отклоняются, в карточку не попадают (FR-022 п. 3).
     Основное CV заменяет прежнее, прежнее уходит в архив (FR-039); текст извлекается при
-    загрузке (DOC/DOCX/TXT, FR-027): сбой извлечения не отменяет загрузку, статус ``error``.
+    загрузке (только CV: DOC/DOCX, FR-027): сбой извлечения не отменяет загрузку, статус ``error``.
     """
     repo = _repo(request)
     limit = _limits(request).max_bytes()
@@ -229,8 +232,11 @@ async def upload_file(
     ext = extension(name)
     if not name or ext not in allowed_extensions(kind):
         allowed = ", ".join("." + e for e in sorted(allowed_extensions(kind)))
+        what = KIND_TITLES[kind] if kind in CV_KINDS else "материалов"
         raise HTTPException(
-            status_code=415, detail=f"Недопустимый формат файла. Допустимо: {allowed}")
+            status_code=415,
+            detail=f"Формат файла .{ext or '?'} не поддерживается для типа «{what}». "
+                   f"Допустимо: {allowed}")
     if not await run_in_threadpool(repo.employee_exists, employee_key):
         raise HTTPException(status_code=404, detail=EMPLOYEE_NOT_FOUND)
 

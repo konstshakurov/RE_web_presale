@@ -168,13 +168,13 @@ def test_end_to_end_through_api(env):
     second = up("cv2.docx", build_docx(["Второе резюме"]))
     assert second["replaced_file_id"] == first["id"]
     up("proj.pptx", b"PK\x03\x04pp", kind="materials")
-    up("scan.pdf", b"%PDF-1.4 scan", kind="extra_cv")
+    up("scan.pdf", b"%PDF-1.4 scan", kind="materials")
 
     listing = client.get(f"/cv/employees/{E1}/files").json()
     assert {f["file_name"] for f in listing["files"]} == {"cv2.docx", "proj.pptx", "scan.pdf"}
     assert [f["id"] for f in listing["archive"]] == [first["id"]]
     assert next(f for f in listing["files"] if f["file_name"] == "scan.pdf")[
-        "extraction_status"] == "error"
+        "extraction_status"] == "none"
 
     dl = client.get(f"/cv/files/{first['id']}/download")  # архивную версию тоже можно скачать
     assert dl.content == doc

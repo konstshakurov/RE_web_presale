@@ -1,4 +1,4 @@
-"""Извлечение текста из CV (FR-027): DOCX, DOC, TXT, отказы. БД не нужна."""
+"""Извлечение текста из CV (FR-027): DOCX, DOC, отказы. БД не нужна."""
 from __future__ import annotations
 
 import pytest
@@ -57,14 +57,16 @@ def test_empty_text_is_error():
         extract_text("scan.docx", build_docx(["  "]))
 
 
-def test_txt_utf8_and_cp1251():
-    assert extract_text("a.txt", "Привет".encode("utf-8-sig")) == "Привет"
-    assert extract_text("a.txt", "Привет".encode("cp1251")) == "Привет"
-
-
-def test_pdf_not_supported():
+@pytest.mark.parametrize("name", ["a.txt", "a.pdf"])
+def test_txt_pdf_not_extractable(name):
     with pytest.raises(ExtractError, match="не поддерживается"):
-        extract_text("a.pdf", b"%PDF-1.4")
+        extract_text(name, b"%PDF-1.4")
+
+
+def test_format_lists():
+    from app.cv.formats import CV_EXTENSIONS, EXTRACTABLE, MATERIAL_EXTENSIONS
+    assert CV_EXTENSIONS == {"doc", "docx"} == EXTRACTABLE
+    assert {"pdf", "txt", "xls", "xlsx", "ppt", "pptx", "png", "jpg", "jpeg"} <= MATERIAL_EXTENSIONS
 
 
 def test_file_name_helpers():

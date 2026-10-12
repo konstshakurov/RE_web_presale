@@ -1,6 +1,7 @@
 """Кэш Jira на настоящей БД (KON-35): upsert, фильтры, группы, скорость, sync_state, сотрудники.
 
-Нужны TEST_APP_DB_URL (роль app_rw, миграции V001-V005) и TEST_CV_DB_URL (роль cv_rw, V001-V005).
+Нужны TEST_APP_DB_URL (роль app_rw, миграции app_db V001-V007) и TEST_CV_DB_URL (роль cv_rw,
+миграции cv_db V001-V006).
 Без переменных тесты пропускаются. Данные тестов имеют префикс KONT35, после теста удаляются.
 """
 from __future__ import annotations

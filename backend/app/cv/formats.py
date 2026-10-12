@@ -1,5 +1,7 @@
-"""Форматы и имена файлов сотрудников (FR-022). Допущение: список форматов в ФТ не назван,
-принят набор для резюме (DOC, DOCX, PDF, TXT) и примеров работ (+ таблицы, презентации, картинки).
+"""Форматы и имена файлов сотрудников (FR-022). Список форматов в ФТ не назван, решение владельца:
+CV (основное и доп.) - только DOC и DOCX (PDF и TXT не принимаются); материалы - DOC, DOCX, PDF,
+TXT, XLS, XLSX, PPT, PPTX, PNG, JPG, JPEG (текст из материалов не извлекается).
+Единственное место, где перечислены форматы.
 """
 from __future__ import annotations
 
@@ -19,10 +21,11 @@ KIND_TITLES = {
     "client_template_cv": "CV по шаблону клиента",
 }
 
-CV_EXTENSIONS = frozenset({"doc", "docx", "pdf", "txt"})
-MATERIAL_EXTENSIONS = CV_EXTENSIONS | {"xls", "xlsx", "ppt", "pptx", "png", "jpg", "jpeg"}
-#: Расширения, из которых умеем доставать текст (FR-027)
-EXTRACTABLE = frozenset({"doc", "docx", "txt"})
+CV_EXTENSIONS = frozenset({"doc", "docx"})
+MATERIAL_EXTENSIONS = frozenset(
+    {"doc", "docx", "pdf", "txt", "xls", "xlsx", "ppt", "pptx", "png", "jpg", "jpeg"})
+#: Расширения CV, из которых достаём текст (FR-027)
+EXTRACTABLE = frozenset({"doc", "docx"})
 
 MIME = {
     "doc": "application/msword",

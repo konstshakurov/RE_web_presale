@@ -1,4 +1,4 @@
-"""Извлечение текста из CV при загрузке (FR-027): DOCX, DOC (Word 97-2003), TXT.
+"""Извлечение текста из CV при загрузке (FR-027): DOCX, DOC (Word 97-2003); других форматов CV нет.
 
 Только стандартная библиотека. Формат определяется по содержимому, а не по расширению.
 Навыки из текста выделяет LLM (KON-38), здесь только текст.
@@ -31,9 +31,7 @@ def extract_text(file_name: str, content: bytes) -> str:
     if ext not in EXTRACTABLE:
         raise ExtractError(f"Извлечение текста для формата .{ext or '?'} не поддерживается")
     try:
-        if ext == "txt":
-            text = _txt(content)
-        elif content.startswith(b"PK\x03\x04"):
+        if content.startswith(b"PK\x03\x04"):
             text = _docx(content)
         elif content.startswith(_CFB_SIG):
             text = _doc(content)
@@ -57,15 +55,6 @@ def _normalize(text: str) -> str:
     text = re.sub(r"[ \t\f\v\xa0]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
-
-
-def _txt(content: bytes) -> str:
-    for enc in ("utf-8-sig", "cp1251"):
-        try:
-            return content.decode(enc)
-        except UnicodeDecodeError:
-            continue
-    return content.decode("utf-8", errors="replace")
 
 
 def _docx(content: bytes) -> str:

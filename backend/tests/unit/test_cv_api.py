@@ -169,12 +169,30 @@ def test_upload_main_cv_extracts_text_and_shows_in_list(env):
     assert client.get("/cv/files").json()["items"][0]["id"] == f["id"]
 
 
-def test_upload_extract_error_keeps_file_with_message(env):
+@pytest.mark.parametrize("kind", ["main_cv", "extra_cv"])
+@pytest.mark.parametrize("name,body", [("cv.pdf", b"%PDF-1.4 x"), ("cv.txt", b"text")])
+def test_cv_pdf_txt_rejected_415(env, kind, name, body):
     client, headers, *_ = env
-    r = upload(client, headers, name="cv.pdf", body=b"%PDF-1.4 x")
+    r = upload(client, headers, name=name, kind=kind, body=body)
+    assert r.status_code == 415
+    assert "не поддерживается" in r.json()["detail"] and ".doc, .docx" in r.json()["detail"]
+    assert client.get(f"/cv/employees/{EMP}/files").json()["files"] == []
+
+
+def test_materials_accept_pdf_txt_without_extraction(env):
+    client, headers, *_ = env
+    for name, body in [("a.pdf", b"%PDF-1.4 x"), ("a.txt", b"text")]:
+        r = upload(client, headers, name=name, kind="materials", body=body)
+        assert r.status_code == 201
+        assert r.json()["file"]["extraction_status"] == "none"
+
+
+def test_upload_corrupt_docx_keeps_file_with_error(env):
+    client, headers, *_ = env
+    r = upload(client, headers, name="cv.docx", body=b"PK\x03\x04broken")
     assert r.status_code == 201
     f = r.json()["file"]
-    assert f["extraction_status"] == "error" and "не поддерживается" in f["extraction_message"]
+    assert f["extraction_status"] == "error" and f["extraction_message"]
     cur = client.get(f"/cv/employees/{EMP}/main-cv").json()
     assert cur["extraction_status"] == "error" and cur["text"] is None and cur["message"]
 
@@ -290,7 +308,12 @@ def test_limits_read_and_admin_only_write(env):
     client, headers, _, limits, app = env
     r = client.get("/cv/limits").json()
     assert r["max_file_mb"] == 10 and r["max_file_bytes"] == 10 * MB
-    assert "docx" in r["cv_extensions"] and r["upload_kinds"]["main_cv"] == "Основное CV"
+    assert r["cv_extensions"] == ["doc", "docx"] and "pdf" not in r["cv_extensions"]
+    assert r["extensions_by_kind"]["main_cv"] == r["extensions_by_kind"]["extra_cv"] == [
+        "doc", "docx"]
+    assert "pdf" in r["extensions_by_kind"]["materials"]
+    assert "pdf" in r["materials_extensions"] and r["text_extraction"] == ["doc", "docx"]
+    assert r["upload_kinds"]["main_cv"] == "Основное CV"
     assert client.put("/cv/limits", json={"max_file_mb": 5}, headers=headers).status_code == 403
     admin, ah, _ = make_client(env[2], limits, role="admin")
     assert admin.put("/cv/limits", json={"max_file_mb": 5}, headers=ah).json()["max_file_mb"] == 5

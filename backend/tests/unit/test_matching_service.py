@@ -180,18 +180,35 @@ def test_not_assignable_never_evaluated_and_hidden_after_status_change():
     assert {i.employee_key for i in st.items} == {"EMP-2"}
 
 
-def test_limit_evaluated_and_preselect_by_skills():
+def test_limit_evaluated_and_screening_ranks_by_skills():
+    """Больше N кандидатов: скрининг по навыкам, глубоко оцениваются только топ-N (KON-38)."""
     w = _world(0, max_evaluated=3)
     w.needs.add(NEED, title="Нужен SQL", description="BPMN", requirements=None)
     for i in range(1, 9):
         fid = w.repo.add_employee(f"EMP-{i}", f"Сотрудник-{i:02d}", text=f"CV {i}")
         w.repo.skills[fid] = ["sql", "bpmn"] if i in (6, 7, 8) else ["java"]
+
+    def by_skills(prompt: str) -> str:
+        out, label = [], None
+        for ln in prompt.splitlines():
+            if ln.startswith("### "):
+                label = ln[4:].strip()
+            elif ln.startswith("Навыки из CV:") and label:
+                pct = 90 if "sql" in ln else 10
+                out.append({"id": label, "percent": pct, "rationale": "по навыкам"})
+        return json.dumps(out)
+
+    w.match_reply = by_skills
     st = w.svc.start_match(NEED, LOGIN)
-    assert len(st.tasks) == 1 and st.tasks[0].candidates == 3
+    assert st.stage == "screening" and len(st.tasks) == 1 and st.tasks[0].candidates == 8
+    w.run_all()  # скрининг; по его завершению worker ставит ступень 2
+    st = w.svc.get_state(NEED, limit=10, offset=0)
+    assert st.stage == "deep" and len(st.tasks) == 1 and st.tasks[0].candidates == 3
     w.run_all()
     st = w.svc.get_state(NEED, limit=10, offset=0)
     assert {i.employee_key for i in st.items} == {"EMP-6", "EMP-7", "EMP-8"}
-    assert st.candidates_total == 8 and st.evaluated == 3
+    assert st.candidates_total == 8 and st.evaluated == 3 and st.remaining == 5
+    assert st.screened == 8 and st.status == "done" and st.deep_size == 3
 
 
 def test_second_start_while_running_does_not_duplicate_tasks():

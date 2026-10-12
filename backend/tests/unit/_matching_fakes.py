@@ -17,12 +17,14 @@ from app.matching.repo import (
     RecRow,
     ResumeRow,
     RunRow,
+    ScreenRow,
     SearchBatchRow,
     SearchResRow,
     SearchRunRow,
     SkillState,
 )
 from app.matching.service import MatchingService
+from app.matching.settings import StaticSettings
 
 from ._llm_fakes import Env, FakeClient
 
@@ -61,6 +63,8 @@ class FakeMatchRepo:
         self.sruns: dict[tuple[str, str], SearchRunRow] = {}
         self.sbatches: list[dict] = []
         self.sresults: dict[tuple[str, int, str], dict] = {}
+        self.mscreens: dict[tuple[str, int, str], dict] = {}
+        self.sscreens: dict[tuple[str, int, str], dict] = {}
         self._fid = 0
         self._bid = 0
         self.tick = 0
@@ -118,6 +122,9 @@ class FakeMatchRepo:
 
     def get_skills(self, fid):
         return tuple(sorted(self.skills.get(fid, [])))
+
+    def get_skills_many(self, ids):
+        return {i: tuple(sorted(self.skills[i])) for i in ids if self.skills.get(i)}
 
     def list_resume(self, *, query, status, tags, match_all, limit, offset):
         rows = []
@@ -226,13 +233,22 @@ class FakeMatchRepo:
             def replace(self_, run, batches):
                 repo.runs[need_key] = RunRow(
                     need_key, run.requested_by, run.provider_id, run.model,
-                    run.need_jira_updated_at, datetime(2026, 10, 12, 9, tzinfo=UTC))
+                    run.need_jira_updated_at, datetime(2026, 10, 12, 9, tzinfo=UTC),
+                    run.chain_state)
                 repo.batches = [b for b in repo.batches if b["need"] != need_key]
                 for b in batches:
                     repo._bid += 1
                     repo.batches.append(dict(
                         id=repo._bid, need=need_key, task_id=b.task_id, keys=b.employee_keys,
-                        fids=b.file_ids, status="pending", code=None, msg=None))
+                        fids=b.file_ids, status="pending", code=None, msg=None,
+                        stage=b.stage, run_id=b.run_id))
+
+            def finish_chain(self_):
+                r = repo.runs.get(need_key)
+                if r is not None:
+                    repo.runs[need_key] = RunRow(
+                        r.need_key, r.requested_by, r.provider_id, r.model,
+                        r.need_jira_updated_at, r.created_at, "done")
         yield Tx()
 
     def get_run(self, need_key):
@@ -240,7 +256,46 @@ class FakeMatchRepo:
 
     def _b(self, b) -> _BatchRow:
         return _BatchRow(b["id"], b["need"], b["task_id"], tuple(b["keys"]), tuple(b["fids"]),
-                         b["status"], b["code"], b["msg"])
+                         b["status"], b["code"], b["msg"], b["stage"], b["run_id"])
+
+    def batches_by_run(self, run_id):
+        return [self._b(b) for b in self.batches if b["run_id"] == run_id]
+
+    def search_batches_by_run(self, run_id):
+        return [self._sb(b) for b in self.sbatches if b["run_id"] == run_id]
+
+    def list_match_screens(self, need_key):
+        rows = [(k, v) for k, v in self.mscreens.items() if k[0] == need_key]
+        rows.sort(key=lambda kv: -kv[1]["order"])
+        return [ScreenRow(v["emp"], k[1], k[2], v["pct"], v["hash"], v["need_at"],
+                          datetime(2026, 10, 12, tzinfo=UTC)) for k, v in rows]
+
+    def upsert_match_screens(self, need_key, rows, *, model, need_updated_at):
+        for r in rows:
+            f = self.files.get(r.cv_file_id)
+            if f is None or f["emp"] != r.employee_key:
+                continue
+            self.tick += 1
+            self.mscreens[(need_key, r.cv_file_id, model)] = dict(
+                emp=r.employee_key, pct=r.match_percent, hash=r.skills_hash,
+                need_at=need_updated_at, order=self.tick)
+        return len(rows)
+
+    def list_search_screens(self, query_hash):
+        rows = [(k, v) for k, v in self.sscreens.items() if k[0] == query_hash]
+        rows.sort(key=lambda kv: -kv[1]["order"])
+        return [ScreenRow(v["emp"], k[1], k[2], v["pct"], v["hash"], None,
+                          datetime(2026, 10, 12, tzinfo=UTC)) for k, v in rows]
+
+    def upsert_search_screens(self, query_hash, rows, *, model):
+        for r in rows:
+            f = self.files.get(r.cv_file_id)
+            if f is None or f["emp"] != r.employee_key:
+                continue
+            self.tick += 1
+            self.sscreens[(query_hash, r.cv_file_id, model)] = dict(
+                emp=r.employee_key, pct=r.match_percent, hash=r.skills_hash, order=self.tick)
+        return len(rows)
 
     def list_batches(self, need_key):
         return [self._b(b) for b in self.batches if b["need"] == need_key]
@@ -265,13 +320,16 @@ class FakeMatchRepo:
         repo = self
 
         class Tx:
+            def run(self_):
+                return repo.sruns.get((login, query_hash))
+
             def batches(self_):
                 return repo.list_search_batches(login, query_hash)
 
             def replace(self_, run, batches):
                 repo.sruns[(login, query_hash)] = SearchRunRow(
                     login, query_hash, run.query_text, run.provider_id, run.model,
-                    datetime(2026, 10, 12, 9, tzinfo=UTC))
+                    datetime(2026, 10, 12, 9, tzinfo=UTC), run.chain_state, run.scope)
                 repo.sbatches = [b for b in repo.sbatches
                                  if (b["login"], b["hash"]) != (login, query_hash)]
                 for b in batches:
@@ -279,7 +337,14 @@ class FakeMatchRepo:
                     repo.sbatches.append(dict(
                         id=repo._bid, login=login, hash=query_hash, task_id=b.task_id,
                         keys=b.employee_keys, fids=b.file_ids, status="pending", code=None,
-                        msg=None))
+                        msg=None, stage=b.stage, run_id=b.run_id))
+
+            def finish_chain(self_):
+                r = repo.sruns.get((login, query_hash))
+                if r is not None:
+                    repo.sruns[(login, query_hash)] = SearchRunRow(
+                        r.requested_by, r.query_hash, r.query_text, r.provider_id, r.model,
+                        r.created_at, "done", r.scope)
         yield Tx()
 
     def get_search_run(self, login, query_hash):
@@ -287,7 +352,8 @@ class FakeMatchRepo:
 
     def _sb(self, b) -> SearchBatchRow:
         return SearchBatchRow(b["id"], b["login"], b["hash"], b["task_id"], tuple(b["keys"]),
-                              tuple(b["fids"]), b["status"], b["code"], b["msg"])
+                              tuple(b["fids"]), b["status"], b["code"], b["msg"], b["stage"],
+                              b["run_id"])
 
     def list_search_batches(self, login, query_hash):
         return [self._sb(b) for b in self.sbatches
@@ -338,15 +404,16 @@ def skills_reply(_prompt: str) -> str:
 class World:
     """Шлюз + хранилище + сервис; ``client`` отвечает по назначению запроса."""
 
-    def __init__(self, *, max_evaluated=30, external_default=False) -> None:
+    def __init__(self, *, max_evaluated=30, screen_batch=50, external_default=False) -> None:
         self.llm_client = FakeClient(self._reply)
         self.env = Env(client=self.llm_client)
         if external_default:
             self.env.providers.update(self.env.external.id, is_default=True)
         self.repo = FakeMatchRepo()
         self.needs = FakeNeeds()
+        self.settings = StaticSettings(max_evaluated, screen_batch)
         self.svc = MatchingService(self.repo, self.needs, self.env.gateway,
-                                   max_evaluated=max_evaluated)
+                                   settings=self.settings)
         self.match_reply = reply_for
         self.skills_reply = skills_reply
 

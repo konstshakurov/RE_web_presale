@@ -63,14 +63,14 @@ def query_hash(query: str) -> str:
     return hashlib.sha256(normalize_query(query).encode("utf-8")).hexdigest()
 
 
-def query_terms(query: str) -> tuple[str, ...]:
+def query_terms(query: str, max_terms: int = MAX_TERMS) -> tuple[str, ...]:
     """Значимые слова запроса: без служебных, без повторов, в порядке появления."""
     out: list[str] = []
     for m in _WORD.finditer(normalize_query(query)):
         w = m.group().strip(".-")
         if len(w) >= 3 and w not in _STOP and w not in out:
             out.append(w)
-        if len(out) >= MAX_TERMS:
+        if len(out) >= max_terms:
             break
     return tuple(out)
 
@@ -86,11 +86,12 @@ def _stem(term: str) -> str:
 
 def score_candidates(
     candidates: Sequence[tuple[str, str, Sequence[str], str]], query: str,
+    *, max_terms: int = MAX_TERMS,
 ) -> list[Scored]:
     """``candidates``: (ключ, ФИО, технологии, текст CV). Оценка = технологии из запроса * 3 +
     слова запроса в тексте CV. Порядок: оценка по убыванию, затем ФИО, ключ."""
     q = normalize_query(query)
-    terms = query_terms(q)
+    terms = query_terms(q, max_terms)
     out: list[Scored] = []
     for key, name, skills, text in candidates:
         low = (text or "").lower()

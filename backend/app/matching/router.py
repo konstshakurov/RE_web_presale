@@ -2,8 +2,13 @@
 профиль сотрудника (FR-003), навыки Основного CV (FR-027), фильтры «Резюме» (FR-032).
 
 Сопоставление асинхронное: ``POST /needs/{key}/match`` ставит задачи в шлюз LLM и сразу
-возвращает состояние; результат опрашивается ``GET`` и берётся из кэша. Внешний провайдер:
-в состоянии ``awaiting_confirmation`` задачи подтверждаются через ``POST /llm/tasks/{id}/confirm``.
+возвращает состояние; результат опрашивается ``GET`` и берётся из кэша.
+
+Оценка двухступенчатая: скрининг всех кандидатов по навыкам, затем глубокая оценка топ-N по
+тексту CV; следующие порции - ``POST /needs/{key}/match/next``. Внешний провайдер: каждая ступень
+- прогон (``run_id``) со своим предпросмотром всех пакетов (``GET /matching/runs/{run_id}``) и
+одним подтверждением (``POST /matching/runs/{run_id}/confirm``); подтверждение отдельных задач
+``POST /llm/tasks/{id}/confirm`` остаётся доступным.
 """
 from __future__ import annotations
 
@@ -14,15 +19,22 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from pydantic import BaseModel, Field
 
-from ..auth.deps import SessionContext, authenticated, authenticated_csrf
+from ..auth.deps import SessionContext, authenticated, authenticated_csrf, require_admin
 from ..cv.repo import CvRepo
 from ..llm_gateway import AnonymizationError, GatewayError
 from .profile import guess_years, parse_sections
+from .screening import (
+    DEEP_SIZE_MAX,
+    DEEP_SIZE_MIN,
+    SCREEN_BATCH_MAX,
+    SCREEN_BATCH_MIN,
+)
 from .semantic import MAX_QUERY_CHARS, MIN_QUERY_CHARS
 from .service import (
     MatchingError,
     MatchingService,
     MatchState,
+    RunInfo,
     SearchFilters,
     SearchState,
 )
@@ -40,10 +52,12 @@ EMPLOYEE_KEY = Path(pattern=r"^[A-Z][A-Z0-9_]*-[0-9]+$", description="Ключ �
 
 _GATEWAY_STATUS = {
     "provider_not_found": 404, "no_default_provider": 409, "empty_prompt": 422,
-    "prompt_too_long": 413,
+    "prompt_too_long": 413, "task_not_found": 404, "not_awaiting_confirmation": 409,
 }
 _MATCHING_STATUS = {
-    "need_not_found": 404, "employee_not_found": 404, "bad_query": 422}
+    "need_not_found": 404, "employee_not_found": 404, "bad_query": 422, "run_not_found": 404,
+    "bad_settings": 422}
+RUN_ID = Path(pattern=r"^[0-9a-fA-F-]{36}$", description="Идентификатор прогона (run_id)")
 
 
 # --- модели ---
@@ -54,6 +68,10 @@ class MatchRequest(BaseModel):
         False, description="Пересчитать, даже если результат в кэше («Пересчитать»)")
 
 
+class NextRequest(BaseModel):
+    provider_id: int | None = Field(None, description="Провайдер LLM; пусто - по умолчанию")
+
+
 class TaskOut(BaseModel):
     task_id: str = Field(description="Задача шлюза LLM: GET /llm/tasks/{id}, confirm, retry")
     status: str = Field(description="Статус задачи шлюза либо итог пакета: done | failed")
@@ -61,6 +79,10 @@ class TaskOut(BaseModel):
         description="true - внешний провайдер, нужен предпросмотр и confirm владельцем")
     batch_status: str = Field(description="pending | done | failed")
     candidates: int
+    stage: str = Field("deep", description="screening - скрининг по навыкам; deep - по тексту CV")
+    run_id: str = Field(
+        "", description="Прогон: GET /matching/runs/{run_id} - предпросмотр всех пакетов, "
+                        "POST .../confirm - одно подтверждение на прогон")
 
 
 class MatchItemOut(BaseModel):
@@ -96,6 +118,18 @@ class MatchStateOut(BaseModel):
     batches_done: int
     batches_failed: int
     errors: list[str] = Field(description="Причины отказов пакетов, без текстов CV")
+    stage: str | None = Field(
+        None, description="Ступень текущего прогона: screening | deep; null - прогона нет")
+    run_id: str | None = Field(
+        None, description="Текущий прогон: при status=awaiting_confirmation - его предпросмотр "
+                          "и подтверждение (GET/POST /matching/runs/{run_id}...)")
+    deep_size: int = Field(0, description="Порция глубокой оценки N (настройка администратора)")
+    remaining: int = Field(0, description="Допустимые, ещё не оценённые глубоко")
+    screened: int = Field(0, description="Кандидаты со свежим баллом скрининга LLM")
+    screen_total: int = Field(0, description="Допустимые с выделенными навыками")
+    can_evaluate_next: bool = Field(
+        False, description="Можно запустить POST /needs/{key}/match/next (есть кого оценивать, "
+                           "прогона нет, провайдер настроен)")
 
 
 class SearchRequest(BaseModel):
@@ -116,8 +150,12 @@ class SearchItemOut(BaseModel):
     employee_key: str
     full_name: str
     status: str
-    source: str = Field(description="llm - оценка LLM; fallback - по технологиям и тексту")
+    source: str = Field(
+        description="llm - глубокая оценка LLM; screening - предварительная оценка по навыкам; "
+                    "fallback - по технологиям и тексту")
     percent: int | None = Field(None, ge=0, le=100, description="Только у source=llm")
+    screen_percent: int | None = Field(
+        None, ge=0, le=100, description="Предварительная оценка скрининга по навыкам (LLM)")
     rationale: str = Field(description="Обоснование LLM либо перечень совпадений без LLM")
     score: int = Field(description="Детерминированная оценка: технологии * 3 + слова запроса")
     matched_skills: list[str]
@@ -152,6 +190,56 @@ class SearchStateOut(BaseModel):
     batches_done: int
     batches_failed: int
     errors: list[str]
+    stage: str | None = Field(None, description="screening | deep; null - прогона нет")
+    run_id: str | None = Field(None, description="Текущий прогон (подтверждение внешней LLM)")
+    deep_size: int = Field(0, description="Порция глубокой оценки N (настройка администратора)")
+    remaining: int = Field(0, description="В выдаче без глубокой оценки")
+    screened: int = Field(0, description="Со свежим баллом скрининга LLM")
+    screen_total: int = Field(0, description="В области поиска с выделенными навыками")
+    can_evaluate_next: bool = Field(
+        False, description="Можно запустить POST /resume/semantic-search/next")
+
+
+class RunTaskOut(BaseModel):
+    task_id: str
+    status: str
+    candidates: int
+    requires_confirmation: bool
+    system: str | None = Field(None, description="Обезличенный системный запрос (внешняя LLM)")
+    prompt: str | None = Field(None, description="Ровно тот текст, который уйдёт во внешнюю LLM")
+    replacements: dict[str, int] = Field(description="вид -> число уникальных подстановок")
+    ner_used: bool
+    error_message: str | None = None
+
+
+class RunOut(BaseModel):
+    run_id: str
+    kind: str = Field(description="match | search")
+    stage: str = Field(description="screening | deep")
+    status: str = Field(
+        description="awaiting_confirmation | running | done | partial | failed")
+    requires_confirmation: bool = Field(
+        description="true - покажите предпросмотр tasks[] и запросите подтверждение")
+    is_external: bool
+    provider_name: str
+    candidates: int = Field(description="Кандидатов во всех пакетах прогона")
+    tasks: list[RunTaskOut] = Field(description="Предпросмотр: все пакеты прогона, обезличенные")
+    replacements: dict[str, int] = Field(description="Подстановки по всему прогону")
+    need_key: str | None = None
+
+
+class MatchSettingsOut(BaseModel):
+    deep_size: int = Field(description="N: сколько кандидатов оценивается глубоко за прогон")
+    deep_size_min: int
+    deep_size_max: int
+    screen_batch: int = Field(description="Кандидатов в пакете скрининга")
+    screen_batch_min: int
+    screen_batch_max: int
+
+
+class MatchSettingsIn(BaseModel):
+    deep_size: int | None = Field(None, ge=DEEP_SIZE_MIN, le=DEEP_SIZE_MAX)
+    screen_batch: int | None = Field(None, ge=SCREEN_BATCH_MIN, le=SCREEN_BATCH_MAX)
 
 
 class SkillsOut(BaseModel):
@@ -236,6 +324,31 @@ def _cv(request: Request) -> CvRepo:
     return repo
 
 
+def _tasks_out(tasks) -> list[TaskOut]:
+    return [TaskOut(task_id=t.task_id, status=t.status,
+                    requires_confirmation=t.requires_confirmation, batch_status=t.batch_status,
+                    candidates=t.candidates, stage=t.stage, run_id=t.run_id) for t in tasks]
+
+
+def _run_out(r: RunInfo) -> RunOut:
+    return RunOut(
+        run_id=r.run_id, kind=r.kind, stage=r.stage, status=r.status,
+        requires_confirmation=r.requires_confirmation, is_external=r.is_external,
+        provider_name=r.provider_name, candidates=r.candidates, replacements=r.replacements,
+        need_key=r.need_key,
+        tasks=[RunTaskOut(
+            task_id=t.task_id, status=t.status, candidates=t.candidates,
+            requires_confirmation=t.requires_confirmation, system=t.system, prompt=t.prompt,
+            replacements=t.replacements, ner_used=t.ner_used, error_message=t.error_message)
+            for t in r.tasks])
+
+
+def _settings_out(deep: int, screen: int) -> MatchSettingsOut:
+    return MatchSettingsOut(
+        deep_size=deep, deep_size_min=DEEP_SIZE_MIN, deep_size_max=DEEP_SIZE_MAX,
+        screen_batch=screen, screen_batch_min=SCREEN_BATCH_MIN, screen_batch_max=SCREEN_BATCH_MAX)
+
+
 def _state_out(s: MatchState) -> MatchStateOut:
     return MatchStateOut(
         need_key=s.need_key, status=s.status, requested_by=s.requested_by, model=s.model,
@@ -247,11 +360,11 @@ def _state_out(s: MatchState) -> MatchStateOut:
             note_updated_at=i.note_updated_at, cv_file_id=i.cv_file_id,
             calculated_at=i.calculated_at, stale=i.stale, skills=list(i.skills))
             for i in s.items],
-        tasks=[TaskOut(task_id=t.task_id, status=t.status,
-                       requires_confirmation=t.requires_confirmation,
-                       batch_status=t.batch_status, candidates=t.candidates) for t in s.tasks],
+        tasks=_tasks_out(s.tasks),
         batches_total=s.batches_total, batches_done=s.batches_done,
-        batches_failed=s.batches_failed, errors=s.errors,
+        batches_failed=s.batches_failed, errors=s.errors, stage=s.stage, run_id=s.run_id,
+        deep_size=s.deep_size, remaining=s.remaining, screened=s.screened,
+        screen_total=s.screen_total, can_evaluate_next=s.can_evaluate_next,
     )
 
 
@@ -267,12 +380,12 @@ def _search_out(s: SearchState) -> SearchStateOut:
             matched_skills=list(i.matched_skills), matched_terms=list(i.matched_terms),
             note=i.note, note_author=i.note_author, note_updated_at=i.note_updated_at,
             cv_file_id=i.cv_file_id, calculated_at=i.calculated_at, stale=i.stale,
-            skills=list(i.skills)) for i in s.items],
-        tasks=[TaskOut(task_id=t.task_id, status=t.status,
-                       requires_confirmation=t.requires_confirmation,
-                       batch_status=t.batch_status, candidates=t.candidates) for t in s.tasks],
+            skills=list(i.skills), screen_percent=i.screen_percent) for i in s.items],
+        tasks=_tasks_out(s.tasks),
         batches_total=s.batches_total, batches_done=s.batches_done,
-        batches_failed=s.batches_failed, errors=s.errors)
+        batches_failed=s.batches_failed, errors=s.errors, stage=s.stage, run_id=s.run_id,
+        deep_size=s.deep_size, remaining=s.remaining, screened=s.screened,
+        screen_total=s.screen_total, can_evaluate_next=s.can_evaluate_next)
 
 
 def _filters(status: str | None, technology: list[str] | None, match: str,
@@ -336,6 +449,28 @@ def get_match(
         _raise(exc)
 
 
+@router.post(
+    "/needs/{need_key}/match/next", response_model=MatchStateOut, status_code=202,
+    responses={404: {"description": "Потребность не найдена в кэше"},
+               409: {"description": "Провайдер LLM по умолчанию не настроен"},
+               422: {"description": "Обезличивание не удалось"}},
+)
+def evaluate_next(
+    request: Request, need_key: Annotated[str, NEED_KEY], body: NextRequest | None = None,
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> MatchStateOut:
+    """«Оценить следующих»: глубокая оценка следующей порции (``deep_size``) рейтинга скрининга.
+    Уже оценённые (кэш по потребности, CV и модели) не пересчитываются. Отдельный прогон
+    (``run_id``): для внешнего провайдера - отдельный предпросмотр и подтверждение."""
+    body = body or NextRequest()
+    try:
+        state = _service(request).evaluate_next(need_key, ctx.login, provider_id=body.provider_id)
+    except (MatchingError, GatewayError, AnonymizationError) as exc:
+        _raise(exc)
+    log.info("matching: %s запустил оценку следующих %s", ctx.login, need_key)
+    return _state_out(state)
+
+
 # --- «Поиск по смыслу (LLM)» (FR-032) ---
 
 @router.post(
@@ -360,6 +495,27 @@ def start_semantic_search(
     return _search_out(state)
 
 
+@router.post(
+    "/resume/semantic-search/next", response_model=SearchStateOut, status_code=202,
+    responses={409: {"description": "Провайдер LLM по умолчанию не настроен"},
+               422: {"description": "Запрос слишком короткий или длинный"}},
+)
+def evaluate_next_search(
+    request: Request, body: SearchRequest, ctx: SessionContext = Depends(authenticated_csrf),
+) -> SearchStateOut:
+    """«Оценить следующих» в поиске по смыслу: глубокая оценка следующей порции рейтинга
+    (те же ``query`` и фильтры, что у основного запроса). Отдельный прогон - отдельное
+    подтверждение у внешнего провайдера."""
+    try:
+        state = _service(request).evaluate_next_search(
+            ctx.login, body.query, provider_id=body.provider_id,
+            filters=_filters(body.status, body.technology, body.match, body.q), limit=body.limit)
+    except (MatchingError, GatewayError, AnonymizationError) as exc:
+        _raise(exc)
+    log.info("matching: %s запустил оценку следующих в поиске", ctx.login)
+    return _search_out(state)
+
+
 @router.get("/resume/semantic-search", response_model=SearchStateOut,
             responses={422: {"description": "Запрос слишком короткий или длинный"}})
 def get_semantic_search(
@@ -380,6 +536,76 @@ def get_semantic_search(
             limit=limit, offset=offset))
     except MatchingError as exc:
         _raise(exc)
+
+
+# --- прогон целиком: один предпросмотр и одно подтверждение (FR-023) ---
+
+@router.get("/matching/runs/{run_id}", response_model=RunOut,
+            responses={404: {"description": "Прогон не найден (или не ваш)"}})
+def get_run(
+    request: Request, run_id: Annotated[str, RUN_ID],
+    ctx: SessionContext = Depends(authenticated),
+) -> RunOut:
+    """Прогон ступени целиком: статус и обезличенный предпросмотр всех пакетов. Внешний
+    провайдер: показать ``tasks[].prompt``, затем ``POST .../confirm``."""
+    try:
+        return _run_out(_service(request).run_info(ctx.login, run_id))
+    except (MatchingError, GatewayError) as exc:
+        _raise(exc)
+
+
+@router.post("/matching/runs/{run_id}/confirm", response_model=RunOut,
+             responses={404: {"description": "Прогон не найден (или не ваш)"},
+                        409: {"description": "Прогон не ожидает подтверждения"}})
+def confirm_run(
+    request: Request, run_id: Annotated[str, RUN_ID],
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> RunOut:
+    """Подтвердить отправку показанного предпросмотра всего прогона: все его задачи уходят в
+    очередь одной транзакцией - либо ни одна. Без предпросмотра отправки нет (FR-023)."""
+    try:
+        return _run_out(_service(request).confirm_run(ctx.login, run_id))
+    except (MatchingError, GatewayError) as exc:
+        _raise(exc)
+
+
+@router.post("/matching/runs/{run_id}/cancel", response_model=RunOut,
+             responses={404: {"description": "Прогон не найден (или не ваш)"}})
+def cancel_run(
+    request: Request, run_id: Annotated[str, RUN_ID],
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> RunOut:
+    """Отменить прогон: неподтверждённые и ожидающие задачи отменяются, собранное сохраняется."""
+    try:
+        return _run_out(_service(request).cancel_run(ctx.login, run_id))
+    except (MatchingError, GatewayError) as exc:
+        _raise(exc)
+
+
+# --- настройки двухступенчатой оценки (администратор) ---
+
+@router.get("/admin/matching/settings", response_model=MatchSettingsOut)
+def get_matching_settings(
+    request: Request, _: SessionContext = Depends(require_admin),
+) -> MatchSettingsOut:
+    """Размер глубокой оценки N (по умолчанию 30, 5..100) и размер пакета скрининга (по
+    умолчанию 50, 10..100)."""
+    return _settings_out(*_service(request).settings())
+
+
+@router.put("/admin/matching/settings", response_model=MatchSettingsOut,
+            responses={422: {"description": "Значение вне границ"}})
+def put_matching_settings(
+    body: MatchSettingsIn, request: Request, ctx: SessionContext = Depends(require_admin),
+) -> MatchSettingsOut:
+    """Изменить настройки (передаются только изменяемые поля). Действуют на новые прогоны."""
+    try:
+        out = _service(request).update_settings(body.deep_size, body.screen_batch)
+    except MatchingError as exc:
+        _raise(exc)
+    log.info("matching: %s изменил настройки оценки: N=%s, пакет скрининга=%s",
+             ctx.login, out[0], out[1])
+    return _settings_out(*out)
 
 
 # --- навыки (FR-027) ---

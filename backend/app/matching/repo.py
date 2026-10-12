@@ -3,9 +3,11 @@ app_db (роль app_rw). Параметры только плейсхолдер
 """
 from __future__ import annotations
 
+import json
+import uuid
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -14,6 +16,10 @@ if TYPE_CHECKING:
 
 PENDING, OK, FAILED = "pending", "ok", "failed"
 DONE = "done"
+#: Ступень пакета: скрининг по навыкам | глубокая оценка по тексту CV
+STAGE_SCREEN, STAGE_DEEP = "screen", "deep"
+#: Ступень 2 после скрининга: ждёт скрининга | то же без учёта кэша | решение принято
+CHAIN_PENDING, CHAIN_FORCE, CHAIN_DONE = "pending", "pending_force", "done"
 #: Предел «зависшего» claim без задачи (процесс упал между claim и submit), секунды
 CLAIM_STALE_SEC = 120
 
@@ -120,6 +126,7 @@ class RunRow:
     model: str
     need_jira_updated_at: datetime
     created_at: datetime
+    chain_state: str = CHAIN_DONE
 
 
 @dataclass(frozen=True)
@@ -132,6 +139,8 @@ class BatchRow:
     status: str
     error_code: str | None
     error_message: str | None
+    stage: str = STAGE_DEEP
+    run_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -139,6 +148,28 @@ class NewBatch:
     task_id: str
     employee_keys: tuple[str, ...]
     file_ids: tuple[int, ...]
+    stage: str = STAGE_DEEP
+    run_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+
+
+@dataclass(frozen=True)
+class NewScreen:
+    """Предварительный балл скрининга; ``skills_hash`` - набор навыков, по которому он получен."""
+    employee_key: str
+    cv_file_id: int
+    match_percent: int
+    skills_hash: str
+
+
+@dataclass(frozen=True)
+class ScreenRow:
+    employee_key: str
+    cv_file_id: int
+    model: str
+    match_percent: int
+    skills_hash: str
+    need_jira_updated_at: datetime | None  # у поиска нет потребности
+    created_at: datetime
 
 
 @dataclass(frozen=True)
@@ -150,6 +181,8 @@ class SearchRunRow:
     provider_id: int | None
     model: str
     created_at: datetime
+    chain_state: str = CHAIN_DONE
+    scope: dict | None = None  # фильтры запуска: ступень 2 берёт ту же область поиска
 
 
 @dataclass(frozen=True)
@@ -163,6 +196,8 @@ class SearchBatchRow:
     status: str
     error_code: str | None
     error_message: str | None
+    stage: str = STAGE_DEEP
+    run_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -188,11 +223,13 @@ _MAIN_JOIN = (
 )
 _STATE = "file_id, status, task_id::text, model, requested_by, error_code, error_message, " \
          "extracted_at, updated_at"
-_BATCH = "id, need_key, task_id::text, employee_keys, file_ids, status, error_code, error_message"
-_RUN = "need_key, requested_by, provider_id, model, need_jira_updated_at, created_at"
-_SRUN = "requested_by, query_hash, query_text, provider_id, model, created_at"
+_BATCH = ("id, need_key, task_id::text, employee_keys, file_ids, status, error_code, "
+          "error_message, stage, run_id::text")
+_RUN = "need_key, requested_by, provider_id, model, need_jira_updated_at, created_at, chain_state"
+_SRUN = ("requested_by, query_hash, query_text, provider_id, model, created_at, chain_state, "
+         "scope")
 _SBATCH = ("id, requested_by, query_hash, task_id::text, employee_keys, file_ids, status, "
-           "error_code, error_message")
+           "error_code, error_message, stage, run_id::text")
 
 
 def _like(q: str) -> str:
@@ -200,11 +237,12 @@ def _like(q: str) -> str:
 
 
 def _batch(r) -> BatchRow:
-    return BatchRow(r[0], r[1], r[2], tuple(r[3]), tuple(r[4]), r[5], r[6], r[7])
+    return BatchRow(r[0], r[1], r[2], tuple(r[3]), tuple(r[4]), r[5], r[6], r[7], r[8], r[9])
 
 
 def _sbatch(r) -> SearchBatchRow:
-    return SearchBatchRow(r[0], r[1], r[2], r[3], tuple(r[4]), tuple(r[5]), r[6], r[7], r[8])
+    return SearchBatchRow(
+        r[0], r[1], r[2], r[3], tuple(r[4]), tuple(r[5]), r[6], r[7], r[8], r[9], r[10])
 
 
 class NeedSource:
@@ -248,16 +286,22 @@ class RunTx:
         c.execute("DELETE FROM cv.match_run WHERE need_key = %s", (run.need_key,))
         c.execute(
             "INSERT INTO cv.match_run (need_key, requested_by, provider_id, model, "
-            "need_jira_updated_at) VALUES (%s, %s, %s, %s, %s)",
+            "need_jira_updated_at, chain_state) VALUES (%s, %s, %s, %s, %s, %s)",
             (run.need_key, run.requested_by, run.provider_id, run.model,
-             run.need_jira_updated_at),
+             run.need_jira_updated_at, run.chain_state),
         )
         for b in batches:
             c.execute(
-                "INSERT INTO cv.match_batch (need_key, task_id, employee_keys, file_ids) "
-                "VALUES (%s, %s::uuid, %s::text[], %s::bigint[])",
-                (run.need_key, b.task_id, list(b.employee_keys), list(b.file_ids)),
+                "INSERT INTO cv.match_batch (need_key, task_id, employee_keys, file_ids, stage, "
+                "run_id) VALUES (%s, %s::uuid, %s::text[], %s::bigint[], %s, %s::uuid)",
+                (run.need_key, b.task_id, list(b.employee_keys), list(b.file_ids), b.stage,
+                 b.run_id),
             )
+
+    def finish_chain(self) -> None:
+        """Решение о ступени 2 принято (отправлять нечего либо ступень не нужна)."""
+        self._conn.execute(
+            "UPDATE cv.match_run SET chain_state = 'done' WHERE need_key = %s", (self._need,))
 
 
 class SearchTx:
@@ -268,11 +312,22 @@ class SearchTx:
         self._login = login
         self._hash = query_hash
 
+    def run(self) -> SearchRunRow | None:
+        r = self._conn.execute(
+            f"SELECT {_SRUN} FROM cv.search_run WHERE requested_by = %s AND query_hash = %s",
+            (self._login, self._hash)).fetchone()
+        return SearchRunRow(*r) if r else None
+
     def batches(self) -> list[SearchBatchRow]:
         rows = self._conn.execute(
             f"SELECT {_SBATCH} FROM cv.search_batch WHERE requested_by = %s AND query_hash = %s "
             "ORDER BY id", (self._login, self._hash)).fetchall()
         return [_sbatch(r) for r in rows]
+
+    def finish_chain(self) -> None:
+        self._conn.execute(
+            "UPDATE cv.search_run SET chain_state = 'done' WHERE requested_by = %s "
+            "AND query_hash = %s", (self._login, self._hash))
 
     def replace(self, run: SearchRunRow, batches: Sequence[NewBatch]) -> None:
         """Прогон по (пользователь, запрос) один: прежний (с пакетами, каскадом) заменяется."""
@@ -280,15 +335,17 @@ class SearchTx:
         c.execute("DELETE FROM cv.search_run WHERE requested_by = %s AND query_hash = %s",
                   (run.requested_by, run.query_hash))
         c.execute(
-            "INSERT INTO cv.search_run (requested_by, query_hash, query_text, provider_id, model) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            (run.requested_by, run.query_hash, run.query_text, run.provider_id, run.model))
+            "INSERT INTO cv.search_run (requested_by, query_hash, query_text, provider_id, model, "
+            "chain_state, scope) VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)",
+            (run.requested_by, run.query_hash, run.query_text, run.provider_id, run.model,
+             run.chain_state, json.dumps(run.scope or {}, ensure_ascii=False)))
         for b in batches:
             c.execute(
                 "INSERT INTO cv.search_batch (requested_by, query_hash, task_id, employee_keys, "
-                "file_ids) VALUES (%s, %s, %s::uuid, %s::text[], %s::bigint[])",
+                "file_ids, stage, run_id) VALUES (%s, %s, %s::uuid, %s::text[], %s::bigint[], "
+                "%s, %s::uuid)",
                 (run.requested_by, run.query_hash, b.task_id, list(b.employee_keys),
-                 list(b.file_ids)))
+                 list(b.file_ids), b.stage, b.run_id))
 
 
 class MatchRepo:
@@ -345,6 +402,16 @@ class MatchRepo:
                 "SELECT tag FROM cv.employee_file_skill WHERE file_id = %s ORDER BY tag",
                 (file_id,)).fetchall()
         return tuple(r[0] for r in rows)
+
+    def get_skills_many(self, file_ids: Sequence[int]) -> dict[int, tuple[str, ...]]:
+        if not file_ids:
+            return {}
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT file_id, array_agg(tag ORDER BY tag) FROM cv.employee_file_skill "
+                "WHERE file_id = ANY(%s::bigint[]) GROUP BY file_id", (list(file_ids),),
+            ).fetchall()
+        return {r[0]: tuple(r[1]) for r in rows}
 
     # --- «Резюме»: фильтры (FR-032) ---
 
@@ -542,6 +609,45 @@ class MatchRepo:
             ).fetchone()
         return _batch(r) if r else None
 
+    def batches_by_run(self, run_id: str) -> list[BatchRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                f"SELECT {_BATCH} FROM cv.match_batch WHERE run_id = %s::uuid ORDER BY id",
+                (run_id,)).fetchall()
+        return [_batch(r) for r in rows]
+
+    def list_match_screens(self, need_key: str) -> list[ScreenRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT employee_key, cv_file_id, model, match_percent, skills_hash, "
+                "need_jira_updated_at, created_at FROM cv.match_screen WHERE need_key = %s "
+                "ORDER BY created_at DESC", (need_key,)).fetchall()
+        return [ScreenRow(*r) for r in rows]
+
+    def upsert_match_screens(
+        self, need_key: str, rows: Sequence[NewScreen], *, model: str, need_updated_at: datetime,
+    ) -> int:
+        """Кэш скрининга по связке потребность + основное CV + модель. Файлы, которых уже нет,
+        пропускаются."""
+        n = 0
+        if not rows:
+            return n
+        with self._pool.connection() as conn, conn.transaction():
+            for r in rows:
+                cur = conn.execute(
+                    "INSERT INTO cv.match_screen (need_key, cv_file_id, employee_key, model, "
+                    "match_percent, need_jira_updated_at, skills_hash) "
+                    "SELECT %s, f.id, f.employee_key, %s, %s, %s, %s FROM cv.employee_file f "
+                    "WHERE f.id = %s AND f.employee_key = %s AND f.kind = 'main_cv' "
+                    "ON CONFLICT (need_key, cv_file_id, model) DO UPDATE SET "
+                    "match_percent = EXCLUDED.match_percent, "
+                    "need_jira_updated_at = EXCLUDED.need_jira_updated_at, "
+                    "skills_hash = EXCLUDED.skills_hash, created_at = now()",
+                    (need_key, model, r.match_percent, need_updated_at, r.skills_hash,
+                     r.cv_file_id, r.employee_key))
+                n += cur.rowcount
+        return n
+
     def pending_batches(self, limit: int = 200) -> list[BatchRow]:
         with self._pool.connection() as conn:
             rows = conn.execute(
@@ -581,6 +687,42 @@ class MatchRepo:
                 f"SELECT {_SBATCH} FROM cv.search_batch WHERE requested_by = %s "
                 "AND query_hash = %s ORDER BY id", (login, query_hash)).fetchall()
         return [_sbatch(r) for r in rows]
+
+    def search_batches_by_run(self, run_id: str) -> list[SearchBatchRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                f"SELECT {_SBATCH} FROM cv.search_batch WHERE run_id = %s::uuid ORDER BY id",
+                (run_id,)).fetchall()
+        return [_sbatch(r) for r in rows]
+
+    def list_search_screens(self, query_hash: str) -> list[ScreenRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT employee_key, cv_file_id, model, match_percent, skills_hash, "
+                "NULL::timestamptz, created_at FROM cv.search_screen WHERE query_hash = %s "
+                "ORDER BY created_at DESC", (query_hash,)).fetchall()
+        return [ScreenRow(*r) for r in rows]
+
+    def upsert_search_screens(
+        self, query_hash: str, rows: Sequence[NewScreen], *, model: str,
+    ) -> int:
+        n = 0
+        if not rows:
+            return n
+        with self._pool.connection() as conn, conn.transaction():
+            for r in rows:
+                cur = conn.execute(
+                    "INSERT INTO cv.search_screen (query_hash, cv_file_id, employee_key, model, "
+                    "match_percent, skills_hash) "
+                    "SELECT %s, f.id, f.employee_key, %s, %s, %s FROM cv.employee_file f "
+                    "WHERE f.id = %s AND f.employee_key = %s AND f.kind = 'main_cv' "
+                    "ON CONFLICT (query_hash, cv_file_id, model) DO UPDATE SET "
+                    "match_percent = EXCLUDED.match_percent, skills_hash = EXCLUDED.skills_hash, "
+                    "created_at = now()",
+                    (query_hash, model, r.match_percent, r.skills_hash, r.cv_file_id,
+                     r.employee_key))
+                n += cur.rowcount
+        return n
 
     def search_batch_by_task(self, task_id: str) -> SearchBatchRow | None:
         with self._pool.connection() as conn:
@@ -635,4 +777,6 @@ class MatchRepo:
             conn.execute("DELETE FROM cv.search_run WHERE created_at < now() - "
                          "make_interval(days => %s)", (retention_days,))
             conn.execute("DELETE FROM cv.search_result WHERE created_at < now() - "
+                         "make_interval(days => %s)", (retention_days,))
+            conn.execute("DELETE FROM cv.search_screen WHERE created_at < now() - "
                          "make_interval(days => %s)", (retention_days,))

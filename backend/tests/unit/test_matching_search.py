@@ -175,15 +175,18 @@ def test_filters_status_technology_and_text():
     assert [i.employee_key for i in st.items] == ["EMP-2"]
 
 
-def test_llm_not_sent_for_filtered_out_and_pool_limit_applied():
+def test_search_larger_than_n_screens_all_then_deep_top_n():
     w = _world(max_evaluated=2)
     w.svc.start_search(LOGIN, QUERY)
-    w.run_all()
-    [call] = _search_calls(w)
-    assert call["prompt"].count("### K") == 2
+    w.run_all()  # скрининг всех трёх по навыкам; по завершении ставится глубокая оценка топ-2
+    calls = _search_calls(w)
+    assert len(calls) == 2
+    assert calls[0]["prompt"].count("### K") == 3 and "Текст CV:" not in calls[0]["prompt"]
+    assert calls[1]["prompt"].count("### K") == 2 and "Текст CV:" in calls[1]["prompt"]
     got = _get(w)
-    assert got.evaluated == 2 and got.total == 3  # третий - по технологиям и тексту
-    assert got.items[-1].source == "fallback"
+    assert got.evaluated == 2 and got.total == 3  # третий - предварительная оценка скрининга
+    assert got.items[-1].source == "screening" and got.items[-1].screen_percent is not None
+    assert got.remaining == 1 and got.screened == 3
 
 
 def test_batches_by_five_candidates():

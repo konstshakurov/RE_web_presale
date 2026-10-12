@@ -1,8 +1,8 @@
 """matching на настоящих БД (KON-38): отбор кандидатов по статусу, навыки привязаны к файлу,
 кэш рекомендаций, прогоны и пакеты, фильтры «Резюме», сквозной сценарий с кэшем.
 
-Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V008) и TEST_APP_DB_URL (app_rw, app_db
-V001-V008); без них пропуск. Данные тестов: сотрудники KONT38-*, потребность KONT38-1; после
+Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V009) и TEST_APP_DB_URL (app_rw, app_db
+V001-V009); без них пропуск. Данные тестов: сотрудники KONT38-*, потребность KONT38-1; после
 теста удаляются. LLM не вызывается: шлюз с клиентом-подменой.
 """
 from __future__ import annotations
@@ -19,10 +19,12 @@ from app.matching.repo import (
     NeedSource,
     NewBatch,
     NewRec,
+    NewScreen,
     RunRow,
     SearchRunRow,
 )
 from app.matching.service import MatchingService
+from app.matching.settings import AppSettings
 
 from ._llm_fakes import Env, FakeClient
 from ._matching_fakes import reply_for, skills_reply
@@ -51,6 +53,7 @@ EMPLOYEES = [
 def _purge(cv_pool, app_pool):
     with cv_pool.connection() as c:
         c.execute("DELETE FROM cv.match_run WHERE need_key LIKE 'KONT38-%'")
+        c.execute("DELETE FROM cv.match_screen WHERE need_key LIKE 'KONT38-%'")
         c.execute("DELETE FROM cv.search_run WHERE requested_by LIKE 'kont38-%'")
         c.execute("DELETE FROM cv.recommendation WHERE need_key LIKE 'KONT38-%'")
         c.execute("DELETE FROM cv.employee_file WHERE employee_key LIKE 'KONT38-%' "
@@ -61,6 +64,8 @@ def _purge(cv_pool, app_pool):
         c.execute("DELETE FROM cv.employee WHERE jira_key LIKE 'KONT38-%'")
     with app_pool.connection() as c:
         c.execute("DELETE FROM app.jira_need WHERE jira_key LIKE 'KONT38-%'")
+        c.execute("DELETE FROM app.app_setting WHERE key IN ('match_deep_size', "
+                  "'match_screen_batch')")
 
 
 @pytest.fixture()
@@ -321,3 +326,115 @@ def test_semantic_search_end_to_end_on_real_repos(env):
     st = svc.get_search(LOGIN, query, limit=50, offset=0)
     assert st.stale is True                                              # заметка изменилась
     assert len(client.calls) == n
+
+
+# --- двухступенчатая оценка (cv_db V009) ---
+
+def test_screen_cache_run_stage_and_group_lookup(env):
+    cv_pool, app_pool, repo, cv, files = env
+    f10, f11 = files["KONT38-10"], files["KONT38-11"]
+    t1, t2 = "77777777-7777-4777-8777-777777777777", "88888888-8888-4888-8888-888888888888"
+    run1, run2 = "99999999-9999-4999-8999-999999999991", "99999999-9999-4999-8999-999999999992"
+    with repo.run_tx(NEED) as tx:
+        tx.replace(RunRow(NEED, LOGIN, 1, "m", T1, T1, "pending"),
+                   [NewBatch(t1, ("KONT38-10",), (f10,), "screen", run1)])
+    assert repo.get_run(NEED).chain_state == "pending"
+    b = repo.batch_by_task(t1)
+    assert (b.stage, b.run_id) == ("screen", run1)
+    assert [x.task_id for x in repo.batches_by_run(run1)] == [t1]
+    assert repo.batches_by_run(run2) == []
+    with repo.run_tx(NEED) as tx:
+        tx.finish_chain()
+        assert tx.run().chain_state == "done"
+    with repo.run_tx(NEED) as tx:       # ступень 2 - новый прогон со своим run_id
+        tx.replace(RunRow(NEED, LOGIN, 1, "m", T1, T1, "done"),
+                   [NewBatch(t2, ("KONT38-11",), (f11,), "deep", run2)])
+    assert repo.get_run(NEED).chain_state == "done" and repo.batches_by_run(run1) == []
+    assert repo.batch_by_task(t2).stage == "deep"
+
+    rows = [NewScreen("KONT38-10", f10, 80, "a" * 64), NewScreen("KONT38-11", f11, 20, "b" * 64),
+            NewScreen("KONT38-10", f11, 99, "c" * 64)]            # чужой файл пропускается
+    assert repo.upsert_match_screens(NEED, rows, model="m1", need_updated_at=T1) == 2
+    assert repo.upsert_match_screens(
+        NEED, [NewScreen("KONT38-10", f10, 55, "d" * 64)], model="m1", need_updated_at=T2) == 1
+    got = {r.employee_key: r for r in repo.list_match_screens(NEED)}
+    assert got["KONT38-10"].match_percent == 55 and got["KONT38-10"].skills_hash == "d" * 64
+    assert got["KONT38-10"].need_jira_updated_at == T2 and len(got) == 2
+    repo.upsert_match_screens(NEED, [NewScreen("KONT38-10", f10, 70, "d" * 64)],
+                              model="m2", need_updated_at=T2)
+    assert len(repo.list_match_screens(NEED)) == 3                 # другая модель - своя запись
+
+    h = "e" * 64
+    t3 = "88888888-8888-4888-8888-888888888883"
+    run3 = "99999999-9999-4999-8999-999999999993"
+    scope = {"status": None, "tags": ["sql"], "match_all": True, "text": None}
+    with repo.search_tx(LOGIN, h) as tx:
+        tx.replace(SearchRunRow(LOGIN, h, "аналитик sql", 1, "m", T1, "pending_force", scope),
+                   [NewBatch(t3, ("KONT38-10",), (f10,), "screen", run3)])
+        assert tx.run().chain_state == "pending_force"
+    sr = repo.get_search_run(LOGIN, h)
+    assert sr.scope == scope and sr.chain_state == "pending_force"
+    assert [x.run_id for x in repo.search_batches_by_run(run3)] == [run3]
+    assert repo.upsert_search_screens(h, rows[:2], model="m1") == 2
+    assert {r.employee_key for r in repo.list_search_screens(h)} == {"KONT38-10", "KONT38-11"}
+    assert repo.get_skills_many([f10, f11]) == {}                  # навыков ещё нет
+
+    # срок хранения чистит и скрининг поиска
+    with cv_pool.connection() as c:
+        c.execute("UPDATE cv.search_screen SET created_at = now() - interval '40 days' "
+                  "WHERE query_hash = %s", (h,))
+    repo.purge_search(30)
+    assert repo.list_search_screens(h) == []
+
+
+def test_two_stage_end_to_end_on_real_repos_and_app_settings(env):
+    cv_pool, app_pool, repo, _, files = env
+    settings = AppSettings(app_pool)
+    assert settings.deep_size() == 30 and settings.screen_batch() == 50     # по умолчанию
+    settings.set(deep_size=5, screen_batch=10)
+    assert (settings.deep_size(), settings.screen_batch()) == (5, 10)
+    with pytest.raises(ValueError):
+        settings.set(deep_size=4)
+    with app_pool.connection() as c:        # значение вне границ в самой БД - по умолчанию
+        c.execute("UPDATE app.app_setting SET value = '1000' WHERE key = 'match_deep_size'")
+    assert settings.deep_size() == 30
+    settings.set(deep_size=5, screen_batch=10)
+
+    # 10 допустимых с CV (2 из env + 8 новых), N=5 -> скрининг, затем глубокая оценка топ-5
+    with cv_pool.connection() as c:
+        for i in range(20, 28):
+            c.execute("INSERT INTO cv.employee (jira_key, full_name, status, assignable) "
+                      "VALUES (%s, %s, 'Свободен', true)", (f"KONT38-{i}", f"Сотрудник {i}"))
+    cv = CvRepo(cv_pool)
+    for i in range(20, 28):
+        fid = cv.add_file(
+            employee_key=f"KONT38-{i}", kind="main_cv", file_name=f"cv-{i}.docx",
+            mime_type="x", content=b"x", uploaded_by="u", extracted_text=f"Резюме {i} аналитик",
+            extraction_status="ok")
+        repo.claim_skills(fid, LOGIN, "m")
+        repo.finish_skills_ok(fid, ["sql"] if i % 2 else ["java"])
+
+    client = FakeClient(lambda p: reply_for(p, percent=lambda n: 100 - 7 * n)
+                        if p.startswith("ПОТРЕБНОСТЬ") else skills_reply(p))
+    e = Env(client=client)
+    svc = MatchingService(repo, NeedSource(app_pool), e.gateway, settings=settings)
+    st = svc.start_match(NEED, LOGIN)
+    assert st.stage == "screening"
+    while (t := e.gateway.run_next()) is not None:
+        svc.collect_task(t.id)
+    st = svc.get_state(NEED, limit=50, offset=0)
+    assert st.stage == "deep" and st.status == "done" and st.evaluated == 5
+    assert st.screened == 8 and st.screen_total == 8 and st.candidates_total == 10
+    assert st.remaining == 5
+    n_calls = len(client.calls)
+    svc.start_match(NEED, LOGIN)                                 # кэш скрининга и глубокой оценки
+    assert e.gateway.run_next() is None and len(client.calls) == n_calls
+
+    st = svc.evaluate_next(NEED, LOGIN)
+    assert st.stage == "deep" and st.tasks[0].candidates >= 1
+    while (t := e.gateway.run_next()) is not None:
+        svc.collect_task(t.id)
+    assert svc.get_state(NEED, limit=50, offset=0).evaluated == 10
+    with app_pool.connection() as c:
+        c.execute("DELETE FROM app.app_setting WHERE key IN ('match_deep_size', "
+                  "'match_screen_batch')")

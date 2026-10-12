@@ -128,6 +128,18 @@ describe("Потребности", () => {
     expect(within(r1).getAllByRole("cell")).toHaveLength(heads.length);
   });
 
+  it("значок «i» у колонки «Кандидаты» открывает описание логики подбора", async () => {
+    route((u) => (u.includes("/sync/needs?") ? json(page([need()])) : undefined));
+    renderNeeds();
+    await screen.findByText("AN-1");
+    await userEvent.click(screen.getByRole("button", { name: "Как подбираются кандидаты" }));
+    const dialog = screen.getByRole("dialog", { name: "Как подбираются кандидаты" });
+    expect(within(dialog).getByText(/Ступень 1/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Внешняя модель/)).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole("button", { name: "Понятно" }));
+    expect(screen.queryByRole("dialog", { name: "Как подбираются кандидаты" })).not.toBeInTheDocument();
+  });
+
   it("пустая ставка - «не указана»; с НДС", async () => {
     route((u) =>
       u.includes("/sync/needs?")

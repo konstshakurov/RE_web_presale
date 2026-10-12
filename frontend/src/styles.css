@@ -174,3 +174,7 @@ a { color: var(--accent); }
 .match-settings { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
 .modal .check { flex-direction: row; align-items: center; gap: 8px; }
 .cv-sections > div { margin-bottom: 8px; }
+
+.info-btn { width: 20px; height: 20px; padding: 0; margin-left: 6px; border-radius: 50%; border: 1px solid var(--accent); background: transparent; color: var(--accent); font: italic 600 12px/18px Georgia, serif; cursor: pointer; vertical-align: middle; }
+.info-btn:hover { background: var(--accent); color: #fff; }
+.matching-info ol { padding-left: 20px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }

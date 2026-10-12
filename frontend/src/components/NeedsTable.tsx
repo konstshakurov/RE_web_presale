@@ -3,6 +3,7 @@ import { Fragment, useState } from "react";
 import type { NeedOut, NeedSort, SortOrder } from "../api/types";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
+import MatchingInfo from "./matching/MatchingInfo";
 import NeedCandidates from "./matching/NeedCandidates";
 
 export interface NeedsSort {
@@ -44,7 +45,9 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
           <th>Клиент / эпик</th>
           <th>Тип контракта</th>
           <th>Ставка</th>
-          <th>Кандидаты</th>
+          <th>
+            Кандидаты <MatchingInfo />
+          </th>
           <SortHeader field="created" label="Создана" sort={sort} onSort={onSort} />
         </tr>
       </thead>

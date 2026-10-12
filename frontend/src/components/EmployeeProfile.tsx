@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { ApiError, api } from "../api/client";
-import type { EmployeeOut, FileOut, NeedOut } from "../api/types";
+import type { EmployeeOut, EmployeeProfileData, FileOut, NeedOut } from "../api/types";
 import { formatSize } from "../lib/employees";
 import { formatDateTime, formatRate } from "../lib/needs";
 import Modal from "./Modal";
@@ -14,11 +14,45 @@ interface Props {
 }
 
 // Профиль сотрудника (FR-003): данные карточки Jira, ссылки на все CV, история отправок (FR-016).
-// Разбор корпоративного CV (стек, отрасли, проекты, годы, языки) - заглушка: в API его пока нет.
+// Разбор корпоративного CV (BR-007: стек, отрасли, проекты, годы, языки) - из GET /resume/employees/{key}/profile.
+const SECTION_TITLES: [string, string][] = [
+  ["profile", "Профиль"],
+  ["stack", "Основной стек"],
+  ["industries", "Отрасли"],
+  ["skills", "Ключевые навыки"],
+  ["languages", "Языки"],
+  ["education", "Образование и сертификаты"],
+  ["projects", "Проекты"],
+];
+
+// Разделы корпоративного CV по заголовкам; годы опыта - только если CV называет их явно.
+function CvSections({ profile }: { profile: EmployeeProfileData | null | undefined }) {
+  if (profile === undefined) return <span className="muted">Загрузка…</span>;
+  if (profile === null) return <span className="muted">Профиль из CV недоступен: нет основного CV или он не разобран</span>;
+  const sections = SECTION_TITLES.filter(([k]) => profile.sections?.[k]);
+  const years = profile.experience_years;
+  if (sections.length === 0 && profile.skills.length === 0 && years == null) {
+    return <span className="muted">В основном CV не найдены разделы корпоративного формата</span>;
+  }
+  return (
+    <div className="cv-sections">
+      {years != null && <p>Опыт: {years} лет (по данным CV)</p>}
+      {profile.skills.length > 0 && <p>Технологии: {profile.skills.join(", ")}</p>}
+      {sections.map(([k, title]) => (
+        <div key={k}>
+          <strong>{title}</strong>
+          <div className="pre">{profile.sections[k]}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Props) {
   const [files, setFiles] = useState<FileOut[] | null>(null);
   const [needs, setNeeds] = useState<NeedOut[] | null>(null);
   const [error, setError] = useState("");
+  const [profile, setProfile] = useState<EmployeeProfileData | null | undefined>(undefined); // null - профиля нет
 
   useEffect(() => {
     let alive = true;
@@ -27,6 +61,10 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
       .employeeFiles(e.jira_key)
       .then((r) => alive && setFiles(r.files))
       .catch(fail);
+    api
+      .employeeProfile(e.jira_key)
+      .then((p) => alive && setProfile(p))
+      .catch(() => alive && setProfile(null)); // нет профиля (404) или недоступен - показываем пояснение
     // История из локального кэша потребностей: потребности, где исполнитель - этот сотрудник
     api
       .needs({ group: "all", limit: 500, offset: 0 })
@@ -50,9 +88,8 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
         <dt>Подробнее об опыте</dt>
         <dd className="pre">{e.extra_experience || <span className="muted">не указано</span>}</dd>
         <dt>Данные из CV</dt>
-        <dd className="muted">
-          Основной стек, отрасли, проекты, годы опыта и языки появятся после разбора основного CV (этап 1, задача на
-          backend).
+        <dd>
+          <CvSections profile={profile} />
         </dd>
         <dt>Файлы</dt>
         <dd>

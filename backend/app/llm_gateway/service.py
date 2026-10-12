@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -19,7 +20,14 @@ from datetime import datetime
 
 from ..config import Secret
 from ..secrets import SecretsError, SecretStore
-from .anonymize import AnonymizationError, Anonymizer, Dictionaries, NerPort, restore
+from .anonymize import (
+    LABELS,
+    AnonymizationError,
+    Anonymizer,
+    Dictionaries,
+    NerPort,
+    restore,
+)
 from .client import ChatClient, LlmCallError, LlmTimeoutError
 from .dictionaries import DictionarySource
 from .repo import (
@@ -59,6 +67,20 @@ class Preview:
     prompt: str
     replacements: dict[str, int]
     ner_used: bool
+    edited: bool = False  # пользователь правил текст предпросмотра (FR-023)
+
+
+class LeakError(GatewayError):
+    """В отредактированном тексте найдены необезличенные фрагменты; текст не сохранён.
+
+    ``fragments`` - то, что нашла проверка (пользователь сам это написал, ему и показываем);
+    в логи фрагменты не пишутся."""
+
+    def __init__(self, fragments: list[str]) -> None:
+        super().__init__(
+            "leak_detected",
+            "В тексте остались необезличенные данные: удалите или замените их плейсхолдерами")
+        self.fragments = fragments
 
 
 @dataclass(frozen=True)
@@ -79,6 +101,10 @@ class TaskView:
     attempts: int
     created_at: datetime
     finished_at: datetime | None
+    editable: bool = False  # внешняя задача до подтверждения: текст можно править
+
+
+_NOT_EDITABLE = "Текст можно править только до подтверждения отправки во внешнюю LLM"
 
 
 def _aad(task_id: str, part: str) -> str:
@@ -155,7 +181,8 @@ class LlmGateway:
             log.error("обезличивание: остались опознаваемые ПДн", extra={"leaks": len(leaks)})
             raise AnonymizationError(f"осталось {len(leaks)} фрагментов")
         return {"system": out_system or None, "prompt": out_prompt, "mapping": anon.mapping,
-                "counts": anon.counts, "ner": anon.ner_used}
+                "counts": anon.counts, "ner": anon.ner_used, "orig_len": len(out_prompt),
+                "terms": _terms_json(terms)}
 
     def _pick_provider(self, provider_id: int | None) -> ProviderRow:
         provider = (self._repo.get_provider(provider_id) if provider_id is not None
@@ -181,6 +208,69 @@ class LlmGateway:
             raise GatewayError(
                 "not_awaiting_confirmation", "Прогон не ожидает подтверждения отправки")
         return [self.get(owner_login, r.id) for r in rows]
+
+    def edit_prompt(self, owner_login: str, task_id: str, new_prompt: str) -> TaskView:
+        """Правка обезличенного текста внешнего запроса до подтверждения (CR владельца, FR-023).
+
+        Перед сохранением текст проходит ту же проверку остатков, что и при постановке
+        (regex, словари, NER), плюс оригиналы подстановок этой задачи. Найдены фрагменты -
+        ``LeakError``, текст не сохраняется. Плейсхолдеры вне таблицы подстановок допустимы."""
+        row = self._own(owner_login, task_id)
+        if not row.is_external or row.status != AWAITING or row.confirmed_at is not None \
+                or row.payload is None:
+            raise GatewayError("not_editable", _NOT_EDITABLE)
+        try:
+            payload = json.loads(self._store.open_blob(row.payload, _aad(row.id, "payload")))
+        except (SecretsError, ValueError):
+            raise GatewayError("payload_unreadable", "Не удалось прочитать запрос") from None
+        new_prompt = new_prompt.replace(_SEP, " ")
+        if not new_prompt.strip():
+            raise GatewayError("empty_prompt", "Пустой запрос к LLM")
+        orig_len = int(payload.get("orig_len") or len(payload["prompt"]))
+        limit = min(orig_len * 2, MAX_PROMPT_CHARS - len(payload.get("system") or ""))
+        if len(new_prompt) > limit:
+            raise GatewayError(
+                "bad_prompt_length",
+                f"Текст длиннее допустимого: не более {limit} символов (2 длины исходного)")
+        leaks = self._find_edit_leaks(payload, new_prompt)
+        if leaks:
+            log.warning("правка текста отклонена: остались ПДн", extra={
+                "task_id": row.id, "leaks": len(leaks)})
+            raise LeakError(leaks)
+        payload.update(prompt=new_prompt, edited=True, orig_len=orig_len)
+        sealed = self._store.seal_blob(json.dumps(payload, ensure_ascii=False),
+                                       _aad(row.id, "payload"))
+        if not self._repo.update_payload(row.id, sealed):
+            raise GatewayError("not_editable", _NOT_EDITABLE)  # успели подтвердить/отменить
+        log.info("текст внешнего запроса изменён пользователем", extra={
+            "task_id": row.id, "chars": len(new_prompt)})
+        return self.get(owner_login, task_id)
+
+    def _find_edit_leaks(self, payload: dict, text: str) -> list[str]:
+        """Словари + оригиналы подстановок задачи (regex/словари) и NER по новым фрагментам."""
+        d = self._dicts.load()
+        saved = payload.get("terms")
+        if saved:
+            d = d.merged(Dictionaries(**{k: tuple(v) for k, v in saved.items()}))
+        d = d.merged(_originals_as_terms(payload.get("mapping") or {}))
+        found = Anonymizer(d, None).find_leaks(text)
+        if self._ner is not None:
+            clean = _blank_placeholders(text)
+            before = (payload.get("prompt") or "").lower()
+            try:
+                spans = self._ner.extract(clean)
+            except Exception as exc:  # noqa: BLE001 - без проверки NER сохранять нельзя
+                log.error("правка текста: сбой NER", extra={"error": type(exc).__name__})
+                raise AnonymizationError("NER недоступен") from None
+            for sp in spans:
+                frag = " ".join(clean[sp.start:sp.end].split())
+                # то, что уже стояло в принятом тексте, не считается новой утечкой
+                if len(frag) >= 3 and frag.lower() not in before:
+                    found.append(frag)
+        seen: dict[str, str] = {}
+        for f in found:
+            seen.setdefault(f.lower(), f)
+        return list(seen.values())
 
     def cancel(self, owner_login: str, task_id: str) -> TaskView:
         row = self._own(owner_login, task_id)
@@ -238,7 +328,8 @@ class LlmGateway:
             try:
                 p = json.loads(self._store.open_blob(row.payload, _aad(row.id, "payload")))
                 preview = Preview(system=p.get("system"), prompt=p["prompt"],
-                                  replacements=p.get("counts", {}), ner_used=p.get("ner", False))
+                                  replacements=p.get("counts", {}), ner_used=p.get("ner", False),
+                                  edited=bool(p.get("edited", False)))
             except (SecretsError, ValueError, KeyError):
                 preview = None
         result = None
@@ -257,6 +348,8 @@ class LlmGateway:
             result=result, error_code=row.error_code, error_message=row.error_message,
             timeout_sec=provider.timeout_sec if provider else DEFAULT_TIMEOUT_SEC,
             attempts=row.attempts, created_at=row.created_at, finished_at=row.finished_at,
+            editable=bool(row.is_external and row.status == AWAITING and preview is not None
+                          and row.confirmed_at is None),
         )
 
     # --- выполнение (worker) ---
@@ -347,7 +440,34 @@ class LlmGateway:
         return self._repo.purge_finished(days)
 
 
+def _terms_json(terms: Dictionaries | None) -> dict | None:
+    if terms is None or terms.is_empty():
+        return None
+    return {"persons": list(terms.persons), "companies": list(terms.companies),
+            "projects": list(terms.projects), "locations": list(terms.locations)}
+
+
+_PH_RE = re.compile(r"\[(?:%s)_\d+\]" % "|".join(LABELS.values()))
+
+
+def _blank_placeholders(text: str) -> str:
+    """Плейсхолдеры -> пробелы той же длины: смещения NER остаются верными."""
+    return _PH_RE.sub(lambda m: " " * len(m.group(0)), text)
+
+
+def _originals_as_terms(mapping: dict[str, str]) -> Dictionaries:
+    """Оригиналы подстановок задачи как словари: по виду метки плейсхолдера."""
+    buckets: dict[str, list[str]] = {
+        "persons": [], "companies": [], "projects": [], "locations": []}
+    kind = {LABELS["person"]: "persons", LABELS["company"]: "companies",
+            LABELS["location"]: "locations"}
+    for ph, original in mapping.items():
+        label = ph.strip("[]").rsplit("_", 1)[0]
+        buckets[kind.get(label, "projects")].append(original)
+    return Dictionaries(**{k: tuple(v) for k, v in buckets.items()})
+
+
 __all__ = [
     "CANCELLED", "DEFAULT_PROVIDER_NAME", "DEFAULT_QWEN_URL", "DEFAULT_TIMEOUT_SEC",
-    "AnonymizationError", "GatewayError", "LlmGateway", "Preview", "TaskView",
+    "AnonymizationError", "GatewayError", "LeakError", "LlmGateway", "Preview", "TaskView",
 ]

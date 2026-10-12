@@ -312,3 +312,111 @@ def test_confirm_many_is_atomic_and_owner_checked(env):
     assert [v.status for v in views] == [QUEUED, QUEUED]
     with pytest.raises(GatewayError):
         env.gateway.confirm_many("ivan", [])
+
+
+# --- правка обезличенного текста до подтверждения (CR владельца, FR-023) ---
+
+def _external(env, prompt=PROMPT):
+    return env.gateway.submit("ivan", "match", prompt, provider_id=env.external.id)
+
+
+def test_edit_prompt_saved_and_sent_and_marked_edited(env):
+    v = _external(env)
+    assert v.editable and v.preview.edited is False
+    new = v.preview.prompt + " Допишу про [ПЕРСОНА_1] и [ORG_1]."
+    e = env.gateway.edit_prompt("ivan", v.id, new)
+    assert e.preview.prompt == new and e.preview.edited and e.editable
+    again = env.gateway.edit_prompt("ivan", v.id, "Короткий вариант [КОМПАНИЯ_1]")  # повторно
+    assert again.preview.prompt == "Короткий вариант [КОМПАНИЯ_1]"
+    env.gateway.confirm("ivan", v.id)
+    env.gateway.run_next()
+    assert env.client.calls[0]["prompt"] == "Короткий вариант [КОМПАНИЯ_1]"
+    done = env.gateway.get("ivan", v.id)
+    assert done.status == DONE and not done.editable
+
+
+def test_edit_prompt_unknown_placeholder_allowed_and_known_restored(env):
+    env.client = FakeClient(lambda p: "Ответ: [ПЕРСОНА_1], [ORG_9]")
+    env.gateway._client = env.client
+    v = _external(env)
+    env.gateway.edit_prompt("ivan", v.id, "Текст [ПЕРСОНА_1] и [ORG_9]")
+    env.gateway.confirm("ivan", v.id)
+    env.gateway.run_next()
+    assert env.gateway.get("ivan", v.id).result == f"Ответ: {PERSON}, [ORG_9]"
+
+
+@pytest.mark.parametrize("leak", [
+    "почта another@example.test", "звонить +7 912 345 67 89", COMPANY, PERSON,
+    "только Тестов", "сайт https://secret.example.test/x",
+])
+def test_edit_prompt_leak_rejected_and_text_unchanged(env, leak):
+    v = _external(env)
+    before = v.preview.prompt
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", v.id, "Правка. " + leak)
+    assert ei.value.code == "leak_detected" and ei.value.fragments
+    after = env.gateway.get("ivan", v.id)
+    assert after.preview.prompt == before and after.preview.edited is False
+
+
+def test_edit_prompt_checks_originals_of_this_task_even_if_dictionary_changed(env):
+    v = _external(env)
+    env.repo.sources["companies"] = []          # словарь уже не знает клиента
+    env.repo.sources["persons"] = []
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", v.id, f"Верните {PERSON} в текст")
+    assert ei.value.code == "leak_detected"
+    assert PERSON in ei.value.fragments[0] or PERSON.lower() in ei.value.fragments[0].lower()
+
+
+def test_edit_prompt_ner_flags_only_new_fragments():
+    e = Env(ner=FakeNer([("Незнакомцев Иван", "person"), ("Новиков Пётр", "person")]))
+    base = "Звонил Незнакомцев Иван. " + "Подробности опыта и проектов в резюме. " * 3
+    v = e.gateway.submit("ivan", "match", base, provider_id=e.external.id)
+    ok = e.gateway.edit_prompt("ivan", v.id, v.preview.prompt + " Ещё раз про [ПЕРСОНА_1].")
+    assert ok.preview.edited
+    with pytest.raises(GatewayError) as ei:
+        e.gateway.edit_prompt("ivan", v.id, ok.preview.prompt + " И Новиков Пётр тоже.")
+    assert ei.value.code == "leak_detected" and ei.value.fragments == ["Новиков Пётр"]
+
+
+def test_edit_prompt_length_limits(env):
+    v = _external(env)
+    n = len(v.preview.prompt)
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", v.id, "я" * (n * 2 + 1))
+    assert ei.value.code == "bad_prompt_length"
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", v.id, "   ")
+    assert ei.value.code == "empty_prompt"
+    assert env.gateway.edit_prompt("ivan", v.id, "я" * (n * 2)).preview.edited
+    # предел считается от исходной длины, а не от длины текущей правки
+    with pytest.raises(GatewayError):
+        env.gateway.edit_prompt("ivan", v.id, "я" * (n * 2 + 1))
+
+
+def test_edit_prompt_not_after_confirm_not_internal_not_foreign(env):
+    v = _external(env)
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("petr", v.id, "чужое")
+    assert ei.value.code == "task_not_found"
+    env.gateway.confirm("ivan", v.id)
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", v.id, "поздно")
+    assert ei.value.code == "not_editable"
+    internal = env.gateway.submit("ivan", "chat", "привет")
+    assert internal.editable is False
+    with pytest.raises(GatewayError) as ei:
+        env.gateway.edit_prompt("ivan", internal.id, "правка")
+    assert ei.value.code == "not_editable"
+
+
+def test_edit_prompt_stored_encrypted_and_not_logged(env, caplog):
+    caplog.set_level(logging.DEBUG)
+    v = _external(env)
+    marker = "УникальнаяПравкаДляЛога"
+    env.gateway.edit_prompt("ivan", v.id, f"Текст {marker}")
+    assert marker.encode() not in env.repo.tasks[v.id]["payload"].ciphertext
+    with pytest.raises(GatewayError):
+        env.gateway.edit_prompt("ivan", v.id, f"{marker} tester@example.test")
+    assert marker not in caplog.text and "tester@example.test" not in caplog.text

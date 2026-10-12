@@ -5,7 +5,7 @@ from .dictionaries import DictionarySource
 from .providers import ProviderError, ProviderService, ensure_default_provider
 from .repo import LlmRepo
 from .runner import LlmRunner
-from .service import GatewayError, LlmGateway, TaskView
+from .service import GatewayError, LeakError, LlmGateway, TaskView
 
 __all__ = [
     "AnonymizationError",
@@ -13,6 +13,7 @@ __all__ = [
     "Dictionaries",
     "DictionarySource",
     "GatewayError",
+    "LeakError",
     "LlmGateway",
     "LlmRepo",
     "LlmRunner",

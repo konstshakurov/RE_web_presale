@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext, authenticated, authenticated_csrf, require_admin
 from ..cv.repo import CvRepo
-from ..llm_gateway import AnonymizationError, GatewayError
+from ..llm_gateway import AnonymizationError, GatewayError, LeakError
 from .profile import guess_years, parse_sections
 from .screening import (
     DEEP_SIZE_MAX,
@@ -53,10 +53,11 @@ EMPLOYEE_KEY = Path(pattern=r"^[A-Z][A-Z0-9_]*-[0-9]+$", description="Ключ �
 _GATEWAY_STATUS = {
     "provider_not_found": 404, "no_default_provider": 409, "empty_prompt": 422,
     "prompt_too_long": 413, "task_not_found": 404, "not_awaiting_confirmation": 409,
+    "not_editable": 409, "bad_prompt_length": 422,
 }
 _MATCHING_STATUS = {
     "need_not_found": 404, "employee_not_found": 404, "bad_query": 422, "run_not_found": 404,
-    "bad_settings": 422}
+    "bad_settings": 422, "task_not_found": 404}
 RUN_ID = Path(pattern=r"^[0-9a-fA-F-]{36}$", description="Идентификатор прогона (run_id)")
 
 
@@ -211,6 +212,15 @@ class RunTaskOut(BaseModel):
     replacements: dict[str, int] = Field(description="вид -> число уникальных подстановок")
     ner_used: bool
     error_message: str | None = None
+    editable: bool = Field(
+        False, description="true - текст prompt можно править: PUT .../tasks/{task_id}/prompt")
+    edited: bool = Field(False, description="prompt изменён пользователем (показан актуальный)")
+
+
+class PromptIn(BaseModel):
+    prompt: str = Field(
+        min_length=1, max_length=200_000,
+        description="Новый обезличенный текст запроса: не длиннее 2 длин исходного")
 
 
 class RunOut(BaseModel):
@@ -340,7 +350,8 @@ def _run_out(r: RunInfo) -> RunOut:
         tasks=[RunTaskOut(
             task_id=t.task_id, status=t.status, candidates=t.candidates,
             requires_confirmation=t.requires_confirmation, system=t.system, prompt=t.prompt,
-            replacements=t.replacements, ner_used=t.ner_used, error_message=t.error_message)
+            replacements=t.replacements, ner_used=t.ner_used, error_message=t.error_message,
+            editable=t.editable, edited=t.edited)
             for t in r.tasks])
 
 
@@ -397,6 +408,9 @@ def _filters(status: str | None, technology: list[str] | None, match: str,
 
 
 def _raise(exc: Exception) -> None:
+    if isinstance(exc, LeakError):
+        raise HTTPException(status_code=422, detail={
+            "code": exc.code, "message": exc.message, "fragments": exc.fragments}) from exc
     if isinstance(exc, MatchingError):
         raise HTTPException(
             status_code=_MATCHING_STATUS.get(exc.code, 400), detail=exc.message) from exc
@@ -567,6 +581,29 @@ def confirm_run(
     try:
         return _run_out(_service(request).confirm_run(ctx.login, run_id))
     except (MatchingError, GatewayError) as exc:
+        _raise(exc)
+
+
+@router.put(
+    "/matching/runs/{run_id}/tasks/{task_id}/prompt", response_model=RunOut,
+    responses={404: {"description": "Прогон или задача не найдены (или не ваши)"},
+               409: {"description": "Текст уже подтверждён/отправлен или задача внутренняя"},
+               422: {"description": "Длина вне 1..2 длин исходного либо в тексте найдены "
+                                    "необезличенные фрагменты: detail = {code: leak_detected, "
+                                    "message, fragments[]}; текст не сохранён"}})
+def edit_task_prompt(
+    request: Request, body: PromptIn, run_id: Annotated[str, RUN_ID],
+    task_id: Annotated[str, Path(pattern=r"^[0-9a-fA-F-]{36}$", description="Задача прогона")],
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> RunOut:
+    """Править обезличенный текст, который уйдёт во внешнюю LLM, до подтверждения прогона
+    (FR-023). Перед сохранением проверка остатков ПДн повторяется (regex, словари, NER и
+    оригиналы подстановок задачи); плейсхолдеры вне таблицы подстановок допустимы. Подтверждение
+    и выполнение используют отредактированный текст; повторная правка возможна до подтверждения."""
+    try:
+        return _run_out(_service(request).edit_task_prompt(
+            ctx.login, run_id, task_id, body.prompt))
+    except (MatchingError, GatewayError, AnonymizationError) as exc:
         _raise(exc)
 
 

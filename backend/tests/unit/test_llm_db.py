@@ -220,3 +220,33 @@ def test_group_confirm_is_all_or_nothing_in_one_transaction(env):
     assert [repo.get_task(i).status for i in (ids[0], ids[2])] == [QUEUED, QUEUED]
     assert repo.get_task(ids[0]).confirmed_at is not None
     assert repo.confirm_tasks([ids[0]]) is False and repo.confirm_tasks([]) is False
+
+
+def test_edit_prompt_until_confirm_then_409_and_encrypted(env):
+    """Правка обезличенного текста (CR владельца): шифртекст в БД, лимит, чужой, после confirm."""
+    pool, repo, _, gw, svc, client = env
+    p = _ext(svc)
+    v = gw.submit(USER, "chat", f"Клиент {COMPANY}. Опишите опыт аналитика подробно.",
+                  provider_id=p.id)
+    assert v.editable and COMPANY not in v.preview.prompt
+    e = gw.edit_prompt(USER, v.id, "Опишите опыт аналитика [КОМПАНИЯ_1] кратко")
+    assert e.preview.edited and e.preview.prompt == "Опишите опыт аналитика [КОМПАНИЯ_1] кратко"
+    with pool.connection() as c:
+        ct = bytes(c.execute("SELECT payload_ct FROM app.llm_task WHERE id = %s::uuid",
+                             (v.id,)).fetchone()[0])
+    assert "кратко".encode() not in ct and "КОМПАНИЯ".encode() not in ct
+    with pytest.raises(GatewayError) as ei:
+        gw.edit_prompt(USER, v.id, f"Верните {COMPANY}")             # оригинал подстановки
+    assert ei.value.code == "leak_detected"
+    assert gw.get(USER, v.id).preview.prompt == e.preview.prompt     # не сохранилось
+    with pytest.raises(GatewayError) as ei:
+        gw.edit_prompt(OTHER, v.id, "чужая правка")
+    assert ei.value.code == "task_not_found"
+    gw.confirm(USER, v.id)
+    with pytest.raises(GatewayError) as ei:
+        gw.edit_prompt(USER, v.id, "после подтверждения")
+    assert ei.value.code == "not_editable"
+    # условный UPDATE: после подтверждения ничего не меняет даже на уровне репозитория
+    assert repo.update_payload(v.id, repo.get_task(v.id).payload) is False
+    gw.run_next()
+    assert client.calls[-1]["prompt"] == "Опишите опыт аналитика [КОМПАНИЯ_1] кратко"

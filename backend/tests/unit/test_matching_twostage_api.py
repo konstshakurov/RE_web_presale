@@ -166,3 +166,78 @@ def test_admin_settings_only_for_admin_with_csrf_and_bounds():
     assert admin.get("/admin/matching/settings").json()["deep_size"] == 40
     # пользователям значение N видно в состоянии потребности
     assert user.get(f"/needs/{NEED}/match").json()["deep_size"] == 40
+
+
+# --- правка обезличенного текста прогона до подтверждения (CR владельца, FR-023) ---
+
+OMEGA = "Фирма Омега"
+
+
+def _edit_world():
+    w = _world(2, external_default=True)
+    w.env.repo.sources["companies"] = [OMEGA]
+    w.repo.add_employee("EMP-20", "Сотрудник-20", text=f"Работал в {OMEGA} аналитиком")
+    return w
+
+
+def _put(client, h, run_id, task_id, text):
+    return client.put(f"/matching/runs/{run_id}/tasks/{task_id}/prompt", headers=h,
+                      json={"prompt": text})
+
+
+def test_edit_prompt_over_http_flow():
+    w = _edit_world()
+    client, h = _client(w)
+    run_id = client.post(f"/needs/{NEED}/match", headers=h, json={}).json()["run_id"]
+    t = client.get(f"/matching/runs/{run_id}").json()["tasks"][0]
+    assert t["editable"] is True and t["edited"] is False
+    assert "[КОМПАНИЯ_1]" in t["prompt"] and OMEGA not in t["prompt"]
+
+    new = t["prompt"] + "\nДоп. пожелание: опыт в [КОМПАНИЯ_1] и [ORG_7]."
+    url = f"/matching/runs/{run_id}/tasks/{t['task_id']}/prompt"
+    assert client.put(url, json={"prompt": new}).status_code == 403            # без CSRF
+    ok = _put(client, h, run_id, t["task_id"], new)
+    assert ok.status_code == 200
+    t2 = ok.json()["tasks"][0]
+    assert t2["prompt"] == new and t2["edited"] is True and t2["editable"] is True
+    assert client.get(f"/matching/runs/{run_id}").json()["tasks"][0]["prompt"] == new
+
+    # утечка: оригинал подстановки этой задачи; текст не сохраняется
+    w.env.repo.sources["companies"] = []
+    bad = _put(client, h, run_id, t["task_id"], new + f" {OMEGA}")
+    assert bad.status_code == 422
+    d = bad.json()["detail"]
+    assert d["code"] == "leak_detected" and d["fragments"] and OMEGA in d["fragments"][0]
+    assert client.get(f"/matching/runs/{run_id}").json()["tasks"][0]["prompt"] == new
+    # длина
+    assert _put(client, h, run_id, t["task_id"], "").status_code == 422
+    too_long = "я" * (len(t["prompt"]) * 2 + 1)
+    assert _put(client, h, run_id, t["task_id"], too_long).status_code == 422
+
+    # confirm и выполнение используют отредактированный текст
+    assert client.post(f"/matching/runs/{run_id}/confirm", headers=h).status_code == 200
+    w.run_all()
+    assert w.llm_client.calls[0]["prompt"] == new
+    after = _put(client, h, run_id, t["task_id"], "поздно")
+    assert after.status_code == 409
+
+
+def test_edit_prompt_foreign_and_unknown_task_are_404():
+    w = _edit_world()
+    client, h = _client(w)                       # пользователь сессии - ivan
+    run_id = w.svc.start_match(NEED, "petr").run_id
+    task_id = w.svc.run_info("petr", run_id).tasks[0].task_id
+    assert _put(client, h, run_id, task_id, "чужой прогон").status_code == 404
+    own = client.post(f"/needs/{NEED}/match", headers=h, json={}).json()["run_id"]
+    other = "00000000-0000-4000-8000-000000000000"
+    assert _put(client, h, own, other, "нет такой задачи").status_code == 404
+    assert _put(client, h, own, task_id, "задача чужого прогона").status_code == 404
+
+
+def test_edit_prompt_internal_provider_is_not_editable():
+    w = _world(2)
+    client, h = _client(w)
+    run_id = client.post(f"/needs/{NEED}/match", headers=h, json={}).json()["run_id"]
+    t = client.get(f"/matching/runs/{run_id}").json()["tasks"][0]
+    assert t["editable"] is False and t["edited"] is False
+    assert _put(client, h, run_id, t["task_id"], "правка").status_code == 409

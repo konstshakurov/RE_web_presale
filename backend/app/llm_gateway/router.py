@@ -18,7 +18,7 @@ from .anonymize import AnonymizationError, Dictionaries
 from .dictionaries import MAX_TERM_LEN, MAX_TERMS, DictionarySource
 from .providers import ProviderError, ProviderService
 from .repo import LlmRepo, ProviderRow
-from .service import GatewayError, LlmGateway, TaskView
+from .service import GatewayError, LeakError, LlmGateway, TaskView
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ NOT_CONFIGURED = "Шлюз LLM не настроен"
 _GATEWAY_STATUS = {
     "task_not_found": 404, "provider_not_found": 404, "no_default_provider": 409,
     "not_awaiting_confirmation": 409, "not_cancellable": 409, "not_retryable": 409,
+    "not_editable": 409, "bad_prompt_length": 422,
     "empty_prompt": 422, "prompt_too_long": 413,
 }
 _PROVIDER_STATUS = {
@@ -125,6 +126,10 @@ class TaskOut(BaseModel):
     attempts: int
     created_at: datetime
     finished_at: datetime | None = None
+    editable: bool = Field(
+        False, description="true - внешний запрос ещё не подтверждён, текст предпросмотра "
+                           "можно править")
+    edited: bool = Field(False, description="Текст предпросмотра изменён пользователем")
 
 
 def _provider_out(p: ProviderRow) -> ProviderOut:
@@ -144,7 +149,7 @@ def _task_out(t: TaskView) -> TaskOut:
                            ner_used=pv.ner_used) if pv else None,
         result=t.result, error_code=t.error_code, error_message=t.error_message,
         timeout_sec=t.timeout_sec, attempts=t.attempts, created_at=t.created_at,
-        finished_at=t.finished_at,
+        finished_at=t.finished_at, editable=t.editable, edited=bool(pv and pv.edited),
     )
 
 
@@ -172,6 +177,9 @@ def _dict_source(request: Request) -> DictionarySource:
 
 
 def _gw_error(exc: GatewayError) -> HTTPException:
+    if isinstance(exc, LeakError):
+        return HTTPException(status_code=422, detail={
+            "code": exc.code, "message": exc.message, "fragments": exc.fragments})
     return HTTPException(status_code=_GATEWAY_STATUS.get(exc.code, 400), detail=exc.message)
 
 

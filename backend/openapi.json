@@ -1711,6 +1711,22 @@
         "title": "ProfileOut",
         "type": "object"
       },
+      "PromptIn": {
+        "properties": {
+          "prompt": {
+            "description": "Новый обезличенный текст запроса: не длиннее 2 длин исходного",
+            "maxLength": 200000,
+            "minLength": 1,
+            "title": "Prompt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "PromptIn",
+        "type": "object"
+      },
       "ProviderCreate": {
         "properties": {
           "api_key": {
@@ -2356,6 +2372,18 @@
           "candidates": {
             "title": "Candidates",
             "type": "integer"
+          },
+          "editable": {
+            "default": false,
+            "description": "true - текст prompt можно править: PUT .../tasks/{task_id}/prompt",
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "edited": {
+            "default": false,
+            "description": "prompt изменён пользователем (показан актуальный)",
+            "title": "Edited",
+            "type": "boolean"
           },
           "error_message": {
             "anyOf": [
@@ -3402,6 +3430,18 @@
             "format": "date-time",
             "title": "Created At",
             "type": "string"
+          },
+          "editable": {
+            "default": false,
+            "description": "true - внешний запрос ещё не подтверждён, текст предпросмотра можно править",
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "edited": {
+            "default": false,
+            "description": "Текст предпросмотра изменён пользователем",
+            "title": "Edited",
+            "type": "boolean"
           },
           "error_code": {
             "anyOf": [
@@ -5796,6 +5836,87 @@
           }
         ],
         "summary": "Confirm Run",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/matching/runs/{run_id}/tasks/{task_id}/prompt": {
+      "put": {
+        "description": "Править обезличенный текст, который уйдёт во внешнюю LLM, до подтверждения прогона\n(FR-023). Перед сохранением проверка остатков ПДн повторяется (regex, словари, NER и\nоригиналы подстановок задачи); плейсхолдеры вне таблицы подстановок допустимы. Подтверждение\nи выполнение используют отредактированный текст; повторная правка возможна до подтверждения.",
+        "operationId": "edit_task_prompt_matching_runs__run_id__tasks__task_id__prompt_put",
+        "parameters": [
+          {
+            "description": "Идентификатор прогона (run_id)",
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "description": "Идентификатор прогона (run_id)",
+              "pattern": "^[0-9a-fA-F-]{36}$",
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Задача прогона",
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "description": "Задача прогона",
+              "pattern": "^[0-9a-fA-F-]{36}$",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Прогон или задача не найдены (или не ваши)"
+          },
+          "409": {
+            "description": "Текст уже подтверждён/отправлен или задача внутренняя"
+          },
+          "422": {
+            "description": "Длина вне 1..2 длин исходного либо в тексте найдены необезличенные фрагменты: detail = {code: leak_detected, message, fragments[]}; текст не сохранён"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Edit Task Prompt",
         "tags": [
           "matching"
         ]

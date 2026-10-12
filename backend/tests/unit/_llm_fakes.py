@@ -165,6 +165,13 @@ class FakeLlmRepo:
         t.update(status=QUEUED, confirmed_at=NOW)
         return True
 
+    def update_payload(self, task_id, payload):
+        t = self.tasks[task_id]
+        if t["status"] != AWAITING or t["confirmed_at"] is not None or t["payload"] is None:
+            return False
+        t["payload"] = payload
+        return True
+
     def confirm_tasks(self, task_ids):
         ids = set(task_ids)
         if not ids or any(self.tasks[i]["status"] != AWAITING for i in ids):

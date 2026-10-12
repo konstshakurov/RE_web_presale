@@ -252,6 +252,18 @@ class LlmRepo:
             )
             return cur.rowcount == 1
 
+    def update_payload(self, task_id: str, payload: SealedSecret) -> bool:
+        """Замена шифртекста payload (правка текста пользователем): только пока задача ждёт
+        подтверждения и не подтверждена; условие в самом UPDATE - гонки с confirm нет."""
+        with self._pool.connection() as conn:
+            cur = conn.execute(
+                "UPDATE app.llm_task SET payload_ct = %s, payload_nonce = %s, key_id = %s, "
+                "updated_at = now() WHERE id = %s::uuid AND status = 'awaiting_confirmation' "
+                "AND confirmed_at IS NULL AND payload_ct IS NOT NULL",
+                (payload.ciphertext, payload.nonce, payload.key_id, task_id),
+            )
+            return cur.rowcount == 1
+
     def confirm_tasks(self, task_ids: list[str]) -> bool:
         """Групповое подтверждение: все задачи awaiting_confirmation -> queued одной транзакцией.
         Если хотя бы одна уже не ждёт подтверждения - не меняется ни одна (False)."""

@@ -132,6 +132,7 @@ class Gateway(Protocol):
     def peek(self, task_id: str): ...
     def get(self, owner_login: str, task_id: str): ...
     def confirm_many(self, owner_login: str, task_ids: list[str]): ...
+    def edit_prompt(self, owner_login: str, task_id: str, new_prompt: str): ...
     def cancel(self, owner_login: str, task_id: str): ...
 
 
@@ -279,6 +280,8 @@ class RunTask:
     replacements: dict[str, int] = field(default_factory=dict)
     ner_used: bool = False
     error_message: str | None = None
+    editable: bool = False      # внешняя задача до подтверждения: текст можно править
+    edited: bool = False        # текст правил пользователь
 
 
 @dataclass(frozen=True)
@@ -1269,7 +1272,9 @@ class MatchingService:
                 len(b.employee_keys), view.requires_confirmation and b.status == PENDING,
                 pv.system if pv else None, pv.prompt if pv else None,
                 dict(pv.replacements) if pv else {}, bool(pv and pv.ner_used),
-                b.error_message))
+                b.error_message,
+                editable=bool(view.editable and b.status == PENDING),
+                edited=bool(pv and pv.edited)))
         _, status, _, _ = self._overview(batches, has_run=True)
         need_key = batches[0].need_key if kind == "match" else None
         return RunInfo(
@@ -1290,6 +1295,19 @@ class MatchingService:
         self._gw.confirm_many(login, ids)
         log.info("matching: прогон подтверждён", extra={
             "run_id": run_id, "tasks": len(ids), "stage": info.stage})
+        return self.run_info(login, run_id)
+
+    def edit_task_prompt(self, login: str, run_id: str, task_id: str, prompt: str) -> RunInfo:
+        """Правка обезличенного текста одной задачи прогона до подтверждения (FR-023).
+        Прогон и задача должны принадлежать пользователю; проверка остатков - в шлюзе."""
+        info = self.run_info(login, run_id)
+        task = next((t for t in info.tasks if t.task_id == task_id), None)
+        if task is None:
+            raise MatchingError("task_not_found", "Задача не найдена в прогоне")
+        if not task.requires_confirmation:
+            raise GatewayError(
+                "not_editable", "Текст можно править только до подтверждения отправки")
+        self._gw.edit_prompt(login, task_id, prompt)
         return self.run_info(login, run_id)
 
     def cancel_run(self, login: str, run_id: str) -> RunInfo:

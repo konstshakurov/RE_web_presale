@@ -890,6 +890,78 @@
         "title": "MatchRequest",
         "type": "object"
       },
+      "MatchSettingsIn": {
+        "properties": {
+          "deep_size": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deep Size"
+          },
+          "screen_batch": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 10.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen Batch"
+          }
+        },
+        "title": "MatchSettingsIn",
+        "type": "object"
+      },
+      "MatchSettingsOut": {
+        "properties": {
+          "deep_size": {
+            "description": "N: сколько кандидатов оценивается глубоко за прогон",
+            "title": "Deep Size",
+            "type": "integer"
+          },
+          "deep_size_max": {
+            "title": "Deep Size Max",
+            "type": "integer"
+          },
+          "deep_size_min": {
+            "title": "Deep Size Min",
+            "type": "integer"
+          },
+          "screen_batch": {
+            "description": "Кандидатов в пакете скрининга",
+            "title": "Screen Batch",
+            "type": "integer"
+          },
+          "screen_batch_max": {
+            "title": "Screen Batch Max",
+            "type": "integer"
+          },
+          "screen_batch_min": {
+            "title": "Screen Batch Min",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deep_size",
+          "deep_size_min",
+          "deep_size_max",
+          "screen_batch",
+          "screen_batch_min",
+          "screen_batch_max"
+        ],
+        "title": "MatchSettingsOut",
+        "type": "object"
+      },
       "MatchStateOut": {
         "properties": {
           "batches_done": {
@@ -917,9 +989,21 @@
             "description": "Дата расчёта для показа в списке (FR-036)",
             "title": "Calculated At"
           },
+          "can_evaluate_next": {
+            "default": false,
+            "description": "Можно запустить POST /needs/{key}/match/next (есть кого оценивать, прогона нет, провайдер настроен)",
+            "title": "Can Evaluate Next",
+            "type": "boolean"
+          },
           "candidates_total": {
             "description": "Допустимые к назначению с основным CV",
             "title": "Candidates Total",
+            "type": "integer"
+          },
+          "deep_size": {
+            "default": 0,
+            "description": "Порция глубокой оценки N (настройка администратора)",
+            "title": "Deep Size",
             "type": "integer"
           },
           "errors": {
@@ -956,6 +1040,12 @@
             "title": "Need Key",
             "type": "string"
           },
+          "remaining": {
+            "default": 0,
+            "description": "Допустимые, ещё не оценённые глубоко",
+            "title": "Remaining",
+            "type": "integer"
+          },
           "requested_by": {
             "anyOf": [
               {
@@ -966,6 +1056,42 @@
               }
             ],
             "title": "Requested By"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Текущий прогон: при status=awaiting_confirmation - его предпросмотр и подтверждение (GET/POST /matching/runs/{run_id}...)",
+            "title": "Run Id"
+          },
+          "screen_total": {
+            "default": 0,
+            "description": "Допустимые с выделенными навыками",
+            "title": "Screen Total",
+            "type": "integer"
+          },
+          "screened": {
+            "default": 0,
+            "description": "Кандидаты со свежим баллом скрининга LLM",
+            "title": "Screened",
+            "type": "integer"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ступень текущего прогона: screening | deep; null - прогона нет",
+            "title": "Stage"
           },
           "stale": {
             "title": "Stale",
@@ -1287,6 +1413,24 @@
           "sync"
         ],
         "title": "NeedsPage",
+        "type": "object"
+      },
+      "NextRequest": {
+        "properties": {
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Провайдер LLM; пусто - по умолчанию",
+            "title": "Provider Id"
+          }
+        },
+        "title": "NextRequest",
         "type": "object"
       },
       "OrderRequest": {
@@ -2125,6 +2269,165 @@
         "title": "RuleOut",
         "type": "object"
       },
+      "RunOut": {
+        "properties": {
+          "candidates": {
+            "description": "Кандидатов во всех пакетах прогона",
+            "title": "Candidates",
+            "type": "integer"
+          },
+          "is_external": {
+            "title": "Is External",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "match | search",
+            "title": "Kind",
+            "type": "string"
+          },
+          "need_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Need Key"
+          },
+          "provider_name": {
+            "title": "Provider Name",
+            "type": "string"
+          },
+          "replacements": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Подстановки по всему прогону",
+            "title": "Replacements",
+            "type": "object"
+          },
+          "requires_confirmation": {
+            "description": "true - покажите предпросмотр tasks[] и запросите подтверждение",
+            "title": "Requires Confirmation",
+            "type": "boolean"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "stage": {
+            "description": "screening | deep",
+            "title": "Stage",
+            "type": "string"
+          },
+          "status": {
+            "description": "awaiting_confirmation | running | done | partial | failed",
+            "title": "Status",
+            "type": "string"
+          },
+          "tasks": {
+            "description": "Предпросмотр: все пакеты прогона, обезличенные",
+            "items": {
+              "$ref": "#/components/schemas/RunTaskOut"
+            },
+            "title": "Tasks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_id",
+          "kind",
+          "stage",
+          "status",
+          "requires_confirmation",
+          "is_external",
+          "provider_name",
+          "candidates",
+          "tasks",
+          "replacements"
+        ],
+        "title": "RunOut",
+        "type": "object"
+      },
+      "RunTaskOut": {
+        "properties": {
+          "candidates": {
+            "title": "Candidates",
+            "type": "integer"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "ner_used": {
+            "title": "Ner Used",
+            "type": "boolean"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ровно тот текст, который уйдёт во внешнюю LLM",
+            "title": "Prompt"
+          },
+          "replacements": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "вид -> число уникальных подстановок",
+            "title": "Replacements",
+            "type": "object"
+          },
+          "requires_confirmation": {
+            "title": "Requires Confirmation",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Обезличенный системный запрос (внешняя LLM)",
+            "title": "System"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status",
+          "candidates",
+          "requires_confirmation",
+          "replacements",
+          "ner_used"
+        ],
+        "title": "RunTaskOut",
+        "type": "object"
+      },
       "SearchItemOut": {
         "properties": {
           "calculated_at": {
@@ -2224,6 +2527,20 @@
             "title": "Score",
             "type": "integer"
           },
+          "screen_percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Предварительная оценка скрининга по навыкам (LLM)",
+            "title": "Screen Percent"
+          },
           "skills": {
             "items": {
               "type": "string"
@@ -2232,7 +2549,7 @@
             "type": "array"
           },
           "source": {
-            "description": "llm - оценка LLM; fallback - по технологиям и тексту",
+            "description": "llm - глубокая оценка LLM; screening - предварительная оценка по навыкам; fallback - по технологиям и тексту",
             "title": "Source",
             "type": "string"
           },
@@ -2373,9 +2690,21 @@
             ],
             "title": "Calculated At"
           },
+          "can_evaluate_next": {
+            "default": false,
+            "description": "Можно запустить POST /resume/semantic-search/next",
+            "title": "Can Evaluate Next",
+            "type": "boolean"
+          },
           "candidates_total": {
             "description": "В области поиска с учётом фильтров",
             "title": "Candidates Total",
+            "type": "integer"
+          },
+          "deep_size": {
+            "default": 0,
+            "description": "Порция глубокой оценки N (настройка администратора)",
+            "title": "Deep Size",
             "type": "integer"
           },
           "errors": {
@@ -2429,6 +2758,12 @@
             "title": "Query",
             "type": "string"
           },
+          "remaining": {
+            "default": 0,
+            "description": "В выдаче без глубокой оценки",
+            "title": "Remaining",
+            "type": "integer"
+          },
           "requested_by": {
             "anyOf": [
               {
@@ -2439,6 +2774,42 @@
               }
             ],
             "title": "Requested By"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Текущий прогон (подтверждение внешней LLM)",
+            "title": "Run Id"
+          },
+          "screen_total": {
+            "default": 0,
+            "description": "В области поиска с выделенными навыками",
+            "title": "Screen Total",
+            "type": "integer"
+          },
+          "screened": {
+            "default": 0,
+            "description": "Со свежим баллом скрининга LLM",
+            "title": "Screened",
+            "type": "integer"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "screening | deep; null - прогона нет",
+            "title": "Stage"
           },
           "stale": {
             "title": "Stale",
@@ -3167,6 +3538,18 @@
             "title": "Requires Confirmation",
             "type": "boolean"
           },
+          "run_id": {
+            "default": "",
+            "description": "Прогон: GET /matching/runs/{run_id} - предпросмотр всех пакетов, POST .../confirm - одно подтверждение на прогон",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "stage": {
+            "default": "deep",
+            "description": "screening - скрининг по навыкам; deep - по тексту CV",
+            "title": "Stage",
+            "type": "string"
+          },
           "status": {
             "description": "Статус задачи шлюза либо итог пакета: done | failed",
             "title": "Status",
@@ -3500,6 +3883,89 @@
         "summary": "Patch Provider",
         "tags": [
           "llm"
+        ]
+      }
+    },
+    "/admin/matching/settings": {
+      "get": {
+        "description": "Размер глубокой оценки N (по умолчанию 30, 5..100) и размер пакета скрининга (по\nумолчанию 50, 10..100).",
+        "operationId": "get_matching_settings_admin_matching_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Get Matching Settings",
+        "tags": [
+          "matching"
+        ]
+      },
+      "put": {
+        "description": "Изменить настройки (передаются только изменяемые поля). Действуют на новые прогоны.",
+        "operationId": "put_matching_settings_admin_matching_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchSettingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "description": "Значение вне границ"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Put Matching Settings",
+        "tags": [
+          "matching"
         ]
       }
     },
@@ -5146,6 +5612,195 @@
         ]
       }
     },
+    "/matching/runs/{run_id}": {
+      "get": {
+        "description": "Прогон ступени целиком: статус и обезличенный предпросмотр всех пакетов. Внешний\nпровайдер: показать ``tasks[].prompt``, затем ``POST .../confirm``.",
+        "operationId": "get_run_matching_runs__run_id__get",
+        "parameters": [
+          {
+            "description": "Идентификатор прогона (run_id)",
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "description": "Идентификатор прогона (run_id)",
+              "pattern": "^[0-9a-fA-F-]{36}$",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Прогон не найден (или не ваш)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Run",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/matching/runs/{run_id}/cancel": {
+      "post": {
+        "description": "Отменить прогон: неподтверждённые и ожидающие задачи отменяются, собранное сохраняется.",
+        "operationId": "cancel_run_matching_runs__run_id__cancel_post",
+        "parameters": [
+          {
+            "description": "Идентификатор прогона (run_id)",
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "description": "Идентификатор прогона (run_id)",
+              "pattern": "^[0-9a-fA-F-]{36}$",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Прогон не найден (или не ваш)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Cancel Run",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/matching/runs/{run_id}/confirm": {
+      "post": {
+        "description": "Подтвердить отправку показанного предпросмотра всего прогона: все его задачи уходят в\nочередь одной транзакцией - либо ни одна. Без предпросмотра отправки нет (FR-023).",
+        "operationId": "confirm_run_matching_runs__run_id__confirm_post",
+        "parameters": [
+          {
+            "description": "Идентификатор прогона (run_id)",
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "description": "Идентификатор прогона (run_id)",
+              "pattern": "^[0-9a-fA-F-]{36}$",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Прогон не найден (или не ваш)"
+          },
+          "409": {
+            "description": "Прогон не ожидает подтверждения"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Confirm Run",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
     "/needs/{need_key}/match": {
       "get": {
         "description": "Состояние и сохранённый результат (повторный просмотр без вызова LLM).",
@@ -5300,6 +5955,82 @@
           }
         ],
         "summary": "Start Match",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/needs/{need_key}/match/next": {
+      "post": {
+        "description": "«Оценить следующих»: глубокая оценка следующей порции (``deep_size``) рейтинга скрининга.\nУже оценённые (кэш по потребности, CV и модели) не пересчитываются. Отдельный прогон\n(``run_id``): для внешнего провайдера - отдельный предпросмотр и подтверждение.",
+        "operationId": "evaluate_next_needs__need_key__match_next_post",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Need Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/NextRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Потребность не найдена в кэше"
+          },
+          "409": {
+            "description": "Провайдер LLM по умолчанию не настроен"
+          },
+          "422": {
+            "description": "Обезличивание не удалось"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Evaluate Next",
         "tags": [
           "matching"
         ]
@@ -5750,6 +6481,58 @@
           }
         ],
         "summary": "Start Semantic Search",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/semantic-search/next": {
+      "post": {
+        "description": "«Оценить следующих» в поиске по смыслу: глубокая оценка следующей порции рейтинга\n(те же ``query`` и фильтры, что у основного запроса). Отдельный прогон - отдельное\nподтверждение у внешнего провайдера.",
+        "operationId": "evaluate_next_search_resume_semantic_search_next_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "409": {
+            "description": "Провайдер LLM по умолчанию не настроен"
+          },
+          "422": {
+            "description": "Запрос слишком короткий или длинный"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Evaluate Next Search",
         "tags": [
           "matching"
         ]

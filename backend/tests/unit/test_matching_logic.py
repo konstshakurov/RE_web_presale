@@ -170,3 +170,66 @@ def test_profile_without_headings_is_empty_and_years_not_invented():
     assert parse_sections("Просто текст резюме без заголовков") == {}
     assert parse_sections(None) == {}
     assert guess_years("Работал давно") is None
+
+
+# Синтетический фрагмент той же структуры, что у корпоративных CV (BR-007): заголовки с
+# двоеточием и без, «Образование и сертификаты», «ПРОЕКТЫ», строки «Стек:» внутри проектов
+CORP_CV = """Системный аналитик
+Профиль
+Аналитик, имеющий более 5 лет опыта в системном и бизнес-анализе.
+Основной стек
+Jira, Confluence, Postman
+Отрасли
+Финтех, Госрегулирование
+Ключевые навыки
+Сбор и анализ требований:
+- интервью, документация
+Чтение кода:
+- Python
+Иностранные языки
+Английский язык - Intermediate (В1)
+Образование и сертификаты:
+- Университет Х | Специальность: системный аналитик
+ПРОЕКТЫ
+Проект Альфа | Финтех |
+01.2024 - 06.2025 | Системный аналитик
+Стек
+Jira, Draw.io
+Задачи и достижения:
+- описание интеграций
+Навыки:
+- не раздел, а строка проекта
+Проект Бета | Строительство |
+Опыт работы 1 год на объекте
+"""
+
+
+def test_profile_corporate_cv_sections_and_explicit_years():
+    s = parse_sections(CORP_CV)
+    assert list(s) == ["profile", "stack", "industries", "skills", "languages", "education",
+                       "projects"]
+    assert s["stack"] == "Jira, Confluence, Postman"
+    assert s["languages"] == "Английский язык - Intermediate (В1)"
+    assert s["education"].startswith("- Университет Х")
+    assert "Чтение кода:" in s["skills"] and "Python" in s["skills"]
+    # «Стек» и «Навыки» внутри проекта не обрывают раздел проектов
+    assert "Jira, Draw.io" in s["projects"] and "Проект Бета" in s["projects"]
+    assert "Jira, Draw.io" not in s["stack"]
+    # общий стаж берётся из профиля, а не из проектной строки «опыт работы 1 год»
+    assert guess_years(CORP_CV) == 5
+
+
+@pytest.mark.parametrize("phrase,years", [
+    ("Аналитик с более чем 7 годами опыта в роли аналитика.", 7),
+    ("7+ лет практического опыта в анализе.", 7),
+    ("Опыт работы 10 лет.", 10),
+    ("Стаж в ИТ 3 года.", 3),
+])
+def test_guess_years_phrasings(phrase, years):
+    assert guess_years("Профиль\n" + phrase) == years
+
+
+def test_projects_section_is_not_cut_at_common_limit():
+    body = "\n".join(f"- задача {i}" for i in range(900))  # заметно больше 4000 символов
+    s = parse_sections("ПРОЕКТЫ\n" + body)
+    assert len(s["projects"]) > 4000

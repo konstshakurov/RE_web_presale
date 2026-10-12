@@ -87,6 +87,39 @@ def test_parse_match_errors():
             parse_match(bad, LABELS)
 
 
+def test_parse_match_gaps_present_empty_missing_and_broken():
+    raw = json.dumps([
+        {"id": "K1", "percent": 60, "rationale": "x", "gaps": ["Нет Kafka", "  Грейд\nмидл  "]},
+        {"id": "K2", "percent": 100, "rationale": "x", "gaps": []},
+        {"id": "K3", "percent": 50, "rationale": "x"},
+        {"id": "K4", "percent": 40, "rationale": "x", "gaps": "нет SQL"},
+    ])
+    labels = {**LABELS, "K4": "EMP-4"}
+    got = parse_match(raw, labels)
+    assert got["EMP-1"].gaps == ("Нет Kafka", "Грейд мидл")
+    assert got["EMP-2"].gaps == ()          # полное совпадение, не «не рассчитано»
+    assert got["EMP-3"].gaps is None        # поля нет
+    assert got["EMP-4"].gaps is None        # не список: результат не ломается
+    assert got["EMP-4"].percent == 40
+
+
+def test_gaps_are_cleaned_and_limited():
+    dirty = "a" + chr(0) + "b" + chr(7) + "c" + chr(0x200B) + "d"
+    items = ["я" * 500, dirty, "", 5, None, "- маркер", "Повтор", "Повтор"]
+    items += [f"пункт {i}" for i in range(10)]
+    got = parse_match(json.dumps([{"id": "K1", "percent": 1, "gaps": items}]), LABELS)
+    g = got["EMP-1"].gaps
+    assert len(g) == 5 and len(g[0]) == 200
+    assert g[1] == "a b c d" and g[2] == "маркер" and g[3] == "Повтор"
+
+
+def test_match_prompts_ask_for_gaps():
+    from app.matching.prompts import MATCH_SYSTEM
+    from app.matching.semantic import SEARCH_SYSTEM
+    for system in (MATCH_SYSTEM, SEARCH_SYSTEM):
+        assert '"gaps"' in system and "до 200" in system and "без ФИО" in system
+
+
 def test_rationale_is_truncated():
     raw = json.dumps([{"id": "K1", "percent": 1, "rationale": "я" * 5000}])
     assert len(parse_match(raw, LABELS)["EMP-1"].rationale) == 1000

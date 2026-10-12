@@ -785,6 +785,21 @@
             "title": "Full Name",
             "type": "string"
           },
+          "gaps": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Чего не хватает до 100% (до 5 пунктов); [] - полное совпадение; null - не рассчитано (оценка до расширения), нужен «Пересчитать»",
+            "title": "Gaps"
+          },
           "note": {
             "anyOf": [
               {
@@ -2482,6 +2497,21 @@
           "full_name": {
             "title": "Full Name",
             "type": "string"
+          },
+          "gaps": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Чего не хватает до 100% (до 5 пунктов); [] - полное совпадение; null - не рассчитано (или оценка не LLM), нужен «Пересчитать»",
+            "title": "Gaps"
           },
           "matched_skills": {
             "items": {

@@ -60,6 +60,7 @@ def test_match_flow_over_http():
     assert got["status"] == "done" and got["total"] == 2 and len(got["items"]) == 1
     item = got["items"][0]
     assert item["percent"] == 90 and item["rationale"] and item["full_name"] == "Сотрудник-01"
+    assert item["gaps"] == ["нет опыта Kafka (K1)", "нет домена банки"]
     assert got["calculated_at"] and got["stale"] is False
     more = client.get(f"/needs/{NEED}/match", params={"limit": 10, "offset": 1}).json()
     assert [i["employee_key"] for i in more["items"]] == ["EMP-2"]
@@ -211,6 +212,7 @@ def test_semantic_search_flow_over_http():
     assert got["status"] == "done" and got["mode"] == "llm" and got["notice"] is None
     item = got["items"][0]
     assert item["source"] == "llm" and item["percent"] == 90 and item["rationale"]
+    assert item["gaps"] == ["нет опыта Kafka (K1)", "нет домена банки"]
     assert item["full_name"] == "Сотрудник-01" and item["cv_file_id"]
     # без фильтра: сотрудник без совпадений по технологиям и тексту в выдачу не попадает
     wide = client.get("/resume/semantic-search", params={"query": SQ}).json()

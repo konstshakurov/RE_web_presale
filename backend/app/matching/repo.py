@@ -109,6 +109,7 @@ class RecRow:
     need_jira_updated_at: datetime
     note_snapshot_at: datetime | None
     created_at: datetime
+    gaps: list[str] | None = None  # NULL - не рассчитано, [] - полное совпадение (cv_db V010)
 
 
 @dataclass(frozen=True)
@@ -118,6 +119,7 @@ class NewRec:
     match_percent: int
     rationale: str
     note_snapshot_at: datetime | None
+    gaps: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -211,6 +213,12 @@ class SearchResRow:
     rationale: str
     note_snapshot_at: datetime | None
     created_at: datetime
+    gaps: list[str] | None = None
+
+
+def _gaps_json(gaps: Sequence[str] | None) -> str | None:
+    """gaps -> jsonb: None остаётся SQL NULL («не рассчитано»), () - пустой массив."""
+    return None if gaps is None else json.dumps(list(gaps), ensure_ascii=False)
 
 
 _CAND = (
@@ -561,15 +569,17 @@ class MatchRepo:
             for r in recs:
                 cur = conn.execute(
                     "INSERT INTO cv.recommendation (need_key, employee_key, cv_file_id, "
-                    "match_percent, rationale, model, need_jira_updated_at, note_snapshot_at) "
-                    "SELECT %s, f.employee_key, f.id, %s, %s, %s, %s, %s FROM cv.employee_file f "
+                    "match_percent, rationale, model, need_jira_updated_at, note_snapshot_at, "
+                    "gaps) SELECT %s, f.employee_key, f.id, %s, %s, %s, %s, %s, %s::jsonb "
+                    "FROM cv.employee_file f "
                     "WHERE f.id = %s AND f.employee_key = %s AND f.kind = 'main_cv' "
                     "ON CONFLICT (need_key, cv_file_id, model) DO UPDATE SET "
                     "match_percent = EXCLUDED.match_percent, rationale = EXCLUDED.rationale, "
                     "need_jira_updated_at = EXCLUDED.need_jira_updated_at, "
-                    "note_snapshot_at = EXCLUDED.note_snapshot_at, created_at = now()",
+                    "note_snapshot_at = EXCLUDED.note_snapshot_at, gaps = EXCLUDED.gaps, "
+                    "created_at = now()",
                     (need_key, r.match_percent, r.rationale, model, need_updated_at,
-                     r.note_snapshot_at, r.cv_file_id, r.employee_key),
+                     r.note_snapshot_at, _gaps_json(r.gaps), r.cv_file_id, r.employee_key),
                 )
                 n += cur.rowcount
         return n
@@ -578,7 +588,7 @@ class MatchRepo:
         with self._pool.connection() as conn:
             rows = conn.execute(
                 "SELECT employee_key, cv_file_id, model, match_percent, rationale, "
-                "need_jira_updated_at, note_snapshot_at, created_at FROM cv.recommendation "
+                "need_jira_updated_at, note_snapshot_at, created_at, gaps FROM cv.recommendation "
                 "WHERE need_key = %s ORDER BY created_at DESC, id DESC", (need_key,)).fetchall()
         return [RecRow(*r) for r in rows]
 
@@ -754,14 +764,16 @@ class MatchRepo:
             for r in recs:
                 cur = conn.execute(
                     "INSERT INTO cv.search_result (query_hash, cv_file_id, employee_key, model, "
-                    "match_percent, rationale, note_snapshot_at) "
-                    "SELECT %s, f.id, f.employee_key, %s, %s, %s, %s FROM cv.employee_file f "
+                    "match_percent, rationale, note_snapshot_at, gaps) "
+                    "SELECT %s, f.id, f.employee_key, %s, %s, %s, %s, %s::jsonb "
+                    "FROM cv.employee_file f "
                     "WHERE f.id = %s AND f.employee_key = %s AND f.kind = 'main_cv' "
                     "ON CONFLICT (query_hash, cv_file_id, model) DO UPDATE SET "
                     "match_percent = EXCLUDED.match_percent, rationale = EXCLUDED.rationale, "
-                    "note_snapshot_at = EXCLUDED.note_snapshot_at, created_at = now()",
+                    "note_snapshot_at = EXCLUDED.note_snapshot_at, gaps = EXCLUDED.gaps, "
+                    "created_at = now()",
                     (query_hash, model, r.match_percent, r.rationale, r.note_snapshot_at,
-                     r.cv_file_id, r.employee_key),
+                     _gaps_json(r.gaps), r.cv_file_id, r.employee_key),
                 )
                 n += cur.rowcount
         return n
@@ -770,7 +782,7 @@ class MatchRepo:
         with self._pool.connection() as conn:
             rows = conn.execute(
                 "SELECT employee_key, cv_file_id, model, match_percent, rationale, "
-                "note_snapshot_at, created_at FROM cv.search_result WHERE query_hash = %s "
+                "note_snapshot_at, created_at, gaps FROM cv.search_result WHERE query_hash = %s "
                 "ORDER BY created_at DESC", (query_hash,)).fetchall()
         return [SearchResRow(*r) for r in rows]
 

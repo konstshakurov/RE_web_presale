@@ -35,7 +35,8 @@ API: `/llm/tasks*`, `/llm/providers` (выбор модели), `/admin/llm/prov
 ## Навыки из CV и сопоставление (KON-38)
 Модуль `app/matching`; нужны миграции cv_db V007 (`file_skill_state`, `match_run`, `match_batch`,
 `recommendation.note_snapshot_at`), V008 (`search_run`, `search_batch`, `search_result`) и V009 (кэш скрининга
-`match_screen`/`search_screen`, `stage`/`run_id` пакетов, `chain_state` прогонов, `search_run.scope`).
+`match_screen`/`search_screen`, `stage`/`run_id` пакетов, `chain_state` прогонов, `search_run.scope`) и
+V010 (`recommendation.gaps`, `search_result.gaps`: «чего не хватает до 100%», jsonb).
 Все вызовы LLM идут через шлюз (задачи `purpose=skills|match|search|match_screen|search_screen`);
 результат забирает worker сразу после задачи и API лениво при запросе состояния (оба идемпотентны).
 - Навыки (FR-027): ставятся при загрузке основного CV и по `POST /resume/employees/{key}/skills`,
@@ -110,5 +111,13 @@ API: `/llm/tasks*`, `/llm/providers` (выбор модели), `/admin/llm/prov
   часть ответа - остальные остаются в рейтинге по детерминированному баллу; ступень 2 не удалось поставить
   (обезличивание, шлюз) - скрининг сохранён, `can_evaluate_next=true`, «Оценить следующих» вернёт причину.
   Ступень 2 ставится в том числе из `GET` (ленивый сбор), от имени автора прогона.
+- «Чего не хватает до 100%» (`gaps`): глубокая оценка (потребность и поиск по смыслу) просит у LLM помимо
+  `percent` и `rationale` список `gaps` - до 5 пунктов по до 200 знаков (навык, уровень, годы, домен, инструмент),
+  `[]` при полном совпадении. Разбор терпимый: нет поля или не список - `gaps=null` (результат не ломается);
+  управляющие и невидимые символы чистятся, длина и число ограничиваются. Обратная подстановка плейсхолдеров для
+  внешнего провайдера делается шлюзом над всем текстом ответа, поэтому `gaps` проходят её вместе с обоснованием.
+  В БД `NULL` = не рассчитано (оценки до V010, кэш остаётся валидным), `[]` = полное совпадение. В API
+  (`items[].gaps` у `/needs/{key}/match` и `/resume/semantic-search`) - `string[] | null`; `null` интерфейс
+  показывает подсказкой «Пересчитать». Скрининг `gaps` не возвращает.
 Тесты: `tests/unit/test_matching_*.py` (двухступенчатая оценка - `test_matching_twostage*.py`); БД-тест
-`test_matching_db.py` (`TEST_CV_DB_URL`, `TEST_APP_DB_URL`, cv_db V001-V009, app_db V001-V008).
+`test_matching_db.py` (`TEST_CV_DB_URL`, `TEST_APP_DB_URL`, cv_db V001-V010, app_db V001-V008).

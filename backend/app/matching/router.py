@@ -98,6 +98,9 @@ class MatchItemOut(BaseModel):
     cv_file_id: int = Field(description="Основное CV: кнопка «Резюме» (FR-037)")
     calculated_at: datetime
     stale: bool = Field(description="Потребность, заметка или модель изменились после расчёта")
+    gaps: list[str] | None = Field(
+        None, description="Чего не хватает до 100% (до 5 пунктов); [] - полное совпадение; "
+                          "null - не рассчитано (оценка до расширения), нужен «Пересчитать»")
     skills: list[str]
 
 
@@ -169,6 +172,9 @@ class SearchItemOut(BaseModel):
     calculated_at: datetime | None
     stale: bool = Field(description="Заметка или модель изменились после расчёта")
     skills: list[str]
+    gaps: list[str] | None = Field(
+        None, description="Чего не хватает до 100% (до 5 пунктов); [] - полное совпадение; "
+                          "null - не рассчитано (или оценка не LLM), нужен «Пересчитать»")
 
 
 class SearchStateOut(BaseModel):
@@ -370,7 +376,8 @@ def _state_out(s: MatchState) -> MatchStateOut:
             employee_key=i.employee_key, full_name=i.full_name, status=i.status,
             percent=i.percent, rationale=i.rationale, note=i.note, note_author=i.note_author,
             note_updated_at=i.note_updated_at, cv_file_id=i.cv_file_id,
-            calculated_at=i.calculated_at, stale=i.stale, skills=list(i.skills))
+            calculated_at=i.calculated_at, stale=i.stale, skills=list(i.skills),
+            gaps=None if i.gaps is None else list(i.gaps))
             for i in s.items],
         tasks=_tasks_out(s.tasks),
         batches_total=s.batches_total, batches_done=s.batches_done,
@@ -392,7 +399,8 @@ def _search_out(s: SearchState) -> SearchStateOut:
             matched_skills=list(i.matched_skills), matched_terms=list(i.matched_terms),
             note=i.note, note_author=i.note_author, note_updated_at=i.note_updated_at,
             cv_file_id=i.cv_file_id, calculated_at=i.calculated_at, stale=i.stale,
-            skills=list(i.skills), screen_percent=i.screen_percent) for i in s.items],
+            skills=list(i.skills), screen_percent=i.screen_percent,
+            gaps=None if i.gaps is None else list(i.gaps)) for i in s.items],
         tasks=_tasks_out(s.tasks),
         batches_total=s.batches_total, batches_done=s.batches_done,
         batches_failed=s.batches_failed, errors=s.errors, stage=s.stage, run_id=s.run_id,

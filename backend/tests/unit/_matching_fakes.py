@@ -210,14 +210,15 @@ class FakeMatchRepo:
             self.tick += 1
             self.recs[(need_key, r.cv_file_id, model)] = dict(
                 emp=r.employee_key, pct=r.match_percent, why=r.rationale,
-                need_at=need_updated_at, snap=r.note_snapshot_at, order=self.tick)
+                need_at=need_updated_at, snap=r.note_snapshot_at, order=self.tick,
+                gaps=None if r.gaps is None else list(r.gaps))
         return len(recs)
 
     def list_recommendations(self, need_key):
         rows = [(k, v) for k, v in self.recs.items() if k[0] == need_key]
         rows.sort(key=lambda kv: -kv[1]["order"])
         return [RecRow(v["emp"], k[1], k[2], v["pct"], v["why"], v["need_at"], v["snap"],
-                       datetime(2026, 10, 12, tzinfo=UTC)) for k, v in rows]
+                       datetime(2026, 10, 12, tzinfo=UTC), v.get("gaps")) for k, v in rows]
 
     # --- прогоны ---
     @contextmanager
@@ -378,14 +379,14 @@ class FakeMatchRepo:
             self.tick += 1
             self.sresults[(query_hash, r.cv_file_id, model)] = dict(
                 emp=r.employee_key, pct=r.match_percent, why=r.rationale, snap=r.note_snapshot_at,
-                order=self.tick)
+                order=self.tick, gaps=None if r.gaps is None else list(r.gaps))
         return len(recs)
 
     def list_search_results(self, query_hash):
         rows = [(k, v) for k, v in self.sresults.items() if k[0] == query_hash]
         rows.sort(key=lambda kv: -kv[1]["order"])
         return [SearchResRow(v["emp"], k[1], k[2], v["pct"], v["why"], v["snap"],
-                             datetime(2026, 10, 12, tzinfo=UTC)) for k, v in rows]
+                             datetime(2026, 10, 12, tzinfo=UTC), v.get("gaps")) for k, v in rows]
 
     def purge_search(self, retention_days):
         self.purged = retention_days
@@ -394,8 +395,10 @@ class FakeMatchRepo:
 def reply_for(prompt: str, percent=lambda n: 90 - n) -> str:
     """Ответ «модели» на запрос сопоставления: оценка каждому K<n> из запроса."""
     labels = [ln[4:].strip() for ln in prompt.splitlines() if ln.startswith("### ")]
-    return json.dumps([{"id": lb, "percent": percent(i), "rationale": f"обоснование {lb}"}
-                       for i, lb in enumerate(labels)], ensure_ascii=False)
+    return json.dumps([
+        {"id": lb, "percent": percent(i), "rationale": f"обоснование {lb}",
+         "gaps": [] if percent(i) >= 100 else [f"нет опыта Kafka ({lb})", "нет домена банки"]}
+        for i, lb in enumerate(labels)], ensure_ascii=False)
 
 
 def skills_reply(_prompt: str) -> str:

@@ -1,7 +1,7 @@
 """matching на настоящих БД (KON-38): отбор кандидатов по статусу, навыки привязаны к файлу,
 кэш рекомендаций, прогоны и пакеты, фильтры «Резюме», сквозной сценарий с кэшем.
 
-Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V009) и TEST_APP_DB_URL (app_rw, app_db
+Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V010) и TEST_APP_DB_URL (app_rw, app_db
 V001-V009); без них пропуск. Данные тестов: сотрудники KONT38-*, потребность KONT38-1; после
 теста удаляются. LLM не вызывается: шлюз с клиентом-подменой.
 """
@@ -178,6 +178,31 @@ def test_recommendation_cache_upsert_and_file_check(env):
                       content=b"y", uploaded_by="u", extracted_text="t", extraction_status="ok")
     cur = {c.employee_key: c.file_id for c in repo.list_candidates()}
     assert cur["KONT38-10"] == new and f10 != new
+
+
+def test_gaps_stored_null_vs_empty_for_recommendations_and_search(env):
+    _, _, repo, _, files = env
+    f10, f11 = files["KONT38-10"], files["KONT38-11"]
+    repo.upsert_recommendations(NEED, [
+        NewRec("KONT38-10", f10, 70, "a", None, ("нет Kafka", "нет домена банки")),
+        NewRec("KONT38-11", f11, 100, "b", None, ()),
+    ], model="m1", need_updated_at=T1)
+    got = {r.employee_key: r for r in repo.list_recommendations(NEED)}
+    assert got["KONT38-10"].gaps == ["нет Kafka", "нет домена банки"]
+    assert got["KONT38-11"].gaps == []
+    # пересчёт без перечня возвращает «не рассчитано»
+    repo.upsert_recommendations(NEED, [NewRec("KONT38-10", f10, 70, "a", None)],
+                                model="m1", need_updated_at=T1)
+    got = {r.employee_key: r for r in repo.list_recommendations(NEED)}
+    assert got["KONT38-10"].gaps is None and got["KONT38-11"].gaps == []
+
+    h = "b" * 64
+    repo.upsert_search_results(h, [NewRec("KONT38-10", f10, 60, "c", None, ("нет SQL",)),
+                                   NewRec("KONT38-11", f11, 100, "d", None, ())], model="m1")
+    sres = {r.employee_key: r for r in repo.list_search_results(h)}
+    assert sres["KONT38-10"].gaps == ["нет SQL"] and sres["KONT38-11"].gaps == []
+    repo.upsert_search_results(h, [NewRec("KONT38-10", f10, 60, "c", None)], model="m1")
+    assert {r.employee_key: r for r in repo.list_search_results(h)}["KONT38-10"].gaps is None
 
 
 def test_runs_and_batches(env):

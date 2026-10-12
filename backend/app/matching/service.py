@@ -161,6 +161,7 @@ class MatchItem:
     calculated_at: datetime
     stale: bool
     skills: tuple[str, ...]
+    gaps: tuple[str, ...] | None = None  # None - не рассчитано (оценка до V010)
 
 
 @dataclass(frozen=True)
@@ -217,6 +218,7 @@ class SearchItem:
     stale: bool
     skills: tuple[str, ...]
     screen_percent: int | None = None  # предварительный балл скрининга LLM
+    gaps: tuple[str, ...] | None = None  # только у source=llm; None - не рассчитано
 
 
 @dataclass(frozen=True)
@@ -719,7 +721,7 @@ class MatchingService:
                     snap = emp.note_updated_at if emp else None
                     if snap is not None and snap > view.created_at:
                         snap = view.created_at  # заметка правилась после постановки: кэш устарел
-                    recs.append(NewRec(key, file_id, res.percent, res.rationale, snap))
+                    recs.append(NewRec(key, file_id, res.percent, res.rationale, snap, res.gaps))
                 self._repo.upsert_recommendations(
                     b.need_key, recs, model=run.model, need_updated_at=run.need_jira_updated_at)
                 n_rated = len(recs)
@@ -797,7 +799,8 @@ class MatchingService:
                 or (active_model is not None and rec.model != active_model))
             items.append(MatchItem(
                 c.employee_key, c.full_name, c.status, rec.match_percent, rec.rationale, c.note,
-                c.note_author, c.note_updated_at, c.file_id, rec.created_at, stale, c.skills))
+                c.note_author, c.note_updated_at, c.file_id, rec.created_at, stale, c.skills,
+                None if rec.gaps is None else tuple(rec.gaps)))
         items.sort(key=lambda i: (-i.percent, i.full_name, i.employee_key))
         calc = max((i.calculated_at for i in items), default=None)
         errors = sorted({b.error_message for b in batches
@@ -1055,7 +1058,7 @@ class MatchingService:
                     snap = emp.note_updated_at if emp else None
                     if snap is not None and snap > view.created_at:
                         snap = view.created_at  # заметка правилась после постановки
-                    recs.append(NewRec(key, file_id, res.percent, res.rationale, snap))
+                    recs.append(NewRec(key, file_id, res.percent, res.rationale, snap, res.gaps))
                 self._repo.upsert_search_results(b.query_hash, recs, model=run.model)
                 n_rated = len(recs)
         except ResponseError as exc:
@@ -1158,7 +1161,8 @@ class MatchingService:
                 rated.append(SearchItem(
                     c.employee_key, c.full_name, c.status, "llm", r.match_percent, r.rationale,
                     s.score, s.skills, s.terms, c.note, c.note_author, c.note_updated_at,
-                    c.file_id, r.created_at, stale, c.skills, screened.get(p.key)))
+                    c.file_id, r.created_at, stale, c.skills, screened.get(p.key),
+                    None if r.gaps is None else tuple(r.gaps)))
             elif p.source == "screen":
                 rest.append(SearchItem(
                     c.employee_key, c.full_name, c.status, "screening", None,

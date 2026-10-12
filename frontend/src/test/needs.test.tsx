@@ -106,7 +106,26 @@ describe("Потребности", () => {
     expect(within(row).getByText("Прямой контракт")).toBeInTheDocument();
     expect(within(row).getByText(/2\s750 RUB \/ час/)).toBeInTheDocument();
     expect(within(row).getByText(/без НДС/)).toBeInTheDocument();
-    expect(within(row).getByText("предлагает: РО")).toBeInTheDocument();
+    expect(within(row).getByText("РО")).toBeInTheDocument();
+    expect(within(row).queryByText(/предлагает/)).toBeNull();
+  });
+
+  it("колонки: «Автор» вторая после «Ключ», «Обновлена» нет; пустой автор - «—»", async () => {
+    route((u) =>
+      u.includes("/sync/needs?")
+        ? json(page([need({ author: "Автор Тестовый" }), need({ jira_key: "AN-2", author: null })]))
+        : undefined,
+    );
+    renderNeeds();
+    await screen.findByText("AN-1");
+    const heads = screen.getAllByRole("columnheader").map((h) => h.textContent?.trim());
+    expect(heads.slice(0, 3)).toEqual(["Ключ", "Автор", "Название"]);
+    expect(heads.some((h) => h?.includes("Обновлена"))).toBe(false);
+    const r1 = screen.getByText("AN-1").closest("tr")!;
+    expect(within(r1).getAllByRole("cell")[1]).toHaveTextContent("Автор Тестовый");
+    const r2 = screen.getByText("AN-2").closest("tr")!;
+    expect(within(r2).getAllByRole("cell")[1]).toHaveTextContent("—");
+    expect(within(r1).getAllByRole("cell")).toHaveLength(heads.length);
   });
 
   it("пустая ставка - «не указана»; с НДС", async () => {
@@ -175,10 +194,8 @@ describe("Потребности", () => {
     expect(screen.getByRole("columnheader", { name: /Создана/ })).toHaveAttribute("aria-sort", "ascending");
     await userEvent.click(within(screen.getByRole("columnheader", { name: /Создана/ })).getByRole("button"));
     await waitFor(() => expect(urls[urls.length - 1]).toContain("order=desc"));
-    // другой столбец: сортировка по «Обновлена», сначала новые
-    await userEvent.click(within(screen.getByRole("columnheader", { name: /Обновлена/ })).getByRole("button"));
-    await waitFor(() => expect(urls[urls.length - 1]).toContain("sort=updated"));
-    expect(urls[urls.length - 1]).toContain("order=desc");
+    // сортировка по «Обновлена» из интерфейса убрана
+    expect(screen.queryByRole("columnheader", { name: /Обновлена/ })).toBeNull();
   });
 
   it("фильтр «Создана с / по» уходит в API вместе с группой и поиском; сброс убирает даты", async () => {

@@ -10,7 +10,7 @@ export function formatDateTime(iso?: string | null): string {
 
 // Ставка полностью (BR-003): сумма, валюта, НДС, единица; пусто - «не указана» (FR-001).
 export function formatRate(rate: Rate): { main: string; vat: string; proposer: string } {
-  const proposer = rate.proposer ? `предлагает: ${rate.proposer}` : "";
+  const proposer = rate.proposer ?? "";
   if (rate.amount === null || rate.amount === undefined) {
     return { main: "не указана", vat: "", proposer };
   }

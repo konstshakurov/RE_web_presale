@@ -13,7 +13,7 @@ export interface NeedsSort {
 interface Props {
   items: NeedOut[];
   sort?: NeedsSort;
-  onSort?: (sort: NeedSort) => void; // клик по заголовку «Создана» / «Обновлена»
+  onSort?: (sort: NeedSort) => void; // клик по заголовку «Создана»
 }
 
 function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: string } & Pick<Props, "sort" | "onSort">) {
@@ -38,6 +38,7 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
       <thead>
         <tr>
           <th>Ключ</th>
+          <th>Автор</th>
           <th>Название</th>
           <th>Статус</th>
           <th>Клиент / эпик</th>
@@ -45,7 +46,6 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
           <th>Ставка</th>
           <th>Кандидаты</th>
           <SortHeader field="created" label="Создана" sort={sort} onSort={onSort} />
-          <SortHeader field="updated" label="Обновлена" sort={sort} onSort={onSort} />
         </tr>
       </thead>
       <tbody>
@@ -64,6 +64,7 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                     n.jira_key
                   )}
                 </td>
+                <td>{n.author || "—"}</td>
                 <td>{n.title}</td>
                 <td>
                   <span className="status">{n.status}</span>
@@ -114,7 +115,6 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                   )}
                 </td>
                 <td>{formatDateTime(n.jira_created_at) || "—"}</td>
-                <td>{formatDateTime(n.jira_updated_at) || "—"}</td>
               </tr>
               {expanded && n.epic_key && (
                 <tr className="needs__details">

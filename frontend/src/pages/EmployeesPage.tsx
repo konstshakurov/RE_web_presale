@@ -5,7 +5,7 @@ import type { EmployeeOut } from "../api/types";
 import CvViewer from "../components/CvViewer";
 import EmployeeProfile from "../components/EmployeeProfile";
 import EmployeeSyncBar from "../components/EmployeeSyncBar";
-import { statusOptions } from "../lib/employees";
+import { FIRED_STATUS, resumeStatusOptions } from "../lib/employees";
 import { useEmployees } from "../lib/useEmployees";
 
 // «Сотрудники» (FR-002, FR-031): карточки Jira, фильтр по 10 статусам, отпуска, профиль, переход к CV.
@@ -13,12 +13,15 @@ export default function EmployeesPage() {
   const emps = useEmployees();
   const [status, setStatus] = useState(""); // "" - все
   const [search, setSearch] = useState("");
+  const [showFired, setShowFired] = useState(false);
   const [profile, setProfile] = useState<EmployeeOut | null>(null);
   const [cvKey, setCvKey] = useState<string | null>(null);
 
   const items = emps.items ?? [];
+  // «Уволен» - не статус-чип, а тумблер: действует вместе со статусом и поиском.
+  const visible = showFired ? items : items.filter((e) => e.status !== FIRED_STATUS);
   const q = search.trim().toLowerCase();
-  const shown = items.filter(
+  const shown = visible.filter(
     (e) =>
       (!status || e.status === status) &&
       (!q || e.full_name.toLowerCase().includes(q) || e.jira_key.toLowerCase().includes(q)),
@@ -35,9 +38,9 @@ export default function EmployeesPage() {
           aria-pressed={status === ""}
           onClick={() => setStatus("")}
         >
-          Все <span className="filter__count">{items.length}</span>
+          Все <span className="filter__count">{visible.length}</span>
         </button>
-        {statusOptions(emps.counts).map((o) => (
+        {resumeStatusOptions(emps.counts).map((o) => (
           <button
             key={o.status}
             type="button"
@@ -66,6 +69,10 @@ export default function EmployeesPage() {
           maxLength={200}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <label className="toolbar__toggle">
+          <input type="checkbox" role="switch" checked={showFired} onChange={(e) => setShowFired(e.target.checked)} />
+          Показывать уволенных
+        </label>
       </div>
 
       {emps.error && (

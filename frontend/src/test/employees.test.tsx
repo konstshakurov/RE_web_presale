@@ -128,12 +128,42 @@ describe("Сотрудники", () => {
     expect(within(card).getByText("Свободен")).toBeInTheDocument();
     expect(within(card).getByText(/10\.11-24\.11/)).toBeInTheDocument();
     expect(screen.getByRole("listitem", { name: "Другой Сотрудник" })).toBeInTheDocument();
-    // 10 статусов + «Все»
-    expect(within(screen.getByRole("navigation", { name: "Статусы сотрудников" })).getAllByRole("button")).toHaveLength(11);
+    // 10 статусов без «Уволен» (он - тумблер) + «Все»
+    expect(within(screen.getByRole("navigation", { name: "Статусы сотрудников" })).getAllByRole("button")).toHaveLength(10);
 
     await userEvent.click(screen.getByRole("button", { name: /Декрет/ }));
     expect(screen.queryByRole("listitem", { name: "Тестов Тест" })).not.toBeInTheDocument();
     expect(screen.getByText("не назначается")).toBeInTheDocument();
+  });
+
+  it("тумблер «Показывать уволенных»: скрыты по умолчанию, работает вместе со статусом и поиском", async () => {
+    setup(
+      {
+        employees: [
+          emp(),
+          emp({ jira_key: "EMP-2", full_name: "Иванов Иван", status: "Декрет" }),
+          emp({ jira_key: "EMP-3", full_name: "Иванов Пётр", status: "Уволен" }),
+        ],
+      },
+      "/employees",
+    );
+    await screen.findByRole("listitem", { name: "Тестов Тест" });
+    const nav = screen.getByRole("navigation", { name: "Статусы сотрудников" });
+    expect(within(nav).queryByRole("button", { name: /Уволен/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("listitem", { name: "Иванов Пётр" })).not.toBeInTheDocument();
+    expect(within(nav).getByRole("button", { name: /Все/ })).toHaveTextContent("2");
+
+    await userEvent.click(screen.getByRole("switch", { name: "Показывать уволенных" }));
+    expect(screen.getByRole("listitem", { name: "Иванов Пётр" })).toBeInTheDocument();
+    expect(within(nav).getByRole("button", { name: /Все/ })).toHaveTextContent("3");
+    // вместе с поиском
+    await userEvent.type(screen.getByLabelText("Поиск по ФИО и ключу"), "иванов");
+    expect(screen.queryByRole("listitem", { name: "Тестов Тест" })).not.toBeInTheDocument();
+    expect(screen.getByRole("listitem", { name: "Иванов Пётр" })).toBeInTheDocument();
+    // вместе со статусом
+    await userEvent.click(within(nav).getByRole("button", { name: /Декрет/ }));
+    expect(screen.queryByRole("listitem", { name: "Иванов Пётр" })).not.toBeInTheDocument();
+    expect(screen.getByRole("listitem", { name: "Иванов Иван" })).toBeInTheDocument();
   });
 
   it("профиль: отпуска, опыт, файлы и история отправок из потребностей", async () => {

@@ -14,7 +14,7 @@ export const EMPLOYEE_STATUSES = [
   "Декрет",
 ];
 
-// Статус «Уволен» в разделе «Резюме» вынесен из списка статусов в тумблер (CR); «Сотрудники» его не затрагивает.
+// Статус «Уволен» в «Резюме» и «Сотрудниках» вынесен из списка статусов в тумблер (CR).
 export const FIRED_STATUS = "Уволен";
 
 // Порядок типов в окне загрузки; названия и допустимые типы приходят из GET /cv/limits.
@@ -33,7 +33,7 @@ export function statusOptions(counts: { status: string; count: number }[]): Stat
   return [...known, ...extra.map((c) => ({ status: c.status, count: c.count }))];
 }
 
-// Варианты списка «Статус сотрудника» в «Резюме»: без «Уволен» (он - отдельный тумблер).
+// Варианты статусов в «Резюме» и «Сотрудниках»: без «Уволен» (он - отдельный тумблер).
 export function resumeStatusOptions(counts: { status: string; count: number }[]): StatusOption[] {
   return statusOptions(counts).filter((o) => o.status !== FIRED_STATUS);
 }

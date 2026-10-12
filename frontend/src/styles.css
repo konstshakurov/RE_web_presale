@@ -31,6 +31,7 @@ a { color: var(--accent); }
 .filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
 .filter__item { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 16px; padding: 4px 12px; cursor: pointer; }
 .filter__item--active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toolbar__toggle { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; }
 .filter__count { opacity: 0.8; margin-left: 4px; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; }
 .toolbar .primary { background: #0b8a5c; color: #fff; border: 0; border-radius: 4px; padding: 8px 16px; cursor: pointer; }

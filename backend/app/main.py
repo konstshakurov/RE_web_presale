@@ -16,6 +16,8 @@ from .config import load_settings
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .logging_setup import configure_logging
 from .secrets import SecretStore
+from .status_groups.repo import StatusGroupRepo
+from .status_groups.router import router as status_groups_router
 from .sync.factory import build_sync_service, open_cv_pool
 from .sync.router import router as sync_router
 
@@ -47,6 +49,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.settings = settings
     app.state.pool = pool
     app.state.repo = repo
+    app.state.status_groups = StatusGroupRepo(pool)
     # без LDAP_URL приложение стартует, но /auth/login отвечает 503
     app.state.ldap = Ldap3Adapter.from_settings(settings) if settings.ldap_url else None
     jira_adapter = _build_jira_adapter(settings)
@@ -71,6 +74,7 @@ app = FastAPI(title="re_web_presale api", lifespan=lifespan)
 
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(status_groups_router)
 app.include_router(sync_router)
 
 

@@ -15,6 +15,20 @@
         "title": "AddUserRequest",
         "type": "object"
       },
+      "CreateGroupRequest": {
+        "properties": {
+          "name": {
+            "description": "Название группы, 1..128 символов, уникальное",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CreateGroupRequest",
+        "type": "object"
+      },
       "EmployeeOut": {
         "properties": {
           "assignable": {
@@ -232,6 +246,43 @@
           "needs_total"
         ],
         "title": "EpicOut",
+        "type": "object"
+      },
+      "GroupOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "need_count": {
+            "description": "Потребностей кэша в группе",
+            "title": "Need Count",
+            "type": "integer"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Statuses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "sort_order",
+          "statuses",
+          "need_count"
+        ],
+        "title": "GroupOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -574,6 +625,54 @@
         "title": "NeedsPage",
         "type": "object"
       },
+      "OrderRequest": {
+        "properties": {
+          "ids": {
+            "description": "Id всех групп в нужном порядке",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "title": "OrderRequest",
+        "type": "object"
+      },
+      "PatchGroupRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Новое название, 1..128 символов",
+            "title": "Name"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          }
+        },
+        "title": "PatchGroupRequest",
+        "type": "object"
+      },
       "PatchUserRequest": {
         "properties": {
           "active": {
@@ -832,6 +931,97 @@
         "title": "StatusGroupOut",
         "type": "object"
       },
+      "StatusGroupsOut": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "other": {
+            "description": "Статусы, которые сейчас попадают в «Прочие»",
+            "items": {
+              "$ref": "#/components/schemas/StatusInfo"
+            },
+            "title": "Other",
+            "type": "array"
+          },
+          "other_count": {
+            "description": "Потребностей в «Прочие»",
+            "title": "Other Count",
+            "type": "integer"
+          },
+          "reserved": {
+            "description": "Зарезервированные имена групп",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reserved",
+            "type": "array"
+          },
+          "statuses": {
+            "description": "Источник выбора: 19 статусов workflow Jira и статусы из кэша",
+            "items": {
+              "$ref": "#/components/schemas/StatusInfo"
+            },
+            "title": "Statuses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups",
+          "statuses",
+          "other",
+          "other_count",
+          "reserved"
+        ],
+        "title": "StatusGroupsOut",
+        "type": "object"
+      },
+      "StatusInfo": {
+        "properties": {
+          "count": {
+            "description": "Потребностей с этим статусом в кэше",
+            "title": "Count",
+            "type": "integer"
+          },
+          "group_ids": {
+            "description": "Группы, в которые входит статус; пусто - «Прочие»",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Group Ids",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "count",
+          "group_ids"
+        ],
+        "title": "StatusInfo",
+        "type": "object"
+      },
+      "StatusRequest": {
+        "properties": {
+          "status": {
+            "description": "Статус Jira как есть, 1..128 символов",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "StatusRequest",
+        "type": "object"
+      },
       "SyncErrorBody": {
         "description": "Тело отказа «Обновить» / эпика: причина как есть (FR-029).",
         "properties": {
@@ -1034,6 +1224,381 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/status-groups": {
+      "get": {
+        "operationId": "list_groups_admin_status_groups_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusGroupsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "List Groups",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_group_admin_status_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "409": {
+            "description": "Группа с таким названием уже есть"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Create Group",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/status-groups/order": {
+      "put": {
+        "operationId": "set_order_admin_status_groups_order_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupOut"
+                  },
+                  "title": "Response Set Order Admin Status Groups Order Put",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Set Order",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/status-groups/{group_id}": {
+      "delete": {
+        "operationId": "delete_group_admin_status_groups__group_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Delete Group",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_group_admin_status_groups__group_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Группа с таким названием уже есть"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Patch Group",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/status-groups/{group_id}/statuses": {
+      "delete": {
+        "operationId": "remove_status_admin_status_groups__group_id__statuses_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Status",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Remove Status",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "Добавить статус в группу; повтор - без изменений. Статус может входить в несколько групп.",
+        "operationId": "add_status_admin_status_groups__group_id__statuses_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Не админ или CSRF"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Add Status",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/users": {
       "get": {
         "operationId": "list_users_admin_users_get",

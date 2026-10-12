@@ -10,3 +10,6 @@ Python 3.12, FastAPI. Каркас: `app/main.py` (api, `/health`), `app/worker.
 `SYNC_PAUSE_RECHECK_SEC` (15), `JIRA_UTC_OFFSET_HOURS` (4), `JIRA_NEED_PROJECT`, `JIRA_NEED_ISSUETYPE`,
 `JIRA_EMPLOYEE_PROJECT`, `JIRA_EMPLOYEE_ISSUETYPE`. Нужна миграция V005 (app_db и cv_db).
 БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V007 и cv_db V001-V006).
+
+## Группы статусов (KON-64)
+Модуль `app/status_groups`, API `/admin/status-groups` (только admin, CSRF на изменяющих): список групп с составом, статусами для выбора и статусами «Прочих»; создать, переименовать, удалить группу; добавить/убрать статус; порядок (`PUT /order`). «Прочие» и «Все статусы» зарезервированы и в таблицы не кладутся. БД-тест: `tests/unit/test_status_groups_db.py`.

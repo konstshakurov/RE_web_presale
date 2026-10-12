@@ -1,0 +1,12 @@
+{
+  "name": "re-web-presale-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "description": "E2E-приёмка входа и разделов (KON-58), Playwright против QA-стенда",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

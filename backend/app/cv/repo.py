@@ -57,6 +57,12 @@ class CvRepo:
                 "SELECT 1 FROM cv.employee WHERE jira_key = %s", (employee_key,)
             ).fetchone() is not None
 
+    def list_employee_names(self) -> list[str]:
+        """ФИО всех карточек: словарь обезличивания шлюза LLM (FR-023)."""
+        with self._pool.connection() as conn:
+            rows = conn.execute("SELECT full_name FROM cv.employee").fetchall()
+        return [r[0] for r in rows]
+
     def list_files(
         self, employee_key: str | None = None, *, include_archived: bool = False
     ) -> list[FileRow]:

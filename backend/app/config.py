@@ -83,13 +83,17 @@ class Settings:
     session_cookie_secure: bool = True  # False только для http-стенда
     jira_base_url: str = ""
     llm_base_url: str = ""
+    llm_api_key: Secret = Secret("")  # ключ внутренней Qwen; только env (NFR-006)
+    llm_model: str = ""  # имя модели внутренней Qwen для chat/completions
+    llm_task_ttl_days: int = 7  # допущение: срок хранения завершённых задач LLM
 
     def enc_key_bytes(self) -> bytes:
         return _decode_key(self.enc_key.reveal())
 
     def secret_values(self) -> list[str]:
         """Значения секретов для фильтра логов."""
-        values = [self.app_db_url, self.cv_db_url, self.enc_key, self.ldap_bind_password]
+        values = [self.app_db_url, self.cv_db_url, self.enc_key, self.ldap_bind_password,
+                  self.llm_api_key]
         return [s.reveal() for s in values if s]
 
 
@@ -104,6 +108,19 @@ def _positive_float(get, name: str, default: str) -> float:
         raise ConfigError(f"{name} должен быть числом") from None
     if value <= 0:
         raise ConfigError(f"{name} должен быть больше нуля")
+    return value
+
+
+def _int_range(get, name: str, default: int, lo: int, hi: int) -> int:
+    raw = get(name)
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ConfigError(f"{name} должен быть целым числом") from None
+    if not lo <= value <= hi:
+        raise ConfigError(f"{name} должен быть в пределах {lo}..{hi}")
     return value
 
 
@@ -153,6 +170,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         session_cookie_secure=_truthy(get("SESSION_COOKIE_SECURE", "true")),
         jira_base_url=get("JIRA_BASE_URL"),
         llm_base_url=get("LLM_BASE_URL"),
+        llm_api_key=Secret(get("LLM_API_KEY")),
+        llm_model=get("LLM_MODEL"),
+        llm_task_ttl_days=_int_range(get, "LLM_TASK_TTL_DAYS", 7, 1, 365),
     )
     settings.enc_key_bytes()  # проверка формата ключа при запуске
     return settings

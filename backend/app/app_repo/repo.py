@@ -231,3 +231,37 @@ class AppRepo:
                 (owner_login,),
             )
             return cur.rowcount == 1
+
+    # --- secret_store, kind='llm_key' (один ключ на провайдера, KON-37) ---
+
+    def upsert_llm_key_secret(self, provider_id: int, sealed: SealedSecret) -> None:
+        with self._pool.connection() as conn:
+            conn.execute(
+                "INSERT INTO app.secret_store (kind, provider_id, ciphertext, nonce, key_id) "
+                "VALUES ('llm_key', %s, %s, %s, %s) "
+                "ON CONFLICT (provider_id) WHERE kind = 'llm_key' DO UPDATE SET "
+                "ciphertext = EXCLUDED.ciphertext, nonce = EXCLUDED.nonce, "
+                "key_id = EXCLUDED.key_id, updated_at = now()",
+                (provider_id, sealed.ciphertext, sealed.nonce, sealed.key_id),
+            )
+
+    def get_llm_key_secret(self, provider_id: int) -> SealedSecret | None:
+        from ..secrets.crypto import SealedSecret
+
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "SELECT ciphertext, nonce, key_id FROM app.secret_store "
+                "WHERE kind = 'llm_key' AND provider_id = %s",
+                (provider_id,),
+            ).fetchone()
+        if not row:
+            return None
+        return SealedSecret(ciphertext=bytes(row[0]), nonce=bytes(row[1]), key_id=row[2])
+
+    def delete_llm_key_secret(self, provider_id: int) -> bool:
+        with self._pool.connection() as conn:
+            cur = conn.execute(
+                "DELETE FROM app.secret_store WHERE kind = 'llm_key' AND provider_id = %s",
+                (provider_id,),
+            )
+            return cur.rowcount == 1

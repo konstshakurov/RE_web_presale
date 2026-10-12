@@ -20,6 +20,8 @@ from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSes
 from .llm_gateway.factory import build_llm
 from .llm_gateway.router import router as llm_router
 from .logging_setup import configure_logging
+from .matching import build_matching
+from .matching.router import router as matching_router
 from .secrets import SecretStore
 from .status_groups.repo import StatusGroupRepo
 from .status_groups.router import router as status_groups_router
@@ -75,6 +77,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.llm = llm.gateway
     app.state.llm_providers = llm.providers
     app.state.llm_dictionary = llm.dictionary
+    # сопоставление и навыки CV (KON-38): задачи ставятся через шлюз, результат собирает worker
+    app.state.matching = build_matching(pool, cv_pool, llm.gateway)
     try:
         yield
     finally:
@@ -92,6 +96,7 @@ app.include_router(status_groups_router)
 app.include_router(sync_router)
 app.include_router(cv_router)
 app.include_router(llm_router)
+app.include_router(matching_router)
 
 
 @app.get("/health")

@@ -2,7 +2,8 @@
 
 Потребности каждые 5 мин, сотрудники раз в час - токеном активного пользователя (только
 чтение); без активных пользователей опрос приостановлен. Пароль в worker не хранится.
-Задачи LLM (KON-37, ADR-007): очередь llm_task в app_db, отдельный поток.
+Задачи LLM (KON-37, ADR-007): очередь llm_task в app_db, отдельный поток; результат
+сопоставления и навыков CV подбирает модуль matching (KON-38).
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ from .config import load_settings
 from .llm_gateway import LlmRunner
 from .llm_gateway.factory import build_llm
 from .logging_setup import configure_logging
+from .matching.factory import build_matching, task_handler
 from .sync.factory import build_jira_adapter, build_sync_service, open_cv_pool
 from .sync.scheduler import Scheduler, run_forever
 from .sync.settings import load_sync_settings
@@ -33,7 +35,11 @@ def main() -> None:
     service = build_sync_service(settings, pool, cv_pool, jira, sync_settings)
     scheduler = Scheduler(service)
     llm = build_llm(settings, pool, cv_pool, with_ner=False)
-    llm_runner = LlmRunner(llm.gateway, ttl_days=settings.llm_task_ttl_days)
+    # результат сопоставления и навыков забирается сразу после задачи (KON-38)
+    matching = build_matching(pool, cv_pool, llm.gateway)
+    llm_runner = LlmRunner(
+        llm.gateway, ttl_days=settings.llm_task_ttl_days,
+        on_finished=task_handler(matching) if matching is not None else None)
     llm_runner.start()
     stop = {"flag": False}
     signal.signal(signal.SIGTERM, lambda *_: stop.update(flag=True))

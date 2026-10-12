@@ -263,7 +263,21 @@ async def upload_file(
         _store, repo, employee_key, kind, name, ext, content, ctx.login)
     log.info("cv: %s загрузил файл id=%s сотрудника %s тип=%s", ctx.login, result.file.id,
              employee_key, kind)
+    if kind == "main_cv" and result.file.extraction_status == "ok":
+        await run_in_threadpool(_schedule_skills, request, employee_key, ctx.login)
     return result
+
+
+def _schedule_skills(request: Request, employee_key: str, login: str) -> None:
+    """Выделение навыков нового основного CV через шлюз LLM (FR-027, KON-38). Сбой не
+    отменяет загрузку: навыки можно поставить позже (POST /resume/employees/{key}/skills)."""
+    matching = getattr(request.app.state, "matching", None)
+    if matching is None:
+        return
+    try:
+        matching.schedule_skills(employee_key, login)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("cv: навыки не поставлены для %s: %s", employee_key, type(exc).__name__)
 
 
 def _store(
@@ -381,4 +395,6 @@ def restore_file(
         raise HTTPException(
             status_code=409, detail="Восстановить можно только архивную версию основного CV")
     log.info("cv: %s восстановил версию основного CV id=%s", ctx.login, file_id)
+    # у ранее извлечённой версии навыки уже есть и не пересчитываются; у остальных - ставятся
+    _schedule_skills(request, f.employee_key, ctx.login)
     return employee_files(f.employee_key, request, ctx)

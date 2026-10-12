@@ -325,6 +325,29 @@
         "title": "EpicOut",
         "type": "object"
       },
+      "FileLink": {
+        "properties": {
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "file_name"
+        ],
+        "title": "FileLink",
+        "type": "object"
+      },
       "FileOut": {
         "properties": {
           "archived_at": {
@@ -742,6 +765,263 @@
         "title": "MainCvText",
         "type": "object"
       },
+      "MatchItemOut": {
+        "properties": {
+          "calculated_at": {
+            "format": "date-time",
+            "title": "Calculated At",
+            "type": "string"
+          },
+          "cv_file_id": {
+            "description": "Основное CV: кнопка «Резюме» (FR-037)",
+            "title": "Cv File Id",
+            "type": "integer"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Заметка о сотруднике (значок, FR-033)",
+            "title": "Note"
+          },
+          "note_author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Author"
+          },
+          "note_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Updated At"
+          },
+          "percent": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Percent",
+            "type": "integer"
+          },
+          "rationale": {
+            "description": "Обоснование по клику на %",
+            "title": "Rationale",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "stale": {
+            "description": "Потребность, заметка или модель изменились после расчёта",
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Статус сотрудника в Jira",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_key",
+          "full_name",
+          "status",
+          "percent",
+          "rationale",
+          "note",
+          "note_author",
+          "note_updated_at",
+          "cv_file_id",
+          "calculated_at",
+          "stale",
+          "skills"
+        ],
+        "title": "MatchItemOut",
+        "type": "object"
+      },
+      "MatchRequest": {
+        "properties": {
+          "force": {
+            "default": false,
+            "description": "Пересчитать, даже если результат в кэше («Пересчитать»)",
+            "title": "Force",
+            "type": "boolean"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Провайдер LLM; пусто - по умолчанию",
+            "title": "Provider Id"
+          }
+        },
+        "title": "MatchRequest",
+        "type": "object"
+      },
+      "MatchStateOut": {
+        "properties": {
+          "batches_done": {
+            "title": "Batches Done",
+            "type": "integer"
+          },
+          "batches_failed": {
+            "title": "Batches Failed",
+            "type": "integer"
+          },
+          "batches_total": {
+            "title": "Batches Total",
+            "type": "integer"
+          },
+          "calculated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Дата расчёта для показа в списке (FR-036)",
+            "title": "Calculated At"
+          },
+          "candidates_total": {
+            "description": "Допустимые к назначению с основным CV",
+            "title": "Candidates Total",
+            "type": "integer"
+          },
+          "errors": {
+            "description": "Причины отказов пакетов, без текстов CV",
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "evaluated": {
+            "title": "Evaluated",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MatchItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "need_key": {
+            "title": "Need Key",
+            "type": "string"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "description": "none | running | awaiting_confirmation | done | partial | failed",
+            "title": "Status",
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/app__matching__router__TaskOut"
+            },
+            "title": "Tasks",
+            "type": "array"
+          },
+          "total": {
+            "description": "Размер выдачи; items - срез limit/offset («Показать ещё»)",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "need_key",
+          "status",
+          "requested_by",
+          "model",
+          "started_at",
+          "calculated_at",
+          "stale",
+          "candidates_total",
+          "evaluated",
+          "total",
+          "items",
+          "tasks",
+          "batches_total",
+          "batches_done",
+          "batches_failed",
+          "errors"
+        ],
+        "title": "MatchStateOut",
+        "type": "object"
+      },
       "MeResponse": {
         "properties": {
           "csrf_token": {
@@ -1129,6 +1409,164 @@
         "title": "PreviewOut",
         "type": "object"
       },
+      "ProfileOut": {
+        "properties": {
+          "assignable": {
+            "title": "Assignable",
+            "type": "boolean"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "experience_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Только если CV называет годы явно",
+            "title": "Experience Years"
+          },
+          "files": {
+            "description": "Ссылки на все актуальные CV сотрудника",
+            "items": {
+              "$ref": "#/components/schemas/FileLink"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "main_cv": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileLink"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "note_author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Author"
+          },
+          "note_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Updated At"
+          },
+          "sections": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Разделы корпоративного CV (BR-007): profile, stack, industries, skills, languages, education, projects; пусто, если заголовков в CV нет",
+            "title": "Sections",
+            "type": "object"
+          },
+          "skills": {
+            "description": "Технологии и навыки из Основного CV (FR-027)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "skills_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skills Status"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "synced_at": {
+            "format": "date-time",
+            "title": "Synced At",
+            "type": "string"
+          },
+          "vacation_plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vacation Plan"
+          }
+        },
+        "required": [
+          "employee_key",
+          "full_name",
+          "status",
+          "assignable",
+          "description",
+          "vacation_plan",
+          "note",
+          "note_author",
+          "note_updated_at",
+          "main_cv",
+          "files",
+          "skills",
+          "skills_status",
+          "sections",
+          "experience_years",
+          "synced_at"
+        ],
+        "title": "ProfileOut",
+        "type": "object"
+      },
       "ProviderCreate": {
         "properties": {
           "api_key": {
@@ -1495,6 +1933,175 @@
         "title": "RefreshResult",
         "type": "object"
       },
+      "ResumeItem": {
+        "properties": {
+          "assignable": {
+            "title": "Assignable",
+            "type": "boolean"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "«Подробнее об опыте» из Jira (FR-002)",
+            "title": "Description"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "extraction_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ok | error | none; null - нет основного CV",
+            "title": "Extraction Status"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "main_cv_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Main Cv File Id"
+          },
+          "main_cv_file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Main Cv File Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "note_author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Author"
+          },
+          "note_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Updated At"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "skills_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "pending | ok | failed; null - не извлекались",
+            "title": "Skills Status"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "vacation_plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vacation Plan"
+          }
+        },
+        "required": [
+          "employee_key",
+          "full_name",
+          "status",
+          "assignable",
+          "description",
+          "vacation_plan",
+          "note",
+          "note_author",
+          "note_updated_at",
+          "main_cv_file_id",
+          "main_cv_file_name",
+          "extraction_status",
+          "skills",
+          "skills_status"
+        ],
+        "title": "ResumeItem",
+        "type": "object"
+      },
+      "ResumeList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ResumeItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "ResumeList",
+        "type": "object"
+      },
       "RuleOut": {
         "properties": {
           "id": {
@@ -1539,6 +2146,68 @@
           "admin_only"
         ],
         "title": "Section",
+        "type": "object"
+      },
+      "SkillsBatchOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SkillsOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "scheduled": {
+            "title": "Scheduled",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "scheduled"
+        ],
+        "title": "SkillsBatchOut",
+        "type": "object"
+      },
+      "SkillsOut": {
+        "properties": {
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "outcome": {
+            "description": "scheduled | exists | no_cv | no_provider | error",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Id"
+          }
+        },
+        "required": [
+          "employee_key",
+          "outcome"
+        ],
+        "title": "SkillsOut",
         "type": "object"
       },
       "StatusCount": {
@@ -1859,7 +2528,128 @@
         "title": "TaskCreate",
         "type": "object"
       },
-      "TaskOut": {
+      "TechnologyOut": {
+        "properties": {
+          "employees": {
+            "title": "Employees",
+            "type": "integer"
+          },
+          "tag": {
+            "title": "Tag",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tag",
+          "employees"
+        ],
+        "title": "TechnologyOut",
+        "type": "object"
+      },
+      "UploadResult": {
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/FileOut"
+          },
+          "replaced_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Для main_cv: прежнее актуальное CV, ушедшее в архив",
+            "title": "Replaced File Id"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "UploadResult",
+        "type": "object"
+      },
+      "UserOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "login": {
+            "title": "Login",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "role",
+          "active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "app__llm_gateway__router__TaskOut": {
         "properties": {
           "attempts": {
             "title": "Attempts",
@@ -1989,107 +2779,41 @@
         "title": "TaskOut",
         "type": "object"
       },
-      "UploadResult": {
+      "app__matching__router__TaskOut": {
         "properties": {
-          "file": {
-            "$ref": "#/components/schemas/FileOut"
+          "batch_status": {
+            "description": "pending | done | failed",
+            "title": "Batch Status",
+            "type": "string"
           },
-          "replaced_file_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Для main_cv: прежнее актуальное CV, ушедшее в архив",
-            "title": "Replaced File Id"
-          }
-        },
-        "required": [
-          "file"
-        ],
-        "title": "UploadResult",
-        "type": "object"
-      },
-      "UserOut": {
-        "properties": {
-          "active": {
-            "title": "Active",
+          "candidates": {
+            "title": "Candidates",
+            "type": "integer"
+          },
+          "requires_confirmation": {
+            "description": "true - внешний провайдер, нужен предпросмотр и confirm владельцем",
+            "title": "Requires Confirmation",
             "type": "boolean"
           },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
+          "status": {
+            "description": "Статус задачи шлюза либо итог пакета: done | failed",
+            "title": "Status",
             "type": "string"
           },
-          "login": {
-            "title": "Login",
-            "type": "string"
-          },
-          "role": {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "title": "Role",
-            "type": "string"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
+          "task_id": {
+            "description": "Задача шлюза LLM: GET /llm/tasks/{id}, confirm, retry",
+            "title": "Task Id",
             "type": "string"
           }
         },
         "required": [
-          "login",
-          "role",
-          "active",
-          "created_at",
-          "updated_at"
+          "task_id",
+          "status",
+          "requires_confirmation",
+          "batch_status",
+          "candidates"
         ],
-        "title": "UserOut",
-        "type": "object"
-      },
-      "ValidationError": {
-        "properties": {
-          "ctx": {
-            "title": "Context",
-            "type": "object"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "title": "Location",
-            "type": "array"
-          },
-          "msg": {
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "title": "Error Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError",
+        "title": "TaskOut",
         "type": "object"
       }
     },
@@ -3735,7 +4459,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/TaskOut"
+                    "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                   },
                   "title": "Response List Tasks Llm Tasks Get",
                   "type": "array"
@@ -3789,7 +4513,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskOut"
+                  "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                 }
               }
             },
@@ -3846,7 +4570,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskOut"
+                  "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                 }
               }
             },
@@ -3899,7 +4623,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskOut"
+                  "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                 }
               }
             },
@@ -3956,7 +4680,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskOut"
+                  "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                 }
               }
             },
@@ -4013,7 +4737,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskOut"
+                  "$ref": "#/components/schemas/app__llm_gateway__router__TaskOut"
                 }
               }
             },
@@ -4047,6 +4771,501 @@
         "summary": "Retry Task",
         "tags": [
           "llm"
+        ]
+      }
+    },
+    "/needs/{need_key}/match": {
+      "get": {
+        "description": "Состояние и сохранённый результат (повторный просмотр без вызова LLM).",
+        "operationId": "get_match_needs__need_key__match_get",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Need Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Первые 10; «Показать ещё» - offset",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "description": "Первые 10; «Показать ещё» - offset",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Потребность не найдена в кэше"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Match",
+        "tags": [
+          "matching"
+        ]
+      },
+      "post": {
+        "description": "«Сопоставить» / «Пересчитать»: детерминированный отбор, затем оценка LLM пакетами.\nРезультат уже в кэше (потребность, CV, заметка и модель не менялись) - LLM не вызывается.",
+        "operationId": "start_match_needs__need_key__match_post",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Need Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MatchRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Потребность не найдена в кэше"
+          },
+          "409": {
+            "description": "Провайдер LLM по умолчанию не настроен"
+          },
+          "422": {
+            "description": "Обезличивание не удалось"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Start Match",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/employees": {
+      "get": {
+        "description": "Таблица раздела «Резюме» с фильтрами без LLM. Технологии - из навыков Основного CV.",
+        "operationId": "list_resume_resume_employees_get",
+        "parameters": [
+          {
+            "description": "Поиск по ФИО, ключу, имени файла и тексту CV",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Поиск по ФИО, ключу, имени файла и тексту CV",
+              "title": "Q"
+            }
+          },
+          {
+            "description": "Статус сотрудника из Jira",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Статус сотрудника из Jira",
+              "title": "Status"
+            }
+          },
+          {
+            "description": "Технологии (повторяемый параметр)",
+            "in": "query",
+            "name": "technology",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Технологии (повторяемый параметр)",
+              "title": "Technology"
+            }
+          },
+          {
+            "description": "all - есть все выбранные технологии; any - любая",
+            "in": "query",
+            "name": "match",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "description": "all - есть все выбранные технологии; any - любая",
+              "pattern": "^(all|any)$",
+              "title": "Match",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List Resume",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/employees/{employee_key}/profile": {
+      "get": {
+        "description": "Профиль из Основного CV (разделы формата BR-007) и карточки Jira. Внешняя LLM не\nвызывается (FR-003).",
+        "operationId": "employee_profile_resume_employees__employee_key__profile_get",
+        "parameters": [
+          {
+            "description": "Ключ карточки сотрудника",
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "description": "Ключ карточки сотрудника",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Employee Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Employee Profile",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/employees/{employee_key}/skills": {
+      "post": {
+        "description": "Выделить навыки Основного CV, если ещё не выделялись (или прошлая попытка упала).\nБез замены файла уже извлечённые навыки не пересчитываются.",
+        "operationId": "extract_skills_resume_employees__employee_key__skills_post",
+        "parameters": [
+          {
+            "description": "Ключ карточки сотрудника",
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "description": "Ключ карточки сотрудника",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Employee Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Extract Skills",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/skills/backfill": {
+      "post": {
+        "description": "Поставить выделение навыков всем, у кого основное CV есть, а навыков нет.",
+        "operationId": "backfill_skills_resume_skills_backfill_post",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillsBatchOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Backfill Skills",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/technologies": {
+      "get": {
+        "description": "Подсказки фильтра «Технология»: теги Основных CV с числом сотрудников.",
+        "operationId": "list_technologies_resume_technologies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TechnologyOut"
+                  },
+                  "title": "Response List Technologies Resume Technologies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List Technologies",
+        "tags": [
+          "matching"
         ]
       }
     },

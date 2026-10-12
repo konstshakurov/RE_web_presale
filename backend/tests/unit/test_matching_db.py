@@ -113,7 +113,7 @@ def test_candidates_exclude_unassignable_no_cv_and_no_text(env):
 
 
 def test_candidates_selected_by_status_not_by_flag(env):
-    """Флаг assignable мог разойтись со статусом: решает статус (FR-002, NOT_ASSIGNABLE_STATUSES)."""
+    """Флаг assignable мог разойтись со статусом: решает статус (FR-002)."""
     cv_pool, _, repo, _, _ = env
     with cv_pool.connection() as c:
         c.execute("UPDATE cv.employee SET assignable = false WHERE jira_key = 'KONT38-10'")

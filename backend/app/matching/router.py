@@ -138,9 +138,9 @@ class SearchRequest(BaseModel):
     provider_id: int | None = Field(None, description="Провайдер LLM; пусто - по умолчанию")
     force: bool = Field(False, description="Пересчитать, даже если оценки в кэше")
     status: str | None = Field(
-        None, max_length=128, description="Фильтр «Статус сотрудника»; без него - все статусы, кроме "
-                                          "Коммерческий проект, Уволен, Декрет, Недоступен для "
-                                          "подключения (FR-002)")
+        None, max_length=128, description=(
+            "Фильтр «Статус сотрудника»; без него - все статусы, кроме Коммерческий проект, "
+            "Уволен, Декрет, Недоступен для подключения (FR-002)"))
     technology: list[str] = Field(default_factory=list, description="Фильтр «Технология»")
     match: str = Field("all", pattern="^(all|any)$")
     q: str | None = Field(None, max_length=200, description="Фильтр «Поиск» (текстовый)")

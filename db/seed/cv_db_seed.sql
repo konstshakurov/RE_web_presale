@@ -5,9 +5,9 @@ BEGIN;
 INSERT INTO cv.employee (jira_key, full_name, status, assignable, extra_experience, note, note_author, note_updated_at) VALUES
     ('TSTP-1', 'Тестовый Сотрудник 01', 'Свободен', true, 'Тестовый опыт: финтех', 'Тестовая заметка: не подключать в проект Гамма', 'test_user_1', now() - interval '1 day'),
     ('TSTP-2', 'Тестовый Сотрудник 02', 'Свободен', true, NULL, NULL, NULL, NULL),
-    ('TSTP-3', 'Тестовый Сотрудник 03', 'На проекте', false, NULL, NULL, NULL, NULL),
+    ('TSTP-3', 'Тестовый Сотрудник 03', 'Коммерческий проект', false, NULL, NULL, NULL, NULL),
     ('TSTP-4', 'Тестовый Сотрудник 04', 'Свободен', true, NULL, NULL, NULL, NULL),
-    ('TSTP-5', 'Тестовый Сотрудник 05', 'В отпуске', false, NULL, NULL, NULL, NULL);
+    ('TSTP-5', 'Тестовый Сотрудник 05', 'Недоступен для подключения', false, NULL, NULL, NULL, NULL);
 
 UPDATE cv.sync_state SET last_sync_at = now() - interval '20 minutes', last_success_at = now() - interval '20 minutes',
                          last_attempt_at = now() - interval '20 minutes'

@@ -141,6 +141,41 @@ class NewBatch:
     file_ids: tuple[int, ...]
 
 
+@dataclass(frozen=True)
+class SearchRunRow:
+    """Прогон «Поиска по смыслу» пользователя по запросу (FR-032)."""
+    requested_by: str
+    query_hash: str
+    query_text: str
+    provider_id: int | None
+    model: str
+    created_at: datetime
+
+
+@dataclass(frozen=True)
+class SearchBatchRow:
+    id: int
+    requested_by: str
+    query_hash: str
+    task_id: str
+    employee_keys: tuple[str, ...]
+    file_ids: tuple[int, ...]
+    status: str
+    error_code: str | None
+    error_message: str | None
+
+
+@dataclass(frozen=True)
+class SearchResRow:
+    employee_key: str
+    cv_file_id: int
+    model: str
+    match_percent: int
+    rationale: str
+    note_snapshot_at: datetime | None
+    created_at: datetime
+
+
 _CAND = (
     "e.jira_key, e.full_name, e.status, e.assignable, e.note, e.note_author, "
     "e.note_updated_at, e.extra_experience, f.id, f.file_name, "
@@ -155,6 +190,9 @@ _STATE = "file_id, status, task_id::text, model, requested_by, error_code, error
          "extracted_at, updated_at"
 _BATCH = "id, need_key, task_id::text, employee_keys, file_ids, status, error_code, error_message"
 _RUN = "need_key, requested_by, provider_id, model, need_jira_updated_at, created_at"
+_SRUN = "requested_by, query_hash, query_text, provider_id, model, created_at"
+_SBATCH = ("id, requested_by, query_hash, task_id::text, employee_keys, file_ids, status, "
+           "error_code, error_message")
 
 
 def _like(q: str) -> str:
@@ -163,6 +201,10 @@ def _like(q: str) -> str:
 
 def _batch(r) -> BatchRow:
     return BatchRow(r[0], r[1], r[2], tuple(r[3]), tuple(r[4]), r[5], r[6], r[7])
+
+
+def _sbatch(r) -> SearchBatchRow:
+    return SearchBatchRow(r[0], r[1], r[2], r[3], tuple(r[4]), tuple(r[5]), r[6], r[7], r[8])
 
 
 class NeedSource:
@@ -216,6 +258,37 @@ class RunTx:
                 "VALUES (%s, %s::uuid, %s::text[], %s::bigint[])",
                 (run.need_key, b.task_id, list(b.employee_keys), list(b.file_ids)),
             )
+
+
+class SearchTx:
+    """Операции над прогоном поиска внутри транзакции с advisory-lock по (пользователь, запрос)."""
+
+    def __init__(self, conn, login: str, query_hash: str) -> None:
+        self._conn = conn
+        self._login = login
+        self._hash = query_hash
+
+    def batches(self) -> list[SearchBatchRow]:
+        rows = self._conn.execute(
+            f"SELECT {_SBATCH} FROM cv.search_batch WHERE requested_by = %s AND query_hash = %s "
+            "ORDER BY id", (self._login, self._hash)).fetchall()
+        return [_sbatch(r) for r in rows]
+
+    def replace(self, run: SearchRunRow, batches: Sequence[NewBatch]) -> None:
+        """Прогон по (пользователь, запрос) один: прежний (с пакетами, каскадом) заменяется."""
+        c = self._conn
+        c.execute("DELETE FROM cv.search_run WHERE requested_by = %s AND query_hash = %s",
+                  (run.requested_by, run.query_hash))
+        c.execute(
+            "INSERT INTO cv.search_run (requested_by, query_hash, query_text, provider_id, model) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (run.requested_by, run.query_hash, run.query_text, run.provider_id, run.model))
+        for b in batches:
+            c.execute(
+                "INSERT INTO cv.search_batch (requested_by, query_hash, task_id, employee_keys, "
+                "file_ids) VALUES (%s, %s, %s::uuid, %s::text[], %s::bigint[])",
+                (run.requested_by, run.query_hash, b.task_id, list(b.employee_keys),
+                 list(b.file_ids)))
 
 
 class MatchRepo:
@@ -484,3 +557,82 @@ class MatchRepo:
                 "finished_at = now() WHERE id = %s AND status = 'pending'",
                 (status, code, (message or "")[:500] or None, batch_id))
         return cur.rowcount > 0
+
+    # --- «Поиск по смыслу» (FR-032) ---
+
+    @contextmanager
+    def search_tx(self, login: str, query_hash: str) -> Iterator[SearchTx]:
+        """Как ``run_tx``: два «Применить» подряд не создадут двух прогонов."""
+        with self._pool.connection() as conn, conn.transaction():
+            conn.execute("SELECT pg_advisory_xact_lock(hashtext(%s))",
+                         (f"search:{login}:{query_hash}",))
+            yield SearchTx(conn, login, query_hash)
+
+    def get_search_run(self, login: str, query_hash: str) -> SearchRunRow | None:
+        with self._pool.connection() as conn:
+            r = conn.execute(
+                f"SELECT {_SRUN} FROM cv.search_run WHERE requested_by = %s AND query_hash = %s",
+                (login, query_hash)).fetchone()
+        return SearchRunRow(*r) if r else None
+
+    def list_search_batches(self, login: str, query_hash: str) -> list[SearchBatchRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                f"SELECT {_SBATCH} FROM cv.search_batch WHERE requested_by = %s "
+                "AND query_hash = %s ORDER BY id", (login, query_hash)).fetchall()
+        return [_sbatch(r) for r in rows]
+
+    def search_batch_by_task(self, task_id: str) -> SearchBatchRow | None:
+        with self._pool.connection() as conn:
+            r = conn.execute(
+                f"SELECT {_SBATCH} FROM cv.search_batch WHERE task_id = %s::uuid", (task_id,)
+            ).fetchone()
+        return _sbatch(r) if r else None
+
+    def finish_search_batch(self, batch_id: int, status: str, code: str | None = None,
+                            message: str | None = None) -> bool:
+        with self._pool.connection() as conn:
+            cur = conn.execute(
+                "UPDATE cv.search_batch SET status = %s, error_code = %s, error_message = %s, "
+                "finished_at = now() WHERE id = %s AND status = 'pending'",
+                (status, code, (message or "")[:500] or None, batch_id))
+        return cur.rowcount > 0
+
+    def upsert_search_results(
+        self, query_hash: str, recs: Sequence[NewRec], *, model: str,
+    ) -> int:
+        """Кэш по связке запрос + основное CV + модель. Файлы, которых уже нет, пропускаются."""
+        if not recs:
+            return 0
+        n = 0
+        with self._pool.connection() as conn, conn.transaction():
+            for r in recs:
+                cur = conn.execute(
+                    "INSERT INTO cv.search_result (query_hash, cv_file_id, employee_key, model, "
+                    "match_percent, rationale, note_snapshot_at) "
+                    "SELECT %s, f.id, f.employee_key, %s, %s, %s, %s FROM cv.employee_file f "
+                    "WHERE f.id = %s AND f.employee_key = %s AND f.kind = 'main_cv' "
+                    "ON CONFLICT (query_hash, cv_file_id, model) DO UPDATE SET "
+                    "match_percent = EXCLUDED.match_percent, rationale = EXCLUDED.rationale, "
+                    "note_snapshot_at = EXCLUDED.note_snapshot_at, created_at = now()",
+                    (query_hash, model, r.match_percent, r.rationale, r.note_snapshot_at,
+                     r.cv_file_id, r.employee_key),
+                )
+                n += cur.rowcount
+        return n
+
+    def list_search_results(self, query_hash: str) -> list[SearchResRow]:
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT employee_key, cv_file_id, model, match_percent, rationale, "
+                "note_snapshot_at, created_at FROM cv.search_result WHERE query_hash = %s "
+                "ORDER BY created_at DESC", (query_hash,)).fetchall()
+        return [SearchResRow(*r) for r in rows]
+
+    def purge_search(self, retention_days: int) -> None:
+        """Запросы и оценки старше срока хранения удаляются."""
+        with self._pool.connection() as conn, conn.transaction():
+            conn.execute("DELETE FROM cv.search_run WHERE created_at < now() - "
+                         "make_interval(days => %s)", (retention_days,))
+            conn.execute("DELETE FROM cv.search_result WHERE created_at < now() - "
+                         "make_interval(days => %s)", (retention_days,))

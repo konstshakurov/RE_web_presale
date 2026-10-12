@@ -167,3 +167,64 @@ def test_upload_main_cv_schedules_skills_and_failure_does_not_break_upload():
 
     app.state.matching = Broken()
     assert upload(client, headers).status_code == 201   # загрузка не откатывается
+
+
+# --- «Поиск по смыслу (LLM)» (FR-032) ---
+
+SQ = "Нужен аналитик с SQL и интеграциями REST"
+
+
+def test_semantic_search_requires_login_and_csrf_and_validates_query():
+    w = _world()
+    app = FastAPI()
+    app.include_router(matching_router)
+    app.state.matching = w.svc
+    c = TestClient(app)
+    assert c.get("/resume/semantic-search", params={"query": SQ}).status_code == 401
+    assert c.post("/resume/semantic-search", json={"query": SQ}).status_code == 401
+    client, headers, _, _ = _client(w)
+    assert client.post("/resume/semantic-search", json={"query": SQ}).status_code == 403
+    assert client.post("/resume/semantic-search", headers=headers,
+                       json={"query": "ab"}).status_code == 422
+    assert client.get("/resume/semantic-search", params={"query": "ab"}).status_code == 422
+    assert client.get("/resume/semantic-search").status_code == 422
+    r = client.post("/resume/semantic-search", headers=headers,
+                    json={"query": SQ, "provider_id": 9999})
+    assert r.status_code == 404
+
+
+def test_semantic_search_flow_over_http():
+    w = _world()
+    client, headers, _, _ = _client(w)
+    w.svc.schedule_skills("EMP-1", "u")
+    w.run_all()
+    r = client.post("/resume/semantic-search", headers=headers,
+                    json={"query": SQ, "technology": ["SQL"], "limit": 5})
+    assert r.status_code == 202
+    body = r.json()
+    assert body["status"] == "running" and body["mode"] == "fallback" and body["notice"]
+    assert [i["employee_key"] for i in body["items"]] == ["EMP-1"]
+    assert body["items"][0]["percent"] is None and body["items"][0]["source"] == "fallback"
+    w.run_all()
+    got = client.get("/resume/semantic-search",
+                     params=[("query", SQ), ("technology", "sql")]).json()
+    assert got["status"] == "done" and got["mode"] == "llm" and got["notice"] is None
+    item = got["items"][0]
+    assert item["source"] == "llm" and item["percent"] == 90 and item["rationale"]
+    assert item["full_name"] == "Сотрудник-01" and item["cv_file_id"]
+    # без фильтра: сотрудник без совпадений по технологиям и тексту в выдачу не попадает
+    wide = client.get("/resume/semantic-search", params={"query": SQ}).json()
+    assert wide["total"] == 1 and wide["evaluated"] == 1 and wide["candidates_total"] == 2
+
+
+def test_semantic_search_without_llm_is_a_clear_message_not_an_error():
+    w = _world()
+    w.env.repo.providers.clear()
+    client, headers, _, _ = _client(w)
+    r = client.post("/resume/semantic-search", headers=headers, json={"query": SQ})
+    assert r.status_code == 202
+    body = r.json()
+    assert body["status"] == "unavailable" and "недоступен" in body["notice"]
+    assert body["total"] == 1 and w.llm_client.calls == []
+    # текстовый поиск и фильтры «Резюме» работают без LLM
+    assert client.get("/resume/employees", params={"q": "другое"}).json()["total"] == 1

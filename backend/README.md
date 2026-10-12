@@ -9,7 +9,7 @@ Python 3.12, FastAPI. Каркас: `app/main.py` (api, `/health`), `app/worker.
 `SYNC_EMPLOYEES_INTERVAL_SEC` (3600), `SYNC_EPIC_TTL_SEC` (3600), `SYNC_INITIAL_LOAD_DAYS` (183),
 `SYNC_PAUSE_RECHECK_SEC` (15), `JIRA_UTC_OFFSET_HOURS` (4), `JIRA_NEED_PROJECT`, `JIRA_NEED_ISSUETYPE`,
 `JIRA_EMPLOYEE_PROJECT`, `JIRA_EMPLOYEE_ISSUETYPE`. Нужна миграция V005 (app_db и cv_db).
-БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V008 и cv_db V001-V007).
+БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V008 и cv_db V001-V008).
 
 ## Файлы сотрудников (KON-36)
 Форматы заданы в одном месте, `app/cv/formats.py`, и отдаются в `GET /cv/limits` (`extensions_by_kind`).
@@ -33,8 +33,9 @@ API: `/llm/tasks*`, `/llm/providers` (выбор модели), `/admin/llm/prov
 БД-тест: `tests/unit/test_llm_db.py`.
 
 ## Навыки из CV и сопоставление (KON-38)
-Модуль `app/matching`; нужна миграция cv_db V007 (`file_skill_state`, `match_run`, `match_batch`,
-`recommendation.note_snapshot_at`). Все вызовы LLM идут через шлюз (задачи `purpose=skills|match`);
+Модуль `app/matching`; нужны миграции cv_db V007 (`file_skill_state`, `match_run`, `match_batch`,
+`recommendation.note_snapshot_at`) и V008 (`search_run`, `search_batch`, `search_result`).
+Все вызовы LLM идут через шлюз (задачи `purpose=skills|match|search`);
 результат забирает worker сразу после задачи и API лениво при запросе состояния (оба идемпотентны).
 - Навыки (FR-027): ставятся при загрузке основного CV и по `POST /resume/employees/{key}/skills`,
   `POST /resume/skills/backfill`; хранятся по файлу, без замены файла не пересчитываются.
@@ -44,6 +45,21 @@ API: `/llm/tasks*`, `/llm/providers` (выбор модели), `/admin/llm/prov
   Кэш по потребность + основное CV + модель; устаревает при смене потребности, заметки или модели.
   Внешний провайдер: задачи в `awaiting_confirmation`, подтверждение `POST /llm/tasks/{id}/confirm` на каждую.
 - «Резюме» (FR-032, FR-003): `GET /resume/employees` (`q`, `status`, `technology`, `match=all|any`),
-  `GET /resume/technologies`, `GET /resume/employees/{key}/profile` (без LLM).
+  `GET /resume/technologies`, `GET /resume/employees/{key}/profile` (без LLM). Профиль: разделы BR-007
+  (профиль, основной стек, отрасли, ключевые навыки, языки, образование и сертификаты, проекты) по заголовкам,
+  годы опыта - только если CV называет их явно («более 5 лет опыта», «опыт работы 7 лет»).
+- «Поиск по смыслу (LLM)» (FR-032): `POST /resume/semantic-search` (CSRF; `query` 3-500 символов, `provider_id`,
+  `force`, фильтры `status`, `technology[]`, `match`, `q`, `limit`) и `GET /resume/semantic-search` (те же
+  параметры + `offset`) - состояние и результат пользователя по запросу. Сначала детерминированный отбор:
+  допустимые статусы (или явно выбранный статус), основное CV с текстом, фильтры, ранжирование по технологиям
+  из запроса (вес 3) и словам запроса в тексте CV; кандидаты без совпадений отсекаются (если совпадений нет ни у
+  кого - остаются все). В LLM уходит топ-30 пакетами по <=5 с метками K1..Kn (без ФИО и ключей), ответ -
+  % и обоснование на кандидата. Кэш по запрос (нормализованный) + основное CV + модель, общий для
+  пользователей; прогон принадлежит автору (он подтверждает отправку внешнему провайдеру, как в сопоставлении).
+  Правка заметки или смена модели - `stale`; замена файла - новая оценка. В выдаче сначала оценённые LLM
+  (`source=llm`, `percent`), затем остальные по технологиям и тексту (`source=fallback`, `percent=null`).
+  Без LLM (нет провайдера, ошибка, таймаут, обезличивание не удалось) список строится так же, а `notice` и
+  `status` (`unavailable` | `failed` | `partial`) объясняют причину; текстовый поиск и фильтры от LLM не зависят.
+  Запросы и оценки хранятся 30 суток (чистятся при новом запуске).
 Тесты: `tests/unit/test_matching_*.py`; БД-тест `test_matching_db.py` (`TEST_CV_DB_URL`, `TEST_APP_DB_URL`,
-cv_db V001-V007).
+cv_db V001-V008).

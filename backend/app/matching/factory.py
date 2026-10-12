@@ -5,7 +5,7 @@ from psycopg_pool import ConnectionPool
 
 from ..llm_gateway import LlmGateway
 from .repo import MatchRepo, NeedSource
-from .service import PURPOSE_MATCH, PURPOSE_SKILLS, MatchingService
+from .service import PURPOSE_MATCH, PURPOSE_SEARCH, PURPOSE_SKILLS, MatchingService
 
 
 def build_matching(
@@ -20,6 +20,6 @@ def build_matching(
 def task_handler(service: MatchingService):
     """Обработчик для ``LlmRunner(on_finished=...)``: после задачи шлюза забирает результат."""
     def handle(task) -> None:
-        if task.purpose in (PURPOSE_MATCH, PURPOSE_SKILLS):
+        if task.purpose in (PURPOSE_MATCH, PURPOSE_SKILLS, PURPOSE_SEARCH):
             service.collect_task(task.id)
     return handle

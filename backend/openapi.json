@@ -2125,6 +2125,378 @@
         "title": "RuleOut",
         "type": "object"
       },
+      "SearchItemOut": {
+        "properties": {
+          "calculated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated At"
+          },
+          "cv_file_id": {
+            "description": "Основное CV: кнопка «Резюме» (FR-037)",
+            "title": "Cv File Id",
+            "type": "integer"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "matched_skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Skills",
+            "type": "array"
+          },
+          "matched_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Terms",
+            "type": "array"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "note_author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Author"
+          },
+          "note_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note Updated At"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Только у source=llm",
+            "title": "Percent"
+          },
+          "rationale": {
+            "description": "Обоснование LLM либо перечень совпадений без LLM",
+            "title": "Rationale",
+            "type": "string"
+          },
+          "score": {
+            "description": "Детерминированная оценка: технологии * 3 + слова запроса",
+            "title": "Score",
+            "type": "integer"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "source": {
+            "description": "llm - оценка LLM; fallback - по технологиям и тексту",
+            "title": "Source",
+            "type": "string"
+          },
+          "stale": {
+            "description": "Заметка или модель изменились после расчёта",
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_key",
+          "full_name",
+          "status",
+          "source",
+          "rationale",
+          "score",
+          "matched_skills",
+          "matched_terms",
+          "note",
+          "note_author",
+          "note_updated_at",
+          "cv_file_id",
+          "calculated_at",
+          "stale",
+          "skills"
+        ],
+        "title": "SearchItemOut",
+        "type": "object"
+      },
+      "SearchRequest": {
+        "properties": {
+          "force": {
+            "default": false,
+            "description": "Пересчитать, даже если оценки в кэше",
+            "title": "Force",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 10,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "match": {
+            "default": "all",
+            "pattern": "^(all|any)$",
+            "title": "Match",
+            "type": "string"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Провайдер LLM; пусто - по умолчанию",
+            "title": "Provider Id"
+          },
+          "q": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Фильтр «Поиск» (текстовый)",
+            "title": "Q"
+          },
+          "query": {
+            "description": "Запрос на естественном языке",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Query",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Фильтр «Статус сотрудника»; без него - допустимые к назначению статусы (6.2)",
+            "title": "Status"
+          },
+          "technology": {
+            "description": "Фильтр «Технология»",
+            "items": {
+              "type": "string"
+            },
+            "title": "Technology",
+            "type": "array"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "SearchRequest",
+        "type": "object"
+      },
+      "SearchStateOut": {
+        "properties": {
+          "batches_done": {
+            "title": "Batches Done",
+            "type": "integer"
+          },
+          "batches_failed": {
+            "title": "Batches Failed",
+            "type": "integer"
+          },
+          "batches_total": {
+            "title": "Batches Total",
+            "type": "integer"
+          },
+          "calculated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated At"
+          },
+          "candidates_total": {
+            "description": "В области поиска с учётом фильтров",
+            "title": "Candidates Total",
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "evaluated": {
+            "description": "С оценкой LLM",
+            "title": "Evaluated",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "mode": {
+            "description": "llm - есть оценки LLM; fallback - только технологии и текст",
+            "title": "Mode",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Понятное сообщение о деградации без LLM",
+            "title": "Notice"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "description": "none | running | awaiting_confirmation | done | partial | failed | unavailable (LLM недоступна)",
+            "title": "Status",
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/app__matching__router__TaskOut"
+            },
+            "title": "Tasks",
+            "type": "array"
+          },
+          "total": {
+            "description": "Размер выдачи; items - срез limit/offset",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "status",
+          "mode",
+          "notice",
+          "requested_by",
+          "model",
+          "started_at",
+          "calculated_at",
+          "stale",
+          "candidates_total",
+          "evaluated",
+          "total",
+          "items",
+          "tasks",
+          "batches_total",
+          "batches_done",
+          "batches_failed",
+          "errors"
+        ],
+        "title": "SearchStateOut",
+        "type": "object"
+      },
       "Section": {
         "properties": {
           "admin_only": {
@@ -5191,6 +5563,193 @@
           }
         ],
         "summary": "Extract Skills",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/resume/semantic-search": {
+      "get": {
+        "description": "Состояние прогона и сохранённый результат текущего пользователя по запросу; без прогона\n- ранжирование по технологиям и тексту без обращения к LLM.",
+        "operationId": "get_semantic_search_resume_semantic_search_get",
+        "parameters": [
+          {
+            "description": "Запрос поиска",
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "description": "Запрос поиска",
+              "maxLength": 700,
+              "title": "Query",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "technology",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technology"
+            }
+          },
+          {
+            "in": "query",
+            "name": "match",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "pattern": "^(all|any)$",
+              "title": "Match",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "description": "Запрос слишком короткий или длинный"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Semantic Search",
+        "tags": [
+          "matching"
+        ]
+      },
+      "post": {
+        "description": "Детерминированный отбор по статусам, основному CV, технологиям и тексту, затем итоговое\nранжирование LLM пакетами. Результат в кэше (запрос + CV + модель) - LLM не вызывается.\nБез LLM (нет провайдера, ошибка, таймаут) список строится по технологиям и тексту, причина\nв ``notice``. Внешний провайдер: обезличивание и подтверждение по FR-023.",
+        "operationId": "start_semantic_search_resume_semantic_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchStateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Провайдер не найден"
+          },
+          "422": {
+            "description": "Запрос слишком короткий или длинный"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Start Semantic Search",
         "tags": [
           "matching"
         ]

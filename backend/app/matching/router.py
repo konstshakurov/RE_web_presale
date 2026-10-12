@@ -18,7 +18,14 @@ from ..auth.deps import SessionContext, authenticated, authenticated_csrf
 from ..cv.repo import CvRepo
 from ..llm_gateway import AnonymizationError, GatewayError
 from .profile import guess_years, parse_sections
-from .service import MatchingError, MatchingService, MatchState
+from .semantic import MAX_QUERY_CHARS, MIN_QUERY_CHARS
+from .service import (
+    MatchingError,
+    MatchingService,
+    MatchState,
+    SearchFilters,
+    SearchState,
+)
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +42,8 @@ _GATEWAY_STATUS = {
     "provider_not_found": 404, "no_default_provider": 409, "empty_prompt": 422,
     "prompt_too_long": 413,
 }
-_MATCHING_STATUS = {"need_not_found": 404, "employee_not_found": 404}
+_MATCHING_STATUS = {
+    "need_not_found": 404, "employee_not_found": 404, "bad_query": 422}
 
 
 # --- модели ---
@@ -88,6 +96,62 @@ class MatchStateOut(BaseModel):
     batches_done: int
     batches_failed: int
     errors: list[str] = Field(description="Причины отказов пакетов, без текстов CV")
+
+
+class SearchRequest(BaseModel):
+    query: str = Field(min_length=MIN_QUERY_CHARS, max_length=MAX_QUERY_CHARS,
+                       description="Запрос на естественном языке")
+    provider_id: int | None = Field(None, description="Провайдер LLM; пусто - по умолчанию")
+    force: bool = Field(False, description="Пересчитать, даже если оценки в кэше")
+    status: str | None = Field(
+        None, max_length=128, description="Фильтр «Статус сотрудника»; без него - допустимые "
+                                          "к назначению статусы (6.2)")
+    technology: list[str] = Field(default_factory=list, description="Фильтр «Технология»")
+    match: str = Field("all", pattern="^(all|any)$")
+    q: str | None = Field(None, max_length=200, description="Фильтр «Поиск» (текстовый)")
+    limit: int = Field(10, ge=1, le=100)
+
+
+class SearchItemOut(BaseModel):
+    employee_key: str
+    full_name: str
+    status: str
+    source: str = Field(description="llm - оценка LLM; fallback - по технологиям и тексту")
+    percent: int | None = Field(None, ge=0, le=100, description="Только у source=llm")
+    rationale: str = Field(description="Обоснование LLM либо перечень совпадений без LLM")
+    score: int = Field(description="Детерминированная оценка: технологии * 3 + слова запроса")
+    matched_skills: list[str]
+    matched_terms: list[str]
+    note: str | None
+    note_author: str | None
+    note_updated_at: datetime | None
+    cv_file_id: int = Field(description="Основное CV: кнопка «Резюме» (FR-037)")
+    calculated_at: datetime | None
+    stale: bool = Field(description="Заметка или модель изменились после расчёта")
+    skills: list[str]
+
+
+class SearchStateOut(BaseModel):
+    query: str
+    status: str = Field(
+        description="none | running | awaiting_confirmation | done | partial | failed | "
+                    "unavailable (LLM недоступна)")
+    mode: str = Field(description="llm - есть оценки LLM; fallback - только технологии и текст")
+    notice: str | None = Field(description="Понятное сообщение о деградации без LLM")
+    requested_by: str | None
+    model: str | None
+    started_at: datetime | None
+    calculated_at: datetime | None
+    stale: bool
+    candidates_total: int = Field(description="В области поиска с учётом фильтров")
+    evaluated: int = Field(description="С оценкой LLM")
+    total: int = Field(description="Размер выдачи; items - срез limit/offset")
+    items: list[SearchItemOut]
+    tasks: list[TaskOut]
+    batches_total: int
+    batches_done: int
+    batches_failed: int
+    errors: list[str]
 
 
 class SkillsOut(BaseModel):
@@ -191,6 +255,33 @@ def _state_out(s: MatchState) -> MatchStateOut:
     )
 
 
+def _search_out(s: SearchState) -> SearchStateOut:
+    return SearchStateOut(
+        query=s.query, status=s.status, mode=s.mode, notice=s.notice,
+        requested_by=s.requested_by, model=s.model, started_at=s.started_at,
+        calculated_at=s.calculated_at, stale=s.stale, candidates_total=s.candidates_total,
+        evaluated=s.evaluated, total=s.total,
+        items=[SearchItemOut(
+            employee_key=i.employee_key, full_name=i.full_name, status=i.status, source=i.source,
+            percent=i.percent, rationale=i.rationale, score=i.score,
+            matched_skills=list(i.matched_skills), matched_terms=list(i.matched_terms),
+            note=i.note, note_author=i.note_author, note_updated_at=i.note_updated_at,
+            cv_file_id=i.cv_file_id, calculated_at=i.calculated_at, stale=i.stale,
+            skills=list(i.skills)) for i in s.items],
+        tasks=[TaskOut(task_id=t.task_id, status=t.status,
+                       requires_confirmation=t.requires_confirmation,
+                       batch_status=t.batch_status, candidates=t.candidates) for t in s.tasks],
+        batches_total=s.batches_total, batches_done=s.batches_done,
+        batches_failed=s.batches_failed, errors=s.errors)
+
+
+def _filters(status: str | None, technology: list[str] | None, match: str,
+             text: str | None) -> SearchFilters:
+    tags = tuple(sorted({t.strip().lower() for t in (technology or []) if t.strip()}))
+    return SearchFilters(status=(status or "").strip() or None, tags=tags,
+                         match_all=match == "all", text=(text or "").strip() or None)
+
+
 def _raise(exc: Exception) -> None:
     if isinstance(exc, MatchingError):
         raise HTTPException(
@@ -241,6 +332,52 @@ def get_match(
     """Состояние и сохранённый результат (повторный просмотр без вызова LLM)."""
     try:
         return _state_out(_service(request).get_state(need_key, limit=limit, offset=offset))
+    except MatchingError as exc:
+        _raise(exc)
+
+
+# --- «Поиск по смыслу (LLM)» (FR-032) ---
+
+@router.post(
+    "/resume/semantic-search", response_model=SearchStateOut, status_code=202,
+    responses={404: {"description": "Провайдер не найден"},
+               422: {"description": "Запрос слишком короткий или длинный"}},
+)
+def start_semantic_search(
+    request: Request, body: SearchRequest, ctx: SessionContext = Depends(authenticated_csrf),
+) -> SearchStateOut:
+    """Детерминированный отбор по статусам, основному CV, технологиям и тексту, затем итоговое
+    ранжирование LLM пакетами. Результат в кэше (запрос + CV + модель) - LLM не вызывается.
+    Без LLM (нет провайдера, ошибка, таймаут) список строится по технологиям и тексту, причина
+    в ``notice``. Внешний провайдер: обезличивание и подтверждение по FR-023."""
+    try:
+        state = _service(request).start_search(
+            ctx.login, body.query, provider_id=body.provider_id, force=body.force,
+            filters=_filters(body.status, body.technology, body.match, body.q), limit=body.limit)
+    except (MatchingError, GatewayError) as exc:
+        _raise(exc)
+    log.info("matching: %s запустил поиск по смыслу", ctx.login)  # текст запроса в лог не пишем
+    return _search_out(state)
+
+
+@router.get("/resume/semantic-search", response_model=SearchStateOut,
+            responses={422: {"description": "Запрос слишком короткий или длинный"}})
+def get_semantic_search(
+    request: Request,
+    query: str = Query(..., max_length=MAX_QUERY_CHARS + 200, description="Запрос поиска"),
+    status: str | None = Query(None, max_length=128),
+    technology: Annotated[list[str] | None, Query()] = None,
+    match: str = Query("all", pattern="^(all|any)$"),
+    q: str | None = Query(None, max_length=200),
+    limit: int = Query(10, ge=1, le=100), offset: int = Query(0, ge=0),
+    ctx: SessionContext = Depends(authenticated),
+) -> SearchStateOut:
+    """Состояние прогона и сохранённый результат текущего пользователя по запросу; без прогона
+    - ранжирование по технологиям и тексту без обращения к LLM."""
+    try:
+        return _search_out(_service(request).get_search(
+            ctx.login, query, filters=_filters(status, technology, match, q),
+            limit=limit, offset=offset))
     except MatchingError as exc:
         _raise(exc)
 

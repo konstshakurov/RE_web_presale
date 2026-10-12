@@ -17,6 +17,9 @@ from app.matching.repo import (
     RecRow,
     ResumeRow,
     RunRow,
+    SearchBatchRow,
+    SearchResRow,
+    SearchRunRow,
     SkillState,
 )
 from app.matching.service import MatchingService
@@ -55,6 +58,9 @@ class FakeMatchRepo:
         self.recs: dict[tuple[str, int, str], dict] = {}
         self.runs: dict[str, RunRow] = {}
         self.batches: list[dict] = []
+        self.sruns: dict[tuple[str, str], SearchRunRow] = {}
+        self.sbatches: list[dict] = []
+        self.sresults: dict[tuple[str, int, str], dict] = {}
         self._fid = 0
         self._bid = 0
         self.tick = 0
@@ -253,6 +259,71 @@ class FakeMatchRepo:
         return True
 
 
+    # --- поиск по смыслу ---
+    @contextmanager
+    def search_tx(self, login, query_hash):
+        repo = self
+
+        class Tx:
+            def batches(self_):
+                return repo.list_search_batches(login, query_hash)
+
+            def replace(self_, run, batches):
+                repo.sruns[(login, query_hash)] = SearchRunRow(
+                    login, query_hash, run.query_text, run.provider_id, run.model,
+                    datetime(2026, 10, 12, 9, tzinfo=UTC))
+                repo.sbatches = [b for b in repo.sbatches
+                                 if (b["login"], b["hash"]) != (login, query_hash)]
+                for b in batches:
+                    repo._bid += 1
+                    repo.sbatches.append(dict(
+                        id=repo._bid, login=login, hash=query_hash, task_id=b.task_id,
+                        keys=b.employee_keys, fids=b.file_ids, status="pending", code=None,
+                        msg=None))
+        yield Tx()
+
+    def get_search_run(self, login, query_hash):
+        return self.sruns.get((login, query_hash))
+
+    def _sb(self, b) -> SearchBatchRow:
+        return SearchBatchRow(b["id"], b["login"], b["hash"], b["task_id"], tuple(b["keys"]),
+                              tuple(b["fids"]), b["status"], b["code"], b["msg"])
+
+    def list_search_batches(self, login, query_hash):
+        return [self._sb(b) for b in self.sbatches
+                if (b["login"], b["hash"]) == (login, query_hash)]
+
+    def search_batch_by_task(self, task_id):
+        return next((self._sb(b) for b in self.sbatches if b["task_id"] == task_id), None)
+
+    def finish_search_batch(self, bid, status, code=None, message=None):
+        b = next(b for b in self.sbatches if b["id"] == bid)
+        if b["status"] != "pending":
+            return False
+        b.update(status=status, code=code, msg=message)
+        return True
+
+    def upsert_search_results(self, query_hash, recs, *, model):
+        for r in recs:
+            f = self.files.get(r.cv_file_id)
+            if f is None or f["emp"] != r.employee_key:
+                continue
+            self.tick += 1
+            self.sresults[(query_hash, r.cv_file_id, model)] = dict(
+                emp=r.employee_key, pct=r.match_percent, why=r.rationale, snap=r.note_snapshot_at,
+                order=self.tick)
+        return len(recs)
+
+    def list_search_results(self, query_hash):
+        rows = [(k, v) for k, v in self.sresults.items() if k[0] == query_hash]
+        rows.sort(key=lambda kv: -kv[1]["order"])
+        return [SearchResRow(v["emp"], k[1], k[2], v["pct"], v["why"], v["snap"],
+                             datetime(2026, 10, 12, tzinfo=UTC)) for k, v in rows]
+
+    def purge_search(self, retention_days):
+        self.purged = retention_days
+
+
 def reply_for(prompt: str, percent=lambda n: 90 - n) -> str:
     """Ответ «модели» на запрос сопоставления: оценка каждому K<n> из запроса."""
     labels = [ln[4:].strip() for ln in prompt.splitlines() if ln.startswith("### ")]
@@ -280,7 +351,7 @@ class World:
         self.skills_reply = skills_reply
 
     def _reply(self, prompt: str) -> str:
-        if prompt.startswith("ПОТРЕБНОСТЬ"):
+        if prompt.startswith(("ПОТРЕБНОСТЬ", "ЗАПРОС РУКОВОДИТЕЛЯ")):
             return self.match_reply(prompt)
         return self.skills_reply(prompt)
 

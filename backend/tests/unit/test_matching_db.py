@@ -1,7 +1,7 @@
 """matching на настоящих БД (KON-38): отбор кандидатов по статусу, навыки привязаны к файлу,
 кэш рекомендаций, прогоны и пакеты, фильтры «Резюме», сквозной сценарий с кэшем.
 
-Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V007) и TEST_APP_DB_URL (app_rw, app_db
+Нужны TEST_CV_DB_URL (cv_rw, миграции cv_db V001-V008) и TEST_APP_DB_URL (app_rw, app_db
 V001-V008); без них пропуск. Данные тестов: сотрудники KONT38-*, потребность KONT38-1; после
 теста удаляются. LLM не вызывается: шлюз с клиентом-подменой.
 """
@@ -14,7 +14,14 @@ import pytest
 
 from app.app_repo import create_pool
 from app.cv.repo import CvRepo
-from app.matching.repo import MatchRepo, NeedSource, NewBatch, NewRec, RunRow
+from app.matching.repo import (
+    MatchRepo,
+    NeedSource,
+    NewBatch,
+    NewRec,
+    RunRow,
+    SearchRunRow,
+)
 from app.matching.service import MatchingService
 
 from ._llm_fakes import Env, FakeClient
@@ -44,6 +51,7 @@ EMPLOYEES = [
 def _purge(cv_pool, app_pool):
     with cv_pool.connection() as c:
         c.execute("DELETE FROM cv.match_run WHERE need_key LIKE 'KONT38-%'")
+        c.execute("DELETE FROM cv.search_run WHERE requested_by LIKE 'kont38-%'")
         c.execute("DELETE FROM cv.recommendation WHERE need_key LIKE 'KONT38-%'")
         c.execute("DELETE FROM cv.employee_file WHERE employee_key LIKE 'KONT38-%' "
                   "AND (is_archived OR kind <> 'main_cv')")
@@ -236,3 +244,80 @@ def test_end_to_end_with_real_repos_cache_and_status_filter(env):
     st3 = svc.get_state(NEED, limit=10, offset=0)
     assert "KONT38-11" not in [i.employee_key for i in st3.items]
     assert len(client.calls) == n_calls
+
+
+def test_search_run_batches_results_cache_and_purge(env):
+    cv_pool, _, repo, cv, files = env
+    h = "a" * 64
+    t1, t2 = "55555555-5555-4555-8555-555555555555", "66666666-6666-4666-8666-666666666666"
+    f10, f11 = files["KONT38-10"], files["KONT38-11"]
+    run = SearchRunRow(LOGIN, h, "аналитик с SQL", 1, "m", T1)
+    with repo.search_tx(LOGIN, h) as tx:
+        assert tx.batches() == []
+        tx.replace(run, [NewBatch(t1, ("KONT38-10", "KONT38-11"), (f10, f11))])
+    assert repo.get_search_run(LOGIN, h).query_text == "аналитик с SQL"
+    assert repo.get_search_run("kont38-other", h) is None
+    b = repo.search_batch_by_task(t1)
+    assert b.employee_keys == ("KONT38-10", "KONT38-11") and b.status == "pending"
+    assert repo.finish_search_batch(b.id, "done") is True
+    assert repo.finish_search_batch(b.id, "failed", "x", "y") is False
+    with repo.search_tx(LOGIN, h) as tx:  # новый прогон заменяет прежний вместе с пакетами
+        tx.replace(run, [NewBatch(t2, ("KONT38-10",), (f10,))])
+    assert [x.task_id for x in repo.list_search_batches(LOGIN, h)] == [t2]
+    assert repo.search_batch_by_task(t1) is None
+
+    recs = [NewRec("KONT38-10", f10, 80, "хорошо", None), NewRec("KONT38-11", f11, 30, "мало", T1),
+            NewRec("KONT38-10", f11, 99, "чужой файл", None)]
+    assert repo.upsert_search_results(h, recs, model="m1") == 2
+    assert repo.upsert_search_results(
+        h, [NewRec("KONT38-10", f10, 55, "пересчёт", None)], model="m1") == 1
+    got = {r.employee_key: r for r in repo.list_search_results(h)}
+    assert len(got) == 2 and got["KONT38-10"].match_percent == 55
+    assert got["KONT38-11"].note_snapshot_at == T1
+    repo.upsert_search_results(h, [NewRec("KONT38-10", f10, 70, "m2", None)], model="m2")
+    assert len(repo.list_search_results(h)) == 3            # другая модель - отдельная запись
+    assert repo.list_search_results("b" * 64) == []         # другой запрос - другой кэш
+
+    # замена файла: оценки по прежнему CV уходят вместе с ним (FK ON DELETE CASCADE)
+    cv.add_file(employee_key="KONT38-11", kind="main_cv", file_name="n.docx", mime_type="x",
+                content=b"y", uploaded_by="u", extracted_text="t", extraction_status="ok")
+    # срок хранения: старый прогон и оценки удаляются, свежие остаются
+    with cv_pool.connection() as c:
+        c.execute("UPDATE cv.search_run SET created_at = now() - interval '40 days' "
+                  "WHERE query_hash = %s", (h,))
+        c.execute("UPDATE cv.search_result SET created_at = now() - interval '40 days' "
+                  "WHERE query_hash = %s AND model = 'm2'", (h,))
+    repo.purge_search(30)
+    assert repo.get_search_run(LOGIN, h) is None and repo.list_search_batches(LOGIN, h) == []
+    assert {r.model for r in repo.list_search_results(h)} == {"m1"}
+
+
+def test_semantic_search_end_to_end_on_real_repos(env):
+    _, app_pool, repo, _, files = env
+    client = FakeClient(lambda p: reply_for(p) if p.startswith("ЗАПРОС") else skills_reply(p))
+    e = Env(client=client)
+    svc = MatchingService(repo, NeedSource(app_pool), e.gateway)
+    query = "аналитик резюме"
+
+    st = svc.start_search(LOGIN, query, limit=50)
+    assert st.status == "running" and st.mode == "fallback"
+    while (t := e.gateway.run_next()) is not None:
+        svc.collect_task(t.id)
+    st = svc.get_search(LOGIN, query, limit=50, offset=0)
+    got = [i for i in st.items if i.employee_key.startswith("KONT38-")]
+    assert st.status == "done" and st.mode == "llm"
+    assert sorted(i.employee_key for i in got) == ["KONT38-10", "KONT38-11"]
+    assert all(i.source == "llm" and 0 <= i.percent <= 100 for i in got)
+    n = len(client.calls)
+
+    again = svc.start_search(LOGIN, "  АНАЛИТИК   резюме ", limit=50)  # кэш по запросу+CV+модели
+    assert again.status == "done" and e.gateway.run_next() is None and len(client.calls) == n
+    other = svc.get_search("kont38-other", query, limit=50, offset=0)    # чужой прогон не виден
+    assert other.status == "none" and other.mode == "llm"
+
+    with env[0].connection() as c:
+        c.execute("UPDATE cv.employee SET note = 'не подключать', note_author = 'ro', "
+                  "note_updated_at = now() WHERE jira_key = 'KONT38-11'")
+    st = svc.get_search(LOGIN, query, limit=50, offset=0)
+    assert st.stale is True                                              # заметка изменилась
+    assert len(client.calls) == n

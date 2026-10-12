@@ -9,6 +9,7 @@ interface AuthState {
   loading: boolean;
   login: (login: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  relogin: (password: string) => Promise<void>; // повторный ввод пароля Jira (FR-029)
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -47,7 +48,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [apply]);
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout]);
+  const relogin = useCallback(
+    async (password: string) => {
+      apply(await api.jiraRelogin(password));
+    },
+    [apply],
+  );
+
+  const value = useMemo(
+    () => ({ user, loading, login, logout, relogin }),
+    [user, loading, login, logout, relogin],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

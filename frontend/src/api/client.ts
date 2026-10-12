@@ -1,11 +1,14 @@
 import type {
+  AdminUser,
   EpicOut,
+  GroupOut,
   LoginRequest,
   MeResponse,
   NeedGroups,
   NeedsPage,
   NeedsQuery,
   RefreshResult,
+  StatusGroupsData,
   SyncErrorBody,
   SyncScope,
 } from "./types";
@@ -91,6 +94,22 @@ export const api = {
   login: (data: LoginRequest) =>
     request<MeResponse>("POST", "/auth/login", data, { redirectOn401: false }),
   logout: () => request<void>("POST", "/auth/logout"),
+  // Пароль живёт только в аргументе и теле запроса; отказ Jira приходит как jira_status, не как ошибка
+  jiraRelogin: (password: string) => request<MeResponse>("POST", "/auth/jira-relogin", { password }),
+  adminUsers: () => request<AdminUser[]>("GET", "/admin/users"),
+  addUser: (login: string) => request<AdminUser>("POST", "/admin/users", { login }),
+  patchUser: (login: string, body: { active?: boolean; role?: "user" | "admin" }) =>
+    request<AdminUser>("PATCH", `/admin/users/${encodeURIComponent(login)}`, body),
+  statusGroups: () => request<StatusGroupsData>("GET", "/admin/status-groups"),
+  createGroup: (name: string) => request<GroupOut>("POST", "/admin/status-groups", { name }),
+  renameGroup: (id: number, name: string) =>
+    request<GroupOut>("PATCH", `/admin/status-groups/${id}`, { name }),
+  deleteGroup: (id: number) => request<void>("DELETE", `/admin/status-groups/${id}`),
+  addGroupStatus: (id: number, status: string) =>
+    request<GroupOut>("POST", `/admin/status-groups/${id}/statuses`, { status }),
+  removeGroupStatus: (id: number, status: string) =>
+    request<GroupOut>("DELETE", `/admin/status-groups/${id}/statuses?status=${encodeURIComponent(status)}`),
+  orderGroups: (ids: number[]) => request<GroupOut[]>("PUT", "/admin/status-groups/order", { ids }),
   needs: (q: NeedsQuery) => {
     const p = new URLSearchParams();
     p.set("group", q.group);

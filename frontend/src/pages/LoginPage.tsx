@@ -1,19 +1,28 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 import Header from "../components/Header";
 
+// Возврат на маршрут, с которого увела потеря сессии; только внутренние пути.
+function returnPath(state: unknown): string {
+  const from = (state as { from?: unknown } | null)?.from;
+  return typeof from === "string" && from.startsWith("/") && !from.startsWith("//") && !from.startsWith("/login")
+    ? from
+    : "/needs";
+}
+
 export default function LoginPage() {
   const { user, loading, login } = useAuth();
+  const location = useLocation();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   // Пароль не в state: читается из поля в момент отправки и сразу очищается.
   const loginRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  if (!loading && user) return <Navigate to="/needs" replace />;
+  if (!loading && user) return <Navigate to={returnPath(location.state)} replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

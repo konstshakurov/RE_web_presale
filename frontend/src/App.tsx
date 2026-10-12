@@ -5,6 +5,7 @@ import { AdminRoute, ProtectedRoute } from "./components/Guards";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import NeedsPage from "./pages/NeedsPage";
+import SettingsPage from "./pages/SettingsPage";
 import Stub from "./pages/Stub";
 
 // Содержимое разделов — задачи Dev-8, 9, 10 (Потребности, Сотрудники, Резюме) и Dev-21 (Настройки).
@@ -19,7 +20,7 @@ export default function App() {
             <Route path="/employees" element={<Stub title="Сотрудники" />} />
             <Route path="/resumes" element={<Stub title="Резюме" />} />
             <Route element={<AdminRoute />}>
-              <Route path="/settings" element={<Stub title="Настройки" />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/needs" replace />} />
           </Route>

@@ -121,3 +121,35 @@ export interface EpicOut {
   needs_total: number;
   error?: SyncErrorBody | null;
 }
+
+// Типы /admin/users по backend/openapi.json (UserOut).
+export interface AdminUser {
+  login: string;
+  role: "user" | "admin";
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Типы /admin/status-groups по backend/openapi.json (KON-64).
+export interface GroupOut {
+  id: number;
+  name: string;
+  sort_order: number;
+  statuses: string[];
+  need_count: number;
+}
+
+export interface StatusInfo {
+  status: string;
+  count: number;
+  group_ids: number[]; // пусто - статус попадает в «Прочие»
+}
+
+export interface StatusGroupsData {
+  groups: GroupOut[];
+  statuses: StatusInfo[];
+  other: StatusInfo[];
+  other_count: number;
+  reserved: string[];
+}

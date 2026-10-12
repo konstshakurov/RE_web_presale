@@ -59,3 +59,31 @@ a { color: var(--accent); }
 .empty { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
 .pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .pager label { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* Настройки: вкладки, модальные окна, баннер Jira, группы статусов */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.tabs__item { background: transparent; color: var(--muted); border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; cursor: pointer; }
+.tabs__item--active { color: var(--text); border-bottom-color: var(--accent); }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 24px; min-width: 340px; max-width: 520px; }
+.modal h2 { margin-top: 0; }
+.modal__form { display: flex; flex-direction: column; gap: 12px; }
+.modal label, .groups label { display: flex; flex-direction: column; gap: 4px; }
+.modal input, .modal select, .groups input, .groups select, .jira-banner input { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; }
+.modal__actions { display: flex; gap: 8px; margin-top: 12px; }
+.modal button, .groups button, .jira-banner button, .toolbar button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.modal button.primary, .groups button.primary, .toolbar button.primary { background: #0b8a5c; border-color: #0b8a5c; color: #fff; }
+.modal button:disabled, .groups button:disabled { opacity: 0.5; cursor: default; }
+.jira-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 12px 24px; background: var(--panel-2); border-bottom: 2px solid var(--warn); }
+.jira-banner__text { margin: 0; flex: 1; min-width: 260px; }
+.jira-banner__form { display: flex; align-items: flex-end; gap: 8px; }
+.jira-banner__form label { display: flex; flex-direction: column; gap: 4px; }
+.group-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; }
+.group-card__head { display: flex; align-items: center; gap: 8px; }
+.group-card__head h3 { margin: 0; }
+.group-card__spacer { flex: 1; }
+.group-card__add { display: flex; gap: 8px; margin-top: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 12px 0; padding: 0; }
+.chip { background: var(--panel-2); border: 1px solid var(--border); border-radius: 14px; padding: 2px 4px 2px 12px; display: inline-flex; align-items: center; gap: 4px; }
+.chip button { background: transparent; border: 0; color: var(--muted); padding: 0 8px; }
+.groups .toolbar { align-items: flex-end; }

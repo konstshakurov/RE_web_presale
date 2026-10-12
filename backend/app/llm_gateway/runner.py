@@ -10,6 +10,7 @@ import threading
 import time
 from collections.abc import Callable
 
+from .repo import TaskRow
 from .service import LlmGateway
 
 log = logging.getLogger(__name__)
@@ -21,11 +22,15 @@ class LlmRunner:
     def __init__(
         self, gateway: LlmGateway, *, idle_sec: float = 2.0, ttl_days: int = 7,
         clock: Callable[[], float] = time.monotonic,
+        on_finished: Callable[[TaskRow], None] | None = None,
     ) -> None:
         self._gw = gateway
         self._idle = idle_sec
         self._ttl_days = ttl_days
         self._clock = clock
+        # вызывается после каждой выполненной задачи (результат модуля-заказчика, KON-38);
+        # сбой обработчика не должен ронять цикл
+        self._on_finished = on_finished
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._next_purge = 0.0
@@ -38,7 +43,16 @@ class LlmRunner:
                 removed = self._gw.purge_old(self._ttl_days)
                 if removed:
                     log.info("удалены завершённые задачи LLM", extra={"count": removed})
-            return self._gw.run_next() is not None
+            task = self._gw.run_next()
+            if task is None:
+                return False
+            if self._on_finished is not None:
+                try:
+                    self._on_finished(task)
+                except Exception as exc:  # noqa: BLE001 - обработчик подберёт задачу при опросе
+                    log.error("сбой обработчика задачи LLM", extra={
+                        "task_id": task.id, "error": type(exc).__name__})
+            return True
         except Exception as exc:  # noqa: BLE001 - БД моргнула: цикл не должен умирать
             log.error("сбой цикла LLM", extra={"error": type(exc).__name__})
             return False

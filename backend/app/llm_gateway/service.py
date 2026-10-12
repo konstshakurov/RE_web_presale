@@ -190,6 +190,24 @@ class LlmGateway:
         row = self._own(owner_login, task_id)
         return self._view(row, self._repo.get_provider(row.provider_id))
 
+    def resolve_provider(self, provider_id: int | None = None) -> ProviderRow:
+        """Провайдер, который будет использован для задачи (по умолчанию - основной). Модулям
+        приложения нужно имя модели заранее: для ключа кэша результата (FR-005)."""
+        return self._pick_provider(provider_id)
+
+    def peek(self, task_id: str) -> TaskView | None:
+        """Состояние и результат задачи БЕЗ проверки владельца: только для модулей приложения,
+        поставивших эту задачу (matching собирает результат за пользователя). Наружу не
+        отдаётся: пользовательский API идёт через ``get`` с проверкой владельца."""
+        try:
+            uuid.UUID(task_id)
+        except ValueError:
+            return None
+        row = self._repo.get_task(task_id)
+        if row is None:
+            return None
+        return self._view(row, self._repo.get_provider(row.provider_id))
+
     def list_tasks(self, owner_login: str, limit: int = 50) -> list[TaskView]:
         providers = {p.id: p for p in self._repo.list_providers()}
         return [self._view(r, providers.get(r.provider_id))

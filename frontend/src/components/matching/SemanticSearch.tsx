@@ -13,6 +13,7 @@ import type { CandidateRow } from "./CandidateList";
 import ProviderSelect from "./ProviderSelect";
 import RunPreviewDialog from "./RunPreviewDialog";
 import RunStatusBar from "./RunStatusBar";
+import MatchingInfo from "./MatchingInfo";
 
 export interface SearchFilters {
   status?: string | null;
@@ -134,6 +135,9 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
   return (
     <div className="semantic">
       <form className="semantic__form" onSubmit={onSubmit}>
+        <div className="semantic__info">
+          Как подбираются кандидаты <MatchingInfo />
+        </div>
         <label>
           Поиск по смыслу (LLM)
           <textarea

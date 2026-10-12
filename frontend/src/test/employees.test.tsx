@@ -284,6 +284,9 @@ describe("Резюме", () => {
     expect(within(row).getByText("test.user, 05.10.2026, 14:00")).toBeInTheDocument();
     expect(screen.getByLabelText("Поиск по смыслу (LLM)")).toBeEnabled();
     expect(screen.getByLabelText("Технология (можно несколько)")).toBeEnabled();
+    // значок «i» с описанием логики подбора рядом с поиском по смыслу
+    await userEvent.click(screen.getByRole("button", { name: "Как подбираются кандидаты" }));
+    expect(screen.getByRole("dialog", { name: "Как подбираются кандидаты" })).toBeInTheDocument();
   });
 
   it("«Удалить» только у файлов с can_delete: актуальное основное CV не удаляется", async () => {

@@ -149,6 +149,10 @@ a { color: var(--accent); }
 .pct--low { background: #b83232; }
 .pct--none { background: var(--panel-2); color: var(--muted); border: 1px solid var(--border); }
 .rationale { white-space: pre-wrap; }
+.gaps { margin: 8px 0 0; }
+.gaps__title { font-weight: 600; }
+.gaps ul { margin: 4px 0 0; padding-left: 20px; }
+.gaps--full { color: #0b8a5c; font-weight: 600; }
 .note-icon { color: var(--warn); }
 .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }

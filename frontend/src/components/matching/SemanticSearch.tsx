@@ -34,6 +34,7 @@ export function toSearchRow(i: SearchItem): CandidateRow {
     preliminary: p.preliminary,
     sourceLabel: i.source === "fallback" ? SOURCE_LABELS.fallback : undefined,
     rationale: i.rationale,
+    gaps: i.source === "llm" ? (i.gaps ?? null) : undefined,
     note: i.note,
     noteAuthor: i.note_author,
     noteUpdatedAt: i.note_updated_at,

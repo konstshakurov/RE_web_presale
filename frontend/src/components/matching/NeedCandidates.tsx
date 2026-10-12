@@ -18,6 +18,10 @@ interface Props {
   autoStart: boolean; // открыт кнопкой «Сопоставить»: сразу ставим расчёт (кэш вернётся без LLM)
 }
 
+// Скрининг идёт, только когда допустимых кандидатов больше размера глубокой оценки
+const SCREEN_HINT =
+  "Предварительная оценка по навыкам — быстрый отбор при большом числе кандидатов; при малом числе кандидатов не выполняется";
+
 export function toRow(i: MatchItem): CandidateRow {
   return {
     key: i.employee_key,
@@ -25,6 +29,7 @@ export function toRow(i: MatchItem): CandidateRow {
     status: i.status,
     percent: i.percent,
     rationale: i.rationale,
+    gaps: i.gaps ?? null,
     note: i.note,
     noteAuthor: i.note_author,
     noteUpdatedAt: i.note_updated_at,
@@ -157,10 +162,13 @@ export default function NeedCandidates({ needKey, autoStart }: Props) {
       )}
       {data && data.status === "none" && !running && !error && <p className="muted">Сопоставление ещё не выполнялось.</p>}
       {data && data.calculated_at && (
-        <p className="muted">
+        <p className="muted" title={SCREEN_HINT}>
           Рассчитано: {formatDateTime(data.calculated_at)}
           {data.model ? `, модель ${data.model}` : ""}. Оценено кандидатов: {data.evaluated} из {data.candidates_total}
-          {data.screen_total ? `; предварительная оценка по навыкам: ${data.screened ?? 0} из ${data.screen_total}` : ""}.
+          {data.screen_total && (data.screened ?? 0) > 0
+            ? `; предварительная оценка по навыкам: ${data.screened} из ${data.screen_total}`
+            : ""}
+          .
         </p>
       )}
 

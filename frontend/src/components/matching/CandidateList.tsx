@@ -12,6 +12,8 @@ export interface CandidateRow {
   preliminary?: boolean; // предварительная оценка скрининга
   sourceLabel?: string;
   rationale: string;
+  // Чего не хватает до 100%: undefined - блок не показываем (нет оценки LLM), null - не рассчитано
+  gaps?: string[] | null;
   note?: string | null;
   noteAuthor?: string | null;
   noteUpdatedAt?: string | null;
@@ -28,6 +30,27 @@ interface Props {
 
 // Назначение кандидата (FR-008) - этап 2 (KON-44): кнопка пока заглушка.
 const ASSIGN_STUB = "Назначение появится на этапе 2";
+
+export const GAPS_TITLE = "Чего не хватает до 100%";
+export const GAPS_FULL = "Полное совпадение";
+export const GAPS_RECALC_HINT = "Нажмите «Пересчитать», чтобы увидеть, чего не хватает";
+
+// Блок «Чего не хватает до 100%» под обоснованием (CR KON-38/KON-41).
+export function GapsBlock({ gaps }: { gaps?: string[] | null }) {
+  if (gaps === undefined) return null;
+  if (gaps === null) return <p className="muted gaps gaps--unknown">{GAPS_RECALC_HINT}</p>;
+  if (gaps.length === 0) return <p className="gaps gaps--full">{GAPS_FULL}</p>;
+  return (
+    <div className="gaps">
+      <div className="gaps__title">{GAPS_TITLE}</div>
+      <ul>
+        {gaps.map((g, i) => (
+          <li key={i}>{g}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function CandidateList({ rows, onResume, assign = true, assignHint = ASSIGN_STUB }: Props) {
   const [open, setOpen] = useState<string | null>(null);
@@ -100,6 +123,7 @@ export default function CandidateList({ rows, onResume, assign = true, assignHin
                 <tr className="needs__details">
                   <td colSpan={4}>
                     <div className="rationale">{r.rationale || "Обоснование не указано"}</div>
+                    <GapsBlock gaps={r.gaps} />
                   </td>
                 </tr>
               )}

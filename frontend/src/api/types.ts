@@ -243,6 +243,7 @@ export interface MatchItem {
   status: string;
   percent: number;
   rationale: string;
+  gaps?: string[] | null; // чего не хватает до 100%; [] - полное совпадение; null - не рассчитано
   note?: string | null;
   note_author?: string | null;
   note_updated_at?: string | null;
@@ -302,6 +303,7 @@ export interface SearchItem {
   percent?: number | null;
   screen_percent?: number | null;
   rationale: string;
+  gaps?: string[] | null; // только у source=llm; null - не рассчитано
   score: number;
   matched_skills: string[];
   matched_terms: string[];

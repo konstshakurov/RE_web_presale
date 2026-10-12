@@ -221,6 +221,56 @@ describe("Потребности: сопоставление", () => {
     expect(called("POST", "/match")).toHaveLength(0); // просмотр сохранённого не запускает расчёт
   });
 
+  it("блок «Чего не хватает до 100%»: список, полное совпадение, подсказка при gaps=null", async () => {
+    serve((url) => {
+      if (url.includes("/needs/AN-1/match?"))
+        return json(
+          state({
+            total: 3,
+            items: [
+              item({ gaps: ["Нет опыта с Kafka", "Грейд ниже требуемого"] }),
+              item({ employee_key: "EMP-2", full_name: "Полный", percent: 100, gaps: [] }),
+              item({ employee_key: "EMP-3", full_name: "Старый", percent: 60, gaps: null }),
+            ],
+          }),
+        );
+    });
+    renderAt("/needs");
+    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await screen.findByText("Тестов Тест");
+    await userEvent.click(screen.getByRole("button", { name: "82%" }));
+    expect(screen.getByText("Чего не хватает до 100%")).toBeInTheDocument();
+    expect(screen.getByText("Нет опыта с Kafka")).toBeInTheDocument();
+    expect(screen.getByText("Грейд ниже требуемого")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "100%" }));
+    expect(screen.getByText("Полное совпадение")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "60%" }));
+    expect(screen.getByText("Нажмите «Пересчитать», чтобы увидеть, чего не хватает")).toBeInTheDocument();
+  });
+
+  it("строка статистики: часть про скрининг только при screened > 0, с подсказкой", async () => {
+    const stats = (over: Partial<MatchState>) =>
+      serve((url) => {
+        if (url.includes("/needs/AN-1/match?")) return json(state({ candidates_total: 4, evaluated: 4, ...over }));
+      });
+    stats({ screened: 0, screen_total: 4 });
+    renderAt("/needs");
+    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    const line = await screen.findByText(/Оценено кандидатов: 4 из 4/);
+    expect(line.textContent).not.toContain("предварительная оценка");
+    expect(line).toHaveAttribute("title", expect.stringContaining("быстрый отбор при большом числе кандидатов"));
+  });
+
+  it("строка статистики: при screened > 0 показывает предварительную оценку", async () => {
+    serve((url) => {
+      if (url.includes("/needs/AN-1/match?")) return json(state({ candidates_total: 40, evaluated: 30, screened: 40, screen_total: 40 }));
+    });
+    renderAt("/needs");
+    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    const line = await screen.findByText(/Оценено кандидатов: 30 из 40/);
+    expect(line.textContent).toContain("предварительная оценка по навыкам: 40 из 40");
+  });
+
   it("«Показать ещё» берёт следующие 10 по offset; «Оценить следующих» и «Пересчитать» (force)", async () => {
     serve((url, method) => {
       if (url.includes("/needs/AN-1/match?") && url.includes("offset=10"))
@@ -557,6 +607,11 @@ describe("Резюме: поиск по смыслу и технологии", (
     const second = screen.getByText("Второй").closest("tr")!;
     expect(within(second).getByText("40%")).toBeInTheDocument();
     expect(within(second).getByText("предварительно")).toBeInTheDocument();
+    // «Чего не хватает»: только у оценки LLM; у предварительной оценки блока нет
+    await userEvent.click(screen.getByRole("button", { name: "90%" }));
+    expect(screen.getByText("Нажмите «Пересчитать», чтобы увидеть, чего не хватает")).toBeInTheDocument();
+    await userEvent.click(within(second).getByRole("button", { name: "40%" }));
+    expect(screen.queryByText(/чего не хватает/i)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: /Оценить следующих/ }));
     await waitFor(() => expect(called("POST", "/semantic-search/next")).toHaveLength(1));
   });

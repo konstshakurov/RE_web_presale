@@ -112,6 +112,18 @@ def test_candidates_exclude_unassignable_no_cv_and_no_text(env):
     assert repo.get_main_cv("KONT38-10")[0] == files["KONT38-10"]
 
 
+def test_candidates_selected_by_status_not_by_flag(env):
+    """Флаг assignable мог разойтись со статусом: решает статус (FR-002, NOT_ASSIGNABLE_STATUSES)."""
+    cv_pool, _, repo, _, _ = env
+    with cv_pool.connection() as c:
+        c.execute("UPDATE cv.employee SET assignable = false WHERE jira_key = 'KONT38-10'")
+        c.execute("UPDATE cv.employee SET assignable = true WHERE jira_key = 'KONT38-12'")
+        c.execute("UPDATE cv.employee SET status = 'Неизвестный статус', assignable = false "
+                  "WHERE jira_key = 'KONT38-11'")
+    keys = [c.employee_key for c in repo.list_candidates() if c.employee_key.startswith("KONT38-")]
+    assert keys == ["KONT38-10", "KONT38-11"]
+
+
 def test_need_source(env):
     _, app_pool, *_ = env
     n = NeedSource(app_pool).get_need(NEED)

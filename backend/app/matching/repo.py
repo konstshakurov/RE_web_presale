@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from app.sync.mapping import NOT_ASSIGNABLE_STATUSES
+
 if TYPE_CHECKING:
     from psycopg_pool import ConnectionPool
 
@@ -355,14 +357,15 @@ class MatchRepo:
     # --- кандидаты и карточки ---
 
     def list_candidates(self, *, only_assignable: bool = True) -> list[CandRow]:
-        """Сотрудники с актуальным основным CV и извлечённым текстом (FR-005). Недопустимые
-        для назначения статусы отсекаются здесь (FR-002, 6.2)."""
+        """Сотрудники с актуальным основным CV и извлечённым текстом (FR-005). Отбор идёт по
+        самому статусу: все, кроме NOT_ASSIGNABLE_STATUSES (FR-002); сохранённый флаг
+        cv.employee.assignable не используется - он мог разойтись со статусом."""
         with self._pool.connection() as conn:
             rows = conn.execute(
                 f"SELECT {_CAND} FROM cv.employee e {_MAIN_JOIN} "
-                "AND f.extraction_status = 'ok' WHERE (NOT %s OR e.assignable) "
-                "ORDER BY e.full_name, e.jira_key",
-                (only_assignable,),
+                "AND f.extraction_status = 'ok' "
+                "WHERE (NOT %s OR e.status <> ALL(%s::text[])) ORDER BY e.full_name, e.jira_key",
+                (only_assignable, sorted(NOT_ASSIGNABLE_STATUSES)),
             ).fetchall()
         return [CandRow(*r[:-1], tuple(r[-1])) for r in rows]
 

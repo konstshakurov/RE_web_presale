@@ -180,6 +180,17 @@ def test_not_assignable_never_evaluated_and_hidden_after_status_change():
     assert {i.employee_key for i in st.items} == {"EMP-2"}
 
 
+def test_selection_by_status_ignores_diverged_flag():
+    w = _world(1)
+    w.repo.add_employee("EMP-7", "Флаг разошёлся", status="Свободен", assignable=False)
+    w.repo.add_employee("EMP-8", "Занят, флаг true", status="Коммерческий проект", assignable=True)
+    w.repo.add_employee("EMP-9", "Новый статус", status="Какой-то новый", assignable=False)
+    w.svc.start_match(NEED, LOGIN)
+    w.run_all()
+    st = w.svc.get_state(NEED, limit=10, offset=0)
+    assert {i.employee_key for i in st.items} == {"EMP-1", "EMP-7", "EMP-9"}
+
+
 def test_limit_evaluated_and_screening_ranks_by_skills():
     """Больше N кандидатов: скрининг по навыкам, глубоко оцениваются только топ-N (KON-38)."""
     w = _world(0, max_evaluated=3)

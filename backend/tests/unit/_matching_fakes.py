@@ -25,6 +25,7 @@ from app.matching.repo import (
 )
 from app.matching.service import MatchingService
 from app.matching.settings import StaticSettings
+from app.sync.mapping import NOT_ASSIGNABLE_STATUSES
 
 from ._llm_fakes import Env, FakeClient
 
@@ -98,7 +99,7 @@ class FakeMatchRepo:
             cur = self._current(key)
             if cur is None or cur[1]["status"] != "ok":
                 continue
-            if only_assignable and not e["assignable"]:
+            if only_assignable and e["status"] in NOT_ASSIGNABLE_STATUSES:
                 continue
             fid, f = cur
             out.append(CandRow(key, e["name"], e["status"], e["assignable"], e["note"],

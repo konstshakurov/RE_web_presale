@@ -159,7 +159,7 @@ def test_cv_replacement_and_note_change_make_results_stale_or_recalculated():
 def test_filters_status_technology_and_text():
     w = _world()
     w.repo.employees["EMP-2"]["status"] = "Коммерческий проект"
-    w.repo.employees["EMP-2"]["assignable"] = False
+    w.repo.employees["EMP-2"]["assignable"] = True   # флаг разошёлся со статусом: решает статус
     st = _get(w)
     assert {i.employee_key for i in st.items} == {"EMP-1", "EMP-3"}   # допустимые статусы
     st = _get(w, filters=SearchFilters(status="Коммерческий проект"))

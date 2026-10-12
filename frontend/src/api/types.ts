@@ -232,3 +232,232 @@ export interface CvLimits {
   upload_kinds: Record<string, string>; // тип -> название
   extensions_by_kind: Record<string, string[]>; // допустимые расширения по типу файла
 }
+
+// Типы сопоставления, поиска по смыслу и шлюза LLM по backend/openapi.json (MatchStateOut, SearchStateOut, RunOut,
+// ProviderOut, ProfileOut и др.; KON-37, KON-38).
+export type RunStatus = "none" | "running" | "awaiting_confirmation" | "done" | "partial" | "failed" | "unavailable" | string;
+
+export interface MatchItem {
+  employee_key: string;
+  full_name: string;
+  status: string;
+  percent: number;
+  rationale: string;
+  note?: string | null;
+  note_author?: string | null;
+  note_updated_at?: string | null;
+  cv_file_id: number;
+  calculated_at: string;
+  stale: boolean;
+  skills: string[];
+}
+
+export interface MatchTask {
+  task_id: string;
+  status: string; // статус задачи шлюза: awaiting_confirmation | queued | running | done | failed | timeout | cancelled
+  requires_confirmation: boolean;
+  batch_status: string;
+  candidates: number;
+  run_id?: string;
+  stage?: string;
+}
+
+// Общая часть состояния сопоставления и поиска по смыслу.
+export interface RunState {
+  status: RunStatus;
+  requested_by: string | null;
+  model: string | null;
+  started_at: string | null;
+  calculated_at: string | null;
+  stale: boolean;
+  candidates_total: number;
+  evaluated: number;
+  total: number;
+  can_evaluate_next?: boolean;
+  deep_size?: number;
+  remaining?: number;
+  screened?: number;
+  screen_total?: number;
+  stage?: string | null;
+  run_id?: string | null;
+  tasks: MatchTask[];
+  batches_total: number;
+  batches_done: number;
+  batches_failed: number;
+  errors: string[];
+}
+
+export interface MatchState extends RunState {
+  need_key: string;
+  items: MatchItem[];
+}
+
+export type SearchSource = "llm" | "screening" | "fallback" | string;
+
+export interface SearchItem {
+  employee_key: string;
+  full_name: string;
+  status: string;
+  source: SearchSource;
+  percent?: number | null;
+  screen_percent?: number | null;
+  rationale: string;
+  score: number;
+  matched_skills: string[];
+  matched_terms: string[];
+  note?: string | null;
+  note_author?: string | null;
+  note_updated_at?: string | null;
+  cv_file_id: number;
+  calculated_at?: string | null;
+  stale: boolean;
+  skills: string[];
+}
+
+export interface SearchState extends RunState {
+  query: string;
+  mode: "llm" | "fallback" | string;
+  notice?: string | null;
+  items: SearchItem[];
+}
+
+export interface SearchParams {
+  query: string;
+  provider_id?: number | null;
+  force?: boolean;
+  status?: string | null;
+  technology?: string[];
+  match?: "all" | "any";
+  q?: string | null;
+  limit?: number;
+}
+
+export interface RunTask {
+  task_id: string;
+  status: string;
+  candidates: number;
+  requires_confirmation: boolean;
+  replacements: Record<string, number>;
+  ner_used: boolean;
+  prompt?: string | null;
+  system?: string | null;
+  error_message?: string | null;
+}
+
+export interface RunOut {
+  run_id: string;
+  kind: "match" | "search" | string;
+  need_key?: string | null;
+  stage: string;
+  status: RunStatus;
+  requires_confirmation: boolean;
+  is_external: boolean;
+  provider_name: string;
+  candidates: number;
+  tasks: RunTask[];
+  replacements: Record<string, number>;
+}
+
+export interface LlmTask {
+  id: string;
+  purpose: string;
+  ref?: string | null;
+  status: string;
+  provider_id: number;
+  provider_name: string;
+  is_external: boolean;
+  requires_confirmation: boolean;
+  timeout_sec: number;
+  attempts: number;
+  error_code?: string | null;
+  error_message?: string | null;
+}
+
+export interface ProviderPublic {
+  id: number;
+  name: string;
+  is_external: boolean;
+  is_default: boolean;
+}
+
+export interface ProviderOut extends ProviderPublic {
+  url: string;
+  timeout_sec: number;
+  model: string;
+  has_key: boolean; // значение ключа API не возвращается никогда
+  updated_at: string;
+}
+
+export interface ProviderCreate {
+  name: string;
+  url: string;
+  is_external: boolean;
+  is_default: boolean;
+  model: string;
+  timeout_sec: number;
+  api_key?: string | null;
+}
+
+export interface ProviderPatch {
+  name?: string;
+  url?: string;
+  is_external?: boolean;
+  is_default?: boolean;
+  model?: string;
+  timeout_sec?: number;
+  api_key?: string | null;
+  remove_key?: boolean;
+}
+
+export interface Dictionary {
+  companies: string[];
+  locations: string[];
+  persons: string[];
+  projects: string[];
+}
+
+export interface MatchSettings {
+  deep_size: number;
+  deep_size_min: number;
+  deep_size_max: number;
+  screen_batch: number;
+  screen_batch_min: number;
+  screen_batch_max: number;
+}
+
+export interface Technology {
+  tag: string;
+  employees: number;
+}
+
+export interface ResumeItem {
+  employee_key: string;
+  full_name: string;
+  status: string;
+  main_cv_file_id: number | null;
+  skills: string[];
+  skills_status: string | null; // pending | ok | failed; null - не извлекались
+}
+
+export interface FileLink {
+  id: number;
+  kind: string;
+  file_name: string;
+}
+
+export interface EmployeeProfileData {
+  employee_key: string;
+  full_name: string;
+  status: string;
+  assignable: boolean;
+  description?: string | null;
+  vacation_plan?: string | null;
+  experience_years?: number | null; // только если CV называет годы явно
+  main_cv?: FileLink | null;
+  files: FileLink[];
+  skills: string[];
+  skills_status?: string | null;
+  sections: Record<string, string>; // BR-007: profile, stack, industries, skills, languages, education, projects
+  note?: string | null;
+  synced_at: string;
+}

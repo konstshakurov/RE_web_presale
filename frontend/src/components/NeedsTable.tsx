@@ -3,6 +3,7 @@ import { Fragment, useState } from "react";
 import type { NeedOut, NeedSort, SortOrder } from "../api/types";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
+import NeedCandidates from "./matching/NeedCandidates";
 
 export interface NeedsSort {
   sort: NeedSort;
@@ -30,6 +31,8 @@ function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: st
 
 export default function NeedsTable({ items, sort, onSort }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+  // Блок «Кандидаты»: start - открыт кнопкой «Сопоставить» (сразу расчёт), view - только сохранённый результат
+  const [cand, setCand] = useState<{ key: string; start: boolean } | null>(null);
   return (
     <table className="needs">
       <thead>
@@ -40,6 +43,7 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
           <th>Клиент / эпик</th>
           <th>Тип контракта</th>
           <th>Ставка</th>
+          <th>Кандидаты</th>
           <SortHeader field="created" label="Создана" sort={sort} onSort={onSort} />
           <SortHeader field="updated" label="Обновлена" sort={sort} onSort={onSort} />
         </tr>
@@ -83,13 +87,46 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                   {rate.vat && <span className="rate__vat"> {rate.vat}</span>}
                   {rate.proposer && <div className="muted">{rate.proposer}</div>}
                 </td>
+                <td>
+                  {cand?.key === n.jira_key ? (
+                    <button type="button" className="link" aria-expanded onClick={() => setCand(null)}>
+                      Скрыть кандидатов
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="primary-small"
+                        aria-label={`Сопоставить ${n.jira_key}`}
+                        onClick={() => setCand({ key: n.jira_key, start: true })}
+                      >
+                        Сопоставить
+                      </button>
+                      <button
+                        type="button"
+                        className="link"
+                        aria-label={`Кандидаты ${n.jira_key}`}
+                        onClick={() => setCand({ key: n.jira_key, start: false })}
+                      >
+                        Кандидаты
+                      </button>
+                    </>
+                  )}
+                </td>
                 <td>{formatDateTime(n.jira_created_at) || "—"}</td>
                 <td>{formatDateTime(n.jira_updated_at) || "—"}</td>
               </tr>
               {expanded && n.epic_key && (
                 <tr className="needs__details">
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <ClientRules epicKey={n.epic_key} />
+                  </td>
+                </tr>
+              )}
+              {cand?.key === n.jira_key && (
+                <tr className="needs__details">
+                  <td colSpan={9}>
+                    <NeedCandidates key={`${n.jira_key}:${cand.start}`} needKey={n.jira_key} autoStart={cand.start} />
                   </td>
                 </tr>
               )}

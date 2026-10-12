@@ -132,3 +132,41 @@ a { color: var(--accent); }
 .profile dt { font-weight: 600; }
 .profile dd { margin: 0; }
 .pre { white-space: pre-wrap; }
+
+/* Сопоставление кандидатов и поиск по смыслу (KON-41) */
+.primary-small { background: #0b8a5c; color: #fff; border: 0; border-radius: 4px; padding: 4px 10px; cursor: pointer; display: block; margin-bottom: 4px; }
+.candidates-block { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+.candidates-block button, .semantic button, .runstatus button:not(.link), .candidates button:not(.pct) { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.candidates-block button.primary, .semantic button.primary { background: #0b8a5c; border-color: #0b8a5c; color: #fff; }
+.candidates-block button:disabled, .semantic button:disabled, .candidates button:disabled { opacity: 0.5; cursor: default; }
+.candidates-block__head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 8px; }
+.candidates .badge { margin-left: 8px; }
+.provider-select { display: flex; flex-direction: column; gap: 4px; }
+.provider-select select, .semantic textarea, .techpicker input, .techpicker select, .llm-settings textarea, .llm-settings input[type="number"], .modal textarea { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; }
+.pct { border: 0; border-radius: 12px; padding: 2px 10px; font-weight: 600; cursor: pointer; color: #fff; }
+.pct--high { background: #0b8a5c; }
+.pct--mid { background: #b7791f; }
+.pct--low { background: #b83232; }
+.pct--none { background: var(--panel-2); color: var(--muted); border: 1px solid var(--border); }
+.rationale { white-space: pre-wrap; }
+.note-icon { color: var(--warn); }
+.spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.runstatus__errors { margin: 4px 0; padding-left: 20px; }
+.link--inline { display: inline; }
+.semantic { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; }
+.semantic__form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.semantic__form label:not(.provider-select) { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 280px; }
+.techpicker { display: flex; flex-direction: column; gap: 4px; min-width: 220px; }
+.techpicker label { display: flex; flex-direction: column; gap: 4px; }
+.techpicker .chips { margin: 4px 0; }
+.llm-settings .group-card button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.llm-settings .group-card button.primary { background: #0b8a5c; border-color: #0b8a5c; color: #fff; }
+.llm-settings .group-card button.link { background: none; border: 0; color: var(--accent); padding: 2px 8px; }
+.llm-settings .group-card button.link--danger { color: var(--err); }
+.dictionary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.dictionary label, .match-settings label { display: flex; flex-direction: column; gap: 4px; }
+.dictionary .modal__actions { grid-column: 1 / -1; align-items: center; }
+.match-settings { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.modal .check { flex-direction: row; align-items: center; gap: 8px; }
+.cv-sections > div { margin-bottom: 8px; }

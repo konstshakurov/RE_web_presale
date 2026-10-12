@@ -423,6 +423,48 @@ describe("Резюме", () => {
     expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
   });
 
+  it("статус «Уволен» убран из списка статусов; тумблер показывает уволенных вместе с поиском и статусом, «Сбросить» выключает", async () => {
+    setup(
+      {
+        employees: [
+          emp(),
+          emp({ jira_key: "EMP-2", full_name: "Иванов Иван", status: "Декрет" }),
+          emp({ jira_key: "EMP-3", full_name: "Иванов Пётр", status: "Уволен" }),
+        ],
+      },
+      "/resumes",
+    );
+    await screen.findByText("Тестов Тест");
+    const select = screen.getByLabelText("Статус сотрудника");
+    expect(within(select).queryByRole("option", { name: "Уволен" })).not.toBeInTheDocument();
+    expect(within(select).getByRole("option", { name: "Декрет" })).toBeInTheDocument();
+    // по умолчанию уволенные скрыты
+    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
+    const toggle = screen.getByRole("switch", { name: "Показывать уволенных" });
+    expect(toggle).not.toBeChecked();
+    await userEvent.click(toggle);
+    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument(); // до «Применить» не меняется
+    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
+    expect(screen.getByText("Иванов Пётр")).toBeInTheDocument();
+    expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
+    // вместе с поиском
+    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "иванов");
+    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
+    expect(screen.getByText("Иванов Пётр")).toBeInTheDocument();
+    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
+    expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
+    // вместе со статусом
+    await userEvent.selectOptions(select, "Декрет");
+    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
+    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
+    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
+    // сброс выключает тумблер
+    await userEvent.click(screen.getByRole("button", { name: "Сбросить" }));
+    expect(screen.getByRole("switch", { name: "Показывать уволенных" })).not.toBeChecked();
+    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
+    expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
+  });
+
   it("переход из «Сотрудников»: ?q= подставляется в поиск", async () => {
     setup({ employees: [emp(), emp({ jira_key: "EMP-2", full_name: "Иванов Иван" })] }, "/resumes?q=EMP-2");
     expect(await screen.findByText("Иванов Иван")).toBeInTheDocument();

@@ -14,6 +14,9 @@ export const EMPLOYEE_STATUSES = [
   "Декрет",
 ];
 
+// Статус «Уволен» в разделе «Резюме» вынесен из списка статусов в тумблер (CR); «Сотрудники» его не затрагивает.
+export const FIRED_STATUS = "Уволен";
+
 // Порядок типов в окне загрузки; названия и допустимые типы приходят из GET /cv/limits.
 const KIND_ORDER = ["main_cv", "extra_cv", "materials"];
 
@@ -28,6 +31,11 @@ export function statusOptions(counts: { status: string; count: number }[]): Stat
   const known = EMPLOYEE_STATUSES.map((s) => ({ status: s, count: byStatus.get(s) ?? 0 }));
   const extra = counts.filter((c) => !EMPLOYEE_STATUSES.includes(c.status));
   return [...known, ...extra.map((c) => ({ status: c.status, count: c.count }))];
+}
+
+// Варианты списка «Статус сотрудника» в «Резюме»: без «Уволен» (он - отдельный тумблер).
+export function resumeStatusOptions(counts: { status: string; count: number }[]): StatusOption[] {
+  return statusOptions(counts).filter((o) => o.status !== FIRED_STATUS);
 }
 
 export function fileExtension(name: string): string {
@@ -65,7 +73,15 @@ export function validateUpload(file: File, kind: string, limits: CvLimits): stri
 }
 
 // Поиск раздела «Резюме»: ФИО, ключ Jira, имя файла (FR-032 п. 1; текст внутри CV - заглушка, нет API).
-export function matchesResume(emp: EmployeeOut, files: FileOut[], query: string, status: string): boolean {
+// Уволенные скрыты, пока showFired выключен; тумблер действует вместе с поиском и статусом.
+export function matchesResume(
+  emp: EmployeeOut,
+  files: FileOut[],
+  query: string,
+  status: string,
+  showFired = false,
+): boolean {
+  if (!showFired && emp.status === FIRED_STATUS) return false;
   if (status && emp.status !== status) return false;
   const q = query.trim().toLowerCase();
   if (!q) return true;

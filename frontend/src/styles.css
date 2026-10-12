@@ -104,6 +104,8 @@ a { color: var(--accent); }
 .resume-filters label { display: flex; flex-direction: column; gap: 4px; }
 .resume-filters input, .resume-filters select, .resume-filters textarea { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; min-width: 220px; }
 .resume-filters input:disabled, .resume-filters textarea:disabled { opacity: 0.5; }
+.resume-filters .resume-filters__toggle { flex-direction: row; align-items: center; gap: 8px; padding-bottom: 8px; }
+.resume-filters .resume-filters__toggle input { min-width: 0; }
 .resume-filters__actions { display: flex; gap: 8px; margin-left: auto; }
 .resume-filters__actions button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px 16px; cursor: pointer; }
 .resume-filters__actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }

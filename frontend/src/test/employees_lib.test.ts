@@ -7,6 +7,7 @@ import {
   formatSize,
   groupFiles,
   matchesResume,
+  resumeStatusOptions,
   statusOptions,
   textSegments,
   uploadKinds,
@@ -63,6 +64,16 @@ describe("statusOptions", () => {
   });
 });
 
+describe("resumeStatusOptions", () => {
+  it("без «Уволен», остальные 9 статусов и лишние сохраняются; общий statusOptions не меняется", () => {
+    const o = resumeStatusOptions([{ status: "Новый статус", count: 1 }]).map((x) => x.status);
+    expect(o).not.toContain("Уволен");
+    expect(o.slice(0, 9)).toEqual(EMPLOYEE_STATUSES.filter((s) => s !== "Уволен"));
+    expect(o[9]).toBe("Новый статус");
+    expect(statusOptions([]).map((x) => x.status)).toContain("Уволен");
+  });
+});
+
 describe("validateUpload", () => {
   it("формат проверяется по типу файла", () => {
     const pdf = new File(["x"], "cv.pdf");
@@ -108,6 +119,22 @@ describe("matchesResume", () => {
     expect(matchesResume(emp(), f, "нет такого", "")).toBe(false);
     expect(matchesResume(emp(), f, "", "Декрет")).toBe(false);
     expect(matchesResume(emp(), f, "", "Свободен")).toBe(true);
+  });
+});
+
+describe("matchesResume: тумблер «Показывать уволенных»", () => {
+  const fired = emp({ status: "Уволен", full_name: "Уволенов Иван" });
+  it("по умолчанию уволенные скрыты, при включении видны", () => {
+    expect(matchesResume(fired, [], "", "")).toBe(false);
+    expect(matchesResume(fired, [], "", "", false)).toBe(false);
+    expect(matchesResume(fired, [], "", "", true)).toBe(true);
+    expect(matchesResume(emp(), [], "", "", false)).toBe(true);
+  });
+  it("работает вместе с поиском и статусом", () => {
+    expect(matchesResume(fired, [], "уволенов", "", true)).toBe(true);
+    expect(matchesResume(fired, [], "тестов", "", true)).toBe(false);
+    expect(matchesResume(fired, [], "", "Свободен", true)).toBe(false);
+    expect(matchesResume(emp(), [], "тестов", "Свободен", true)).toBe(true);
   });
 });
 

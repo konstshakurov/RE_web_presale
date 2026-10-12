@@ -8,7 +8,7 @@ import CvViewer from "../components/CvViewer";
 import EmployeeSyncBar from "../components/EmployeeSyncBar";
 import FilesCell from "../components/resumes/FilesCell";
 import UploadDialog from "../components/resumes/UploadDialog";
-import { EMPLOYEE_STATUSES, groupFiles, matchesResume, statusOptions } from "../lib/employees";
+import { EMPLOYEE_STATUSES, FIRED_STATUS, groupFiles, matchesResume, resumeStatusOptions } from "../lib/employees";
 import { formatDateTime } from "../lib/needs";
 import { useEmployees } from "../lib/useEmployees";
 
@@ -39,8 +39,8 @@ export default function ResumesPage() {
   const [limits, setLimits] = useState<CvLimits | null>(null);
   const [limitsError, setLimitsError] = useState("");
   const initialQuery = params.get("q") ?? "";
-  const [draft, setDraft] = useState({ q: initialQuery, status: "" });
-  const [applied, setApplied] = useState({ q: initialQuery, status: "" });
+  const [draft, setDraft] = useState({ q: initialQuery, status: "", showFired: false });
+  const [applied, setApplied] = useState({ q: initialQuery, status: "", showFired: false });
   const [uploadFor, setUploadFor] = useState<EmployeeOut | null>(null);
   const [view, setView] = useState<{ key: string; fileId?: number } | null>(null);
   const [notice, setNotice] = useState("");
@@ -63,18 +63,18 @@ export default function ResumesPage() {
   }, [loadFiles]);
 
   const byEmployee = useMemo(() => groupFiles(files ?? []), [files]);
-  const options = statusOptions(emps.counts);
-  const rows = (emps.items ?? []).filter((e) => matchesResume(e, byEmployee.get(e.jira_key) ?? [], applied.q, applied.status));
+  const options = resumeStatusOptions(emps.counts);
+  const rows = (emps.items ?? []).filter((e) => matchesResume(e, byEmployee.get(e.jira_key) ?? [], applied.q, applied.status, applied.showFired));
   const mainCount = (files ?? []).filter((f) => f.kind === "main_cv").length;
 
   function onApply(e: FormEvent) {
     e.preventDefault();
-    setApplied({ q: draft.q.trim(), status: draft.status });
+    setApplied({ q: draft.q.trim(), status: draft.status, showFired: draft.showFired });
   }
 
   function onReset() {
-    setDraft({ q: "", status: "" });
-    setApplied({ q: "", status: "" });
+    setDraft({ q: "", status: "", showFired: false });
+    setApplied({ q: "", status: "", showFired: false });
   }
 
   const error = emps.error || filesError;
@@ -98,12 +98,21 @@ export default function ResumesPage() {
           Статус сотрудника
           <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })}>
             <option value="">— все —</option>
-            {(options.length ? options : EMPLOYEE_STATUSES.map((s) => ({ status: s, count: 0 }))).map((o) => (
+            {(options.length ? options : EMPLOYEE_STATUSES.filter((s) => s !== FIRED_STATUS).map((s) => ({ status: s, count: 0 }))).map((o) => (
               <option key={o.status} value={o.status}>
                 {o.status}
               </option>
             ))}
           </select>
+        </label>
+        <label className="resume-filters__toggle">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={draft.showFired}
+            onChange={(e) => setDraft({ ...draft, showFired: e.target.checked })}
+          />
+          Показывать уволенных
         </label>
         <label>
           Технология БА (можно несколько)

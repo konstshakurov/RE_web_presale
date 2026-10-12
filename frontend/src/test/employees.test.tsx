@@ -267,7 +267,7 @@ describe("Сотрудники", () => {
 });
 
 describe("Резюме", () => {
-  it("таблица: файлы, содержание, заглушки технологий и поиска по смыслу, заметка с автором", async () => {
+  it("таблица: файлы, содержание, заметка с автором, поле поиска по смыслу доступно", async () => {
     setup(
       {
         employees: [
@@ -282,8 +282,8 @@ describe("Резюме", () => {
     expect(within(row).getByRole("button", { name: "Показать текст" })).toBeInTheDocument();
     expect(within(row).getByText("Не подключать к клиенту X")).toBeInTheDocument();
     expect(within(row).getByText("test.user, 05.10.2026, 14:00")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Запрос на естественном языке")).toBeDisabled();
-    expect(screen.getByPlaceholderText("Выбор технологий")).toBeDisabled();
+    expect(screen.getByLabelText("Поиск по смыслу (LLM)")).toBeEnabled();
+    expect(screen.getByLabelText("Технология (можно несколько)")).toBeEnabled();
   });
 
   it("«Удалить» только у файлов с can_delete: актуальное основное CV не удаляется", async () => {

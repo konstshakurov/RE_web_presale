@@ -80,7 +80,7 @@ describe("Настройки: допущенные", () => {
     expect(within(rows[2]).getByRole("button", { name: "Вернуть доступ" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("tab", { name: "НДС" }));
-    expect(screen.getByText(/в Dev-10 и далее/)).toBeInTheDocument();
+    expect(screen.getByText(/Раздел в разработке/)).toBeInTheDocument();
   });
 
   it("добавление: логин и роль, список обновляется без перезагрузки", async () => {

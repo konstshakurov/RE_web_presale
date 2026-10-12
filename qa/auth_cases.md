@@ -105,3 +105,12 @@
 | FR-038 | TC-UI-01 | только unit фронта (Dev) и ручной просмотр; визуального соответствия файлу не проверяли |
 | FR-029 | TC-AUTH-13,13b | покрыто моками; живая Jira - не проверялась |
 | NFR-006 | TC-NFR6-01..06, TC-AUTH-05c, TC-LDAP-05 | покрыто; канарейка по живому входу - ручной шаг |
+
+## 10. Автотесты на стенде и e2e (QA-5 KON-57, QA-6 KON-58)
+
+Стенд: `bash qa/stand/stand.sh up` (отдельный compose-проект, фейк Jira, тестовый LDAP). Тесты:
+`backend/tests/qa/test_stand_api_qa.py` (API, имена `test_tcNN_*` совпадают с ID кейсов выше),
+`backend/tests/qa/test_stand_nfr_qa.py` (NFR-006, NFR-007 п.3), `qa/e2e/tests/login_and_access.spec.ts` (E2E-01..10).
+Закрыто: TC-AUTH-11d (конкурентный отзыв, пройден), TC-AUTH-10f и TC-UI-01 (e2e), TC-AUTH-13 на стенде с фейк Jira.
+Найдено: KON-67 (управляющий символ в пароле -> 503), KON-68 (пароль в теле 422), KON-69 (FR-029 «как есть»).
+Отчёты: `qa/reports/kon-57_api_access_report.md`, `qa/reports/kon-58_e2e_acceptance_report.md`.

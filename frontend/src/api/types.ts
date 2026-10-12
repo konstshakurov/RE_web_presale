@@ -54,6 +54,7 @@ export interface NeedOut {
   status: string;
   epic_key?: string | null;
   epic_name?: string | null;
+  employee_key?: string | null; // карточка исполнителя в Jira, если определена однозначно
   contract_type?: string | null;
   rate: Rate;
   author?: string | null;
@@ -160,4 +161,74 @@ export interface StatusGroupsData {
   other: StatusInfo[];
   other_count: number;
   reserved: string[];
+}
+
+// Типы /sync/employees и /cv по backend/openapi.json (EmployeeOut, EmployeesPage, FileOut, CvLimits; KON-35, KON-36).
+export interface EmployeeOut {
+  jira_key: string;
+  jira_url?: string | null;
+  full_name: string;
+  status: string;
+  assignable: boolean;
+  extra_experience?: string | null; // «Подробнее об опыте»
+  vacation_plan?: string | null; // поле Jira «Отпуск» как есть
+  note?: string | null;
+  note_author?: string | null;
+  note_updated_at?: string | null;
+  synced_at: string;
+}
+
+export interface EmployeesPage {
+  items: EmployeeOut[];
+  total: number;
+  limit: number;
+  offset: number;
+  statuses: { status: string; count: number }[];
+  sync: SyncStamp;
+}
+
+export type FileKind = "main_cv" | "extra_cv" | "materials" | "client_template_cv";
+
+export interface FileOut {
+  id: number;
+  employee_key: string;
+  kind: FileKind | string;
+  kind_title: string;
+  client_epic_key?: string | null;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  is_archived: boolean;
+  archived_at?: string | null;
+  uploaded_by: string;
+  uploaded_at: string;
+  extraction_status: "ok" | "error" | "none" | string;
+  extraction_message?: string | null;
+  can_delete: boolean; // false - актуальное основное CV
+  can_restore: boolean; // true - архивная версия основного CV
+}
+
+export interface EmployeeFiles {
+  employee_key: string;
+  files: FileOut[];
+  archive: FileOut[];
+}
+
+export interface UploadResult {
+  file: FileOut;
+  replaced_file_id?: number | null;
+}
+
+export interface CvText {
+  file: FileOut | null;
+  extraction_status?: string; // только у main-cv: ok | error | none
+  text: string | null;
+  message?: string | null;
+}
+
+export interface CvLimits {
+  max_file_mb: number;
+  max_file_bytes: number;
+  upload_kinds: Record<string, string>; // тип -> название
+  extensions_by_kind: Record<string, string[]>; // допустимые расширения по типу файла
 }

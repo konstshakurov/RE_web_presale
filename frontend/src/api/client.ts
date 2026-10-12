@@ -1,6 +1,13 @@
 import type {
   AdminUser,
+  CvLimits,
+  CvText,
+  EmployeeFiles,
+  EmployeeOut,
+  EmployeesPage,
   EpicOut,
+  FileKind,
+  FileOut,
   GroupOut,
   LoginRequest,
   MeResponse,
@@ -11,6 +18,7 @@ import type {
   StatusGroupsData,
   SyncErrorBody,
   SyncScope,
+  UploadResult,
 } from "./types";
 
 // nginx проксирует /api/ на api; сессия — HttpOnly cookie, CSRF — заголовок на изменяющих запросах.
@@ -58,7 +66,9 @@ export async function request<T>(
   opts: { redirectOn401?: boolean } = {},
 ): Promise<T> {
   const headers: Record<string, string> = {};
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const raw = body instanceof Blob; // файл уходит как есть: тело запроса = байты (KON-36)
+  if (raw) headers["Content-Type"] = "application/octet-stream";
+  else if (body !== undefined) headers["Content-Type"] = "application/json";
   if (!SAFE_METHODS.has(method.toUpperCase()) && csrfToken) headers["X-CSRF-Token"] = csrfToken;
 
   let res: Response;
@@ -67,7 +77,7 @@ export async function request<T>(
       method,
       headers,
       credentials: "same-origin",
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : raw ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, "Нет связи с сервером, повторите позже");
@@ -124,5 +134,33 @@ export const api = {
   },
   needGroups: () => request<NeedGroups>("GET", "/sync/needs/groups"),
   refresh: (scope: SyncScope) => request<RefreshResult>("POST", "/sync/refresh", { scope }),
+  employees: (limit: number, offset: number) =>
+    request<EmployeesPage>("GET", `/sync/employees?limit=${Math.min(limit, 500)}&offset=${offset}`),
+  // Все сотрудники: страницами по 500, пока не набран total (~80 человек - обычно один запрос)
+  allEmployees: async (): Promise<EmployeesPage> => {
+    const first = await api.employees(500, 0);
+    const items: EmployeeOut[] = [...first.items];
+    while (items.length < first.total) {
+      const next = await api.employees(500, items.length);
+      if (next.items.length === 0) break;
+      items.push(...next.items);
+    }
+    return { ...first, items };
+  },
+  cvLimits: () => request<CvLimits>("GET", "/cv/limits"),
+  cvFiles: () => request<{ items: FileOut[] }>("GET", "/cv/files"),
+  employeeFiles: (key: string) =>
+    request<EmployeeFiles>("GET", `/cv/employees/${encodeURIComponent(key)}/files`),
+  uploadFile: (key: string, kind: FileKind | string, file: File) =>
+    request<UploadResult>(
+      "POST",
+      `/cv/employees/${encodeURIComponent(key)}/files?kind=${encodeURIComponent(kind)}&file_name=${encodeURIComponent(file.name)}`,
+      file,
+    ),
+  deleteFile: (id: number) => request<void>("DELETE", `/cv/files/${id}`),
+  restoreFile: (id: number) => request<EmployeeFiles>("POST", `/cv/files/${id}/restore`),
+  fileText: (id: number) => request<CvText>("GET", `/cv/files/${id}/text`),
+  mainCv: (key: string) => request<CvText>("GET", `/cv/employees/${encodeURIComponent(key)}/main-cv`),
+  downloadUrl: (id: number) => `${API_BASE}/cv/files/${id}/download`,
   epic: (key: string) => request<EpicOut>("GET", `/sync/epics/${encodeURIComponent(key)}`),
 };

@@ -89,3 +89,41 @@ a { color: var(--accent); }
 .chip { background: var(--panel-2); border: 1px solid var(--border); border-radius: 14px; padding: 2px 4px 2px 12px; display: inline-flex; align-items: center; gap: 4px; }
 .chip button { background: transparent; border: 0; color: var(--muted); padding: 0 8px; }
 .groups .toolbar { align-items: flex-end; }
+
+/* Сотрудники и Резюме (KON-40) */
+.button { display: inline-block; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; text-decoration: none; cursor: pointer; }
+.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.card__title { font-size: 16px; margin: 0; }
+.card__desc { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+.card__actions, .file__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: auto; }
+.card__actions button, .card__actions .button, .resumes button:not(.link), .toolbar input[type="search"] { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.toolbar input[type="search"] { cursor: text; }
+.resumes button:disabled { opacity: 0.5; cursor: default; }
+.resume-filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 8px; }
+.resume-filters label { display: flex; flex-direction: column; gap: 4px; }
+.resume-filters input, .resume-filters select, .resume-filters textarea { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; min-width: 220px; }
+.resume-filters input:disabled, .resume-filters textarea:disabled { opacity: 0.5; }
+.resume-filters__actions { display: flex; gap: 8px; margin-left: auto; }
+.resume-filters__actions button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px 16px; cursor: pointer; }
+.resume-filters__actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.files__list { list-style: none; margin: 0 0 8px; padding: 0; }
+.file { padding: 4px 0 8px; border-bottom: 1px solid var(--border); }
+.file__kind { color: var(--muted); font-size: 13px; }
+.file__name { font-weight: 600; word-break: break-word; }
+.file__meta { font-size: 13px; margin: 2px 0; }
+.files__archive { margin-top: 8px; padding: 8px; background: var(--panel-2); border-radius: 4px; }
+.link--danger { color: var(--err); display: inline; }
+.file__actions .link { display: inline; }
+.note { white-space: pre-wrap; }
+.modal--wide { width: min(960px, 92vw); max-width: none; max-height: 90vh; overflow: auto; }
+.cv-search { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cv-search input { flex: 1; }
+.cv-text { white-space: pre-wrap; word-break: break-word; font-family: inherit; max-height: 60vh; overflow: auto; background: var(--panel-2); border-radius: 4px; padding: 12px; margin: 0; }
+.hit { background: #f5b04166; color: inherit; }
+.hit--active { background: var(--warn); color: #000; }
+.modal .button { text-decoration: none; }
+.profile { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+.profile dt { font-weight: 600; }
+.profile dd { margin: 0; }
+.pre { white-space: pre-wrap; }

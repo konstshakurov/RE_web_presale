@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import base64
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi import FastAPI
@@ -189,3 +189,44 @@ def test_employees_503_when_cv_pool_missing():
     c = TestClient(app)
     c.cookies.set("re_session", sid)
     assert c.get("/sync/employees").status_code == 503
+
+
+def test_needs_default_sort_is_created_desc_without_date_filter(env):
+    client, _, repo, *_ = env
+    assert client.get("/sync/needs").status_code == 200
+    call = repo.list_calls[-1]
+    assert call["sort"] == "created" and call["order_dir"] == "desc"
+    assert call["filter"].created_from is None and call["filter"].created_before is None
+
+
+def test_needs_created_range_is_whole_days_in_jira_zone_with_group_and_query(env):
+    client, _, repo, *_ = env
+    r = client.get("/sync/needs", params={
+        "created_from": "2026-10-01", "created_to": "2026-10-09",
+        "group": "3", "q": "1С", "sort": "created", "order": "asc"})
+    assert r.status_code == 200
+    call = repo.list_calls[-1]
+    f, tz = call["filter"], timezone(timedelta(hours=4))  # пояс Jira по умолчанию +04:00
+    assert f.created_from == datetime(2026, 10, 1, tzinfo=tz)
+    assert f.created_before == datetime(2026, 10, 10, tzinfo=tz)  # «по» включительно
+    assert f.group == "3" and f.query == "1С" and call["order_dir"] == "asc"
+
+
+def test_needs_single_bound_and_updated_sort(env):
+    client, _, repo, *_ = env
+    assert client.get("/sync/needs", params={"created_to": "2026-10-09", "sort": "updated"}
+                      ).status_code == 200
+    f = repo.list_calls[-1]["filter"]
+    assert f.created_from is None and f.created_before is not None
+    assert repo.list_calls[-1]["sort"] == "updated"
+
+
+@pytest.mark.parametrize("params", [
+    {"created_from": "2026-10-09", "created_to": "2026-10-01"},  # from позже to
+    {"created_from": "not-a-date"},
+    {"order": "sideways"},
+])
+def test_needs_bad_date_filter_or_order_is_422(env, params):
+    client, _, repo, *_ = env
+    assert client.get("/sync/needs", params=params).status_code == 422
+    assert repo.list_calls == []

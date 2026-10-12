@@ -1,10 +1,34 @@
 import { Fragment, useState } from "react";
 
-import type { NeedOut } from "../api/types";
-import { formatRate } from "../lib/needs";
+import type { NeedOut, NeedSort, SortOrder } from "../api/types";
+import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
 
-export default function NeedsTable({ items }: { items: NeedOut[] }) {
+export interface NeedsSort {
+  sort: NeedSort;
+  order: SortOrder;
+}
+
+interface Props {
+  items: NeedOut[];
+  sort?: NeedsSort;
+  onSort?: (sort: NeedSort) => void; // клик по заголовку «Создана» / «Обновлена»
+}
+
+function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: string } & Pick<Props, "sort" | "onSort">) {
+  const active = sort?.sort === field;
+  const dir = active ? sort.order : undefined;
+  return (
+    <th aria-sort={dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none"}>
+      <button type="button" className="sort" onClick={() => onSort?.(field)}>
+        {label}
+        <span aria-hidden="true">{dir === "asc" ? " ▲" : dir === "desc" ? " ▼" : ""}</span>
+      </button>
+    </th>
+  );
+}
+
+export default function NeedsTable({ items, sort, onSort }: Props) {
   const [open, setOpen] = useState<string | null>(null);
   return (
     <table className="needs">
@@ -16,6 +40,8 @@ export default function NeedsTable({ items }: { items: NeedOut[] }) {
           <th>Клиент / эпик</th>
           <th>Тип контракта</th>
           <th>Ставка</th>
+          <SortHeader field="created" label="Создана" sort={sort} onSort={onSort} />
+          <SortHeader field="updated" label="Обновлена" sort={sort} onSort={onSort} />
         </tr>
       </thead>
       <tbody>
@@ -57,10 +83,12 @@ export default function NeedsTable({ items }: { items: NeedOut[] }) {
                   {rate.vat && <span className="rate__vat"> {rate.vat}</span>}
                   {rate.proposer && <div className="muted">{rate.proposer}</div>}
                 </td>
+                <td>{formatDateTime(n.jira_created_at) || "—"}</td>
+                <td>{formatDateTime(n.jira_updated_at) || "—"}</td>
               </tr>
               {expanded && n.epic_key && (
                 <tr className="needs__details">
-                  <td colSpan={6}>
+                  <td colSpan={8}>
                     <ClientRules epicKey={n.epic_key} />
                   </td>
                 </tr>

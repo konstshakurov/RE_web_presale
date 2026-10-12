@@ -114,6 +114,10 @@ export const api = {
     const p = new URLSearchParams();
     p.set("group", q.group);
     if (q.q) p.set("q", q.q);
+    if (q.createdFrom) p.set("created_from", q.createdFrom);
+    if (q.createdTo) p.set("created_to", q.createdTo);
+    if (q.sort) p.set("sort", q.sort);
+    if (q.order) p.set("order", q.order);
     p.set("limit", String(Math.min(q.limit, 500)));
     p.set("offset", String(q.offset));
     return request<NeedsPage>("GET", `/sync/needs?${p}`);

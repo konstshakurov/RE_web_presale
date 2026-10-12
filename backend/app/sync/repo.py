@@ -56,6 +56,8 @@ class NeedFilter:
     status: str | None = None
     epic_key: str | None = None
     query: str | None = None
+    created_from: datetime | None = None  # jira_created_at >= created_from (включительно)
+    created_before: datetime | None = None  # jira_created_at < created_before (исключительно)
 
 
 _STATE_COLS = (
@@ -115,6 +117,12 @@ def _need_where(f: NeedFilter) -> tuple[str, list[Any]]:
         like = "%" + f.query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         conds.append("(n.jira_key ILIKE %s OR n.title ILIKE %s)")
         params += [like, like]
+    if f.created_from is not None:
+        conds.append("n.jira_created_at >= %s")
+        params.append(f.created_from)
+    if f.created_before is not None:
+        conds.append("n.jira_created_at < %s")
+        params.append(f.created_before)
     return (" WHERE " + " AND ".join(conds)) if conds else "", params
 
 
@@ -241,10 +249,12 @@ class SyncRepo:
         return set_ + cleared
 
     def list_needs(
-        self, f: NeedFilter, *, limit: int, offset: int, sort: str = "created"
+        self, f: NeedFilter, *, limit: int, offset: int, sort: str = "created",
+        order_dir: str = "desc",
     ) -> tuple[list[dict[str, Any]], int]:
         where, params = _need_where(f)
         order = "n.jira_updated_at" if sort == "updated" else "n.jira_created_at"
+        direction = "ASC" if order_dir == "asc" else "DESC"  # только константы в SQL
         with self._app.connection() as conn:
             total = conn.execute(
                 f"SELECT count(*) FROM app.jira_need n{where}", params
@@ -258,7 +268,7 @@ class SyncRepo:
                 "COALESCE((SELECT array_agg(t.tag ORDER BY t.tag) FROM app.jira_need_tag t "
                 "WHERE t.need_key = n.jira_key), '{}') AS tags "
                 "FROM app.jira_need n LEFT JOIN app.jira_epic e ON e.epic_key = n.epic_key"
-                f"{where} ORDER BY {order} DESC, n.jira_key DESC LIMIT %s OFFSET %s",
+                f"{where} ORDER BY {order} {direction}, n.jira_key {direction} LIMIT %s OFFSET %s",
                 [*params, limit, offset],
             )
             cols = [d.name for d in cur.description]

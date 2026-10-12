@@ -4,7 +4,7 @@
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -213,14 +213,31 @@ def list_needs(
     status: Annotated[str | None, Query(max_length=128)] = None,
     epic_key: Annotated[str | None, Query(max_length=64)] = None,
     q: Annotated[str | None, Query(max_length=200, description="Поиск по ключу и названию")] = None,
+    created_from: Annotated[date | None, Query(
+        description="Создана с (YYYY-MM-DD, включительно; сутки в поясе Jira)")] = None,
+    created_to: Annotated[date | None, Query(
+        description="Создана по (YYYY-MM-DD, включительно; сутки в поясе Jira)")] = None,
     sort: Literal["created", "updated"] = "created",
+    order: Annotated[Literal["asc", "desc"], Query(
+        description="Направление сортировки (по умолчанию - новые сверху)")] = "desc",
     limit: Annotated[int, Query(ge=1, le=LIMIT_MAX)] = 100,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> NeedsPage:
     service = _service(request)
+    if created_from and created_to and created_from > created_to:
+        raise HTTPException(status_code=422, detail="created_from позже created_to")
+    tz = timezone(timedelta(hours=service.settings.jira_utc_offset_hours))
     items, total = service.repo.list_needs(
-        NeedFilter(group=group, status=status, epic_key=epic_key, query=q),
-        limit=limit, offset=offset, sort=sort,
+        NeedFilter(
+            group=group, status=status, epic_key=epic_key, query=q,
+            created_from=datetime.combine(created_from, time.min, tz) if created_from else None,
+            # «по» включительно: до начала следующих суток
+            created_before=(
+                datetime.combine(created_to + timedelta(days=1), time.min, tz)
+                if created_to else None
+            ),
+        ),
+        limit=limit, offset=offset, sort=sort, order_dir=order,
     )
     out = [
         NeedOut(

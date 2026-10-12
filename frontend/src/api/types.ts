@@ -59,6 +59,7 @@ export interface NeedOut {
   author?: string | null;
   assignee?: string | null;
   jira_url?: string | null;
+  jira_created_at: string;
   jira_updated_at: string;
 }
 
@@ -70,9 +71,16 @@ export interface NeedsPage {
   sync: SyncStamp;
 }
 
+export type NeedSort = "created" | "updated";
+export type SortOrder = "asc" | "desc";
+
 export interface NeedsQuery {
   group: string; // key группы: id | other | all
   q?: string;
+  createdFrom?: string; // YYYY-MM-DD, включительно
+  createdTo?: string; // YYYY-MM-DD, включительно
+  sort?: NeedSort;
+  order?: SortOrder;
   limit: number;
   offset: number;
 }

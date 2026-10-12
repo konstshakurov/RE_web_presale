@@ -2242,6 +2242,44 @@
             }
           },
           {
+            "description": "Создана с (YYYY-MM-DD, включительно; сутки в поясе Jira)",
+            "in": "query",
+            "name": "created_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Создана с (YYYY-MM-DD, включительно; сутки в поясе Jira)",
+              "title": "Created From"
+            }
+          },
+          {
+            "description": "Создана по (YYYY-MM-DD, включительно; сутки в поясе Jira)",
+            "in": "query",
+            "name": "created_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Создана по (YYYY-MM-DD, включительно; сутки в поясе Jira)",
+              "title": "Created To"
+            }
+          },
+          {
             "in": "query",
             "name": "sort",
             "required": false,
@@ -2252,6 +2290,22 @@
                 "updated"
               ],
               "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Направление сортировки (по умолчанию - новые сверху)",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "description": "Направление сортировки (по умолчанию - новые сверху)",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "title": "Order",
               "type": "string"
             }
           },

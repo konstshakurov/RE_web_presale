@@ -28,6 +28,7 @@ class FakeSyncRepo:
         self.busy: set[str] = set()
         self.has_cv = with_cv
         self.upsert_calls = 0
+        self.list_calls: list[dict] = []
 
     def set_poller(self, login: str, secret_updated_at: datetime = T0) -> None:
         self.pollers = [p for p in self.pollers if p.login != login]
@@ -59,6 +60,11 @@ class FakeSyncRepo:
         self.states[scope] = SyncStateRow(
             scope, old.last_sync_at, old.last_success_at, T0, message, code, T0,
             old.initial_load_done)
+
+    def list_needs(self, f, *, limit, offset, sort="created", order_dir="desc"):
+        self.list_calls.append({"filter": f, "limit": limit, "offset": offset,
+                                "sort": sort, "order_dir": order_dir})
+        return [], 0
 
     def max_need_updated(self):
         return max((n.jira_updated_at for n in self.needs.values()), default=None)

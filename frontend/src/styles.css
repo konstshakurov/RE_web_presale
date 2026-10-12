@@ -46,6 +46,8 @@ a { color: var(--accent); }
 .badge--reauth, .badge--error { color: var(--err); }
 .needs { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); }
 .needs th { text-align: left; background: var(--panel-2); padding: 10px 12px; }
+.needs th button.sort { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; color: inherit; }
+.datefilter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .needs td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; }
 .needs__details td { background: var(--panel-2); }
 .status { color: var(--ok); background: var(--panel-2); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }

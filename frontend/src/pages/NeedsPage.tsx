@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import { ApiError, api } from "../api/client";
-import type { NeedsPage as NeedsData, StatusGroup, SyncStamp } from "../api/types";
+import type { NeedSort, NeedsPage as NeedsData, SortOrder, StatusGroup, SyncStamp } from "../api/types";
 import NeedsTable from "../components/NeedsTable";
 import SyncNotes from "../components/SyncNotes";
 import { refreshErrorText } from "../lib/needs";
@@ -38,6 +38,10 @@ export default function NeedsPage() {
   const [info, setInfo] = useState("");
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
+  const [sort, setSort] = useState<NeedSort>("created");
+  const [order, setOrder] = useState<SortOrder>("desc");
   const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(0);
   const seq = useRef(0);
@@ -61,11 +65,12 @@ export default function NeedsPage() {
 
   const loadNeeds = useCallback(async () => {
     if (group === null) return;
+    if (createdFrom && createdTo && createdFrom > createdTo) return; // диапазон неверен - не запрашиваем
     const id = ++seq.current;
     setLoading(true);
     setError("");
     try {
-      const page = await api.needs({ group, q: query, limit, offset });
+      const page = await api.needs({ group, q: query, createdFrom, createdTo, sort, order, limit, offset });
       if (id !== seq.current) return;
       if (!Array.isArray(page?.items)) throw new Error("bad response");
       setData(page);
@@ -76,7 +81,7 @@ export default function NeedsPage() {
     } finally {
       if (id === seq.current) setLoading(false);
     }
-  }, [group, query, limit, offset]);
+  }, [group, query, createdFrom, createdTo, sort, order, limit, offset]);
 
   useEffect(() => {
     void loadNeeds();
@@ -96,6 +101,25 @@ export default function NeedsPage() {
     e.preventDefault();
     setOffset(0);
     setQuery(search.trim());
+  }
+
+  // Клик по заголовку: тот же столбец - меняет направление, другой - сначала новые сверху.
+  function onSort(field: NeedSort) {
+    setOffset(0);
+    if (field === sort) setOrder(order === "desc" ? "asc" : "desc");
+    else {
+      setSort(field);
+      setOrder("desc");
+    }
+  }
+
+  const rangeInvalid = createdFrom !== "" && createdTo !== "" && createdFrom > createdTo;
+  const rangeSet = createdFrom !== "" || createdTo !== "";
+
+  function resetDates() {
+    setOffset(0);
+    setCreatedFrom("");
+    setCreatedTo("");
   }
 
   async function onRefresh() {
@@ -156,6 +180,41 @@ export default function NeedsPage() {
         </form>
       </div>
 
+      <div className="datefilter">
+        <label>
+          Создана с{" "}
+          <input
+            type="date"
+            value={createdFrom}
+            max={createdTo || undefined}
+            onChange={(e) => {
+              setOffset(0);
+              setCreatedFrom(e.target.value);
+            }}
+          />
+        </label>
+        <label>
+          по{" "}
+          <input
+            type="date"
+            value={createdTo}
+            min={createdFrom || undefined}
+            onChange={(e) => {
+              setOffset(0);
+              setCreatedTo(e.target.value);
+            }}
+          />
+        </label>
+        <button type="button" disabled={!rangeSet} onClick={resetDates}>
+          Сбросить даты
+        </button>
+        {rangeInvalid && (
+          <span className="error" role="alert">
+            Дата «с» позже даты «по»
+          </span>
+        )}
+      </div>
+
       {refreshError && (
         <p className="error" role="alert">
           {refreshError}
@@ -182,7 +241,7 @@ export default function NeedsPage() {
               )}
             </div>
           ) : (
-            <NeedsTable items={data.items} />
+            <NeedsTable items={data.items} sort={{ sort, order }} onSort={onSort} />
           )}
           <div className="pager">
             <span>

@@ -163,6 +163,26 @@ def test_status_groups_filter_other_and_counters(repo, pools):
     assert counts == {"kont35-a": 2, "kont35-b": 2}  # счётчики пересекаются, не суммируются
 
 
+def test_created_range_sort_direction_and_other_filters(repo):
+    repo.upsert_needs([
+        need(1, created="2026-10-01T10:00:00.000+0000", updated="2026-10-01T10:00:00.000+0000"),
+        need(2, "Найм", created="2026-10-05T23:30:00.000+0000",
+             updated="2026-10-05T23:30:00.000+0000"),
+        need(3, created="2026-10-09T08:00:00.000+0000", updated="2026-10-09T08:00:00.000+0000"),
+    ])
+    day = lambda d: datetime(2026, 10, d, tzinfo=UTC)  # noqa: E731
+    f = lambda order="desc", **kw: [  # noqa: E731
+        i["jira_key"] for i in repo.list_needs(
+            NeedFilter(query=P, **kw), limit=10, offset=0, order_dir=order)[0]]
+    assert f() == [f"{P}-3", f"{P}-2", f"{P}-1"]
+    assert f("asc") == [f"{P}-1", f"{P}-2", f"{P}-3"]
+    # от включительно, до (следующие сутки) исключительно
+    assert f("asc", created_from=day(2), created_before=day(6)) == [f"{P}-2"]
+    assert f(created_before=day(2)) == [f"{P}-1"]
+    assert f(created_from=day(9)) == [f"{P}-3"]
+    assert f(created_from=day(2), created_before=day(6), status="Требуется кандидат") == []
+
+
 def test_search_escapes_like_wildcards(repo):
     repo.upsert_needs([need(1), need(2)])
     assert repo.list_needs(NeedFilter(query="%"), limit=10, offset=0)[1] == 0

@@ -44,6 +44,7 @@ function need(over: Partial<NeedOut> = {}): NeedOut {
     epic_name: "Клиент А",
     contract_type: "Прямой контракт",
     rate: { amount: 2750, currency: "RUB", includes_vat: false, unit: "час", proposer: "РО" },
+    jira_created_at: "2026-10-01T08:30:00Z",
     jira_updated_at: "2026-10-09T09:00:00Z",
     ...over,
   };
@@ -152,6 +153,78 @@ describe("Потребности", () => {
     await waitFor(() => expect(urls[urls.length - 1]).toContain("q=abc"));
     await userEvent.selectOptions(screen.getByLabelText("На странице"), "500");
     await waitFor(() => expect(urls[urls.length - 1]).toContain("limit=500"));
+  });
+
+  it("колонка «Создана»: дата и время; сортировка по клику asc/desc, сброс на 1-ю страницу", async () => {
+    const urls: string[] = [];
+    route((u) => {
+      if (u.includes("/sync/needs?")) {
+        urls.push(u);
+        return json(page([need()]));
+      }
+    });
+    renderNeeds();
+    await screen.findByText("AN-1");
+    const th = screen.getByRole("columnheader", { name: /Создана/ });
+    expect(th).toHaveAttribute("aria-sort", "descending"); // по умолчанию новые сверху
+    expect(urls[0]).toContain("sort=created");
+    expect(urls[0]).toContain("order=desc");
+    expect(screen.getByText(/01\.10\.2026/)).toBeInTheDocument();
+    await userEvent.click(within(th).getByRole("button"));
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("order=asc"));
+    expect(screen.getByRole("columnheader", { name: /Создана/ })).toHaveAttribute("aria-sort", "ascending");
+    await userEvent.click(within(screen.getByRole("columnheader", { name: /Создана/ })).getByRole("button"));
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("order=desc"));
+    // другой столбец: сортировка по «Обновлена», сначала новые
+    await userEvent.click(within(screen.getByRole("columnheader", { name: /Обновлена/ })).getByRole("button"));
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("sort=updated"));
+    expect(urls[urls.length - 1]).toContain("order=desc");
+  });
+
+  it("фильтр «Создана с / по» уходит в API вместе с группой и поиском; сброс убирает даты", async () => {
+    const urls: string[] = [];
+    route((u) => {
+      if (u.includes("/sync/needs?")) {
+        urls.push(u);
+        return json(page([need()]));
+      }
+    });
+    renderNeeds();
+    await screen.findByText("AN-1");
+    expect(urls[0]).not.toContain("created_from");
+    expect(screen.getByRole("button", { name: "Сбросить даты" })).toBeDisabled();
+    await userEvent.type(screen.getByLabelText("Создана с"), "2026-10-01");
+    await userEvent.type(screen.getByLabelText("по"), "2026-10-09");
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("created_to=2026-10-09"));
+    const last = urls[urls.length - 1];
+    expect(last).toContain("created_from=2026-10-01");
+    expect(last).toContain("group=1");
+    await userEvent.click(screen.getByRole("button", { name: /Прочие/ }));
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("group=other"));
+    expect(urls[urls.length - 1]).toContain("created_from=2026-10-01"); // диапазон держится в любой группе
+    await userEvent.click(screen.getByRole("button", { name: "Сбросить даты" }));
+    await waitFor(() => expect(urls[urls.length - 1]).not.toContain("created_from"));
+    expect(urls[urls.length - 1]).not.toContain("created_to");
+    expect(screen.getByLabelText("Создана с")).toHaveValue("");
+  });
+
+  it("диапазон «с» позже «по»: предупреждение, запрос не уходит", async () => {
+    const urls: string[] = [];
+    route((u) => {
+      if (u.includes("/sync/needs?")) {
+        urls.push(u);
+        return json(page([need()]));
+      }
+    });
+    renderNeeds();
+    await screen.findByText("AN-1");
+    const before = urls.length;
+    await userEvent.type(screen.getByLabelText("по"), "2026-10-01");
+    await waitFor(() => expect(urls.length).toBeGreaterThan(before));
+    const n = urls.length;
+    await userEvent.type(screen.getByLabelText("Создана с"), "2026-10-09");
+    expect(await screen.findByText(/позже даты «по»/)).toBeInTheDocument();
+    expect(urls.length).toBe(n);
   });
 
   it("«Обновить»: POST scope=needs, перезагрузка и штамп", async () => {

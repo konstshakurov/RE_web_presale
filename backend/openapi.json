@@ -29,6 +29,37 @@
         "title": "CreateGroupRequest",
         "type": "object"
       },
+      "EmployeeFiles": {
+        "properties": {
+          "archive": {
+            "description": "Прежние версии основного CV, до 3, свежие сверху",
+            "items": {
+              "$ref": "#/components/schemas/FileOut"
+            },
+            "title": "Archive",
+            "type": "array"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "files": {
+            "description": "Актуальные файлы: основное CV, доп. CV, материалы",
+            "items": {
+              "$ref": "#/components/schemas/FileOut"
+            },
+            "title": "Files",
+            "type": "array"
+          }
+        },
+        "required": [
+          "employee_key",
+          "files",
+          "archive"
+        ],
+        "title": "EmployeeFiles",
+        "type": "object"
+      },
       "EmployeeOut": {
         "properties": {
           "assignable": {
@@ -248,6 +279,173 @@
         "title": "EpicOut",
         "type": "object"
       },
+      "FileOut": {
+        "properties": {
+          "archived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "can_delete": {
+            "description": "false - актуальное основное CV: только заменяется",
+            "title": "Can Delete",
+            "type": "boolean"
+          },
+          "can_restore": {
+            "description": "true - архивная версия основного CV",
+            "title": "Can Restore",
+            "type": "boolean"
+          },
+          "client_epic_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Только для client_template_cv",
+            "title": "Client Epic Key"
+          },
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "extraction_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Причина, если extraction_status=error",
+            "title": "Extraction Message"
+          },
+          "extraction_status": {
+            "description": "ok | error | none; none у «Материалов» - текст не извлекается",
+            "title": "Extraction Status",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_archived": {
+            "description": "true - прежняя версия основного CV (архив, FR-039)",
+            "title": "Is Archived",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "main_cv | extra_cv | materials | client_template_cv",
+            "title": "Kind",
+            "type": "string"
+          },
+          "kind_title": {
+            "title": "Kind Title",
+            "type": "string"
+          },
+          "mime_type": {
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "uploaded_at": {
+            "format": "date-time",
+            "title": "Uploaded At",
+            "type": "string"
+          },
+          "uploaded_by": {
+            "title": "Uploaded By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "employee_key",
+          "kind",
+          "kind_title",
+          "file_name",
+          "mime_type",
+          "size_bytes",
+          "is_archived",
+          "uploaded_by",
+          "uploaded_at",
+          "extraction_status",
+          "can_delete",
+          "can_restore"
+        ],
+        "title": "FileOut",
+        "type": "object"
+      },
+      "FileText": {
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/FileOut"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Извлечённый текст; null при extraction_status != ok",
+            "title": "Text"
+          }
+        },
+        "required": [
+          "file",
+          "text"
+        ],
+        "title": "FileText",
+        "type": "object"
+      },
+      "FilesList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FileOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "FilesList",
+        "type": "object"
+      },
       "GroupOut": {
         "properties": {
           "id": {
@@ -338,6 +536,80 @@
         "title": "JiraStatus",
         "type": "object"
       },
+      "LimitsOut": {
+        "properties": {
+          "cv_extensions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Cv Extensions",
+            "type": "array"
+          },
+          "materials_extensions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Materials Extensions",
+            "type": "array"
+          },
+          "max_file_bytes": {
+            "title": "Max File Bytes",
+            "type": "integer"
+          },
+          "max_file_mb": {
+            "title": "Max File Mb",
+            "type": "integer"
+          },
+          "max_file_mb_ceiling": {
+            "description": "Потолок 10 МБ задан в БД (ADR-009)",
+            "title": "Max File Mb Ceiling",
+            "type": "integer"
+          },
+          "text_extraction": {
+            "description": "Расширения, из которых извлекается текст",
+            "items": {
+              "type": "string"
+            },
+            "title": "Text Extraction",
+            "type": "array"
+          },
+          "upload_kinds": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Тип файла -> название",
+            "title": "Upload Kinds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "max_file_mb",
+          "max_file_bytes",
+          "max_file_mb_ceiling",
+          "upload_kinds",
+          "cv_extensions",
+          "materials_extensions",
+          "text_extraction"
+        ],
+        "title": "LimitsOut",
+        "type": "object"
+      },
+      "LimitsRequest": {
+        "properties": {
+          "max_file_mb": {
+            "description": "Целое число МБ, 1..10",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max File Mb",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_file_mb"
+        ],
+        "title": "LimitsRequest",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "login": {
@@ -356,6 +628,59 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MainCvText": {
+        "properties": {
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "extraction_status": {
+            "description": "ok | error | none (нет файла)",
+            "title": "Extraction Status",
+            "type": "string"
+          },
+          "file": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null - у сотрудника нет основного CV"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "employee_key",
+          "file",
+          "extraction_status"
+        ],
+        "title": "MainCvText",
         "type": "object"
       },
       "MeResponse": {
@@ -1123,6 +1448,30 @@
           "interval_sec"
         ],
         "title": "SyncStamp",
+        "type": "object"
+      },
+      "UploadResult": {
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/FileOut"
+          },
+          "replaced_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Для main_cv: прежнее актуальное CV, ушедшее в архив",
+            "title": "Replaced File Id"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "UploadResult",
         "type": "object"
       },
       "UserOut": {
@@ -1929,6 +2278,544 @@
         "summary": "Me",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/cv/employees/{employee_key}/files": {
+      "get": {
+        "operationId": "employee_files_cv_employees__employee_key__files_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "title": "Employee Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeFiles"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Employee Files",
+        "tags": [
+          "cv"
+        ]
+      },
+      "post": {
+        "description": "Загрузить ОДИН файл: тело запроса - содержимое файла (Content-Type любой).\n\nНедопустимый формат и файл больше лимита отклоняются, в карточку не попадают (FR-022 п. 3).\nОсновное CV заменяет прежнее, прежнее уходит в архив (FR-039); текст извлекается при\nзагрузке (DOC/DOCX/TXT, FR-027): сбой извлечения не отменяет загрузку, статус ``error``.",
+        "operationId": "upload_file_cv_employees__employee_key__files_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "title": "Employee Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Тип файла - обязателен (FR-022 п. 1)",
+            "in": "query",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "description": "Тип файла - обязателен (FR-022 п. 1)",
+              "enum": [
+                "main_cv",
+                "extra_cv",
+                "materials"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Имя файла",
+            "in": "query",
+            "name": "file_name",
+            "required": true,
+            "schema": {
+              "description": "Имя файла",
+              "maxLength": 1024,
+              "minLength": 1,
+              "title": "File Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "413": {
+            "description": "Файл больше лимита"
+          },
+          "415": {
+            "description": "Недопустимый формат"
+          },
+          "422": {
+            "description": "Нет типа, имени или тела"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Upload File",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/employees/{employee_key}/main-cv": {
+      "get": {
+        "description": "Текст актуального основного CV (кнопка «Резюме», FR-037; вход для FR-027/FR-036).\nНет файла - 200 со статусом ``none``.",
+        "operationId": "main_cv_text_cv_employees__employee_key__main_cv_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "title": "Employee Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MainCvText"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Main Cv Text",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/files": {
+      "get": {
+        "description": "Актуальные файлы всех сотрудников одним запросом: столбец «Файлы» раздела «Резюме».",
+        "operationId": "list_all_files_cv_files_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilesList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List All Files",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/files/{file_id}": {
+      "delete": {
+        "description": "Удалить файл (FR-040). Актуальное основное CV - 409: оно только заменяется (FR-039).",
+        "operationId": "delete_file_cv_files__file_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Актуальное основное CV не удаляется"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Delete File",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/files/{file_id}/download": {
+      "get": {
+        "description": "Исходный файл без изменений (FR-040 п. 1), в том числе версия из архива.",
+        "operationId": "download_file_cv_files__file_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Download File",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/files/{file_id}/restore": {
+      "post": {
+        "description": "Восстановить версию из архива: она становится актуальным основным CV, текущее уходит\nв архив (FR-039 п. 4).",
+        "operationId": "restore_file_cv_files__file_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeFiles"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Не архивная версия основного CV"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Restore File",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/files/{file_id}/text": {
+      "get": {
+        "description": "Извлечённый текст для окна просмотра (FR-037).",
+        "operationId": "file_text_cv_files__file_id__text_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileText"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "File Text",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/limits": {
+      "get": {
+        "description": "Лимит и форматы для окна загрузки (FR-022 п. 3).",
+        "operationId": "get_limits_cv_limits_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Limits",
+        "tags": [
+          "cv"
+        ]
+      },
+      "put": {
+        "description": "Лимит файла (только admin). Выше 10 МБ нельзя: потолок в схеме cv_db (ADR-009).",
+        "operationId": "set_limits_cv_limits_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LimitsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Set Limits",
+        "tags": [
+          "cv"
         ]
       }
     },

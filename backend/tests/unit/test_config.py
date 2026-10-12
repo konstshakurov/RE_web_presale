@@ -54,3 +54,11 @@ def test_ldap_bind_template_is_read():
     tpl = "uid={login},cn=users,dc=example,dc=test"
     assert load_settings(env(LDAP_BIND_TEMPLATE=tpl)).ldap_bind_template == tpl
     assert load_settings(env()).ldap_bind_template == ""
+
+
+def test_cv_max_file_mb_default_and_bounds():
+    assert load_settings(env()).cv_max_file_mb == 10
+    assert load_settings(env(CV_MAX_FILE_MB="5")).cv_max_file_mb == 5
+    for bad in ("0", "11", "x"):  # потолок 10 МБ зашит в cv_db (ADR-009)
+        with pytest.raises(ConfigError, match="CV_MAX_FILE_MB"):
+            load_settings(env(CV_MAX_FILE_MB=bad))

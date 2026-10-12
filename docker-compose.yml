@@ -36,6 +36,8 @@ x-backend-env: &backend-env
   JIRA_EMPLOYEE_ISSUETYPE: ${JIRA_EMPLOYEE_ISSUETYPE:-}
   WORKER_HEARTBEAT_PATH: ${WORKER_HEARTBEAT_PATH:-}
   LLM_BASE_URL: ${LLM_BASE_URL:-}
+  # Файлы CV (KON-36): лимит по умолчанию, МБ 1..10; настройка в app_setting приоритетнее
+  CV_MAX_FILE_MB: ${CV_MAX_FILE_MB:-}
 
 services:
   db:

@@ -13,6 +13,9 @@ from .auth import router as auth_router
 from .auth.admin import router as admin_router
 from .bootstrap import seed_admins
 from .config import load_settings
+from .cv.limits import CvLimits
+from .cv.repo import CvRepo
+from .cv.router import router as cv_router
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .logging_setup import configure_logging
 from .secrets import SecretStore
@@ -61,6 +64,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     seed_admins(repo, settings.admin_logins)
     cv_pool = open_cv_pool(settings)
     app.state.sync = build_sync_service(settings, pool, cv_pool, jira_adapter)
+    # файлы CV: только пул cv_rw; лимит файла читается из app_db (app_setting)
+    app.state.cv = CvRepo(cv_pool) if cv_pool is not None else None
+    app.state.cv_limits = CvLimits(pool, settings.cv_max_file_mb)
     try:
         yield
     finally:
@@ -76,6 +82,7 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(status_groups_router)
 app.include_router(sync_router)
+app.include_router(cv_router)
 
 
 @app.get("/health")

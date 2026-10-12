@@ -69,6 +69,7 @@ class Settings:
     enc_key: Secret = field(repr=True)
     enc_key_id: str = "k1"
     cv_db_url: Secret = Secret("")  # роль cv_rw; нужен синхронизации сотрудников (KON-35)
+    cv_max_file_mb: int = 10  # лимит файла по умолчанию; app_setting.max_file_mb приоритетнее
     admin_logins: tuple[str, ...] = ()
     ldap_url: str = ""
     ldap_base_dn: str = ""
@@ -106,6 +107,18 @@ def _positive_float(get, name: str, default: str) -> float:
     return value
 
 
+def _cv_max_mb(raw: str) -> int:
+    if not raw:
+        return 10
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ConfigError("CV_MAX_FILE_MB должен быть целым числом") from None
+    if not 1 <= value <= 10:  # потолок 10 МБ зашит в cv_db (ADR-009)
+        raise ConfigError("CV_MAX_FILE_MB должен быть в пределах 1..10")
+    return value
+
+
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     """Прочитать конфиг. ``env`` по умолчанию ``os.environ``."""
     e = os.environ if env is None else env
@@ -126,6 +139,7 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         enc_key=Secret(get("APP_ENC_KEY")),
         enc_key_id=key_id,
         cv_db_url=Secret(get("CV_DB_URL")),
+        cv_max_file_mb=_cv_max_mb(get("CV_MAX_FILE_MB")),
         admin_logins=parse_admin_logins(get("ADMIN_LOGINS")),
         ldap_url=get("LDAP_URL"),
         ldap_base_dn=get("LDAP_BASE_DN"),

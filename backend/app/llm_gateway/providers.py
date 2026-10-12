@@ -132,6 +132,11 @@ def ensure_default_provider(repo: LlmRepo, settings: Settings) -> bool:
     (LLM_API_KEY) в момент вызова либо задаётся администратором в настройках.
     """
     if repo.count_providers() > 0:
+        # Провайдер по умолчанию создан до появления модели в конфиге: дозаполняем имя модели.
+        current = repo.get_default_provider()
+        if (current is not None and not current.is_external and not current.model
+                and settings.llm_model):
+            repo.update_provider(current.id, {"model": settings.llm_model})
         return False
     created = repo.create_provider(
         DEFAULT_PROVIDER_NAME, settings.llm_base_url or DEFAULT_QWEN_URL,

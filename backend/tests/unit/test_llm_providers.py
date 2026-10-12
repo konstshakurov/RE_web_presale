@@ -24,6 +24,14 @@ def test_default_provider_created_once_from_env():
     assert repo.count_providers() == 1
 
 
+def test_empty_model_of_internal_default_is_filled_from_config():
+    repo = FakeLlmRepo(MemSecretRepo())
+    ensure_default_provider(repo, load_settings({**ENV, "LLM_MODEL": "qwen-test"}))
+    repo.update_provider(repo.get_default_provider().id, {"model": ""})
+    assert ensure_default_provider(repo, load_settings({**ENV, "LLM_MODEL": "qwen-new"})) is False
+    assert repo.get_default_provider().model == "qwen-new"
+
+
 def test_default_url_from_architecture_when_env_empty():
     repo = FakeLlmRepo(MemSecretRepo())
     ensure_default_provider(repo, load_settings(ENV))

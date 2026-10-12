@@ -17,6 +17,8 @@ from .cv.limits import CvLimits
 from .cv.repo import CvRepo
 from .cv.router import router as cv_router
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
+from .llm_gateway.factory import build_llm
+from .llm_gateway.router import router as llm_router
 from .logging_setup import configure_logging
 from .secrets import SecretStore
 from .status_groups.repo import StatusGroupRepo
@@ -67,6 +69,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # файлы CV: только пул cv_rw; лимит файла читается из app_db (app_setting)
     app.state.cv = CvRepo(cv_pool) if cv_pool is not None else None
     app.state.cv_limits = CvLimits(pool, settings.cv_max_file_mb)
+    # шлюз LLM (KON-37): обезличивание и постановка задач; вызовы LLM выполняет worker
+    llm = build_llm(settings, pool, cv_pool, with_ner=True)
+    app.state.llm_repo = llm.repo
+    app.state.llm = llm.gateway
+    app.state.llm_providers = llm.providers
+    app.state.llm_dictionary = llm.dictionary
     try:
         yield
     finally:
@@ -83,6 +91,7 @@ app.include_router(admin_router)
 app.include_router(status_groups_router)
 app.include_router(sync_router)
 app.include_router(cv_router)
+app.include_router(llm_router)
 
 
 @app.get("/health")

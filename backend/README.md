@@ -9,7 +9,7 @@ Python 3.12, FastAPI. Каркас: `app/main.py` (api, `/health`), `app/worker.
 `SYNC_EMPLOYEES_INTERVAL_SEC` (3600), `SYNC_EPIC_TTL_SEC` (3600), `SYNC_INITIAL_LOAD_DAYS` (183),
 `SYNC_PAUSE_RECHECK_SEC` (15), `JIRA_UTC_OFFSET_HOURS` (4), `JIRA_NEED_PROJECT`, `JIRA_NEED_ISSUETYPE`,
 `JIRA_EMPLOYEE_PROJECT`, `JIRA_EMPLOYEE_ISSUETYPE`. Нужна миграция V005 (app_db и cv_db).
-БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V007 и cv_db V001-V006).
+БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V008 и cv_db V001-V006).
 
 ## Файлы сотрудников (KON-36)
 Форматы заданы в одном месте, `app/cv/formats.py`, и отдаются в `GET /cv/limits` (`extensions_by_kind`).
@@ -18,3 +18,16 @@ pdf, txt, xls, xlsx, ppt, pptx, png, jpg, jpeg; текст не извлекае
 
 ## Группы статусов (KON-64)
 Модуль `app/status_groups`, API `/admin/status-groups` (только admin, CSRF на изменяющих): список групп с составом, статусами для выбора и статусами «Прочих»; создать, переименовать, удалить группу; добавить/убрать статус; порядок (`PUT /order`). «Прочие» и «Все статусы» зарезервированы и в таблицы не кладутся. БД-тест: `tests/unit/test_status_groups_db.py`.
+
+## Шлюз LLM (KON-37)
+Модуль `app/llm_gateway`; все обращения к LLM только через него (ADR-007). Миграция app_db V008 (колонка
+`llm_provider.model`, очередь `llm_task`). Внутренняя Qwen (OpenAI-совместимый API) создаётся при старте из
+`LLM_BASE_URL` (по умолчанию адрес из архитектуры), `LLM_MODEL`, ключ `LLM_API_KEY` (только env; ключи
+админских провайдеров - шифртекстом в `secret_store`, `kind=llm_key`). Внешний провайдер: обезличивание
+(regex, словари из кэша Jira и CV и админский словарь, natasha NER) -> предпросмотр -> подтверждение
+(`POST /llm/tasks/{id}/confirm`) -> worker вызывает с таймаутом провайдера (по умолчанию 120 с) -> обратная
+подстановка. Внутренний - без обезличивания, сразу в очередь. Повтор: `POST /llm/tasks/{id}/retry`.
+API: `/llm/tasks*`, `/llm/providers` (выбор модели), `/admin/llm/providers*`, `/admin/llm/dictionary`.
+Завершённые задачи хранятся `LLM_TASK_TTL_DAYS` (7) дней. Модуль вызывается из Python так:
+`request.app.state.llm.submit(login, "match", prompt, provider_id=None, ref="ANALYTICS-1")`.
+БД-тест: `tests/unit/test_llm_db.py`.

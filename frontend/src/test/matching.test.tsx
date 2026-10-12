@@ -302,7 +302,7 @@ describe("Потребности: сопоставление", () => {
     expect(called("POST", "/confirm")).toHaveLength(0);
 
     // закрытие окна ничего не отправляет
-    await userEvent.click(within(dialog).getByRole("button", { name: "Закрыть, не отправляя" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Отложить" }));
     expect(called("POST", "/confirm")).toHaveLength(0);
     expect(screen.getByText(/ничего не отправлено/)).toBeInTheDocument();
 
@@ -310,6 +310,136 @@ describe("Потребности: сопоставление", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Подтвердить и отправить" }));
     await waitFor(() => expect(called("POST", "/confirm")).toHaveLength(1));
     expect(await screen.findByText("Тестов Тест")).toBeInTheDocument();
+  });
+
+  it("«Отложить» и «Отменить расчёт» различаются подсказками; отложить cancel не вызывает", async () => {
+    const run: RunOut = {
+      run_id: "33333333-3333-3333-3333-333333333333",
+      kind: "match",
+      stage: "deep",
+      status: "awaiting_confirmation",
+      requires_confirmation: true,
+      is_external: true,
+      provider_name: "Внешняя",
+      candidates: 1,
+      replacements: {},
+      tasks: [],
+    };
+    serve((url) => {
+      if (url.endsWith(`/matching/runs/${run.run_id}`)) return json(run);
+      if (url.includes("/needs/AN-1/match?"))
+        return json(state({ status: "awaiting_confirmation", run_id: run.run_id, items: [], total: 0, calculated_at: null }));
+    });
+    renderAt("/needs");
+    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
+    expect(within(dialog).getByRole("button", { name: "Отложить" })).toHaveAttribute(
+      "title",
+      "Окно закроется, расчёт останется в ожидании подтверждения",
+    );
+    expect(within(dialog).getByRole("button", { name: "Отменить расчёт" })).toHaveAttribute(
+      "title",
+      expect.stringContaining("Прогон будет отменён, текст не будет отправлен"),
+    );
+    expect(within(dialog).queryByRole("button", { name: /Закрыть, не отправляя/ })).toBeNull();
+    await userEvent.click(within(dialog).getByRole("button", { name: "Отложить" }));
+    expect(called("POST", "/cancel")).toHaveLength(0);
+    expect(called("POST", "/confirm")).toHaveLength(0);
+  });
+
+  describe("правка текста пакета", () => {
+    const runId = "44444444-4444-4444-4444-444444444444";
+    const mkRun = (prompt: string, edited = false): RunOut => ({
+      run_id: runId,
+      kind: "match",
+      need_key: "AN-1",
+      stage: "screening",
+      status: "awaiting_confirmation",
+      requires_confirmation: true,
+      is_external: true,
+      provider_name: "Внешняя модель",
+      candidates: 1,
+      replacements: { persons: 1 },
+      tasks: [
+        { task_id: "t1", status: "awaiting_confirmation", candidates: 1, requires_confirmation: true, replacements: { persons: 1 }, ner_used: true, prompt, editable: true, edited },
+      ],
+    });
+    const open = async (put: (body: { prompt: string }) => Response) => {
+      const current = mkRun("ИСХОДНЫЙ ТЕКСТ");
+      serve((url, method, body) => {
+        if (url.endsWith("/tasks/t1/prompt") && method === "PUT") return put(body as { prompt: string });
+        if (url.endsWith(`/matching/runs/${runId}/confirm`) && method === "POST") return json({ ...current, status: "running" });
+        if (url.endsWith(`/matching/runs/${runId}`)) return json(current);
+        if (url.includes("/needs/AN-1/match?"))
+          return json(state({ status: "awaiting_confirmation", run_id: runId, items: [], total: 0, calculated_at: null }));
+      });
+      renderAt("/needs");
+      await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+      const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
+      const box = (await within(dialog).findByLabelText("Текст пакета 1")) as HTMLTextAreaElement;
+      return { dialog, box };
+    };
+
+    it("текст редактируется; сохранение активно только при изменении; подтверждение блокируется до сохранения", async () => {
+      const { dialog, box } = await open((b) => json(mkRun(b.prompt, true)));
+      expect(box.tagName).toBe("TEXTAREA");
+      expect(box).toHaveValue("ИСХОДНЫЙ ТЕКСТ");
+      expect(within(dialog).getByText(/проверяются на остатки персональных данных/)).toBeInTheDocument();
+      const save = within(dialog).getByRole("button", { name: "Сохранить правки пакета 1" });
+      const confirm = within(dialog).getByRole("button", { name: "Подтвердить и отправить" });
+      expect(save).toBeDisabled();
+      expect(confirm).toBeEnabled();
+
+      await userEvent.type(box, " плюс");
+      expect(save).toBeEnabled();
+      expect(confirm).toBeDisabled();
+      expect(within(dialog).getByText(/изменено, не сохранено/)).toBeInTheDocument();
+
+      await userEvent.click(save);
+      await waitFor(() => expect(called("PUT", "/tasks/t1/prompt")).toHaveLength(1));
+      expect(called("PUT", "/tasks/t1/prompt")[0].body).toEqual({ prompt: "ИСХОДНЫЙ ТЕКСТ плюс" });
+      await waitFor(() => expect(confirm).toBeEnabled());
+      expect(save).toBeDisabled();
+      expect(within(dialog).getByLabelText("Текст пакета 1")).toHaveValue("ИСХОДНЫЙ ТЕКСТ плюс");
+      expect(within(dialog).getByText("изменено")).toBeInTheDocument();
+    });
+
+    it("422: сообщение и найденные фрагменты, введённый текст остаётся, подтверждение заблокировано", async () => {
+      const { dialog, box } = await open(() =>
+        json({ detail: { message: "В тексте остались необезличенные фрагменты", fragments: ["Иванов И. И.", "ООО Ромашка"] } }, 422),
+      );
+      await userEvent.clear(box);
+      await userEvent.type(box, "Иванов И. И. работал");
+      await userEvent.click(within(dialog).getByRole("button", { name: "Сохранить правки пакета 1" }));
+      expect(await within(dialog).findByText("В тексте остались необезличенные фрагменты")).toBeInTheDocument();
+      expect(within(dialog).getByText("Иванов И. И.")).toBeInTheDocument();
+      expect(within(dialog).getByText("ООО Ромашка")).toBeInTheDocument();
+      expect(within(dialog).getByLabelText("Текст пакета 1")).toHaveValue("Иванов И. И. работал");
+      expect(within(dialog).getByRole("button", { name: "Подтвердить и отправить" })).toBeDisabled();
+    });
+
+    it("409: текст сообщения показывается, правка не теряется", async () => {
+      const { dialog, box } = await open(() => json({ detail: "Прогон уже подтверждён" }, 409));
+      await userEvent.type(box, "!");
+      await userEvent.click(within(dialog).getByRole("button", { name: "Сохранить правки пакета 1" }));
+      expect(await within(dialog).findByText("Прогон уже подтверждён")).toBeInTheDocument();
+      expect(within(dialog).getByLabelText("Текст пакета 1")).toHaveValue("ИСХОДНЫЙ ТЕКСТ!");
+    });
+
+    it("без editable текст только для чтения", async () => {
+      const run = mkRun("ТОЛЬКО ЧТЕНИЕ");
+      run.tasks[0].editable = false;
+      serve((url) => {
+        if (url.endsWith(`/matching/runs/${runId}`)) return json(run);
+        if (url.includes("/needs/AN-1/match?"))
+          return json(state({ status: "awaiting_confirmation", run_id: runId, items: [], total: 0, calculated_at: null }));
+      });
+      renderAt("/needs");
+      await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+      const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
+      await within(dialog).findByText("ТОЛЬКО ЧТЕНИЕ");
+      expect(within(dialog).queryByRole("textbox")).toBeNull();
+    });
   });
 
   it("отмена прогона вызывает cancel", async () => {

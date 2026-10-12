@@ -94,3 +94,30 @@ export function parseTerms(text: string): string[] {
   }
   return out;
 }
+
+export interface PromptRejection {
+  status: number;
+  message: string;
+  fragments: string[]; // найденные необезличенные фрагменты (422)
+}
+
+// Отказ PUT .../prompt: текст сообщения и список фрагментов. Допущение: список лежит в detail.fragments
+// либо fragments, элементы - строки или объекты с text/fragment/value.
+export function promptRejection(e: unknown): PromptRejection {
+  const err = e as { status?: number; message?: string; body?: unknown };
+  const body = (err?.body ?? {}) as { detail?: unknown; fragments?: unknown };
+  const detail = (typeof body.detail === "object" && body.detail !== null ? body.detail : {}) as { fragments?: unknown };
+  const raw = Array.isArray(detail.fragments) ? detail.fragments : Array.isArray(body.fragments) ? body.fragments : [];
+  const fragments = raw
+    .map((f) => {
+      if (typeof f === "string") return f;
+      const o = f as { text?: unknown; fragment?: unknown; value?: unknown };
+      const v = o?.text ?? o?.fragment ?? o?.value;
+      return typeof v === "string" ? v : "";
+    })
+    .filter(Boolean);
+  const status = err?.status ?? 0;
+  const message =
+    err?.message || (status === 422 ? "В тексте остались необезличенные фрагменты" : "Не удалось сохранить правки");
+  return { status, message, fragments };
+}

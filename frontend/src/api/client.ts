@@ -26,6 +26,7 @@ import type {
   RefreshResult,
   ResumeItem,
   RunOut,
+  RunTask,
   SearchParams,
   SearchState,
   StatusGroupsData,
@@ -44,6 +45,7 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public detail: SyncErrorBody | null = null, // разобранный detail отказа /sync (state, code, message)
+    public body: unknown = null, // тело отказа как есть (например, список найденных фрагментов при 422)
   ) {
     super(message);
   }
@@ -68,6 +70,8 @@ function errorText(status: number, body: unknown): string {
   const detail = (body as { detail?: unknown } | null)?.detail;
   if (typeof detail === "string" && detail) return detail;
   if (isSyncError(detail) && detail.message) return detail.message; // текст отказа Jira как есть
+  const msg = (detail as { message?: unknown } | null)?.message;
+  if (typeof msg === "string" && msg) return msg;
   if (status === 422) return "Проверьте введённые данные";
   if (status >= 500) return "Сервис временно недоступен, повторите позже";
   return `Ошибка запроса (${status})`;
@@ -106,7 +110,7 @@ export async function request<T>(
       /* тело не JSON */
     }
     const detail = (data as { detail?: unknown } | null)?.detail;
-    throw new ApiError(res.status, errorText(res.status, data), isSyncError(detail) ? detail : null);
+    throw new ApiError(res.status, errorText(res.status, data), isSyncError(detail) ? detail : null, data);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -212,6 +216,13 @@ export const api = {
   runPreview: (runId: string) => request<RunOut>("GET", `/matching/runs/${encodeURIComponent(runId)}`),
   confirmRun: (runId: string) => request<RunOut>("POST", `/matching/runs/${encodeURIComponent(runId)}/confirm`),
   cancelRun: (runId: string) => request<RunOut>("POST", `/matching/runs/${encodeURIComponent(runId)}/cancel`),
+  // Правка обезличенного текста пакета до подтверждения (CR KON-41); 422 - остались необезличенные фрагменты
+  updateTaskPrompt: (runId: string, taskId: string, prompt: string) =>
+    request<RunOut | RunTask>(
+      "PUT",
+      `/matching/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}/prompt`,
+      { prompt },
+    ),
   retryTask: (taskId: string) => request<LlmTask>("POST", `/llm/tasks/${encodeURIComponent(taskId)}/retry`),
   publicProviders: () => request<ProviderPublic[]>("GET", "/llm/providers"),
   // «Резюме»: поиск по смыслу, технологии, профиль (FR-032, FR-003)

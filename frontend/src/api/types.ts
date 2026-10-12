@@ -341,6 +341,8 @@ export interface RunTask {
   ner_used: boolean;
   prompt?: string | null;
   system?: string | null;
+  editable?: boolean; // текст можно править до подтверждения
+  edited?: boolean; // текст правлен пользователем
   error_message?: string | null;
 }
 

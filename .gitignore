@@ -61,3 +61,9 @@ frontend/dist/
 .pytest_cache/
 secrets/
 !backend/app/secrets/
+
+# QA-стенд: локально сгенерированные значения (KON-57/58)
+qa/stand/.qa.env
+qa/e2e/node_modules/
+qa/e2e/test-results/
+qa/e2e/playwright-report/

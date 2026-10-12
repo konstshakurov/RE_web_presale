@@ -188,6 +188,11 @@ def _looks_like_secret_value(v: str) -> bool:
     return any(ch.isdigit() for ch in v) and any(ch.isalpha() for ch in v) and not re.fullmatch(r"[A-Za-z_.()\[\]]+", v)
 
 
+#: Известные ложные срабатывания (проверено вручную, KON-57): вымышленный пароль фейкового LDAP
+#: в unit-тесте Dev, к реальным учётным записям отношения не имеет. Формат: (путь, имя константы).
+KNOWN_FIXTURES = {("backend/tests/unit/test_auth.py", "PASSWORD")}
+
+
 def scan_repo_tree(root: Path, extra_ignore: tuple[str, ...] = ("qa/nfr006_check.py",)) -> list[Finding]:
     out: list[Finding] = []
     for p in root.rglob("*"):
@@ -209,6 +214,8 @@ def scan_repo_tree(root: Path, extra_ignore: tuple[str, ...] = ("qa/nfr006_check
                 continue
             for m in _ENV_SECRET.finditer(line):
                 name, val = m.group(1), m.group(2)
+                if (rel, name) in KNOWN_FIXTURES:
+                    continue
                 quoted_or_env = bool(re.search(r"[:=]\s*[\"']", line)) or p.suffix in {".env", ".ldif", ".yml", ".yaml", ".sh", ".example", ""}
                 if quoted_or_env and _looks_like_secret_value(val):
                     out.append(Finding("repo", rel, f"{name} задан значением {mask(val)}"))

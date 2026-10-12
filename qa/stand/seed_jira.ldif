@@ -1,0 +1,9 @@
+# Дополнительные вымышленные пользователи QA-стенда для сценариев Jira (KON-58).
+# Плейсхолдеры подставляет stand.sh из локального env; в репозитории паролей нет.
+dn: uid=qa-jirablock,cn=users,cn=accounts,dc=qa,dc=example,dc=test
+objectClass: inetOrgPerson
+uid: qa-jirablock
+cn: QA Jira Blocked Fiction
+sn: JiraBlock
+mail: qa-jirablock@qa.example.test
+userPassword: FAKE_PW_JIRABLOCK

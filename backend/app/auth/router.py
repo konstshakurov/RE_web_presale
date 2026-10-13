@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from ..app_repo import AppRepo
 from ..config import Settings
@@ -30,8 +30,19 @@ SECTIONS = (
 
 
 class LoginRequest(BaseModel):
-    login: str = Field(max_length=128)
-    password: str = Field(max_length=1024, repr=False)  # пустые отклоняются в обработчике
+    # Пустой логин/пароль и управляющие символы в логине - ошибка формата (422), а не отказ
+    # аутентификации (401): LDAP не вызывается. Неверные данные и «нет в списке» - 401.
+    login: str = Field(min_length=1, max_length=128)
+    password: str = Field(min_length=1, max_length=1024, repr=False)
+
+    @field_validator("login")
+    @classmethod
+    def _login_not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Логин не может быть пустым")
+        if any(ord(ch) < 32 or ord(ch) == 127 for ch in v):
+            raise ValueError("Логин содержит недопустимые символы")
+        return v
 
 
 class Section(BaseModel):

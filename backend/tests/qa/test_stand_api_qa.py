@@ -91,8 +91,8 @@ def test_tc02_outsider_denied_same_text_as_wrong_password(baseline):
 @pytest.mark.parametrize("pw", ["", " ", "   ", "\x00", " ", "a​b", "пароль-кириллица"])
 def test_tc04_empty_like_password_denied(baseline, pw):
     r = Session().login("qa-user", pw)
-    # NUL в теле JSON отклоняется на входе API (KON-76): 422; остальные - 401. Сессия не создаётся
-    assert r.status_code == (422 if "\x00" in pw else 401) and "set-cookie" not in r.headers
+    # пустой пароль и NUL - ошибка формата (422, KON-76); остальные - отказ аутентификации (401)
+    assert r.status_code == (422 if pw == "" or "\x00" in pw else 401) and "set-cookie" not in r.headers
 
 
 # KON-67 исправлен (89b0cee): управляющий символ в пароле -> 401, не 503
@@ -111,6 +111,12 @@ def test_tc05_ldap_injection_denied(baseline, name):
     # NUL в теле JSON - 422 на входе API (KON-76), остальные инъекции - 401
     assert r.status_code == (422 if "\x00" in name else 401), name
     assert "set-cookie" not in r.headers
+
+
+@pytest.mark.parametrize("name", ["", "  ", "\t", "qa\nuser", "qa\x01user"])
+def test_tc05d_blank_or_control_login_is_422(baseline, name):
+    r = Session().login(name, PASSWORDS["qa-user"])
+    assert r.status_code == 422 and "set-cookie" not in r.headers
 
 
 def test_tc05b_login_normalized_trim_and_case(baseline):

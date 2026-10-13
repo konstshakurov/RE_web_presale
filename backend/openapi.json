@@ -696,11 +696,13 @@
         "properties": {
           "login": {
             "maxLength": 128,
+            "minLength": 1,
             "title": "Login",
             "type": "string"
           },
           "password": {
             "maxLength": 1024,
+            "minLength": 1,
             "title": "Password",
             "type": "string"
           }

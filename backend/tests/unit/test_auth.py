@@ -156,13 +156,22 @@ def test_wrong_password_and_not_in_list_same_text(client):
     assert a == b == c == DENIED
 
 
-def test_empty_password_denied_without_ldap_call(client, env):
-    assert login(client, "ivan", "").status_code == 401
+def test_empty_password_is_validation_error_without_ldap_call(client, env):
+    assert login(client, "ivan", "").status_code == 422
     assert env[2].calls == []
 
 
-def test_empty_login_denied(client):
-    assert login(client, "  ", PASSWORD).status_code == 401
+def test_empty_blank_or_control_login_is_validation_error(client, env):
+    for name in ("", "  ", "\t", "iv\nan", "iv\x01an", "\x7f"):
+        r = login(client, name, PASSWORD)
+        assert r.status_code == 422, repr(name)
+        assert PASSWORD not in r.text
+        assert "set-cookie" not in r.headers
+    assert env[2].calls == []
+
+
+def test_blank_like_password_still_goes_to_ldap_and_is_denied(client):
+    assert login(client, "ivan", "   ").status_code == 401
 
 
 def test_ldap_down_gives_503_without_details(client, env):

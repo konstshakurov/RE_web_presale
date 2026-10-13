@@ -4,6 +4,7 @@
 удаляются."""
 from __future__ import annotations
 
+import json
 import os
 
 import pytest
@@ -206,6 +207,16 @@ def test_dictionary_sources_and_custom_dictionary(env):
     got = src.load_custom()
     assert got.projects == ("Проект-Тест-37",)
     assert "Проект-Тест-37" in src.load().projects
+
+
+def test_tech_terms_setting_extends_whitelist(env):
+    _, repo, _, _, _, _ = env
+    src = DictionarySource(repo)
+    assert src.load_tech_terms() == ()
+    repo.put_setting("llm_tech_terms", json.dumps(["ВнутреннийФреймворк", "  "]))
+    assert src.load_tech_terms() == ("ВнутреннийФреймворк",)
+    repo.put_setting("llm_tech_terms", "не json")
+    assert src.load_tech_terms() == ()
 
 
 def test_group_confirm_is_all_or_nothing_in_one_transaction(env):

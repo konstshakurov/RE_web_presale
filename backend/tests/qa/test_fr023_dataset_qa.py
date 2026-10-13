@@ -21,8 +21,8 @@ SET_PATH = Path(os.environ.get("QA_FR023_SET") or (
 EXAMPLES = json.loads(SET_PATH.read_text(encoding="utf-8"))["examples"]
 
 # id примера -> номер дефекта в Linear (xfail до исправления)
-LEAK_BUGS = {"FR023-05": "KON-70", "FR023-06": "KON-71", "FR023-08": "KON-70"}
-KEEP_BUGS = {"FR023-02": "KON-72", "FR023-03": "KON-72", "FR023-04": "KON-72", "FR023-07": "KON-72"}
+LEAK_BUGS: dict[str, str] = {}
+KEEP_BUGS: dict[str, str] = {}
 
 natasha = pytest.importorskip("natasha")
 

@@ -420,3 +420,15 @@ def test_edit_prompt_stored_encrypted_and_not_logged(env, caplog):
     with pytest.raises(GatewayError):
         env.gateway.edit_prompt("ivan", v.id, f"{marker} tester@example.test")
     assert marker not in caplog.text and "tester@example.test" not in caplog.text
+
+
+def test_edit_prompt_ner_does_not_flag_whitelisted_technologies():
+    e = Env(ner=FakeNer([("Kafka", "company"), ("Camunda", "company")]))
+    v = e.gateway.submit("ivan", "match", "Опыт работы, проекты и резюме. " * 4,
+                         provider_id=e.external.id)
+    ok = e.gateway.edit_prompt("ivan", v.id, v.preview.prompt + " Стек: Kafka, Camunda.")
+    assert ok.preview.edited
+    e.repo.settings["llm_dictionary"] = json.dumps({"companies": ["Camunda"]})
+    with pytest.raises(GatewayError) as ei:
+        e.gateway.edit_prompt("ivan", v.id, ok.preview.prompt + " Стек: Kafka, Camunda.")
+    assert ei.value.code == "leak_detected" and "Camunda" in ei.value.fragments

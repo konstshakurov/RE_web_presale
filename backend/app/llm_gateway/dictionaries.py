@@ -15,6 +15,7 @@ from .repo import LlmRepo
 log = logging.getLogger(__name__)
 
 SETTING_KEY = "llm_dictionary"
+TECH_SETTING_KEY = "llm_tech_terms"
 MAX_TERMS = 5000
 MAX_TERM_LEN = 200
 KINDS = ("persons", "companies", "projects", "locations")
@@ -39,6 +40,21 @@ class DictionarySource:
             log.warning("app_setting %s: не JSON, словарь пропущен", SETTING_KEY)
             return Dictionaries()
         return Dictionaries(**{k: tuple(str(v) for v in data.get(k, [])) for k in KINDS})
+
+    def load_tech_terms(self) -> tuple[str, ...]:
+        """Расширение белого списка технологий (KON-72): app_setting ``llm_tech_terms``,
+        JSON-массив строк. Встроенный список - в ``technologies.py``."""
+        raw = self._repo.get_setting(TECH_SETTING_KEY)
+        if not raw:
+            return ()
+        try:
+            data = json.loads(raw)
+        except ValueError:
+            log.warning("app_setting %s: не JSON, расширение пропущено", TECH_SETTING_KEY)
+            return ()
+        if not isinstance(data, list):
+            return ()
+        return tuple(str(v)[:MAX_TERM_LEN] for v in data[:MAX_TERMS] if str(v).strip())
 
     def save_custom(self, d: Dictionaries) -> None:
         self._repo.put_setting(

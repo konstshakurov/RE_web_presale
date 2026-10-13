@@ -171,7 +171,7 @@ class LlmGateway:
         d = self._dicts.load()
         if terms is not None:
             d = d.merged(terms)
-        anonymizer = Anonymizer(d, self._ner)
+        anonymizer = Anonymizer(d, self._ner, self._dicts.load_tech_terms())
         joined = (system or "") + _SEP + prompt
         anon = anonymizer.anonymize(joined)
         out_system, out_prompt = anon.text.split(_SEP, 1)
@@ -253,7 +253,8 @@ class LlmGateway:
         if saved:
             d = d.merged(Dictionaries(**{k: tuple(v) for k, v in saved.items()}))
         d = d.merged(_originals_as_terms(payload.get("mapping") or {}))
-        found = Anonymizer(d, None).find_leaks(text)
+        anonymizer = Anonymizer(d, None, self._dicts.load_tech_terms())
+        found = anonymizer.find_leaks(text)
         if self._ner is not None:
             clean = _blank_placeholders(text)
             before = (payload.get("prompt") or "").lower()
@@ -265,7 +266,8 @@ class LlmGateway:
             for sp in spans:
                 frag = " ".join(clean[sp.start:sp.end].split())
                 # то, что уже стояло в принятом тексте, не считается новой утечкой
-                if len(frag) >= 3 and frag.lower() not in before:
+                if (len(frag) >= 3 and frag.lower() not in before
+                        and not anonymizer.is_known_tech(frag)):
                     found.append(frag)
         seen: dict[str, str] = {}
         for f in found:

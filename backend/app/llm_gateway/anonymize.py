@@ -1,9 +1,10 @@
 """Конвейер обезличивания текста перед отправкой во внешнюю LLM (FR-023, ADR-007).
 
-Этапы: regex (email, телефоны, URL) -> словари (клиенты, ФИО сотрудников, проекты, локации)
--> NER (ФИО, организации, локации; необязателен). Пересечения разрешаются в пользу более раннего
-этапа и более длинного фрагмента. Одному оригиналу соответствует один плейсхолдер; таблица
-подстановок возвращается вызывающему и хранится только до конца задачи.
+Этапы: regex (email, телефоны, URL и голые домены, @логины) -> словари (клиенты, ФИО
+сотрудников, проекты, локации) -> NER (ФИО, организации, локации; необязателен). Пересечения
+разрешаются в пользу более раннего этапа и более длинного фрагмента. Одному оригиналу
+соответствует один плейсхолдер; таблица подстановок возвращается вызывающему и хранится
+только до конца задачи.
 
 Модуль чистый: без БД и сети; NER приходит через порт ``NerPort``.
 """
@@ -15,17 +16,33 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Protocol
 
+from .technologies import build_terms, is_tech, normalize
+
 #: вид сущности -> метка в плейсхолдере
 PERSON, COMPANY, PROJECT, LOCATION = "person", "company", "project", "location"
-EMAIL, PHONE, URL = "email", "phone", "url"
+EMAIL, PHONE, URL, CONTACT = "email", "phone", "url", "contact"
 LABELS = {
     PERSON: "ПЕРСОНА", COMPANY: "КОМПАНИЯ", PROJECT: "ПРОЕКТ", LOCATION: "ЛОКАЦИЯ",
-    EMAIL: "EMAIL", PHONE: "ТЕЛЕФОН", URL: "ССЫЛКА",
+    EMAIL: "EMAIL", PHONE: "ТЕЛЕФОН", URL: "ССЫЛКА", CONTACT: "КОНТАКТ",
 }
 MIN_TERM_LEN = 3  # короче - слишком много ложных срабатываний
 
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>\"'\]\[)]+", re.IGNORECASE)
+# логин мессенджера (@handle): не внутри e-mail и не после слова; 4-32 знака
+_HANDLE_RE = re.compile(r"(?<![\w.@])@[A-Za-z][A-Za-z0-9_]{3,31}(?![\w@])")
+# голый домен (без схемы и www): только с известным TLD строчными буквами, чтобы не задевать
+# «node.js», «ASP.NET», «a.b», имена файлов (main.py, README.md) и версии (1.2.3)
+_BARE_TLDS = (
+    "com|net|org|info|biz|ru|su|рф|ua|by|kz|io|dev|app|tech|ai|cloud|online|site|store|pro|"
+    "test|example|invalid|local|internal"
+)
+_DOMAIN_RE = re.compile(
+    rf"(?<![\w@.\-/])(?:[^\W_](?:[\w\-]*[^\W_])?\.)+(?:{_BARE_TLDS})(?![\w\-]|\.\w)"
+    r"(?:/[^\s<>\"'\]\[)]*)?"
+)
+#: технологии, которые по написанию похожи на домен (регистр не важен)
+_DOMAIN_LIKE_TECH = frozenset({"socket.io", "asp.net", "ado.net", "vb.net", "f.net", "dot.net"})
 _PHONE_RES = (
     # +7 / 8 и 10 цифр с любыми разделителями
     re.compile(r"(?<![\w])(?:\+7|8|7)[\s\-(]*\d{3}[\s\-)]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}(?!\d)"),
@@ -125,6 +142,12 @@ def _variants(term: str) -> list[str]:
     return [v for v in out if len(v) >= MIN_TERM_LEN]
 
 
+#: короткие слова ФИО (2-3 буквы: Ким, Ли, Пак): только с заглавной буквы и закрытым списком
+#: падежных окончаний - иначе «ли», «как» и т.п. давали бы ложные срабатывания (KON-71)
+_SHORT_TOKEN_LEN = 2
+_SHORT_ENDINGS = "а|у|ом|ем|е|ы|и|ой|ею|ою|ю|я|ей|ов|ев|ам|ами|ах"
+
+
 def _stem(token: str) -> str:
     return token[:-1] if len(token) >= 5 else token
 
@@ -153,6 +176,7 @@ class _DictMatcher:
     def _add_persons(self, names: Iterable[str]) -> None:
         full: dict[str, str] = {}
         parts: dict[str, str] = {}  # отдельное слово ФИО -> каноническое ФИО
+        short: dict[str, str] = {}  # то же для слов короче 4 букв
         for name in _uniq(names):
             if len(name) < MIN_TERM_LEN:
                 continue
@@ -160,6 +184,8 @@ class _DictMatcher:
             for tok in re.findall(r"[\w-]+", name):
                 if len(tok) >= 4:
                     parts.setdefault(tok.lower(), name)
+                elif len(tok) >= _SHORT_TOKEN_LEN and tok.isalpha():
+                    short.setdefault(tok.lower(), name)
         if full:
             alt = "|".join(_flex(t) for t in sorted(full.values(), key=len, reverse=True))
             pat = re.compile(rf"(?<!\w)(?:{alt})(?!\w)", re.IGNORECASE | re.UNICODE)
@@ -170,6 +196,11 @@ class _DictMatcher:
                            for t in sorted(parts, key=len, reverse=True))
             pat = re.compile(rf"(?<!\w)(?:{alt})(?!\w)", re.IGNORECASE | re.UNICODE)
             self._rules.append((PERSON, 2, pat, parts, True))
+        if short:
+            forms = {f for t in short for f in (t.capitalize(), t.upper())}
+            alt = "|".join(re.escape(f) for f in sorted(forms, key=len, reverse=True))
+            pat = re.compile(rf"(?<!\w)(?:{alt})(?i:(?:{_SHORT_ENDINGS}))?(?!\w)", re.UNICODE)
+            self._rules.append((PERSON, 2, pat, short, True))
 
     def find(self, text: str) -> list[_Span]:
         out: list[_Span] = []
@@ -197,9 +228,25 @@ _PLACEHOLDER_RE = re.compile(r"\[(?:%s)_\d+\]" % "|".join(LABELS.values()))
 class Anonymizer:
     """Обезличивает текст по regex, словарям и (если задан) NER."""
 
-    def __init__(self, dictionaries: Dictionaries, ner: NerPort | None = None) -> None:
+    def __init__(
+        self, dictionaries: Dictionaries, ner: NerPort | None = None,
+        tech_terms: Iterable[str] = (),
+    ) -> None:
         self._matcher = _DictMatcher(dictionaries)
         self._ner = ner
+        # технологии (KON-72): встроенный список + расширение; термины словаря обезличивания
+        # имеют приоритет - их белый список не защищает
+        own = {
+            normalize(v)
+            for names in (dictionaries.persons, dictionaries.companies,
+                          dictionaries.projects, dictionaries.locations)
+            for term in names for v in _variants(term)
+        }
+        self._tech = frozenset(build_terms(tech_terms) - own)
+
+    def is_known_tech(self, fragment: str) -> bool:
+        """Фрагмент - название технологии из белого списка (NER-замена не нужна)."""
+        return is_tech(fragment, self._tech)
 
     def anonymize(self, text: str) -> AnonymizedText:
         spans = self._regex_spans(text)
@@ -209,7 +256,7 @@ class Anonymizer:
             ner_used = True
             for s in self._ner.extract(text):
                 surface = text[s.start:s.end]
-                if len(surface.strip()) >= MIN_TERM_LEN:
+                if len(surface.strip()) >= MIN_TERM_LEN and not self.is_known_tech(surface):
                     spans.append(_Span(s.start, s.end, s.kind, " ".join(surface.split()), 3))
         chosen = _resolve(spans)
 
@@ -247,6 +294,15 @@ class Anonymizer:
         for pat in _PHONE_RES:
             for m in pat.finditer(text):
                 spans.append(_Span(m.start(), m.end(), PHONE, m.group(0).strip(), 0))
+        for m in _HANDLE_RE.finditer(text):
+            spans.append(_Span(m.start(), m.end(), CONTACT, m.group(0), 0))
+        for m in _DOMAIN_RE.finditer(text):
+            end = m.end()
+            while end > m.start() and text[end - 1] in ".,;:!?":
+                end -= 1
+            if text[m.start():end].lower() in _DOMAIN_LIKE_TECH:
+                continue
+            spans.append(_Span(m.start(), end, URL, text[m.start():end], 0))
         return spans
 
     def find_leaks(self, outgoing: str) -> list[str]:

@@ -168,3 +168,118 @@ def test_natasha_smoke_if_installed():
     r = Anonymizer(Dictionaries(), NatashaNer()).anonymize(
         "Кандидата зовут Иван Петров, он работал в Москве.")
     assert "Петров" not in r.text and "[ПЕРСОНА_1]" in r.text and r.ner_used
+
+
+# --- KON-70: логины @handle и голые домены ---------------------------------------------------
+
+@pytest.mark.parametrize("text, secret", [
+    ("Контакты: Telegram @olga_test_user.", "@olga_test_user"),
+    ("Пишите @ivan_test, ответим.", "@ivan_test"),
+    ("Сайт работодателя employer.test.", "employer.test"),
+    ("См. portal.corp-example.test/about?id=7 далее", "portal.corp-example.test"),
+    ("Сайт: тест-банк.рф, спасибо", "тест-банк.рф"),
+])
+def test_handle_and_bare_domain_masked_and_caught_by_find_leaks(text, secret):
+    a = Anonymizer(Dictionaries())
+    assert a.find_leaks(text), "find_leaks должен видеть исходный текст как утечку"
+    out = a.anonymize(text).text
+    assert secret not in out and "[" in out
+    assert a.find_leaks(out) == []
+
+
+def test_user_edit_that_adds_handle_is_a_leak():
+    a = Anonymizer(Dictionaries())
+    assert a.find_leaks("Контакт [КОНТАКТ_1] и ещё @new_handle_test") == ["@new_handle_test"]
+
+
+@pytest.mark.parametrize("text", [
+    "Стек: node.js, ASP.NET, Vue.js, Next.js, Socket.io, asp.net core, 1C:Enterprise.",
+    "Версии 1.2.3 и 2.0, пункт a.b, например: e.g. или i.e.",
+    "Файлы main.py, README.md, build.sh, Dockerfile.",
+    "Пишите на a@b.ru? Нет: просто знак @ и @x.",
+])
+def test_legit_dotted_names_are_not_masked(text):
+    a = Anonymizer(Dictionaries())
+    if "a@b.ru" in text:  # e-mail маскируется как раньше, остальное нет
+        assert a.anonymize(text).text.count("[") == 1
+        return
+    assert a.anonymize(text).text == text
+    assert a.find_leaks(text) == []
+
+
+def test_email_url_phone_rules_unchanged_with_new_rules():
+    text = "a.b@c.example.test, https://x.example.test/p?q=1, +7 (900) 111-22-33, www.alpha.test"
+    r = Anonymizer(Dictionaries()).anonymize(text)
+    assert r.counts == {"email": 1, "url": 2, "phone": 1}
+
+
+# --- KON-71: короткие фамилии (Ким, Ли) известных ФИО -----------------------------------------
+
+def test_short_surname_all_forms_masked():
+    a = Anonymizer(Dictionaries(persons=("Ким Дмитрий",)))
+    text = "Работал с Дмитрием Кимом; у Кима, Киму, Ким, КИМ."
+    out = a.anonymize(text).text
+    assert "Ким" not in out and "КИМ" not in out and "Дмитри" not in out
+    assert a.find_leaks(text)
+    assert a.find_leaks(out) == []
+    assert a.find_leaks("правка: звонил Киму") == ["Киму"]
+
+
+def test_short_surname_same_person_shares_placeholder():
+    r = Anonymizer(Dictionaries(persons=("Ким Дмитрий",))).anonymize("Ким Дмитрий; у Кима.")
+    assert r.text == "[ПЕРСОНА_1]; у [ПЕРСОНА_1]." and r.counts == {"person": 1}
+
+
+def test_short_surname_does_not_touch_common_words():
+    a = Anonymizer(Dictionaries(persons=("Ким Дмитрий", "Ли Анна")))
+    text = "Правда ли? Кимчи, лисица, ликвидность, как и когда; Лиса и пакет, ким без заглавной."
+    assert a.anonymize(text).text == text
+    assert a.find_leaks(text) == []
+
+
+def test_short_surname_not_masked_without_person_in_dictionary():
+    text = "Ким и Ли обсуждали проект."
+    assert Anonymizer(Dictionaries()).anonymize(text).text == text
+
+
+# --- KON-72: технологии не маскируются как «компании» ----------------------------------------
+
+TECH_TEXT = ("Требования: Jira, Confluence, SQL. Стек: Java, Kafka, Camunda. "
+             "Документация: Swagger, PlantUML, Postman, Spring Boot.")
+_TECH = ["Jira", "Confluence", "SQL", "Java", "Kafka", "Camunda", "Swagger", "PlantUML",
+         "Postman", "Spring Boot"]
+
+
+def test_known_technologies_survive_ner_company_spans():
+    ner = FakeNer([(t, COMPANY) for t in _TECH] + [("Альфа-Инвест", COMPANY)])
+    r = Anonymizer(Dictionaries(), ner).anonymize(TECH_TEXT + " Работал в Альфа-Инвест.")
+    for t in _TECH:
+        assert t in r.text
+    assert "Альфа-Инвест" not in r.text and r.counts == {"company": 1}
+
+
+def test_ner_span_listing_only_technologies_is_kept_mixed_span_is_masked():
+    ner = FakeNer([("Jira, Confluence", COMPANY), ("Kafka СтранноеИмя", COMPANY)])
+    r = Anonymizer(Dictionaries(), ner).anonymize("Jira, Confluence и Kafka СтранноеИмя.")
+    assert r.text.startswith("Jira, Confluence и [КОМПАНИЯ_1]")
+
+
+def test_real_company_from_dictionary_is_still_masked_and_has_priority_over_whitelist():
+    d = Dictionaries(companies=("Тинькофф", "ТБанк", "СимбирСофт", "Camunda"))
+    ner = FakeNer([("Тинькофф", COMPANY), ("Camunda", COMPANY), ("Kafka", COMPANY)])
+    r = Anonymizer(d, ner).anonymize("Тинькофф, ТБанк, СимбирСофт; стек Camunda и Kafka.")
+    assert "Тинькофф" not in r.text and "ТБанк" not in r.text and "СимбирСофт" not in r.text
+    # «Camunda» добавлена админом как клиент: словарь сильнее белого списка
+    assert "Camunda" not in r.text and "Kafka" in r.text
+
+
+def test_whitelist_is_extensible():
+    ner = FakeNer([("ВнутреннийФреймворк", COMPANY)])
+    text = "Опыт: ВнутреннийФреймворк."
+    assert "ВнутреннийФреймворк" not in Anonymizer(Dictionaries(), ner).anonymize(text).text
+    r = Anonymizer(Dictionaries(), ner, ["внутреннийфреймворк"]).anonymize(text)
+    assert r.text == text
+
+
+def test_whitelisted_tech_is_not_pd_for_find_leaks():
+    assert Anonymizer(Dictionaries()).find_leaks(TECH_TEXT) == []

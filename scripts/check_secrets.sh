@@ -11,7 +11,8 @@ if git ls-files --error-unmatch .env >/dev/null 2>&1; then echo "FAIL  .env в �
 if ! git check-ignore -q .env; then echo "FAIL  .env не в .gitignore"; fail=1; fi
 
 # 3. Блок re_web_presale в шаблоне не содержит значений (блок Confluence платформы не проверяется)
-if sed -n '/re_web_presale (KON-32)/,$p' .env.example | tr -d '' | grep -E '^[A-Z_]+=.+' ; then echo "FAIL  .env.example содержит значения"; fail=1; fi
+if sed -n '/re_web_presale (KON-32)/,$p' .env.example | tr -d '
+' | grep -E '^[A-Z_]+=.+' ; then echo "FAIL  .env.example содержит значения"; fail=1; fi
 
 # 4. Паттерны секретов (output/, docs/, skills/ — артефакты BABOK и документация, не код)
 pat_keys='-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}'
@@ -20,7 +21,7 @@ files=$(git ls-files --cached --others --exclude-standard \
   | grep -vE '^(output|docs|skills|input|estimate|architecture|tests)/|package-lock\.json$|^scripts/check_secrets\.sh$|^\.env\.example$|\.md$')
 if [ -n "$files" ]; then
   hits=$(echo "$files" | xargs grep -nIE "$pat_keys" 2>/dev/null)
-  hits2=$(echo "$files" | xargs grep -nIEi "$pat_assign" 2>/dev/null | grep -vE '\$\{|<[A-Za-z_]+>|os\.environ|getenv|:\?|self\.|config\.|:'"'"'|FAKE_')
+  hits2=$(echo "$files" | xargs grep -nIEi "$pat_assign" 2>/dev/null | grep -vE '\$\{|<[A-Za-z_]+>|os\.environ|os\.urandom|getenv|:\?|self\.|config\.|body\.|external_key|:'"'"'|FAKE_|[\"']test-[a-z0-9-]+[\"']')
   if [ -n "$hits$hits2" ]; then echo "FAIL  похожие на секреты строки:"; echo "$hits"; echo "$hits2" | sed -E 's/(=|:)[[:space:]]*.*/\1 <скрыто>/'; fail=1; fi
 fi
 

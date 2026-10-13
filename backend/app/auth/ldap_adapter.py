@@ -12,7 +12,12 @@ import ssl
 from urllib.parse import urlparse
 
 from ldap3 import BASE, SIMPLE, Connection, Server, Tls
-from ldap3.core.exceptions import LDAPBindError, LDAPException, LDAPInvalidCredentialsResult
+from ldap3.core.exceptions import (
+    LDAPBindError,
+    LDAPException,
+    LDAPInvalidCredentialsResult,
+    LDAPSASLPrepError,
+)
 from ldap3.utils.conv import escape_filter_chars
 from ldap3.utils.dn import escape_rdn
 
@@ -160,7 +165,9 @@ class Ldap3Adapter:
             self._bind(conn)
             name, mail = self._read_profile(conn, dn)
             return LdapProfile(full_name=name or login, mail=mail)
-        except (LDAPBindError, LDAPInvalidCredentialsResult):
+        except (LDAPBindError, LDAPInvalidCredentialsResult, LDAPSASLPrepError):
+            # SASLprep запрещает управляющие символы в пароле: это неверный пароль (KON-67),
+            # а не недоступность LDAP
             return None
         except (LDAPException, OSError) as exc:
             # деталей сервера и значений аргументов в лог не пишем: только класс ошибки

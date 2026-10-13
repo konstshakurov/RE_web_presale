@@ -27,6 +27,7 @@ from .status_groups.repo import StatusGroupRepo
 from .status_groups.router import router as status_groups_router
 from .sync.factory import build_sync_service, open_cv_pool
 from .sync.router import router as sync_router
+from .validation import install_validation_handler
 
 log = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="re_web_presale api", lifespan=lifespan)
+install_validation_handler(app)  # 422 без введённых значений (KON-68)
 
 
 app.include_router(auth_router)

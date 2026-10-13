@@ -1,6 +1,8 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
+import { api } from "../api/client";
 import type { NeedOut, NeedSort, SortOrder } from "../api/types";
+import { candidatesLabel } from "../lib/matching";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
 import MatchingInfo from "./matching/MatchingInfo";
@@ -30,8 +32,28 @@ function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: st
   );
 }
 
+// В колонке «Ключ» показываем только номер: ANALYTICS-5903 -> 5903 (ссылка по-прежнему ведёт в Jira)
+export function shortKey(key: string): string {
+  return key.replace(/^[A-Z][A-Z0-9_]*-(?=\d+$)/, "");
+}
+
 export default function NeedsTable({ items, sort, onSort }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+  // Число кандидатов в сохранённом результате: нет ключа - расчёта не было, показываем «Сопоставить»
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const keysId = items.map((n) => n.jira_key).join(",");
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    if (!keysId) return;
+    let alive = true;
+    api
+      .matchCounts(keysId.split(","))
+      .then((r) => alive && setCounts(r.counts))
+      .catch(() => alive && setCounts({})); // без счётчиков остаётся «Сопоставить» - расчёт откроет сохранённый результат
+    return () => {
+      alive = false;
+    };
+  }, [keysId, refresh]);
   // Блок «Кандидаты»: start - открыт кнопкой «Сопоставить» (сразу расчёт), view - только сохранённый результат
   const [cand, setCand] = useState<{ key: string; start: boolean } | null>(null);
   return (
@@ -42,8 +64,8 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
           <th>Автор</th>
           <th>Название</th>
           <th>Статус</th>
-          <th>Клиент / эпик</th>
-          <th>Тип контракта</th>
+          <th>Клиент</th>
+          <th>Контракт</th>
           <th>Ставка</th>
           <th>
             Кандидаты <MatchingInfo />
@@ -53,7 +75,7 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
       </thead>
       <tbody>
         {items.map((n) => {
-          const rate = formatRate(n.rate);
+          const rate = formatRate(n.rate, false);
           const expanded = open === n.jira_key;
           return (
             <Fragment key={n.jira_key}>
@@ -61,10 +83,10 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                 <td>
                   {n.jira_url ? (
                     <a href={n.jira_url} target="_blank" rel="noreferrer">
-                      {n.jira_key}
+                      {shortKey(n.jira_key)}
                     </a>
                   ) : (
-                    n.jira_key
+                    shortKey(n.jira_key)
                   )}
                 </td>
                 <td>{n.author || "—"}</td>
@@ -88,33 +110,40 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                 <td>{n.contract_type || "—"}</td>
                 <td className="rate">
                   <strong>{rate.main}</strong>
-                  {rate.vat && <span className="rate__vat"> {rate.vat}</span>}
+                  {rate.vat && <span className="rate__vat">{rate.vat}</span>}
                   {rate.proposer && <div className="muted">{rate.proposer}</div>}
                 </td>
                 <td>
                   {cand?.key === n.jira_key ? (
-                    <button type="button" className="link" aria-expanded onClick={() => setCand(null)}>
+                    <button
+                      type="button"
+                      className="link"
+                      aria-expanded
+                      onClick={() => {
+                        setCand(null);
+                        setRefresh((x) => x + 1);
+                      }}
+                    >
                       Скрыть кандидатов
                     </button>
+                  ) : counts[n.jira_key] !== undefined ? (
+                    <button
+                      type="button"
+                      className="link"
+                      aria-label={`${candidatesLabel(counts[n.jira_key])}, ${n.jira_key}`}
+                      onClick={() => setCand({ key: n.jira_key, start: false })}
+                    >
+                      {candidatesLabel(counts[n.jira_key])}
+                    </button>
                   ) : (
-                    <>
-                      <button
-                        type="button"
-                        className="primary-small"
-                        aria-label={`Сопоставить ${n.jira_key}`}
-                        onClick={() => setCand({ key: n.jira_key, start: true })}
-                      >
-                        Сопоставить
-                      </button>
-                      <button
-                        type="button"
-                        className="link"
-                        aria-label={`Кандидаты ${n.jira_key}`}
-                        onClick={() => setCand({ key: n.jira_key, start: false })}
-                      >
-                        Кандидаты
-                      </button>
-                    </>
+                    <button
+                      type="button"
+                      className="primary-small"
+                      aria-label={`Сопоставить ${n.jira_key}`}
+                      onClick={() => setCand({ key: n.jira_key, start: true })}
+                    >
+                      Сопоставить
+                    </button>
                   )}
                 </td>
                 <td>{formatDateTime(n.jira_created_at) || "—"}</td>
@@ -129,7 +158,12 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
               {cand?.key === n.jira_key && (
                 <tr className="needs__details">
                   <td colSpan={9}>
-                    <NeedCandidates key={`${n.jira_key}:${cand.start}`} needKey={n.jira_key} autoStart={cand.start} />
+                    <NeedCandidates
+                      key={`${n.jira_key}:${cand.start}`}
+                      needKey={n.jira_key}
+                      autoStart={cand.start}
+                      onTotal={(total) => setCounts((c) => (c[n.jira_key] === total ? c : { ...c, [n.jira_key]: total }))}
+                    />
                   </td>
                 </tr>
               )}

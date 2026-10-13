@@ -1,5 +1,3 @@
-import { Fragment, useState } from "react";
-
 import { formatDateTime } from "../../lib/needs";
 import { percentTone } from "../../lib/matching";
 
@@ -53,83 +51,63 @@ export function GapsBlock({ gaps }: { gaps?: string[] | null }) {
 }
 
 export default function CandidateList({ rows, onResume, assign = true, assignHint = ASSIGN_STUB }: Props) {
-  const [open, setOpen] = useState<string | null>(null);
   return (
     <table className="needs candidates">
       <thead>
         <tr>
           <th>Кандидат</th>
           <th>Совпадение</th>
-          <th>Заметка</th>
+          <th>Рекомендации</th>
           <th />
         </tr>
       </thead>
       <tbody>
-        {rows.map((r) => {
-          const expanded = open === r.key;
-          return (
-            <Fragment key={r.key}>
-              <tr>
-                <td>
-                  {r.name}
-                  <div className="muted">{r.key}</div>
-                  <span className="status">{r.status}</span>
-                  {r.stale && (
-                    <span className="badge badge--stale" title="Потребность, заметка или модель изменились">
-                      устарело
-                    </span>
-                  )}
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className={r.percent === null ? "pct pct--none" : `pct pct--${percentTone(r.percent)}`}
-                    aria-expanded={expanded}
-                    title="Показать обоснование"
-                    onClick={() => setOpen(expanded ? null : r.key)}
-                  >
-                    {r.percent === null ? "без оценки" : `${r.percent}%`}
-                  </button>
-                  {r.preliminary && <div className="muted">предварительно</div>}
-                  {r.sourceLabel && <div className="muted">{r.sourceLabel}</div>}
-                  {r.tags.length > 0 && <div className="muted">{r.tags.join(", ")}</div>}
-                </td>
-                <td>
-                  {r.note ? (
-                    <span title={[r.noteAuthor, formatDateTime(r.noteUpdatedAt)].filter(Boolean).join(", ")}>
-                      <span className="note-icon" aria-hidden="true">
-                        ✎
-                      </span>{" "}
-                      {r.note}
-                    </span>
-                  ) : (
-                    <span className="muted">—</span>
-                  )}
-                </td>
-                <td>
-                  <div className="card__actions">
-                    <button type="button" onClick={() => onResume(r.key)}>
-                      Резюме
-                    </button>
-                    {assign && (
-                      <button type="button" disabled title={assignHint}>
-                        Назначить
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-              {expanded && (
-                <tr className="needs__details">
-                  <td colSpan={4}>
-                    <div className="rationale">{r.rationale || "Обоснование не указано"}</div>
-                    <GapsBlock gaps={r.gaps} />
-                  </td>
-                </tr>
+        {rows.map((r) => (
+          <tr key={r.key}>
+            <td>
+              {r.name}
+              <div className="muted">{r.key}</div>
+              <span className="status">{r.status}</span>
+              {r.stale && (
+                <span className="badge badge--stale" title="Потребность, заметка или модель изменились">
+                  устарело
+                </span>
               )}
-            </Fragment>
-          );
-        })}
+            </td>
+            <td>
+              <span className={r.percent === null ? "pct pct--none" : `pct pct--${percentTone(r.percent)}`}>
+                {r.percent === null ? "без оценки" : `${r.percent}%`}
+              </span>
+              {r.preliminary && <div className="muted">предварительно</div>}
+              {r.sourceLabel && <div className="muted">{r.sourceLabel}</div>}
+              {r.tags.length > 0 && <div className="muted">{r.tags.join(", ")}</div>}
+              {r.note && (
+                <div className="candidate-note" title={[r.noteAuthor, formatDateTime(r.noteUpdatedAt)].filter(Boolean).join(", ")}>
+                  <span className="note-icon" aria-hidden="true">
+                    ✎
+                  </span>{" "}
+                  Заметка: {r.note}
+                </div>
+              )}
+            </td>
+            <td>
+              <div className="rationale">{r.rationale || "Обоснование не указано"}</div>
+              <GapsBlock gaps={r.gaps} />
+            </td>
+            <td>
+              <div className="card__actions">
+                <button type="button" onClick={() => onResume(r.key)}>
+                  Резюме
+                </button>
+                {assign && (
+                  <button type="button" disabled title={assignHint}>
+                    Назначить
+                  </button>
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );

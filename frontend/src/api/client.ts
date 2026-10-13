@@ -208,6 +208,12 @@ export const api = {
   // Сопоставление (FR-005, FR-036): POST ставит расчёт и сразу возвращает состояние, GET - опрос состояния
   matchState: (key: string, limit = 10, offset = 0) =>
     request<MatchState>("GET", `/needs/${encodeURIComponent(key)}/match?limit=${limit}&offset=${offset}`),
+  // Число кандидатов в сохранённом результате по потребностям страницы списка; без результата ключа в ответе нет
+  matchCounts: (keys: string[]) =>
+    request<{ counts: Record<string, number> }>(
+      "GET",
+      `/needs/match-counts?${keys.map((k) => `keys=${encodeURIComponent(k)}`).join("&")}`,
+    ),
   startMatch: (key: string, body: { provider_id?: number | null; force?: boolean } = {}) =>
     request<MatchState>("POST", `/needs/${encodeURIComponent(key)}/match`, body),
   matchNext: (key: string, providerId?: number | null) =>

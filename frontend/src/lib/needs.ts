@@ -8,14 +8,14 @@ export function formatDateTime(iso?: string | null): string {
   return Number.isNaN(d.getTime()) ? "" : dateTime.format(d);
 }
 
-// Ставка полностью (BR-003): сумма, валюта, НДС, единица; пусто - «не указана» (FR-001).
-export function formatRate(rate: Rate): { main: string; vat: string; proposer: string } {
+// Ставка полностью (BR-003): сумма, валюта, НДС, единица (в таблице потребностей без единицы); пусто - «не указана» (FR-001).
+export function formatRate(rate: Rate, withUnit = true): { main: string; vat: string; proposer: string } {
   const proposer = rate.proposer ?? "";
   if (rate.amount === null || rate.amount === undefined) {
     return { main: "не указана", vat: "", proposer };
   }
   const amount = rate.amount.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
-  const main = [amount, rate.currency, rate.unit ? `/ ${rate.unit}` : ""].filter(Boolean).join(" ");
+  const main = [amount, rate.currency, withUnit && rate.unit ? `/ ${rate.unit}` : ""].filter(Boolean).join(" ");
   const vat = rate.includes_vat === true ? "с НДС" : rate.includes_vat === false ? "без НДС" : "НДС не указан";
   return { main, vat, proposer };
 }

@@ -99,12 +99,15 @@ describe("Потребности", () => {
   it("таблица: ключ, статус как есть, клиент, контракт, ставка полностью", async () => {
     route((u) => (u.includes("/sync/needs?") ? json(page([need()])) : undefined));
     renderNeeds();
-    const row = (await screen.findByText("AN-1")).closest("tr")!;
+    const row = (await screen.findByRole("cell", { name: "1" })).closest("tr")!;
     expect(within(row).getByText("Аналитик 1С")).toBeInTheDocument();
     expect(within(row).getByText("Поиск кандидата")).toBeInTheDocument();
     expect(within(row).getByText(/Клиент А/)).toBeInTheDocument();
     expect(within(row).getByText("Прямой контракт")).toBeInTheDocument();
-    expect(within(row).getByText(/2\s750 RUB \/ час/)).toBeInTheDocument();
+    expect(within(row).getByText(/2\s750 RUB/)).toBeInTheDocument();
+    expect(row.textContent).not.toContain("/ час");
+    expect(screen.getByRole("columnheader", { name: "Клиент" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Контракт" })).toBeInTheDocument();
     expect(within(row).getByText(/без НДС/)).toBeInTheDocument();
     expect(within(row).getByText("РО")).toBeInTheDocument();
     expect(within(row).queryByText(/предлагает/)).toBeNull();
@@ -117,13 +120,13 @@ describe("Потребности", () => {
         : undefined,
     );
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     const heads = screen.getAllByRole("columnheader").map((h) => h.textContent?.trim());
     expect(heads.slice(0, 3)).toEqual(["Ключ", "Автор", "Название"]);
     expect(heads.some((h) => h?.includes("Обновлена"))).toBe(false);
-    const r1 = screen.getByText("AN-1").closest("tr")!;
+    const r1 = screen.getByRole("cell", { name: "1" }).closest("tr")!;
     expect(within(r1).getAllByRole("cell")[1]).toHaveTextContent("Автор Тестовый");
-    const r2 = screen.getByText("AN-2").closest("tr")!;
+    const r2 = screen.getByRole("cell", { name: "2" }).closest("tr")!;
     expect(within(r2).getAllByRole("cell")[1]).toHaveTextContent("—");
     expect(within(r1).getAllByRole("cell")).toHaveLength(heads.length);
   });
@@ -131,7 +134,7 @@ describe("Потребности", () => {
   it("значок «i» у колонки «Кандидаты» открывает описание логики подбора", async () => {
     route((u) => (u.includes("/sync/needs?") ? json(page([need()])) : undefined));
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     await userEvent.click(screen.getByRole("button", { name: "Как подбираются кандидаты" }));
     const dialog = screen.getByRole("dialog", { name: "Как подбираются кандидаты" });
     expect(within(dialog).getByText(/Ступень 1/)).toBeInTheDocument();
@@ -161,7 +164,7 @@ describe("Потребности", () => {
       }
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     expect(urls[0]).toContain("group=1");
     expect(urls[0]).toContain("limit=100");
     await userEvent.click(screen.getByRole("button", { name: /Прочие/ }));
@@ -179,7 +182,7 @@ describe("Потребности", () => {
       }
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     await userEvent.type(screen.getByLabelText("Поиск по ключу и названию"), "abc{enter}");
     await waitFor(() => expect(urls[urls.length - 1]).toContain("q=abc"));
     await userEvent.selectOptions(screen.getByLabelText("На странице"), "500");
@@ -195,7 +198,7 @@ describe("Потребности", () => {
       }
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     const th = screen.getByRole("columnheader", { name: /Создана/ });
     expect(th).toHaveAttribute("aria-sort", "descending"); // по умолчанию новые сверху
     expect(urls[0]).toContain("sort=created");
@@ -219,7 +222,7 @@ describe("Потребности", () => {
       }
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     expect(urls[0]).not.toContain("created_from");
     expect(screen.getByRole("button", { name: "Сбросить даты" })).toBeDisabled();
     await userEvent.type(screen.getByLabelText("Создана с"), "2026-10-01");
@@ -246,7 +249,7 @@ describe("Потребности", () => {
       }
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     const before = urls.length;
     await userEvent.type(screen.getByLabelText("по"), "2026-10-01");
     await waitFor(() => expect(urls.length).toBeGreaterThan(before));
@@ -266,7 +269,7 @@ describe("Потребности", () => {
       if (u.includes("/sync/needs?")) return json(page([need()]));
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     expect(screen.getByText(/актуально на/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Обновить" }));
     await waitFor(() => expect(refreshBody).toBe('{"scope":"needs"}'));
@@ -286,12 +289,12 @@ describe("Потребности", () => {
       if (u.includes("/sync/needs?")) return json(page([need()]));
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     await userEvent.click(screen.getByRole("button", { name: "Обновить" }));
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(label);
     expect(alert).toHaveTextContent("Текст Jira как есть");
-    expect(screen.getByText("AN-1")).toBeInTheDocument(); // кэш остаётся
+    expect(screen.getByRole("cell", { name: "1" })).toBeInTheDocument(); // кэш остаётся
   });
 
   it("пометки sync: stale, paused, needs_reauthorization и message как есть", async () => {
@@ -301,7 +304,7 @@ describe("Потребности", () => {
         : undefined,
     );
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     expect(screen.getByText("опрос приостановлен")).toBeInTheDocument();
     expect(screen.getByText("нужна повторная авторизация")).toBeInTheDocument();
     expect(screen.getByText("данные могут отставать от Jira")).toBeInTheDocument();
@@ -338,7 +341,7 @@ describe("Потребности", () => {
         });
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     await userEvent.click(screen.getByRole("button", { name: "Правила клиента" }));
     expect(await screen.findByText("Формат резюме")).toBeInTheDocument();
     expect(screen.getByText("Корпоративный")).toBeInTheDocument();
@@ -351,9 +354,9 @@ describe("Потребности", () => {
       if (u.endsWith("/sync/refresh")) return json({ detail: "Требуется вход" }, 401);
     });
     renderNeeds();
-    await screen.findByText("AN-1");
+    await screen.findByRole("cell", { name: "1" });
     await userEvent.click(screen.getByRole("button", { name: "Обновить" }));
-    await waitFor(() => expect(screen.queryByText("AN-1")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("cell", { name: "1" })).not.toBeInTheDocument());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

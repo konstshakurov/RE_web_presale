@@ -121,3 +121,11 @@ export function promptRejection(e: unknown): PromptRejection {
     err?.message || (status === 422 ? "В тексте остались необезличенные фрагменты" : "Не удалось сохранить правки");
   return { status, message, fragments };
 }
+
+// «1 кандидат», «2 кандидата», «5 кандидатов», «21 кандидат», «12 кандидатов»
+export function candidatesLabel(n: number): string {
+  const last = n % 10;
+  const tens = n % 100;
+  const word = tens >= 11 && tens <= 14 ? "кандидатов" : last === 1 ? "кандидат" : last >= 2 && last <= 4 ? "кандидата" : "кандидатов";
+  return `${n} ${word}`;
+}

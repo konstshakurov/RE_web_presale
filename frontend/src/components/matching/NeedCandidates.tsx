@@ -17,6 +17,7 @@ import RunStatusBar from "./RunStatusBar";
 interface Props {
   needKey: string;
   autoStart: boolean; // открыт кнопкой «Сопоставить»: сразу ставим расчёт (кэш вернётся без LLM)
+  onTotal?: (n: number) => void; // число кандидатов в результате - для колонки «Кандидаты» списка
 }
 
 // Скрининг идёт, только когда допустимых кандидатов больше размера глубокой оценки
@@ -40,7 +41,7 @@ export function toRow(i: MatchItem): CandidateRow {
 }
 
 // Блок «Кандидаты» потребности (FR-036, FR-005): расчёт в фоне, опрос, подтверждение внешней отправки (FR-023).
-export default function NeedCandidates({ needKey, autoStart }: Props) {
+export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
   const [data, setData] = useState<MatchState | null>(null);
   const [items, setItems] = useState<MatchItem[]>([]);
   const [error, setError] = useState("");
@@ -90,6 +91,10 @@ export default function NeedCandidates({ needKey, autoStart }: Props) {
   }, []);
 
   usePolling(isRunning(data?.status), reload);
+
+  useEffect(() => {
+    if (data && data.status !== "none" && data.total > 0) onTotal?.(data.total);
+  }, [data?.status, data?.total]);
 
   // Прогон ждёт подтверждения - сразу показываем предпросмотр (один раз на прогон)
   useEffect(() => {

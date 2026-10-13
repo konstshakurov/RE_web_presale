@@ -28,6 +28,7 @@ const json = (body: unknown, status = 200) =>
 const fetchMock = vi.fn();
 type Call = { url: string; method: string; body: unknown };
 let calls: Call[];
+let counts: Record<string, number> = { "AN-1": 1 }; // результат уже есть -> в списке «N кандидатов»
 
 function item(over: Partial<MatchItem> = {}): MatchItem {
   return {
@@ -153,6 +154,7 @@ function serve(h: Handler, role = "user") {
     const r = h(url, method, body);
     if (r) return r;
     if (url.endsWith("/auth/me")) return json({ ...ME, role });
+    if (url.includes("/needs/match-counts")) return json({ counts });
     if (url.endsWith("/sync/needs/groups"))
       return json({ groups: [{ key: "all", id: null, name: "Все статусы", count: 1 }], statuses: [], sync: STAMP });
     if (url.includes("/sync/needs?")) return json({ items: [NEED], total: 1, limit: 100, offset: 0, sync: STAMP });
@@ -178,6 +180,7 @@ function renderAt(path: string) {
 }
 
 beforeEach(() => {
+  counts = { "AN-1": 1 };
   vi.stubGlobal("fetch", fetchMock);
 });
 afterEach(() => {
@@ -187,6 +190,7 @@ afterEach(() => {
 
 describe("Потребности: сопоставление", () => {
   it("«Сопоставить»: POST с CSRF, индикатор не блокирует интерфейс, затем кандидаты", async () => {
+    counts = {};
     let polls = 0;
     serve((url, method) => {
       if (url.endsWith("/needs/AN-1/match") && method === "POST")
@@ -207,16 +211,16 @@ describe("Потребности: сопоставление", () => {
     expect(screen.getByRole("button", { name: "Назначить" })).toBeDisabled();
   });
 
-  it("обоснование по клику на %; метка устаревшего результата; пустой результат", async () => {
+  it("обоснование и рекомендации видны сразу; метка устаревшего результата", async () => {
     serve((url) => {
       if (url.includes("/needs/AN-1/match?")) return json(state({ stale: true, items: [item({ stale: true })] }));
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     await screen.findByText("Тестов Тест");
-    expect(screen.queryByText("Совпадают 1С и REST")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "82%" }));
     expect(screen.getByText("Совпадают 1С и REST")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Рекомендации" })).toBeInTheDocument();
+    expect(screen.getByText("82%")).toHaveClass("pct--high");
     expect(screen.getAllByText(/устарел/i).length).toBeGreaterThan(0);
     expect(called("POST", "/match")).toHaveLength(0); // просмотр сохранённого не запускает расчёт
   });
@@ -236,15 +240,12 @@ describe("Потребности: сопоставление", () => {
         );
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     await screen.findByText("Тестов Тест");
-    await userEvent.click(screen.getByRole("button", { name: "82%" }));
     expect(screen.getByText("Чего не хватает до 100%")).toBeInTheDocument();
     expect(screen.getByText("Нет опыта с Kafka")).toBeInTheDocument();
     expect(screen.getByText("Грейд ниже требуемого")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "100%" }));
     expect(screen.getByText("Полное совпадение")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "60%" }));
     expect(screen.getByText("Нажмите «Пересчитать», чтобы увидеть, чего не хватает")).toBeInTheDocument();
   });
 
@@ -255,7 +256,7 @@ describe("Потребности: сопоставление", () => {
       });
     stats({ screened: 0, screen_total: 4 });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     const line = await screen.findByText(/Оценено кандидатов: 4 из 4/);
     expect(line.textContent).not.toContain("предварительная оценка");
     expect(line).toHaveAttribute("title", expect.stringContaining("быстрый отбор при большом числе кандидатов"));
@@ -266,7 +267,7 @@ describe("Потребности: сопоставление", () => {
       if (url.includes("/needs/AN-1/match?")) return json(state({ candidates_total: 40, evaluated: 30, screened: 40, screen_total: 40 }));
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     const line = await screen.findByText(/Оценено кандидатов: 30 из 40/);
     expect(line.textContent).toContain("предварительная оценка по навыкам: 40 из 40");
   });
@@ -290,7 +291,7 @@ describe("Потребности: сопоставление", () => {
       if (method === "POST") return json(state({ status: "running", items: [] }), 202);
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     await screen.findByText("Кандидат 9");
     await userEvent.click(screen.getByRole("button", { name: "Показать ещё" }));
     expect(await screen.findByText("Одиннадцатый")).toBeInTheDocument();
@@ -308,7 +309,7 @@ describe("Потребности: сопоставление", () => {
       if (url.includes("/needs/AN-1/match?")) return json(state());
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     await screen.findByText("Тестов Тест");
     await userEvent.click(screen.getByRole("button", { name: "Пересчитать" }));
     await waitFor(() => expect(called("POST", "/needs/AN-1/match")).toHaveLength(1));
@@ -381,7 +382,7 @@ describe("Потребности: сопоставление", () => {
         return json(state({ status: "awaiting_confirmation", run_id: run.run_id, items: [], total: 0, calculated_at: null }));
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
     expect(within(dialog).getByRole("button", { name: "Отложить" })).toHaveAttribute(
       "title",
@@ -424,7 +425,7 @@ describe("Потребности: сопоставление", () => {
           return json(state({ status: "awaiting_confirmation", run_id: runId, items: [], total: 0, calculated_at: null }));
       });
       renderAt("/needs");
-      await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+      await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
       const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
       const box = (await within(dialog).findByLabelText("Текст пакета 1")) as HTMLTextAreaElement;
       return { dialog, box };
@@ -485,7 +486,7 @@ describe("Потребности: сопоставление", () => {
           return json(state({ status: "awaiting_confirmation", run_id: runId, items: [], total: 0, calculated_at: null }));
       });
       renderAt("/needs");
-      await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+      await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
       const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
       await within(dialog).findByText("ТОЛЬКО ЧТЕНИЕ");
       expect(within(dialog).queryByRole("textbox")).toBeNull();
@@ -512,7 +513,7 @@ describe("Потребности: сопоставление", () => {
         return json(state({ status: "awaiting_confirmation", run_id: run.run_id, items: [], total: 0, calculated_at: null }));
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     const dialog = await screen.findByRole("dialog", { name: /Предпросмотр/ });
     await userEvent.click(within(dialog).getByRole("button", { name: "Отменить расчёт" }));
     await waitFor(() => expect(called("POST", "/cancel")).toHaveLength(1));
@@ -534,7 +535,7 @@ describe("Потребности: сопоставление", () => {
         );
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     expect(await screen.findByText(/не ответила за 120 с/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Повторить" }));
     await waitFor(() => expect(called("POST", "/llm/tasks/t-9/retry")).toHaveLength(1));
@@ -545,7 +546,7 @@ describe("Потребности: сопоставление", () => {
       if (url.includes("/needs/AN-1/match?")) return json(state({ items: [], total: 0, evaluated: 0, candidates_total: 0 }));
     });
     renderAt("/needs");
-    await userEvent.click(await screen.findByRole("button", { name: "Кандидаты AN-1" }));
+    await userEvent.click(await screen.findByRole("button", { name: "1 кандидат, AN-1" }));
     expect(await screen.findByText(/Подходящих кандидатов нет/)).toBeInTheDocument();
   });
 });
@@ -608,10 +609,8 @@ describe("Резюме: поиск по смыслу и технологии", (
     expect(within(second).getByText("40%")).toBeInTheDocument();
     expect(within(second).getByText("предварительно")).toBeInTheDocument();
     // «Чего не хватает»: только у оценки LLM; у предварительной оценки блока нет
-    await userEvent.click(screen.getByRole("button", { name: "90%" }));
     expect(screen.getByText("Нажмите «Пересчитать», чтобы увидеть, чего не хватает")).toBeInTheDocument();
-    await userEvent.click(within(second).getByRole("button", { name: "40%" }));
-    expect(screen.queryByText(/чего не хватает/i)).not.toBeInTheDocument();
+    expect(within(second).queryByText(/чего не хватает/i)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: /Оценить следующих/ }));
     await waitFor(() => expect(called("POST", "/semantic-search/next")).toHaveLength(1));
   });

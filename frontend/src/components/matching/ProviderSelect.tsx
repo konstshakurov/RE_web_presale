@@ -12,13 +12,13 @@ export default function ProviderSelect({ providers, value, onChange, disabled }:
   if (providers.length < 2) return null;
   return (
     <label className="provider-select">
-      Модель
       <select
+        aria-label="Модель"
         value={value === null ? "" : String(value)}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
       >
-        <option value="">По умолчанию</option>
+        <option value="">LLM по умолчанию</option>
         {providers.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}

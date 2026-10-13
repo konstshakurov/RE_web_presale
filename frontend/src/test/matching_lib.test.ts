@@ -60,3 +60,20 @@ describe("задачи и подстановки", () => {
     expect(replacementsText({})).toBe("подстановок нет");
   });
 });
+
+describe("candidatesLabel", () => {
+  it("склоняет «кандидат» по числу", async () => {
+    const { candidatesLabel } = await import("../lib/matching");
+    expect(candidatesLabel(0)).toBe("0 кандидатов");
+    expect(candidatesLabel(1)).toBe("1 кандидат");
+    expect(candidatesLabel(2)).toBe("2 кандидата");
+    expect(candidatesLabel(4)).toBe("4 кандидата");
+    expect(candidatesLabel(5)).toBe("5 кандидатов");
+    expect(candidatesLabel(8)).toBe("8 кандидатов");
+    expect(candidatesLabel(11)).toBe("11 кандидатов");
+    expect(candidatesLabel(12)).toBe("12 кандидатов");
+    expect(candidatesLabel(21)).toBe("21 кандидат");
+    expect(candidatesLabel(23)).toBe("23 кандидата");
+    expect(candidatesLabel(111)).toBe("111 кандидатов");
+  });
+});

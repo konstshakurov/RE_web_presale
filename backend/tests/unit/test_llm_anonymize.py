@@ -283,3 +283,88 @@ def test_whitelist_is_extensible():
 
 def test_whitelisted_tech_is_not_pd_for_find_leaks():
     assert Anonymizer(Dictionaries()).find_leaks(TECH_TEXT) == []
+
+
+# --- KON-74: падежные формы слов ФИО (творительный и др.) --------------------------------------
+
+SURNAME_CASES = [
+    ("Кузнецов Андрей Сергеевич", "Рекомендация от Кузнецовым не требуется.", "Кузнецовым"),
+    ("Сидоров Олег Павлович", "Встреча с Сидоровым назначена.", "Сидоровым"),
+    ("Квашнин Тимофей Львович", "Беседовал с Квашниным вчера.", "Квашниным"),
+    ("Орлов Денис Николаевич", "Резюме подготовлено Орловым.", "Орловым"),
+    ("Королёв Пётр Иванович", "Звонил с Королёвым и Королевым.", "Королевым"),
+    ("Орлова Анна Игоревна", "Говорил с Орловой и Орлову.", "Орловой"),
+    ("Достоевский Фёдор Михайлович", "Встретились с Достоевским.", "Достоевским"),
+    ("Достоевская Анна Григорьевна", "Передал Достоевской.", "Достоевской"),
+    ("Ковальчук Иван Петрович", "Согласовано с Ковальчуком.", "Ковальчуком"),
+    ("Кузнец Иван Петрович", "Согласовано с Кузнецом.", "Кузнецом"),
+]
+
+
+@pytest.mark.parametrize("name,text,form", SURNAME_CASES)
+def test_surname_case_forms_masked_and_caught_by_find_leaks(name, text, form):
+    a = Anonymizer(Dictionaries(persons=(name,)))
+    out = a.anonymize(text).text
+    assert form.lower() not in out.lower()
+    assert a.find_leaks(text), "find_leaks должен видеть падежную форму"
+    assert a.find_leaks(out) == []
+
+
+def test_all_six_cases_of_surname_name_patronymic():
+    a = Anonymizer(Dictionaries(persons=("Сидоров Андрей Петрович", "Орлова Мария Ивановна")))
+    forms = [
+        "Сидоров", "Сидорова", "Сидорову", "Сидорова", "Сидоровым", "Сидорове",
+        "Андрей", "Андрея", "Андрею", "Андреем", "Андрее",
+        "Петрович", "Петровича", "Петровичу", "Петровичем", "Петровиче",
+        "Орлова", "Орловой", "Орлову", "Мария", "Марии", "Марию", "Марией", "Ивановна",
+        "Ивановны", "Ивановне", "Ивановну", "Ивановной",
+    ]
+    for f in forms:
+        assert a.anonymize(f"Это {f} тут").text == "Это [ПЕРСОНА_1] тут" or \
+            a.anonymize(f"Это {f} тут").text == "Это [ПЕРСОНА_2] тут", f
+        assert a.find_leaks(f"правка {f}"), f
+
+
+def test_first_name_and_patronymic_instrumental():
+    a = Anonymizer(Dictionaries(persons=("Иванов Иван Петрович",)))
+    r = a.anonymize("Подписал Иваном Петровичем, затем Ивановым.")
+    assert r.text == "Подписал [ПЕРСОНА_1] [ПЕРСОНА_1], затем [ПЕРСОНА_1]."
+
+
+def test_invariable_surnames_masked_as_is():
+    a = Anonymizer(Dictionaries(persons=("Шевченко Олег Петрович", "Седых Анна Ивановна")))
+    out = a.anonymize("Звонил Шевченко и Седых.").text
+    assert out == "Звонил [ПЕРСОНА_1] и [ПЕРСОНА_2]."
+
+
+def test_adjective_type_surname_forms_need_capital_letter():
+    """«Толстой» -> «Толстого»: обычное прилагательное «толстого» не маскируется."""
+    a = Anonymizer(Dictionaries(persons=("Толстой Лев Николаевич",)))
+    assert a.anonymize("Беседа с Толстым.").text == "Беседа с [ПЕРСОНА_1]."
+    text = "толстого слоя, толстым пакетом и толстую папку"
+    assert a.anonymize(text).text == text and a.find_leaks(text) == []
+
+
+def test_case_forms_do_not_touch_common_words():
+    a = Anonymizer(Dictionaries(persons=(
+        "Орлов Денис Николаевич", "Иванов Иван Петрович", "Кузнецов Андрей Сергеевич",
+        "Петров Сергей Львович",
+    )))
+    text = ("Орёл, орлиный, орда; ивановский базар, иваны; кузнецкий мост, кузница; "
+            "петровка, петрушка; андрогин, сергиев; львиный; николаевский, ордер.")
+    assert a.anonymize(text).text == text
+    assert a.find_leaks(text) == []
+
+
+def test_lowercase_ci_forms_still_masked():
+    a = Anonymizer(Dictionaries(persons=("Квашнин Тимофей Львович",)))
+    assert a.anonymize("от квашниным и ТИМОФЕЕМ").text == "от [ПЕРСОНА_1] и [ПЕРСОНА_1]"
+
+
+# --- KON-75: форма имени не сопоставляется с фамилией другого человека ----------------------------
+
+def test_first_name_form_not_mapped_to_other_person():
+    d = Dictionaries(persons=("Иван Петров", "Иванов Пётр Сергеевич"))
+    r = Anonymizer(d).anonymize("Свяжитесь с Иваном Петровым по вопросу ставки")
+    assert set(r.mapping.values()) == {"Иван Петров"}
+    assert restore(r.text, r.mapping).count("Иванов Пётр Сергеевич") == 0

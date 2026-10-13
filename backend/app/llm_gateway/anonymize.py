@@ -152,6 +152,67 @@ def _stem(token: str) -> str:
     return token[:-1] if len(token) >= 5 else token
 
 
+# --- падежные формы слов ФИО (KON-74) -------------------------------------------------------------
+_WORD_RE = re.compile(r"\w+", re.UNICODE)
+_VOWELS = "аеёиоуыэюя"
+#: окончания 2-го склонения (Иван, Петров, Петрович, Ковальчук): -а -у -ом/-ем -е; множественное
+#: число не берём: «Иваны» - обычное слово, а не имя
+_CONS_ENDINGS = ("а", "у", "ом", "ем", "е")
+#: фамилии на -ов/-ев/-ёв/-ин/-ын: добавляется -ым (творительный) и женские -ой/-ою
+_POSS_ENDINGS = ("ым", "ы", "ых", "ыми", "ой", "ою")
+_ADJ_SKY = ("ий", "ого", "ому", "им", "ом", "ая", "ой", "ую", "ою", "ие", "их", "ими")
+_ADJ_OY = ("ой", "ого", "ому", "ым", "ом", "ая", "ую", "ою", "ые", "ых", "ыми")
+_ADJ_Y = ("ый", "ого", "ому", "ым", "ом", "ая", "ую", "ою", "ые", "ых", "ыми")
+_FEM_ADJ = ("ая", "ой", "ую", "ою", "ие", "их", "ими")
+_A_ENDINGS = ("ы", "и", "е", "у", "ой", "ою", "ей")
+_YA_ENDINGS = ("и", "е", "ю", "ей", "ёй", "ею")
+_J_ENDINGS = ("я", "ю", "ем", "ём", "е", "и", "ям", "ями", "ях")
+_IY_ENDINGS = ("ия", "ию", "ием", "ии")
+
+
+def name_forms(token: str) -> tuple[set[str], set[str]]:
+    """Падежные формы одного слова ФИО (строчные): (любой регистр, только с заглавной буквы).
+
+    Формы, которые могут совпасть с обычным словом (прилагательные Толстой/Белый/Достоевский),
+    идут во второй набор: в тексте они считаются именем, только если написаны с заглавной.
+    Несклоняемые (-ых/-их/-ко/-енко) дают только исходное слово. Короткие слова (< 4 букв)
+    сюда не попадают. Набор намеренно закрытый: общий «основа + любые 2-3 буквы» давал бы
+    ложные срабатывания на обычных словах.
+    """
+    t = token.lower()
+    if len(t) < 4 or not t.isalpha():
+        return set(), set()
+    ci: set[str] = {t}
+    cap: set[str] = set()
+    if t.endswith(("ых", "их", "ко")):                 # несклоняемые
+        return ci, cap
+    if t.endswith(("ский", "цкий", "ской", "цкой")):
+        cap |= {t[:-2] + e for e in _ADJ_SKY}
+    elif t.endswith("ой"):
+        cap |= {t[:-2] + e for e in _ADJ_OY}
+    elif t.endswith("ый"):
+        cap |= {t[:-2] + e for e in _ADJ_Y}
+    elif t.endswith(("ая", "яя")):
+        cap |= {t[:-2] + e for e in _FEM_ADJ}
+    elif t.endswith("ий"):                             # Дмитрий, Василий
+        ci |= {t[:-2] + e for e in _IY_ENDINGS}
+    elif t.endswith("й"):                              # Андрей, Николай
+        ci |= {t[:-1] + e for e in _J_ENDINGS}
+    elif t.endswith("ь"):                              # Игорь
+        ci |= {t[:-1] + e for e in _J_ENDINGS}
+    elif t.endswith("я"):                              # Мария, Илья
+        ci |= {t[:-1] + e for e in _YA_ENDINGS}
+    elif t.endswith("а"):                              # Анна, Никита, Иванова, Петровна
+        ci |= {t[:-1] + e for e in _A_ENDINGS}
+    elif t[-1] not in _VOWELS:                         # Иван, Петров, Квашнин, Петрович
+        ci |= {t + e for e in _CONS_ENDINGS}
+        if t.endswith(("ов", "ев", "ёв", "ин", "ын")):
+            ci |= {t + e for e in _POSS_ENDINGS}
+    # ё/е: в тексте часто пишут без точек
+    return ({f.replace("ё", "е") for f in ci} | ci,
+            {f.replace("ё", "е") for f in cap} | cap)
+
+
 class _DictMatcher:
     """Регулярные выражения по словарям; строятся один раз на объект Anonymizer."""
 
@@ -161,6 +222,10 @@ class _DictMatcher:
         self._add_plain(COMPANY, d.companies)
         self._add_plain(PROJECT, d.projects)
         self._add_plain(LOCATION, d.locations)
+        # падежные формы слов ФИО: точное слово -> каноническое ФИО (KON-74); ci - любой регистр,
+        # cap - только с заглавной буквы
+        self._forms_ci: dict[str, str] = {}
+        self._forms_cap: dict[str, str] = {}
         self._add_persons(d.persons)
 
     def _add_plain(self, kind: str, terms: Iterable[str]) -> None:
@@ -177,6 +242,7 @@ class _DictMatcher:
         full: dict[str, str] = {}
         parts: dict[str, str] = {}  # отдельное слово ФИО -> каноническое ФИО
         short: dict[str, str] = {}  # то же для слов короче 4 букв
+        words: dict[str, str] = {}  # чисто буквенные слова: падежи закрыты точными формами
         for name in _uniq(names):
             if len(name) < MIN_TERM_LEN:
                 continue
@@ -184,14 +250,18 @@ class _DictMatcher:
             for tok in re.findall(r"[\w-]+", name):
                 if len(tok) >= 4:
                     parts.setdefault(tok.lower(), name)
+                    if tok.isalpha():
+                        words.setdefault(tok.lower(), name)
                 elif len(tok) >= _SHORT_TOKEN_LEN and tok.isalpha():
                     short.setdefault(tok.lower(), name)
+        self._add_forms(words)
         if full:
             alt = "|".join(_flex(t) for t in sorted(full.values(), key=len, reverse=True))
             pat = re.compile(rf"(?<!\w)(?:{alt})(?!\w)", re.IGNORECASE | re.UNICODE)
             self._rules.append((PERSON, 1, pat, full, False))
+        # слова с дефисом/цифрами формами не покрыты: основа + до двух букв окончания
+        parts = {t: n for t, n in parts.items() if t not in words}
         if parts:
-            # отдельное слово ФИО с возможным падежным окончанием (Петров -> Петрова, Петрову)
             alt = "|".join(re.escape(_stem(t)) + r"\w{0,2}"
                            for t in sorted(parts, key=len, reverse=True))
             pat = re.compile(rf"(?<!\w)(?:{alt})(?!\w)", re.IGNORECASE | re.UNICODE)
@@ -202,6 +272,20 @@ class _DictMatcher:
             pat = re.compile(rf"(?<!\w)(?:{alt})(?i:(?:{_SHORT_ENDINGS}))?(?!\w)", re.UNICODE)
             self._rules.append((PERSON, 2, pat, short, True))
 
+    def _add_forms(self, parts: dict[str, str]) -> None:
+        """Формы строятся в два прохода: свои слова словаря сильнее порождённых форм, поэтому
+        «Иванов» остаётся за «Иванов Пётр», а не за «Иван» (+ов) (KON-75)."""
+        for tok, name in parts.items():
+            self._forms_ci.setdefault(tok, name)
+        generated = [(name, name_forms(tok)) for tok, name in parts.items()]
+        for name, (ci, _cap) in generated:
+            for f in ci:
+                self._forms_ci.setdefault(f, name)
+        for name, (_ci, cap) in generated:
+            for f in cap:
+                if f not in self._forms_ci:
+                    self._forms_cap.setdefault(f, name)
+
     def find(self, text: str) -> list[_Span]:
         out: list[_Span] = []
         for kind, prio, pat, canon, by_stem in self._rules:
@@ -211,6 +295,16 @@ class _DictMatcher:
                 if key is None and by_stem:
                     key = _canon_by_stem(surface, canon)
                 out.append(_Span(m.start(), m.end(), kind, key or m.group(0), prio))
+        # падежные формы слов ФИО (KON-74); целое ФИО (приоритет 1) сильнее
+        if self._forms_ci or self._forms_cap:
+            for m in _WORD_RE.finditer(text):
+                w = m.group(0)
+                low = w.lower()
+                key = self._forms_ci.get(low)
+                if key is None and w[0].isupper():
+                    key = self._forms_cap.get(low)
+                if key is not None:
+                    out.append(_Span(m.start(), m.end(), PERSON, key, 2))
         return out
 
 

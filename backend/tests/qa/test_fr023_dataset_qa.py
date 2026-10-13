@@ -21,7 +21,7 @@ SET_PATH = Path(os.environ.get("QA_FR023_SET") or (
 EXAMPLES = json.loads(SET_PATH.read_text(encoding="utf-8"))["examples"]
 
 # id примера -> номер дефекта в Linear (xfail до исправления)
-LEAK_BUGS: dict[str, str] = {"FR023-10": "KON-74: фамилия в творительном падеже (Квашниным, Кузнецовым) не маскируется"}
+LEAK_BUGS: dict[str, str] = {}
 KEEP_BUGS: dict[str, str] = {}
 
 natasha = pytest.importorskip("natasha")
@@ -98,7 +98,6 @@ def test_ner_only_recall_is_reported_not_enforced(ner, capsys):
     assert all(s.lower() not in out for s in ex["forbidden"])
 
 
-@pytest.mark.xfail(strict=True, reason="KON-75: «Иваном» сопоставляется с фамилией другого человека из словаря")
 def test_first_name_form_not_mapped_to_other_person_in_dictionary():
     """Обратная подстановка не должна подставлять ФИО другого человека (KON-75)."""
     d = Dictionaries(persons=("Иван Петров", "Иванов Пётр Сергеевич"))
@@ -113,7 +112,6 @@ def test_first_name_form_not_mapped_to_other_person_in_dictionary():
     ("Орлов Денис Николаевич", "Резюме подготовлено Орловым.", "Орловым"),
     ("Громов Артём Викторович", "Подписано Громовым Артёмом.", "Громовым"),
 ])
-@pytest.mark.xfail(strict=True, reason="KON-74: творительный падеж мужской фамилии не маскируется словарём")
 def test_surname_instrumental_case_is_masked_by_dictionary_alone(name, text, forbidden):
     """Словарь сам по себе (без NER) обязан закрывать падежные формы фамилии, иначе утечка зависит
     от вероятностного NER (KON-74)."""

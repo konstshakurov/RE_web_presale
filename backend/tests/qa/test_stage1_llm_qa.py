@@ -206,7 +206,6 @@ def test_fr023_external_requires_confirmation_nothing_sent_before(user, ext_prov
     assert user.post(f"/llm/tasks/{t['id']}/confirm").status_code == 409  # повторное подтверждение
 
 
-@pytest.mark.xfail(strict=True, reason="KON-74: творительный падеж фамилии не маскируется и не останавливает отправку")
 def test_fr023_instrumental_case_surnames_are_masked(user, ext_provider):
     t = submit(user, f"{MARKER} Беседовал с Тимофеем Квашниным вчера.", provider_id=ext_provider["id"],
                terms={"persons": ["Квашнин Тимофей Львович"], "companies": [], "projects": [], "locations": []})
@@ -217,7 +216,6 @@ def test_fr023_instrumental_case_surnames_are_masked(user, ext_provider):
         assert t.status_code == 422                                        # допустимо: отправка запрещена
 
 
-@pytest.mark.xfail(strict=True, reason="KON-75: «Иваном» -> ФИО другого человека из словаря")
 def test_fr023_first_name_form_not_mapped_to_other_person(user, ext_provider, llm):
     t = submit(user, f"{MARKER} Свяжитесь с Иваном Петровым", provider_id=ext_provider["id"],
                terms={"persons": ["Иван Петров"], "companies": [], "projects": [], "locations": []}).json()
@@ -246,7 +244,7 @@ def test_fr023_tasks_are_private_to_owner(user, ext_provider, admin):
     assert user.http.get("/llm/tasks/not-a-uuid").status_code == 404
 
 
-WIRE_BUGS = {"FR023-10": "KON-74: фамилия в творительном падеже уходит во внешнюю LLM"}
+WIRE_BUGS: dict[str, str] = {}
 
 
 @pytest.mark.parametrize("ex", [

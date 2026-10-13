@@ -220,6 +220,13 @@ class FakeMatchRepo:
         return [RecRow(v["emp"], k[1], k[2], v["pct"], v["why"], v["need_at"], v["snap"],
                        datetime(2026, 10, 12, tzinfo=UTC), v.get("gaps")) for k, v in rows]
 
+    def recommended_pairs(self, need_keys):
+        out = {}
+        for k, v in self.recs.items():
+            if k[0] in need_keys:
+                out.setdefault(k[0], set()).add((v["emp"], k[1]))
+        return out
+
     # --- прогоны ---
     @contextmanager
     def run_tx(self, need_key):

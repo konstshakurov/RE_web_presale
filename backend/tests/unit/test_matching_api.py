@@ -66,6 +66,18 @@ def test_match_flow_over_http():
     assert [i["employee_key"] for i in more["items"]] == ["EMP-2"]
 
 
+def test_match_counts_for_needs_list():
+    w = _world()
+    w.needs.add("ANALYTICS-2")
+    client, headers, _, _ = _client(w)
+    empty = client.get("/needs/match-counts", params={"keys": [NEED, "ANALYTICS-2"]})
+    assert empty.status_code == 200 and empty.json() == {"counts": {}}
+    client.post(f"/needs/{NEED}/match", headers=headers, json={})
+    w.run_all()
+    got = client.get("/needs/match-counts", params={"keys": [NEED, "ANALYTICS-2", "bad_key"]})
+    assert got.json() == {"counts": {NEED: 2}}
+
+
 def test_match_errors_and_validation():
     w = _world()
     client, headers, _, _ = _client(w)

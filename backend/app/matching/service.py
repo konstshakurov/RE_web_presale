@@ -768,6 +768,19 @@ class MatchingService:
         with self._repo.run_tx(need_key) as tx:
             tx.finish_chain()
 
+    def match_counts(self, need_keys: list[str]) -> dict[str, int]:
+        """Число кандидатов в сохранённом результате по каждой потребности (для списка
+        потребностей); потребности без результата в ответ не попадают. Правило отбора то же,
+        что в get_state: допустимый сотрудник и оценка по его текущему основному CV."""
+        pairs = self._repo.recommended_pairs(list(need_keys))
+        if not pairs:
+            return {}
+        cands = self._repo.list_candidates(only_assignable=True)
+        return {
+            key: sum(1 for c in cands if (c.employee_key, c.file_id) in rated)
+            for key, rated in pairs.items()
+        }
+
     def get_state(self, need_key: str, *, limit: int, offset: int) -> MatchState:
         """Состояние прогона и список кандидатов из кэша (FR-036). Недопустимые для назначения
         статусы отсекаются на чтении: сотрудник мог сменить статус после расчёта."""

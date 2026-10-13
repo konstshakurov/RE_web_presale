@@ -765,6 +765,23 @@
         "title": "MainCvText",
         "type": "object"
       },
+      "MatchCountsOut": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Ключ потребности -> число кандидатов в сохранённом результате; потребностей без результата в словаре нет",
+            "title": "Counts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "counts"
+        ],
+        "title": "MatchCountsOut",
+        "type": "object"
+      },
       "MatchItemOut": {
         "properties": {
           "calculated_at": {
@@ -5947,6 +5964,73 @@
           }
         ],
         "summary": "Edit Task Prompt",
+        "tags": [
+          "matching"
+        ]
+      }
+    },
+    "/needs/match-counts": {
+      "get": {
+        "description": "Для колонки «Кандидаты» списка потребностей: «Сопоставить» или «N кандидатов».",
+        "operationId": "get_match_counts_needs_match_counts_get",
+        "parameters": [
+          {
+            "description": "Ключи потребностей текущей страницы списка",
+            "in": "query",
+            "name": "keys",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 200,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Ключи потребностей текущей страницы списка",
+              "title": "Keys"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchCountsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Match Counts",
         "tags": [
           "matching"
         ]

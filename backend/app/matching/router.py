@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime
 from typing import Annotated
 
@@ -48,6 +49,7 @@ router = APIRouter(
 
 NO_STORE_MSG = "Хранилище CV не настроено (CV_DB_URL)"
 NEED_KEY = Path(pattern=r"^[A-Z][A-Z0-9_]*-[0-9]+$", description="Ключ потребности Jira")
+_NEED_KEY_RE = re.compile(r"^[A-Z][A-Z0-9_]*-[0-9]+$")
 EMPLOYEE_KEY = Path(pattern=r"^[A-Z][A-Z0-9_]*-[0-9]+$", description="Ключ карточки сотрудника")
 
 _GATEWAY_STATUS = {
@@ -455,6 +457,24 @@ def start_match(
         _raise(exc)
     log.info("matching: %s запустил сопоставление %s", ctx.login, need_key)
     return _state_out(state)
+
+
+class MatchCountsOut(BaseModel):
+    counts: dict[str, int] = Field(
+        description="Ключ потребности -> число кандидатов в сохранённом результате; "
+                    "потребностей без результата в словаре нет")
+
+
+@router.get("/needs/match-counts", response_model=MatchCountsOut)
+def get_match_counts(
+    request: Request,
+    keys: Annotated[list[str] | None, Query(
+        max_length=200, description="Ключи потребностей текущей страницы списка")] = None,
+    _: SessionContext = Depends(authenticated),
+) -> MatchCountsOut:
+    """Для колонки «Кандидаты» списка потребностей: «Сопоставить» или «N кандидатов»."""
+    clean = [k for k in dict.fromkeys(keys or []) if _NEED_KEY_RE.match(k)]
+    return MatchCountsOut(counts=_service(request).match_counts(clean))
 
 
 @router.get("/needs/{need_key}/match", response_model=MatchStateOut,

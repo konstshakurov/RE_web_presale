@@ -592,6 +592,19 @@ class MatchRepo:
                 "WHERE need_key = %s ORDER BY created_at DESC, id DESC", (need_key,)).fetchall()
         return [RecRow(*r) for r in rows]
 
+    def recommended_pairs(self, need_keys: Sequence[str]) -> dict[str, set[tuple[str, int]]]:
+        """Пары (сотрудник, файл CV) с сохранённой оценкой по каждой потребности из списка."""
+        if not need_keys:
+            return {}
+        with self._pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT DISTINCT need_key, employee_key, cv_file_id FROM cv.recommendation "
+                "WHERE need_key = ANY(%s)", (list(need_keys),)).fetchall()
+        out: dict[str, set[tuple[str, int]]] = {}
+        for need_key, employee_key, file_id in rows:
+            out.setdefault(need_key, set()).add((employee_key, file_id))
+        return out
+
     # --- прогоны ---
 
     @contextmanager

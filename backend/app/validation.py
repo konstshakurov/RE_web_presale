@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -45,6 +46,52 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
     return JSONResponse(
         status_code=422, content={"detail": jsonable_encoder(sanitize_errors(exc.errors()))}
     )
+
+
+def _nul_error(loc: list[Any]) -> dict[str, Any]:
+    return {"type": "value_error", "loc": loc,
+            "msg": "Значение содержит недопустимый символ NUL (0x00)"}
+
+
+def _walk_nul(value: Any, loc: list[Any]) -> list[dict[str, Any]]:
+    """Пути строк JSON-тела (ключи и значения), содержащих NUL."""
+    if isinstance(value, str):
+        return [_nul_error(loc)] if "\x00" in value else []
+    out: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if isinstance(k, str) and "\x00" in k:
+                out.append(_nul_error(loc))
+            out += _walk_nul(v, [*loc, k])
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            out += _walk_nul(v, [*loc, i])
+    return out
+
+
+async def reject_nul(request: Request) -> None:
+    """Глобальная зависимость (KON-76): NUL (0x00) в query/path/JSON-теле - 422 на границе API.
+
+    PostgreSQL не принимает NUL в text, иначе ``psycopg.DataError`` -> 500. Значение в ответ не
+    попадает: только ``loc`` и фиксированный текст.
+    """
+    errors: list[dict[str, Any]] = []
+    for name, value in request.query_params.multi_items():
+        if "\x00" in name or "\x00" in value:
+            errors.append(_nul_error(["query", name.replace("\x00", "")]))
+    for name, value in request.path_params.items():
+        if isinstance(value, str) and "\x00" in value:
+            errors.append(_nul_error(["path", name]))
+    if "json" in request.headers.get("content-type", ""):
+        raw = await request.body()
+        # дешёвый префильтр: NUL в JSON - либо сырой байт, либо экранирование \x00
+        if b"\x00" in raw or rb"\u0000" in raw.lower():
+            try:
+                errors += _walk_nul(json.loads(raw), ["body"])
+            except ValueError:  # битый JSON - это дело обычной валидации тела
+                pass
+    if errors:
+        raise RequestValidationError(errors)
 
 
 def install_validation_handler(app: FastAPI) -> None:

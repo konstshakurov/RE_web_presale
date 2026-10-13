@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import pytest
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from ldap3.core.exceptions import LDAPSASLPrepError
 from pydantic import BaseModel, Field
 
 from app.auth import router
 from app.auth.ldap_adapter import Ldap3Adapter
-from app.validation import install_validation_handler, sanitize_errors
+from app.validation import install_validation_handler, reject_nul, sanitize_errors
 
 SECRET = "FAKE_Pw-Zq9!unit-secret-4417"
 
@@ -109,3 +109,63 @@ def test_control_char_password_via_api_is_401(pw, monkeypatch):
     monkeypatch.setattr("app.auth.ldap_adapter.Connection.bind", boom)
     ad = Ldap3Adapter("ldap://127.0.0.1:1", "", "", bind_template="uid={login},dc=x")
     assert ad.authenticate("ivan", pw) is False
+
+
+def _nul_client() -> TestClient:
+    app = FastAPI(dependencies=[Depends(reject_nul)])
+    install_validation_handler(app)
+
+    @app.get("/list")
+    def lst(q: str | None = None, status: str | None = None):
+        return {"q": q}
+
+    @app.get("/item/{key}")
+    def item(key: str):
+        return {"key": key}
+
+    @app.post("/body")
+    def body(payload: dict):
+        return {}
+
+    return TestClient(app)
+
+
+@pytest.mark.parametrize("param", ["q", "status"])
+def test_nul_in_query_is_422_without_echo(param):
+    r = _nul_client().get(f"/list?{param}=a%00bSECRETX")
+    assert r.status_code == 422
+    assert "SECRETX" not in r.text and "input" not in r.text
+    assert r.json()["detail"][0]["loc"] == ["query", param]
+
+
+def test_nul_in_repeated_query_param_is_422():
+    r = _nul_client().get("/list?q=ok&q=a%00b")
+    assert r.status_code == 422
+
+
+def test_nul_in_path_is_422():
+    r = _nul_client().get("/item/a%00b")
+    assert r.status_code == 422 and r.json()["detail"][0]["loc"] == ["path", "key"]
+
+
+def test_nul_in_json_body_is_422():
+    c = _nul_client()
+    r = c.post("/body", content=r'{"query": ["x", {"deep": "a\u0000b"}]}',
+               headers={"content-type": "application/json"})
+    assert r.status_code == 422
+    assert r.json()["detail"][0]["loc"] == ["body", "query", 1, "deep"]
+
+
+def test_clean_values_and_control_chars_pass():
+    c = _nul_client()
+    assert c.get("/list", params={"q": "ab", "status": "Требуется кандидат"}).status_code == 200
+    r = c.post("/body", json={"q": r"text \u0000 literal backslash"})
+    assert r.status_code == 200
+    bad = c.post("/body", content="{bad", headers={"content-type": "application/json"})
+    assert bad.status_code == 422
+
+
+def test_main_app_has_nul_dependency():
+    from app.main import app
+
+    assert any(d.dependency is reject_nul for d in app.router.dependencies)

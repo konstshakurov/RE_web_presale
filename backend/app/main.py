@@ -5,7 +5,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from .app_repo import AppRepo, create_pool
 from .auth import Ldap3Adapter
@@ -27,7 +27,7 @@ from .status_groups.repo import StatusGroupRepo
 from .status_groups.router import router as status_groups_router
 from .sync.factory import build_sync_service, open_cv_pool
 from .sync.router import router as sync_router
-from .validation import install_validation_handler
+from .validation import install_validation_handler, reject_nul
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +88,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         pool.close()
 
 
-app = FastAPI(title="re_web_presale api", lifespan=lifespan)
+# reject_nul: NUL в query/path/теле - 422, а не psycopg.DataError -> 500 (KON-76)
+app = FastAPI(title="re_web_presale api", lifespan=lifespan, dependencies=[Depends(reject_nul)])
 install_validation_handler(app)  # 422 без введённых значений (KON-68)
 
 

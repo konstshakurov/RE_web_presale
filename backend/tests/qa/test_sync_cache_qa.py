@@ -373,7 +373,6 @@ def test_sync16_limit_and_offset_bounds(user, cache500):
     assert user.http.get("/sync/needs", params={"limit": 1}).json()["total"] == 500
 
 
-@pytest.mark.xfail(reason="KON-76: NUL в q/status/epic_key даёт 500 вместо 422", strict=False)
 @pytest.mark.parametrize("param", ["q", "status", "epic_key"])
 def test_sync16b_nul_byte_in_filter_is_not_500(user, cache500, param):
     """SYNC-16b (FR-034): символ NUL в строковом фильтре - 422 или пустой список, но не 500 (KON-76)."""

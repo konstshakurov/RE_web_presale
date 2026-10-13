@@ -94,7 +94,7 @@ def test_tc04_empty_like_password_denied(baseline, pw):
     assert r.status_code == 401 and "set-cookie" not in r.headers
 
 
-@pytest.mark.xfail(strict=True, reason="BUG KON-67: управляющий символ в пароле -> 503 вместо 401")
+# KON-67 исправлен (89b0cee): управляющий символ в пароле -> 401, не 503
 @pytest.mark.parametrize("pw", ["\t", "a\tb", "\n", "\x01", "\x7f"])
 def test_tc04_control_char_password_denied(baseline, pw):
     r = Session().login("qa-user", pw)
@@ -128,7 +128,7 @@ def test_tc05c_field_limits(baseline):
                        headers={"content-type": "application/json"}).status_code == 422
 
 
-@pytest.mark.xfail(strict=True, reason="BUG KON-68: 422 возвращает введённый пароль в поле input")
+# KON-68 исправлен (89b0cee): 422 не возвращает введённый пароль
 def test_tc05c_overlong_password_not_echoed(baseline):
     long_pw = "FAKE_" + "p" * 1100
     r = Session().login("qa-user", long_pw)

@@ -68,3 +68,9 @@ qa/e2e/node_modules/
 qa/e2e/test-results/
 qa/e2e/playwright-report/
 qa/e2e/artifacts/
+
+# QA: файлы CV для e2e генерируются qa/testdata/make_cv_files.py (cv_big.docx ~10 МБ)
+qa/testdata/cv/
+# QA: результаты нагрузки locust
+tests_load/result_*
+qa/e2e/artifacts/test-results/

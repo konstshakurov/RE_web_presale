@@ -50,9 +50,44 @@ QA_JIRA_RELOGIN_PW=$(tok 12)
 EOT
 }
 
+# KON-47: дописать недостающие переменные в существующий .qa.env (значения не перезаписываются)
+add_missing() {
+  local name="$1" value="$2"
+  grep -q "^$name=" "$ENVF" || echo "$name=$value" >> "$ENVF"
+}
+ensure_env() {
+  add_missing QA_DB_PORT 15432
+  add_missing QA_JIRA_PORT 18090
+  add_missing QA_LLM_PORT 18091
+  add_missing QA_FAKE_JIRA_URL http://127.0.0.1:18090
+  add_missing QA_FAKE_LLM_URL http://127.0.0.1:18091
+  add_missing LLM_BASE_URL http://fake-llm:8080/v1
+  add_missing LLM_MODEL fake-qwen
+  add_missing LLM_API_KEY "FAKE_internal_$(tok 12)"
+  add_missing SYNC_NEEDS_INTERVAL_SEC 20
+  add_missing SYNC_EMPLOYEES_INTERVAL_SEC 30
+  add_missing SYNC_PAUSE_RECHECK_SEC 5
+  add_missing SYNC_OVERLAP_SEC 5
+}
+
+# KON-47: все миграции применены (app_db V001..V008, cv_db V001..V010); иначе стенд непригоден
+check_migrations() {
+  local ok=1 db want have
+  for db in app_db cv_db; do
+    want=$(ls "$ROOT/db/migrations/$db"/V*.sql | grep -v '\.down\.sql$' | wc -l | tr -d ' 
+')
+    have=$($DC exec -T db psql -U postgres -d "$db" -Atc "SELECT count(*) FROM meta.schema_migration" | tr -d '
+ ')
+    echo "миграции $db: применено $have из $want"
+    [ "$have" = "$want" ] || ok=0
+  done
+  [ "$ok" = 1 ] || { echo "ОШИБКА: не все миграции применены (пересоздайте тома: stand.sh down && up)"; return 1; }
+}
+
 case "${1:-up}" in
   up)
     gen_env
+    ensure_env
     set -a; . "$ENVF"; set +a
     $DC up -d --build
     echo "ожидание LDAP..."
@@ -74,11 +109,15 @@ case "${1:-up}" in
       echo "seed загружен"
     fi
     for i in $(seq 1 40); do
-      curl -fsS "http://127.0.0.1:${PROXY_PORT}/health" >/dev/null 2>&1 && { echo "стенд готов: $QA_BASE_URL"; exit 0; }
+      curl -fsS "http://127.0.0.1:${PROXY_PORT}/health" >/dev/null 2>&1 && {
+        check_migrations || exit 1
+        echo "стенд готов: $QA_BASE_URL"; exit 0; }
       sleep 3
     done
     echo "стенд не ответил на /health"; exit 1 ;;
   down)
+    ensure_env
+    set -a; . "$ENVF"; set +a
     $DC down -v ;;
   logs)
     set -a; . "$ENVF"; set +a

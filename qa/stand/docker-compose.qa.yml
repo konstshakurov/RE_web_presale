@@ -1,5 +1,6 @@
 # Оверлей QA-стенда (KON-57/58): отдельный compose-проект re_web_presale_qa, чтобы не трогать
 # рабочий стенд разработчика. Фейк Jira вместо боевой; тестовый LDAP на 127.0.0.1:1390.
+# KON-47: добавлены fake-llm и порты управления фейками (18090 Jira, 18091 LLM).
 # Запуск: bash qa/stand/stand.sh up   (все значения генерируются локально, в репозитории их нет)
 services:
   db:
@@ -11,6 +12,8 @@ services:
       JIRA_TOKEN_ENCRYPTION_KEY: ${JIRA_TOKEN_ENCRYPTION_KEY}
     depends_on:
       fake-jira:
+        condition: service_started
+      fake-llm:
         condition: service_started
   worker:
     environment:
@@ -24,6 +27,18 @@ services:
     command: ["python", "-u", "/srv/fake_jira.py"]
     environment:
       FAKE_JIRA_RELOGIN_PW: ${QA_JIRA_RELOGIN_PW}
+    ports:
+      # управление сценарием (/__qa/*): только loopback QA-стенда
+      - "127.0.0.1:${QA_JIRA_PORT:-18090}:8080"
     volumes:
       - ./qa/stand/fake_jira.py:/srv/fake_jira.py:ro
+    networks: [internal]
+  fake-llm:
+    # KON-47: OpenAI-совместимый фейк LLM (внутренняя Qwen и "внешний" провайдер), захват тел запросов
+    image: python:3.12-slim
+    command: ["python", "-u", "/srv/fake_llm.py"]
+    ports:
+      - "127.0.0.1:${QA_LLM_PORT:-18091}:8080"
+    volumes:
+      - ./qa/stand/fake_llm.py:/srv/fake_llm.py:ro
     networks: [internal]

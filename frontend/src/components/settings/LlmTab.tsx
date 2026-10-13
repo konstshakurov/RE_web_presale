@@ -3,20 +3,21 @@ import type { FormEvent } from "react";
 
 import { ApiError, api } from "../../api/client";
 import type { Dictionary, MatchSettings, ProviderOut } from "../../api/types";
-import { LLM_TIMEOUT_SEC, parseTerms, providerUrlError } from "../../lib/matching";
+import { LLM_TIMEOUT_SEC, TECH_TERM_MAX_LEN, mergeTechTerms, parseTerms, providerUrlError } from "../../lib/matching";
 import Modal from "../Modal";
 
 function errText(e: unknown): string {
   return e instanceof ApiError ? e.message : "Не удалось выполнить действие";
 }
 
-// Вкладка «LLM» (FR-030, FR-023, FR-005; только админ): провайдеры, словарь обезличивания, настройки сопоставления.
+// Вкладка «LLM» (FR-030, FR-023, FR-005; только админ): провайдеры, словарь обезличивания, технологии, настройки сопоставления.
 // Ключ API вводится и обратно не показывается: backend отдаёт только has_key.
 export default function LlmTab() {
   return (
     <div className="llm-settings">
       <ProvidersSection />
       <DictionarySection />
+      <TechTermsSection />
       <MatchSettingsSection />
     </div>
   );
@@ -398,6 +399,129 @@ function DictionarySection() {
             {saved && <span role="status">Сохранено</span>}
           </div>
         </form>
+      )}
+    </section>
+  );
+}
+
+// Технологии, которые не обезличиваются (KON-73): расширение встроенного белого списка.
+function TechTermsSection() {
+  const [terms, setTerms] = useState<string[] | null>(null);
+  const [overlaps, setOverlaps] = useState<string[]>([]);
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .techTerms()
+      .then((d) => {
+        if (!alive) return;
+        setTerms(d.terms ?? []);
+        setOverlaps(d.overlaps ?? []);
+      })
+      .catch((e) => alive && setError(e instanceof ApiError ? e.message : "Не удалось загрузить список технологий"));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  function add() {
+    if (!terms || !input.trim()) return;
+    const r = mergeTechTerms(terms, input);
+    if (r.tooLong.length) return setError(`Название технологии не длиннее ${TECH_TERM_MAX_LEN} знаков: ${r.tooLong[0]}`);
+    if (r.overflow) return setError("В списке не более 500 технологий");
+    setError("");
+    setSaved(false);
+    setTerms(r.terms);
+    setInput("");
+  }
+
+  async function onSave() {
+    if (!terms) return;
+    setBusy(true);
+    setError("");
+    setSaved(false);
+    try {
+      const d = await api.saveTechTerms(terms);
+      setTerms(d.terms);
+      setOverlaps(d.overlaps ?? []);
+      setSaved(true);
+    } catch (err) {
+      setError(errText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="group-card">
+      <h3>Технологии, которые не обезличиваются</h3>
+      <p className="muted">
+        Названия технологий и продуктов (Jira, Kafka, внутренний фреймворк), которые остаются в тексте для внешней LLM
+        и не заменяются на [КОМПАНИЯ_n]. Список дополняет встроенный. Названия компаний и клиентов сюда добавлять нельзя:
+        их нужно обезличивать, для этого служит словарь выше (у словаря приоритет). Изменения действуют сразу.
+      </p>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+      {!terms && !error && <p className="muted">Загрузка…</p>}
+      {terms && (
+        <div className="tech-terms">
+          {overlaps.length > 0 && (
+            <p className="error" role="status">
+              Есть в словаре обезличивания, поэтому продолжают маскироваться: {overlaps.join(", ")}
+            </p>
+          )}
+          {terms.length > 0 ? (
+            <ul className="chips" aria-label="Технологии без обезличивания">
+              {terms.map((t) => (
+                <li key={t} className="chip">
+                  {t}
+                  <button
+                    type="button"
+                    aria-label={`Убрать ${t}`}
+                    onClick={() => {
+                      setSaved(false);
+                      setTerms(terms.filter((x) => x !== t));
+                    }}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">Дополнительных технологий нет, действует встроенный список.</p>
+          )}
+          <label>
+            Добавить технологии (через запятую или с новой строки)
+            <textarea
+              rows={2}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  add();
+                }
+              }}
+            />
+          </label>
+          <div className="modal__actions">
+            <button type="button" onClick={add} disabled={!input.trim()}>
+              Добавить
+            </button>
+            <button type="button" className="primary" disabled={busy} onClick={() => void onSave()}>
+              Сохранить список технологий
+            </button>
+            {saved && <span role="status">Сохранено</span>}
+          </div>
+        </div>
       )}
     </section>
   );

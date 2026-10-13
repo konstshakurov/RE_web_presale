@@ -40,9 +40,13 @@ const SETTINGS = {
 };
 
 let providers: ProviderOut[];
+let techFail = false;
+let techOverlaps: string[] = [];
 
 function setup(role = "admin") {
   providers = [provider()];
+  techFail = false;
+  techOverlaps = [];
   calls = [];
   fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
     const method = init?.method ?? "GET";
@@ -65,6 +69,11 @@ function setup(role = "admin") {
     if (url === "/api/admin/llm/dictionary" && method === "GET")
       return json({ persons: ["Иван Иванов"], companies: [], projects: [], locations: [] });
     if (url === "/api/admin/llm/dictionary" && method === "PUT") return json(body);
+    if (url === "/api/admin/llm/tech-terms" && method === "GET") return json({ terms: ["Фреймворкус"], overlaps: [] });
+    if (url === "/api/admin/llm/tech-terms" && method === "PUT") {
+      if (techFail) return json({ detail: "Название технологии не длиннее 64 знаков" }, 422);
+      return json({ terms: body?.terms, overlaps: techOverlaps });
+    }
     if (url === "/api/admin/matching/settings" && method === "GET") return json(SETTINGS);
     if (url === "/api/admin/matching/settings" && method === "PUT") return json({ ...SETTINGS, ...body });
     return json({ detail: "не найдено" }, 404);
@@ -166,5 +175,45 @@ describe("Настройки: LLM", () => {
     await userEvent.click(screen.getByRole("button", { name: "Сохранить настройки" }));
     await waitFor(() => expect(called("PUT", "/api/admin/matching/settings")).toHaveLength(1));
     expect(called("PUT", "/api/admin/matching/settings")[0].body).toEqual({ deep_size: 40, screen_batch: 50 });
+  });
+
+  it("технологии: чипы, вставка списка, удаление, PUT с очищенным списком", async () => {
+    setup();
+    await userEvent.click(await screen.findByRole("tab", { name: "LLM" }));
+    const chips = await screen.findByRole("list", { name: "Технологии без обезличивания" });
+    expect(within(chips).getByText("Фреймворкус")).toBeInTheDocument();
+    const input = screen.getByLabelText(/Добавить технологии/);
+    await userEvent.click(input);
+    await userEvent.paste("Kafka, camunda;\n  Мой Стек \nфреймворкус");
+    await userEvent.click(screen.getByRole("button", { name: "Добавить" }));
+    expect(within(chips).getByText("Kafka")).toBeInTheDocument();
+    expect(within(chips).getByText("Мой Стек")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Убрать Kafka" }));
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить список технологий" }));
+    await waitFor(() => expect(called("PUT", "/api/admin/llm/tech-terms")).toHaveLength(1));
+    expect(called("PUT", "/api/admin/llm/tech-terms")[0].body).toEqual({
+      terms: ["Фреймворкус", "camunda", "Мой Стек"],
+    });
+    expect(await screen.findAllByText("Сохранено")).not.toHaveLength(0);
+  });
+
+  it("технологии: слишком длинное название не добавляется; ошибка сервера и пересечение показываются", async () => {
+    setup();
+    techOverlaps = ["Фреймворкус"];
+    await userEvent.click(await screen.findByRole("tab", { name: "LLM" }));
+    await screen.findByRole("list", { name: "Технологии без обезличивания" });
+    const input = screen.getByLabelText(/Добавить технологии/);
+    await userEvent.click(input);
+    await userEvent.paste("x".repeat(65));
+    await userEvent.click(screen.getByRole("button", { name: "Добавить" }));
+    expect(await screen.findByText(/не длиннее 64 знаков: x/)).toBeInTheDocument();
+
+    techFail = true;
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить список технологий" }));
+    expect(await screen.findByText("Название технологии не длиннее 64 знаков")).toBeInTheDocument();
+
+    techFail = false;
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить список технологий" }));
+    expect(await screen.findByText(/продолжают маскироваться: Фреймворкус/)).toBeInTheDocument();
   });
 });

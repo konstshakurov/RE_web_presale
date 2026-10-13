@@ -9,8 +9,9 @@ import json
 import logging
 from typing import Protocol
 
-from .anonymize import Dictionaries
+from .anonymize import Dictionaries, _variants
 from .repo import LlmRepo
+from .technologies import normalize
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +20,8 @@ TECH_SETTING_KEY = "llm_tech_terms"
 MAX_TERMS = 5000
 MAX_TERM_LEN = 200
 KINDS = ("persons", "companies", "projects", "locations")
+MAX_TECH_TERMS = 500
+MAX_TECH_TERM_LEN = 64
 
 
 class EmployeeNames(Protocol):
@@ -55,6 +58,21 @@ class DictionarySource:
         if not isinstance(data, list):
             return ()
         return tuple(str(v)[:MAX_TERM_LEN] for v in data[:MAX_TERMS] if str(v).strip())
+
+    def save_tech_terms(self, terms: list[str]) -> None:
+        """Сохранить расширение белого списка технологий; действует на следующий запрос
+        обезличивания (список читается при каждом обезличивании), перезапуск не нужен."""
+        self._repo.put_setting(TECH_SETTING_KEY, json.dumps(list(terms), ensure_ascii=False))
+
+    def tech_overlaps(self, terms: list[str]) -> list[str]:
+        """Термины, которые есть и в словаре обезличивания: приоритет у словаря, поэтому
+        белый список их не защищает (они маскируются всегда)."""
+        d = self.load_custom()
+        own = {
+            normalize(v)
+            for kind in KINDS for term in getattr(d, kind) for v in _variants(term)
+        }
+        return [t for t in terms if normalize(t) in own]
 
     def save_custom(self, d: Dictionaries) -> None:
         self._repo.put_setting(

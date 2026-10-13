@@ -3346,6 +3346,47 @@
         "title": "TaskCreate",
         "type": "object"
       },
+      "TechTermsBody": {
+        "properties": {
+          "terms": {
+            "default": [],
+            "description": "Технологии, которые не обезличиваются",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "title": "Terms",
+            "type": "array"
+          }
+        },
+        "title": "TechTermsBody",
+        "type": "object"
+      },
+      "TechTermsOut": {
+        "properties": {
+          "overlaps": {
+            "description": "Термины, которые есть и в словаре обезличивания: приоритет у словаря, они продолжают маскироваться",
+            "items": {
+              "type": "string"
+            },
+            "title": "Overlaps",
+            "type": "array"
+          },
+          "terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Terms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "terms",
+          "overlaps"
+        ],
+        "title": "TechTermsOut",
+        "type": "object"
+      },
       "TechnologyOut": {
         "properties": {
           "employees": {
@@ -3968,6 +4009,96 @@
           }
         ],
         "summary": "Patch Provider",
+        "tags": [
+          "llm"
+        ]
+      }
+    },
+    "/admin/llm/tech-terms": {
+      "get": {
+        "description": "Дополнительные технологии (к встроенному списку), которые не заменяются на [КОМПАНИЯ_n].",
+        "operationId": "get_tech_terms_admin_llm_tech_terms_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechTermsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Get Tech Terms",
+        "tags": [
+          "llm"
+        ]
+      },
+      "put": {
+        "description": "Заменяет список. Пустой список допустим (остаётся встроенный). Действует сразу.",
+        "operationId": "put_tech_terms_admin_llm_tech_terms_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TechTermsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechTermsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Put Tech Terms",
         "tags": [
           "llm"
         ]

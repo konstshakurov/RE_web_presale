@@ -129,3 +129,34 @@ export function candidatesLabel(n: number): string {
   const word = tens >= 11 && tens <= 14 ? "кандидатов" : last === 1 ? "кандидат" : last >= 2 && last <= 4 ? "кандидата" : "кандидатов";
   return `${n} ${word}`;
 }
+
+export const TECH_TERM_MAX_LEN = 64;
+export const TECH_TERMS_MAX = 500;
+
+// Список технологий (KON-73): вставка через запятую, «;» или с новой строки. Дубли без учёта
+// регистра убираются (остаётся первое написание), слишком длинные возвращаются отдельно.
+export function mergeTechTerms(
+  current: string[],
+  text: string,
+): { terms: string[]; tooLong: string[]; overflow: boolean } {
+  const seen = new Set(current.map((t) => t.toLowerCase()));
+  const terms = [...current];
+  const tooLong: string[] = [];
+  let overflow = false;
+  for (const part of text.split(/[,;\r\n]+/)) {
+    const t = part.trim().replace(/\s+/g, " ");
+    const k = t.toLowerCase();
+    if (!t || seen.has(k)) continue;
+    if (t.length > TECH_TERM_MAX_LEN) {
+      tooLong.push(t);
+      continue;
+    }
+    if (terms.length >= TECH_TERMS_MAX) {
+      overflow = true;
+      continue;
+    }
+    seen.add(k);
+    terms.push(t);
+  }
+  return { terms, tooLong, overflow };
+}

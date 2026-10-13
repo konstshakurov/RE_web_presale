@@ -2,6 +2,8 @@
 «задача -> предпросмотр -> подтверждение -> результат», ошибки. БД не нужна."""
 from __future__ import annotations
 
+import json
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -10,7 +12,7 @@ from app.app_repo.repo import AppUser
 from app.auth.sessions import csrf_token, hash_session_id, new_session_id
 from app.llm_gateway.router import router
 
-from ._llm_fakes import FAKE_PROVIDER_KEY, NOW, Env
+from ._llm_fakes import FAKE_PROVIDER_KEY, NOW, Env, FakeNer
 
 COMPANY = "Тестовая Компания Альфа"
 NEW_KEY = "test-new-key-2222222222"
@@ -32,9 +34,8 @@ class AuthRepo:
     def revoke_session(self, h): ...
 
 
-@pytest.fixture()
-def ctx():
-    e = Env()
+def _make_ctx(ner=None):
+    e = Env(ner=ner)
     e.repo.sources["companies"] = [COMPANY]
     app = FastAPI()
     app.include_router(router)
@@ -45,6 +46,17 @@ def ctx():
     app.state.llm_providers = e.providers
     app.state.llm_dictionary = e.dictionary
     return app, e
+
+
+@pytest.fixture()
+def ctx():
+    return _make_ctx()
+
+
+@pytest.fixture()
+def ctx_ner():
+    """NER помечает «Фреймворкус» как организацию (как natasha делает с названиями продуктов)."""
+    return _make_ctx(FakeNer([("Фреймворкус", "company")]))
 
 
 def client(ctx, login):
@@ -68,6 +80,8 @@ def test_settings_admin_only_and_anonymous_401(ctx):
                    ).status_code == 403
     assert c.delete(f"/admin/llm/providers/{pid}", headers=h).status_code == 403
     assert c.get("/admin/llm/dictionary").status_code == 403
+    assert c.get("/admin/llm/tech-terms").status_code == 403
+    assert c.put("/admin/llm/tech-terms", headers=h, json={"terms": ["X"]}).status_code == 403
     assert c.put("/admin/llm/dictionary", headers=h, json={}).status_code == 403
     assert TestClient(ctx[0]).get("/admin/llm/providers").status_code == 401
     assert TestClient(ctx[0]).get("/llm/providers").status_code == 401
@@ -195,6 +209,77 @@ def test_dictionary_roundtrip_and_effect(ctx):
         "provider_id": ctx[1].external.id})
     assert r.status_code == 201
     assert r.json()["preview"]["prompt"] == "[ПРОЕКТ_1] для [КОМПАНИЯ_1]"
+
+
+# --- технологии, которые не обезличиваются (KON-73) ---
+
+def test_tech_terms_anonymous_401_and_csrf(ctx):
+    app, _ = ctx
+    assert TestClient(app).get("/admin/llm/tech-terms").status_code == 401
+    c, _h = client(ctx, "boss")
+    assert c.put("/admin/llm/tech-terms", json={"terms": ["X"]}).status_code == 403  # без CSRF
+
+
+def test_tech_terms_roundtrip_trim_dedup_empty_allowed(ctx):
+    c, h = client(ctx, "boss")
+    assert c.get("/admin/llm/tech-terms").json() == {"terms": [], "overlaps": []}
+    r = c.put("/admin/llm/tech-terms", headers=h, json={
+        "terms": ["  Фреймворкус ", "фреймворкус", "Мой  Стек", "FOO"]})
+    assert r.status_code == 200
+    assert r.json()["terms"] == ["Фреймворкус", "Мой Стек", "FOO"]
+    assert c.get("/admin/llm/tech-terms").json()["terms"] == ["Фреймворкус", "Мой Стек", "FOO"]
+    assert json.loads(ctx[1].repo.settings["llm_tech_terms"]) == ["Фреймворкус", "Мой Стек", "FOO"]
+    r = c.put("/admin/llm/tech-terms", headers=h, json={"terms": []})
+    assert r.status_code == 200 and r.json()["terms"] == []
+
+
+def test_tech_terms_validation(ctx):
+    c, h = client(ctx, "boss")
+    put = lambda terms: c.put("/admin/llm/tech-terms", headers=h, json={"terms": terms})  # noqa: E731
+    assert put(["   "]).status_code == 422
+    assert put([""]).status_code == 422
+    assert put(["x" * 65]).status_code == 422
+    assert put(["x" * 64]).status_code == 200
+    assert put([f"t{i}" for i in range(501)]).status_code == 422
+    assert put([f"t{i}" for i in range(500)]).status_code == 200
+    assert c.put("/admin/llm/tech-terms", headers=h, json={"terms": "Java"}).status_code == 422
+    # неудачное сохранение не затирает прежний список
+    put(["Keep"])
+    assert put(["   "]).status_code == 422
+    assert c.get("/admin/llm/tech-terms").json()["terms"] == ["Keep"]
+
+
+def test_tech_terms_overlap_with_dictionary_is_warned(ctx):
+    c, h = client(ctx, "boss")
+    c.put("/admin/llm/dictionary", headers=h, json={"projects": ["Фреймворкус"]})
+    r = c.put("/admin/llm/tech-terms", headers=h, json={"terms": ["фреймворкус", "Другое"]})
+    assert r.status_code == 200
+    assert r.json()["overlaps"] == ["фреймворкус"]
+    assert c.get("/admin/llm/tech-terms").json()["overlaps"] == ["фреймворкус"]
+
+
+def _preview(ctx, login="ivan"):
+    u, uh = client(ctx, login)
+    r = u.post("/llm/tasks", headers=uh, json={
+        "purpose": "chat", "prompt": "Опыт: Фреймворкус, Java.", "provider_id": ctx[1].external.id})
+    assert r.status_code == 201
+    return r.json()["preview"]["prompt"]
+
+
+def test_added_tech_term_not_masked_without_restart(ctx_ner):
+    assert _preview(ctx_ner) == "Опыт: [КОМПАНИЯ_1], Java."
+    c, h = client(ctx_ner, "boss")
+    c.put("/admin/llm/tech-terms", headers=h, json={"terms": ["Фреймворкус"]})
+    assert _preview(ctx_ner) == "Опыт: Фреймворкус, Java."  # тот же процесс, без перезапуска
+    c.put("/admin/llm/tech-terms", headers=h, json={"terms": []})
+    assert _preview(ctx_ner) == "Опыт: [КОМПАНИЯ_1], Java."
+
+
+def test_dictionary_wins_over_added_tech_term(ctx_ner):
+    c, h = client(ctx_ner, "boss")
+    c.put("/admin/llm/tech-terms", headers=h, json={"terms": ["Фреймворкус"]})
+    c.put("/admin/llm/dictionary", headers=h, json={"companies": ["Фреймворкус"]})
+    assert _preview(ctx_ner) == "Опыт: [КОМПАНИЯ_1], Java."
 
 
 # --- задачи ---

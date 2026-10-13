@@ -15,7 +15,13 @@ from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext, authenticated, authenticated_csrf, require_admin
 from .anonymize import AnonymizationError, Dictionaries
-from .dictionaries import MAX_TERM_LEN, MAX_TERMS, DictionarySource
+from .dictionaries import (
+    MAX_TECH_TERM_LEN,
+    MAX_TECH_TERMS,
+    MAX_TERM_LEN,
+    MAX_TERMS,
+    DictionarySource,
+)
 from .providers import ProviderError, ProviderService
 from .repo import LlmRepo, ProviderRow
 from .service import GatewayError, LeakError, LlmGateway, TaskView
@@ -87,6 +93,18 @@ class DictionaryBody(BaseModel):
     companies: list[Term] = []
     projects: list[Term] = []
     locations: list[Term] = []
+
+
+class TechTermsBody(BaseModel):
+    terms: list[str] = Field(
+        [], max_length=MAX_TECH_TERMS, description="Технологии, которые не обезличиваются")
+
+
+class TechTermsOut(BaseModel):
+    terms: list[str]
+    overlaps: list[str] = Field(
+        description="Термины, которые есть и в словаре обезличивания: приоритет у словаря, "
+                    "они продолжают маскироваться")
 
 
 class TaskCreate(BaseModel):
@@ -288,6 +306,52 @@ def put_dictionary(
     _dict_source(request).save_custom(d)
     log.info("LLM: %s обновил словарь обезличивания (%s строк)", ctx.login, total)
     return _dictionary_body(d)
+
+
+# --- технологии, которые не обезличиваются (KON-73, админ) ---
+
+def _tech_terms(items: list[str]) -> list[str]:
+    """trim и схлопывание пробелов, дубли без учёта регистра убираются (первое написание)."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in items:
+        t = " ".join(raw.split())
+        if not t:
+            raise HTTPException(status_code=422, detail="Пустая строка в списке технологий")
+        if len(t) > MAX_TECH_TERM_LEN:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Название технологии не длиннее {MAX_TECH_TERM_LEN} знаков")
+        key = t.casefold()
+        if key not in seen:
+            seen.add(key)
+            out.append(t)
+    return out
+
+
+def _tech_out(src: DictionarySource, terms: list[str]) -> TechTermsOut:
+    return TechTermsOut(terms=terms, overlaps=src.tech_overlaps(terms))
+
+
+@router.get("/admin/llm/tech-terms", response_model=TechTermsOut)
+def get_tech_terms(
+    request: Request, _: SessionContext = Depends(require_admin)
+) -> TechTermsOut:
+    """Дополнительные технологии (к встроенному списку), которые не заменяются на [КОМПАНИЯ_n]."""
+    src = _dict_source(request)
+    return _tech_out(src, list(src.load_tech_terms()))
+
+
+@router.put("/admin/llm/tech-terms", response_model=TechTermsOut)
+def put_tech_terms(
+    body: TechTermsBody, request: Request, ctx: SessionContext = Depends(require_admin)
+) -> TechTermsOut:
+    """Заменяет список. Пустой список допустим (остаётся встроенный). Действует сразу."""
+    terms = _tech_terms(body.terms)
+    src = _dict_source(request)
+    src.save_tech_terms(terms)
+    log.info("LLM: %s обновил список технологий (%s строк)", ctx.login, len(terms))
+    return _tech_out(src, terms)
 
 
 # --- задачи ---

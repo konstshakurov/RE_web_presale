@@ -420,6 +420,12 @@ export interface Dictionary {
   projects: string[];
 }
 
+export interface TechTerms {
+  terms: string[];
+  // термины, которые есть и в словаре обезличивания: приоритет у словаря
+  overlaps?: string[];
+}
+
 export interface MatchSettings {
   deep_size: number;
   deep_size_min: number;

@@ -9,6 +9,7 @@ import {
   replacementsText,
   retryableTasks,
   searchPercent,
+  mergeTechTerms,
 } from "../lib/matching";
 
 describe("percentTone", () => {
@@ -75,5 +76,21 @@ describe("candidatesLabel", () => {
     expect(candidatesLabel(21)).toBe("21 кандидат");
     expect(candidatesLabel(23)).toBe("23 кандидата");
     expect(candidatesLabel(111)).toBe("111 кандидатов");
+  });
+});
+
+describe("mergeTechTerms", () => {
+  it("делит по запятой, «;» и строкам, убирает пустые и дубли без учёта регистра", () => {
+    const r = mergeTechTerms(["Java"], " Kafka,java ;\n\n  Мой   Стек ,");
+    expect(r.terms).toEqual(["Java", "Kafka", "Мой Стек"]);
+    expect(r.tooLong).toEqual([]);
+    expect(r.overflow).toBe(false);
+  });
+  it("слишком длинные возвращает отдельно, переполнение отмечает", () => {
+    expect(mergeTechTerms([], "x".repeat(65)).tooLong).toHaveLength(1);
+    const full = Array.from({ length: 500 }, (_, i) => `t${i}`);
+    const r = mergeTechTerms(full, "new");
+    expect(r.overflow).toBe(true);
+    expect(r.terms).toHaveLength(500);
   });
 });

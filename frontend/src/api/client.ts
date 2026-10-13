@@ -3,6 +3,7 @@ import type {
   CvLimits,
   CvText,
   Dictionary,
+  TechTerms,
   EmployeeFiles,
   EmployeeOut,
   EmployeesPage,
@@ -261,6 +262,8 @@ export const api = {
   deleteProvider: (id: number) => request<void>("DELETE", `/admin/llm/providers/${id}`),
   dictionary: () => request<Dictionary>("GET", "/admin/llm/dictionary"),
   saveDictionary: (body: Dictionary) => request<Dictionary>("PUT", "/admin/llm/dictionary", body),
+  techTerms: () => request<TechTerms>("GET", "/admin/llm/tech-terms"),
+  saveTechTerms: (terms: string[]) => request<TechTerms>("PUT", "/admin/llm/tech-terms", { terms }),
   matchSettings: () => request<MatchSettings>("GET", "/admin/matching/settings"),
   saveMatchSettings: (body: { deep_size: number; screen_batch: number }) =>
     request<MatchSettings>("PUT", "/admin/matching/settings", body),

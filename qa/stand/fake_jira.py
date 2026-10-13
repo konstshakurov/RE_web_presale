@@ -14,7 +14,10 @@
   POST /__qa/status {"key","status"}        сменить статус; updated = сейчас (NFR-008)
   POST /__qa/age {"minutes"}              сдвинуть updated всех задач в прошлое (проверка инкремента)
   POST /__qa/gen {"count","start","status"} добавить N потребностей ANALYTICS (нагрузка NFR-002)
-  POST /__qa/fail {"mode": "none|401|403|500", "delay": сек}  отказ чтения (search/issue/epic)
+  POST /__qa/fail {"mode": "none|401|403|400|500", "delay": сек}  отказ чтения (search/issue/epic);
+                                            400 - «Jira отклонила запрос» (jira_error -> 502, KON-63)
+  POST /__qa/put {"key","summary","status","project","type","created_days_ago","fields":{...}}
+                                            создать/заменить задачу с произвольными полями (KON-63: ставки);
   GET  /__qa/stats                          счётчики запросов чтения
 Все данные вымышленные. Набор строится кодом, детерминированно, относительно момента старта.
 """
@@ -256,6 +259,14 @@ class Handler(BaseHTTPRequestHandler):
                          created, upd, description="Нагрузочная потребность. Требования: SQL, BPMN.",
                          customfield_10101=f"CLN-{1 + i % 3}")
                 return self._send(200, {"issues": len(ISSUES)})
+            if path == "/__qa/put":
+                now = datetime.now(UTC)
+                fields = dict(data.get("fields") or {})
+                _put(str(data["key"]), str(data.get("project", "ANALYTICS")),
+                     str(data.get("type", "Аналитик")), str(data.get("status", "Требуется кандидат")),
+                     str(data.get("summary", "Аналитик (QA put)")),
+                     now - timedelta(days=float(data.get("created_days_ago", 1))), now, **fields)
+                return self._send(200, {"issues": len(ISSUES)})
             if path == "/__qa/fail":
                 FAIL.update(mode=str(data.get("mode", "none")), delay=float(data.get("delay", 0)))
                 return self._send(200, FAIL)
@@ -298,6 +309,10 @@ class Handler(BaseHTTPRequestHandler):
         if mode == "403":
             STATS["denied"] += 1
             self._send(403, {"errorMessages": [FORBIDDEN_TEXT]})
+            return True
+        if mode == "400":
+            STATS["denied"] += 1
+            self._send(400, {"errorMessages": ["The JQL query is invalid (fake Jira, QA scenario)"]})
             return True
         if mode == "500":
             STATS["denied"] += 1

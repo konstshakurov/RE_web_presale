@@ -112,5 +112,5 @@
 `backend/tests/qa/test_stand_api_qa.py` (API, имена `test_tcNN_*` совпадают с ID кейсов выше),
 `backend/tests/qa/test_stand_nfr_qa.py` (NFR-006, NFR-007 п.3), `qa/e2e/tests/login_and_access.spec.ts` (E2E-01..10).
 Закрыто: TC-AUTH-11d (конкурентный отзыв, пройден), TC-AUTH-10f и TC-UI-01 (e2e), TC-AUTH-13 на стенде с фейк Jira.
-Найдено: KON-67 (управляющий символ в пароле -> 503), KON-68 (пароль в теле 422), KON-69 (FR-029 «как есть»).
+Найдено: KON-67 (управляющий символ в пароле -> 503), KON-68 (пароль в теле 422), KON-69 (FR-029 «как есть»; закрыт 11730ce, проверено 13.10: `test_tc13_jira_refusal_text_shown_verbatim` пройден, xfail снят). NUL в логине/пароле после KON-76 -> 422 (не 401), сессия не создаётся; тесты tc04/tc05 это учитывают.
 Отчёты: `qa/reports/kon-57_api_access_report.md`, `qa/reports/kon-58_e2e_acceptance_report.md`.

@@ -36,7 +36,7 @@
 | SYNC-15 | Фильтры: `group` (каждая группа, `other`, `all`), `status`, `epic_key`, `q` (в т. ч. регистр, `%`, `_`, `\`), `created_from` / `created_to` (границы суток +04:00) | выборка и `total` совпадают с независимым SQL по кэшу | FR-034, FR-035 | C `test_sync15_*`; U `test_status_groups_filter_*`, `test_search_escapes_like_wildcards` |
 | SYNC-15b | Сочетание фильтров group + epic_key + q + диапазон дат | пересечение (И), `total` совпадает с SQL | FR-034, FR-035 | C `test_sync15b_*` |
 | SYNC-16 | Границы `limit` / `offset` (0, 501, -1, "abc", 10^7; offset за концом; `q` 200 / 201 символ; SQL-подобная строка, `\x01`) | 422 для недопустимых значений; пустая страница с прежним `total`; без 500; то же для `/sync/employees` | FR-034 | C `test_sync16_*` |
-| SYNC-16b | NUL (`%00`) в `q`, `status`, `epic_key` | 422 или пустой список, не 500 | FR-034 | C `test_sync16b_*` - **xfail, дефект KON-76** |
+| SYNC-16b | NUL (`%00`) в `q`, `status`, `epic_key` | 422 или пустой список, не 500 | FR-034 | C `test_sync16b_*` - **пройден 13.10 (KON-76 закрыт, 46fc54d): 422**, 3 параметра |
 | SYNC-17 | Прирост +100 потребностей к 500 | один цикл «Обновить» без ошибок (0,1-0,2 с), список `limit=500` при 600 записях 26-36 мс | NFR-002, NFR-008 | C `test_sync17_*`; S:nfr `test_nfr002_weekly_growth_*` |
 
 ## 2. Трассировка требование -> кейс -> тест
@@ -93,7 +93,7 @@
 
 | ID | Суть | Серьёзность | Статус |
 |---|---|---|---|
-| KON-76 | NUL (`%00`) в `q` / `status` / `epic_key` в `/sync/needs`, `/sync/employees`, `/resume/employees` даёт 500 вместо 422 | низкая-средняя | открыт (метка Bug) |
+| KON-76 | NUL (`%00`) в `q` / `status` / `epic_key` в `/sync/needs`, `/sync/employees`, `/resume/employees` даёт 500 вместо 422 | низкая-средняя | **закрыт**: исправлен в 46fc54d, проверен на пересобранном стенде 13.10 (SYNC-16b: 3 из 3, NUL -> 422) |
 
 ### 3.4 Не проверялось и почему
 

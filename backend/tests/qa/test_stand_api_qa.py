@@ -91,7 +91,8 @@ def test_tc02_outsider_denied_same_text_as_wrong_password(baseline):
 @pytest.mark.parametrize("pw", ["", " ", "   ", "\x00", " ", "a​b", "пароль-кириллица"])
 def test_tc04_empty_like_password_denied(baseline, pw):
     r = Session().login("qa-user", pw)
-    assert r.status_code == 401 and "set-cookie" not in r.headers
+    # NUL в теле JSON отклоняется на входе API (KON-76): 422; остальные - 401. Сессия не создаётся
+    assert r.status_code == (422 if "\x00" in pw else 401) and "set-cookie" not in r.headers
 
 
 # KON-67 исправлен (89b0cee): управляющий символ в пароле -> 401, не 503
@@ -107,7 +108,8 @@ def test_tc04_control_char_password_denied(baseline, pw):
 )
 def test_tc05_ldap_injection_denied(baseline, name):
     r = Session().login(name, PASSWORDS["qa-user"])
-    assert r.status_code == 401, name
+    # NUL в теле JSON - 422 на входе API (KON-76), остальные инъекции - 401
+    assert r.status_code == (422 if "\x00" in name else 401), name
     assert "set-cookie" not in r.headers
 
 
@@ -312,8 +314,8 @@ def test_tc13_jira_refusal_does_not_block_login_and_is_shown_as_is(baseline):
     assert s.me().status_code == 200                           # разделы доступны
 
 
-@pytest.mark.xfail(strict=True, reason="KON-69: FR-029 'как есть' vs обобщённый hint (кандидат в CR)")
 def test_tc13_jira_refusal_text_shown_verbatim(baseline):
+    """FR-029 (KON-69, закрыт): текст отказа из JSON-ответа Jira показывается как есть."""
     js = Session().login("qa-jirablock").json()["jira_status"]
     assert "fake Jira, QA" in js["message"]                    # текст из тела ответа Jira
 

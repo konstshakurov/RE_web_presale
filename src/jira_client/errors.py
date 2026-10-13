@@ -170,6 +170,65 @@ def classify_login_failure(response) -> str:
     return LOGIN_REASON_AUTH_FAILED
 
 
+#: Сколько знаков текста Jira показывается пользователю при отказе входа (FR-029).
+USER_TEXT_LIMIT = 500
+#: Чем заменяется эхо секрета (пароля) в тексте для пользователя.
+SECRET_MASK = "[скрыто]"
+
+_CONTROL_RE = re.compile(r"[\x00-\x1f\x7f-\x9f]+")
+_TAG_RE = re.compile(r"<[^>]*>")
+
+
+def mask_secrets(text: str, secrets=()) -> str:
+    """Заменить вхождения секретов (пароль, эхо в ответе Jira) на ``[скрыто]``."""
+    for secret in secrets or ():
+        if secret:
+            text = text.replace(secret, SECRET_MASK)
+    return text
+
+
+def extract_user_text(body: bytes, content_type: str = "", secrets=()) -> str:
+    """Текст отказа Jira «как есть» для показа пользователю (FR-029).
+
+    Возвращает строку только если тело — JSON-объект с ``errorMessages`` /
+    ``errors`` (либо ``message``). HTML, не-JSON и пустое тело дают ``""``:
+    вызывающий подставляет обобщённый hint. Заголовки и cookie сюда не
+    попадают вовсе; управляющие символы и теги убираются, пароль из ``secrets``
+    заменяется на ``[скрыто]``, длина ограничена ``USER_TEXT_LIMIT``.
+    """
+    if not body:
+        return ""
+    text = body.decode("utf-8", errors="replace").strip()
+    if not text.startswith("{"):
+        return ""
+    import json
+
+    try:
+        payload = json.loads(text)
+    except ValueError:
+        return ""
+    if not isinstance(payload, dict):
+        return ""
+
+    parts: List[str] = []
+    single = _as_text(payload.get("message"))
+    if single:
+        parts.append(single)
+    messages = payload.get("errorMessages")
+    if isinstance(messages, list):
+        parts.extend(_as_text(m) for m in messages if _as_text(m))
+    errors = payload.get("errors")
+    if isinstance(errors, dict):
+        parts.extend("%s: %s" % (k, _as_text(v)) for k, v in errors.items() if _as_text(v))
+    elif isinstance(errors, list):
+        parts.extend(_as_text(e) for e in errors if _as_text(e))
+
+    joined = mask_secrets(" ".join(parts), secrets)
+    joined = _TAG_RE.sub(" ", joined)
+    joined = " ".join(_CONTROL_RE.sub(" ", joined).split())
+    return joined[:USER_TEXT_LIMIT]
+
+
 def _as_text(value: Any) -> str:
     if value is None:
         return ""
@@ -333,20 +392,24 @@ class JiraLoginError(JiraAuthError):
         summary: str = "",
         *,
         login_reason: str = LOGIN_REASON_AUTH_FAILED,
+        user_text: str = "",
         **kw: Any,
     ) -> None:
         self.login_reason = login_reason
+        #: Текст отказа из ответа Jira (FR-029); пусто — тело не JSON.
+        self.user_text = user_text or ""
         kw.setdefault("reason", login_reason)
         super().__init__(summary, **kw)
 
     @property
     def hint(self) -> str:
-        """Короткий текст для пользователя. HTML-страница Jira не показывается."""
-        return LOGIN_HINTS.get(self.login_reason, "")
+        """Текст для пользователя: текст из JSON-ответа Jira как есть (FR-029),
+        иначе обобщённое объяснение. HTML-страница Jira не показывается."""
+        return self.user_text or LOGIN_HINTS.get(self.login_reason, "")
 
     def _render(self) -> str:
         base = super()._render()
-        hint = self.hint
+        hint = LOGIN_HINTS.get(self.login_reason, "")
         return ("%s %s" % (base, hint)).strip() if hint else base
 
 

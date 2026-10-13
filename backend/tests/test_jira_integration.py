@@ -152,7 +152,55 @@ class TestLogin:
 
         assert exc.value.code == CODE_LOGIN_BLOCKED
         assert exc.value.code != CODE_AUTH_FAILED
+        # FR-029 (KON-69): текст из JSON-ответа Jira показывается как есть
+        assert exc.value.message == "Проверка не пройдена"
+
+    def test_blocked_without_jira_text_uses_generic_hint(self, adapter_factory):
+        handler = router(
+            default=lambda: error_response(
+                [], 403, {"x-seraph-loginreason": "AUTHENTICATION_DENIED"}
+            )
+        )
+        adapter = adapter_factory(handler)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
+
+        assert exc.value.code == CODE_LOGIN_BLOCKED
         assert "браузер" in exc.value.message
+
+    def test_html_refusal_gives_hint_not_markup(self, adapter_factory):
+        def html():
+            return httpx.Response(
+                403,
+                text="<html><head><title>Denied</title></head><body>secret-page</body></html>",
+                headers={"content-type": "text/html", "x-seraph-loginreason": "AUTHENTICATION_DENIED"},
+            )
+
+        adapter = adapter_factory(router(default=html))
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
+
+        assert exc.value.code == CODE_LOGIN_BLOCKED
+        assert "<" not in exc.value.message and "secret-page" not in exc.value.message
+        assert "браузер" in exc.value.message
+
+    def test_password_echo_in_refusal_is_masked(self, adapter_factory):
+        handler = router(
+            default=lambda: error_response(
+                ["Login failed for %s" % FAKE_PROBE_PASSWORD],
+                403,
+                {"x-seraph-loginreason": "AUTHENTICATION_DENIED"},
+            )
+        )
+        adapter = adapter_factory(handler)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
+
+        assert FAKE_PROBE_PASSWORD not in exc.value.message
+        assert "[скрыто]" in exc.value.message
 
     def test_unreachable_jira_is_jira_unavailable_not_wrong_password(self, adapter_factory):
         def handler(request):

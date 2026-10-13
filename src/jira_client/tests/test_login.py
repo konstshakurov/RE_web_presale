@@ -21,7 +21,9 @@ import pytest
 from jira_client.auth import SessionLoginProvider
 from jira_client.errors import (
     LOGIN_REASON_AUTH_FAILED,
+    LOGIN_HINTS,
     LOGIN_REASON_BLOCKED,
+    USER_TEXT_LIMIT,
     JiraBadRequestError,
     JiraLoginError,
     JiraServerError,
@@ -291,3 +293,76 @@ class TestPasswordDoesNotLeak:
         assert PASSWORD not in described
         assert USERNAME not in described
         assert session.token not in described
+
+
+class TestUserTextFromJira:
+    """FR-029 (KON-69): отказ показывается текстом из JSON-ответа Jira."""
+
+    DENIED = {"x-seraph-loginreason": "AUTHENTICATION_DENIED"}
+
+    def _fail(self, handler):
+        with pytest.raises(JiraLoginError) as exc:
+            build(handler).login(USERNAME, PASSWORD)
+        return exc.value
+
+    def test_json_error_messages_are_shown_as_is(self):
+        text = "Login denied: confirmation in the browser is required (fake Jira, QA)"
+        err = self._fail(json_error(403, [text], self.DENIED))
+        assert err.login_reason == LOGIN_REASON_BLOCKED
+        assert err.hint == text
+
+    def test_wrong_password_text_is_shown_too(self):
+        err = self._fail(
+            json_error(401, ["Ошибка доступа"], {"x-seraph-loginreason": "AUTHENTICATED_FAILED"})
+        )
+        assert err.login_reason == LOGIN_REASON_AUTH_FAILED
+        assert err.hint == "Ошибка доступа"
+
+    def test_errors_dict_and_several_messages_are_joined(self):
+        def handler(request):
+            return httpx.Response(
+                403,
+                json={"errorMessages": ["Первая", "Вторая"], "errors": {"login": "заблокирован"}},
+                headers={**JSON_CT, **self.DENIED},
+            )
+
+        assert self._fail(handler).hint == "Первая Вторая login: заблокирован"
+
+    def test_html_gives_generic_hint(self):
+        def handler(request):
+            return httpx.Response(
+                403,
+                text="<html><title>Denied</title><body>page</body></html>",
+                headers={"content-type": "text/html", **self.DENIED},
+            )
+
+        err = self._fail(handler)
+        assert err.user_text == ""
+        assert err.hint == LOGIN_HINTS[LOGIN_REASON_BLOCKED]
+
+    def test_empty_body_gives_generic_hint(self):
+        def handler(request):
+            return httpx.Response(403, content=b"", headers=self.DENIED)
+
+        assert self._fail(handler).hint == LOGIN_HINTS[LOGIN_REASON_BLOCKED]
+
+    def test_json_without_messages_gives_generic_hint(self):
+        err = self._fail(json_error(403, [], self.DENIED))
+        assert err.hint == LOGIN_HINTS[LOGIN_REASON_BLOCKED]
+
+    def test_password_echo_is_masked_everywhere(self):
+        err = self._fail(json_error(403, ["Пароль %s не принят" % PASSWORD], self.DENIED))
+        assert PASSWORD not in err.hint
+        assert "[скрыто]" in err.hint
+        assert PASSWORD not in str(err) and PASSWORD not in err.summary
+        assert PASSWORD not in err.body_head
+
+    def test_long_text_is_truncated(self):
+        err = self._fail(json_error(403, ["я" * 2000], self.DENIED))
+        assert len(err.hint) == USER_TEXT_LIMIT
+
+    def test_control_characters_are_removed(self):
+        raw = "строка1\u0000\r\nстрока2\u001b[31m"
+        err = self._fail(json_error(403, [raw], self.DENIED))
+        assert "\x00" not in err.hint and "\r" not in err.hint and "\n" not in err.hint
+        assert err.hint.startswith("строка1 строка2")

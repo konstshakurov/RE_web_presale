@@ -44,6 +44,8 @@ from .errors import (
     JiraUnavailableError,
     classify_login_failure,
     error_for_response,
+    extract_user_text,
+    mask_secrets,
     parse_error_body,
 )
 
@@ -301,7 +303,7 @@ class SessionLoginProvider:
 
         if response.status_code >= 400:
             if response.status_code in (401, 403):
-                raise self._login_error(response)
+                raise self._login_error(response, password)
             raise error_for_response(response, method="POST", path=self.endpoint)
 
         cookie_name, token = self._extract_session(response)
@@ -314,16 +316,24 @@ class SessionLoginProvider:
 
     # -- разбор ответа ------------------------------------------------------
 
-    def _login_error(self, response: httpx.Response) -> JiraLoginError:
-        """Собрать исключение отказа входа. Тело **запроса** здесь не участвует."""
-        parsed = parse_error_body(response.content, response.headers.get("content-type", ""))
+    def _login_error(self, response: httpx.Response, password: str = "") -> JiraLoginError:
+        """Собрать исключение отказа входа. Тело **запроса** здесь не участвует.
+
+        Пароль известен только как аргумент: если Jira отзеркалила его в
+        ответе, он заменяется на ``[скрыто]`` и в тексте для пользователя
+        (FR-029), и в ``summary`` / ``body_head``.
+        """
+        content_type = response.headers.get("content-type", "")
+        parsed = parse_error_body(response.content, content_type)
+        secrets = (password,)
         return JiraLoginError(
-            parsed["summary"],
+            mask_secrets(parsed["summary"], secrets),
+            user_text=extract_user_text(response.content, content_type, secrets),
             status=response.status_code,
             code=parsed["code"],
             login_reason=classify_login_failure(response),
             field_errors=parsed["field_errors"],
-            body_head=parsed["raw_head"],
+            body_head=mask_secrets(parsed["raw_head"], secrets),
             is_json=parsed["is_json"],
             method="POST",
             path=self.endpoint,

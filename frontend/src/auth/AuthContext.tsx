@@ -7,6 +7,7 @@ import type { MeResponse } from "../api/types";
 interface AuthState {
   user: MeResponse | null;
   loading: boolean;
+  sessionExpired: boolean; // сессию отобрал 401 (а не выход) - вход показывает сообщение (FR-024)
   login: (login: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   relogin: (password: string) => Promise<void>; // повторный ввод пароля Jira (FR-029)
@@ -17,14 +18,19 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const apply = useCallback((me: MeResponse | null) => {
     setCsrfToken(me?.csrf_token ?? "");
+    setSessionExpired(false);
     setUser(me);
   }, []);
 
   useEffect(() => {
-    setUnauthorizedHandler(() => apply(null)); // 401 -> ProtectedRoute уводит на вход
+    setUnauthorizedHandler(() => {
+      apply(null);
+      setSessionExpired(true);
+    }); // 401 -> ProtectedRoute уводит на вход
     api
       .me()
       .then(apply)
@@ -56,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ user, loading, login, logout, relogin }),
-    [user, loading, login, logout, relogin],
+    () => ({ user, loading, sessionExpired, login, logout, relogin }),
+    [user, loading, sessionExpired, login, logout, relogin],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

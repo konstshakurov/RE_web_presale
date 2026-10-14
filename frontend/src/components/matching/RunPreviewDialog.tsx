@@ -87,7 +87,34 @@ export default function RunPreviewDialog({ runId, onClose, onConfirmed, onCancel
     !!run && run.requires_confirmation && run.status === "awaiting_confirmation" && !busy && !hasDrafts && saving === null;
 
   return (
-    <Modal title="Предпросмотр отправки во внешнюю LLM" wide>
+    <Modal
+      title="Предпросмотр отправки во внешнюю LLM"
+      wide
+      onClose={onClose}
+      footer={
+        <div className="modal__grp">
+          <button type="button" className="primary" disabled={!canConfirm} onClick={() => void act("confirm")}>
+            Подтвердить и отправить
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            title="Окно закроется, расчёт останется в ожидании подтверждения"
+            onClick={onClose}
+          >
+            Отложить
+          </button>
+          <button
+            type="button"
+            disabled={busy || !run}
+            title="Прогон будет отменён, текст не будет отправлен; начать заново можно кнопкой «Сопоставить»"
+            onClick={() => void act("cancel")}
+          >
+            Отменить расчёт
+          </button>
+        </div>
+      }
+    >
       {!run && !error && <p className="muted">Загрузка…</p>}
       {run && (
         <>
@@ -159,27 +186,6 @@ export default function RunPreviewDialog({ runId, onClose, onConfirmed, onCancel
         </p>
       )}
       {hasDrafts && <p className="muted">Есть несохранённые правки: сохраните их, чтобы отправить именно этот текст.</p>}
-      <div className="modal__actions">
-        <button type="button" className="primary" disabled={!canConfirm} onClick={() => void act("confirm")}>
-          Подтвердить и отправить
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          title="Окно закроется, расчёт останется в ожидании подтверждения"
-          onClick={onClose}
-        >
-          Отложить
-        </button>
-        <button
-          type="button"
-          disabled={busy || !run}
-          title="Прогон будет отменён, текст не будет отправлен; начать заново можно кнопкой «Сопоставить»"
-          onClick={() => void act("cancel")}
-        >
-          Отменить расчёт
-        </button>
-      </div>
       <p className="muted">
         «Отложить» только закрывает окно: расчёт останется в ожидании подтверждения (баннер «Проверить и отправить»).
         «Отменить расчёт» отменяет прогон: текст не будет отправлен, начать заново можно кнопкой «Сопоставить».

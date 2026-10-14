@@ -53,7 +53,25 @@ export default function CvViewer({ employeeKey, fileId, onClose }: Props) {
   const failed = data?.extraction_status === "error" || file?.extraction_status === "error";
 
   return (
-    <Modal title={title} wide>
+    <Modal
+      title={title}
+      wide
+      onClose={onClose}
+      footer={
+        <>
+          {file ? (
+            <a className="button" href={api.downloadUrl(file.id)} download>
+              Скачать исходный файл
+            </a>
+          ) : (
+            <span />
+          )}
+          <button type="button" className="primary" onClick={onClose}>
+            Закрыть
+          </button>
+        </>
+      }
+    >
       {error && (
         <p className="error" role="alert">
           {error}
@@ -110,16 +128,6 @@ export default function CvViewer({ employeeKey, fileId, onClose }: Props) {
           </pre>
         </>
       )}
-      <div className="modal__actions">
-        {file && (
-          <a className="button" href={api.downloadUrl(file.id)} download>
-            Скачать исходный файл
-          </a>
-        )}
-        <button type="button" onClick={onClose}>
-          Закрыть
-        </button>
-      </div>
     </Modal>
   );
 }

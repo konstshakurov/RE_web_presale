@@ -136,7 +136,7 @@ describe("Сотрудники", () => {
     expect(screen.getByText("не назначается")).toBeInTheDocument();
   });
 
-  it("тумблер «Показывать уволенных»: скрыты по умолчанию, работает вместе со статусом и поиском", async () => {
+  it("тумблер «Уволенные»: скрыты по умолчанию, работает вместе со статусом и поиском", async () => {
     setup(
       {
         employees: [
@@ -153,7 +153,7 @@ describe("Сотрудники", () => {
     expect(screen.queryByRole("listitem", { name: "Иванов Пётр" })).not.toBeInTheDocument();
     expect(within(nav).getByRole("button", { name: /Все/ })).toHaveTextContent("2");
 
-    await userEvent.click(screen.getByRole("switch", { name: "Показывать уволенных" }));
+    await userEvent.click(screen.getByRole("switch", { name: "Уволенные" }));
     expect(screen.getByRole("listitem", { name: "Иванов Пётр" })).toBeInTheDocument();
     expect(within(nav).getByRole("button", { name: /Все/ })).toHaveTextContent("3");
     // вместе с поиском
@@ -202,12 +202,31 @@ describe("Сотрудники", () => {
       },
       "/employees",
     );
-    await userEvent.click(await screen.findByRole("button", { name: "Профиль" }));
+    await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));
     const dlg = await screen.findByRole("dialog");
     expect(await within(dlg).findByText("tester_cv.docx")).toBeInTheDocument();
     expect(await within(dlg).findByText(/AN-5/)).toBeInTheDocument();
     expect(within(dlg).queryByText(/AN-6/)).not.toBeInTheDocument();
     expect(within(dlg).getByText("Работал с ERP")).toBeInTheDocument();
+  });
+
+  it("профиль (M2): статус в шапке, нет строки «Статус», футер: Резюме/Файлы и «Закрыть», Esc и × закрывают", async () => {
+    setup({}, "/employees");
+    await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));
+    const dlg = await screen.findByRole("dialog");
+    expect(within(dlg).queryByText("Статус", { selector: "dt" })).not.toBeInTheDocument();
+    expect(within(dlg).getByText(/доступен для назначения|на потребность не назначается/)).toBeInTheDocument();
+    expect(within(dlg).getByRole("button", { name: "Резюме" })).toHaveClass("act");
+    expect(within(dlg).getByRole("link", { name: "Файлы" })).toHaveClass("act");
+    await userEvent.click(within(dlg).getByRole("button", { name: "Закрыть" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));
+    await screen.findByRole("dialog");
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));
+    await userEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Закрыть окно" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("окно CV: текст, поиск с переходом между совпадениями", async () => {
@@ -220,7 +239,7 @@ describe("Сотрудники", () => {
       },
       "/employees",
     );
-    await userEvent.click(await screen.findByRole("button", { name: "Резюме" }));
+    await userEvent.click(await screen.findByRole("button", { name: /^Резюме: / }));
     const dlg = await screen.findByRole("dialog");
     expect(await within(dlg).findByText(/1С ERP опыт/)).toBeInTheDocument();
     expect(within(dlg).getByRole("link", { name: /Скачать/ })).toHaveAttribute("href", "/api/cv/files/10/download");
@@ -247,7 +266,7 @@ describe("Сотрудники", () => {
       },
       "/employees",
     );
-    await userEvent.click(await screen.findByRole("button", { name: "Резюме" }));
+    await userEvent.click(await screen.findByRole("button", { name: /^Резюме: / }));
     expect(await screen.findByText("Файл повреждён")).toBeInTheDocument();
   });
 
@@ -279,11 +298,11 @@ describe("Резюме", () => {
     );
     const row = (await screen.findByText("tester_cv.docx")).closest("tr")!;
     expect(within(row).getByText("extra.docx")).toBeInTheDocument();
-    expect(within(row).getByRole("button", { name: "Показать текст" })).toBeInTheDocument();
+    expect(within(row).getByRole("button", { name: /^Показать текст CV: / })).toBeInTheDocument();
     expect(within(row).getByText("Не подключать к клиенту X")).toBeInTheDocument();
     expect(within(row).getByText("test.user, 05.10.2026, 14:00")).toBeInTheDocument();
     expect(screen.getByLabelText("Поиск по смыслу (LLM)")).toBeEnabled();
-    expect(screen.getByLabelText("Технология (можно несколько)")).toBeEnabled();
+    expect(screen.getByLabelText("Технологии")).toBeEnabled();
     // значок «i» с описанием логики подбора рядом с поиском по смыслу
     await userEvent.click(screen.getByRole("button", { name: "Как подбираются кандидаты" }));
     expect(screen.getByRole("dialog", { name: "Как подбираются кандидаты" })).toBeInTheDocument();
@@ -373,7 +392,7 @@ describe("Резюме", () => {
   it("загрузка: без типа кнопка недоступна; недопустимый формат не уходит на сервер", async () => {
     const user = userEvent.setup({ applyAccept: false });
     setup({ files: [file()] }, "/resumes");
-    await user.click(await screen.findByRole("button", { name: "Добавить" }));
+    await user.click(await screen.findByRole("button", { name: /^Добавить файл: / }));
     const dlg = await screen.findByRole("dialog");
     const submit = within(dlg).getByRole("button", { name: "Загрузить" });
     expect(submit).toBeDisabled();
@@ -408,7 +427,7 @@ describe("Резюме", () => {
       },
       "/resumes",
     );
-    await user.click(await screen.findByRole("button", { name: "Добавить" }));
+    await user.click(await screen.findByRole("button", { name: /^Добавить файл: / }));
     const dlg = await screen.findByRole("dialog");
     expect(within(dlg).getByLabelText("Файл")).not.toHaveAttribute("multiple");
     await user.selectOptions(within(dlg).getByLabelText("Тип файла"), "extra_cv");
@@ -434,7 +453,7 @@ describe("Резюме", () => {
       },
       "/resumes",
     );
-    await user.click(await screen.findByRole("button", { name: "Добавить" }));
+    await user.click(await screen.findByRole("button", { name: /^Добавить файл: / }));
     const dlg = await screen.findByRole("dialog");
     await user.selectOptions(within(dlg).getByLabelText("Тип файла"), "materials");
     await user.upload(within(dlg).getByLabelText("Файл"), new File(["abc"], "pic.png"));
@@ -473,7 +492,7 @@ describe("Резюме", () => {
     expect(within(select).getByRole("option", { name: "Декрет" })).toBeInTheDocument();
     // по умолчанию уволенные скрыты
     expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
-    const toggle = screen.getByRole("switch", { name: "Показывать уволенных" });
+    const toggle = screen.getByRole("switch", { name: "Уволенные" });
     expect(toggle).not.toBeChecked();
     await userEvent.click(toggle);
     expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument(); // до «Применить» не меняется
@@ -493,7 +512,7 @@ describe("Резюме", () => {
     expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
     // сброс выключает тумблер
     await userEvent.click(screen.getByRole("button", { name: "Сбросить" }));
-    expect(screen.getByRole("switch", { name: "Показывать уволенных" })).not.toBeChecked();
+    expect(screen.getByRole("switch", { name: "Уволенные" })).not.toBeChecked();
     expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
     expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
   });

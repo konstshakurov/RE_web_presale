@@ -13,6 +13,7 @@ import type { CandidateRow } from "./CandidateList";
 import ProviderSelect from "./ProviderSelect";
 import RunPreviewDialog from "./RunPreviewDialog";
 import RunStatusBar from "./RunStatusBar";
+import { HintLabel } from "../HintButton";
 import MatchingInfo from "./MatchingInfo";
 
 export interface SearchFilters {
@@ -134,39 +135,59 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
 
   return (
     <div className="semantic">
-      <form className="semantic__form" onSubmit={onSubmit}>
-        <div className="semantic__info">
-          Как подбираются кандидаты <MatchingInfo />
+      <form className="semantic__form sa" onSubmit={onSubmit}>
+        <div className="sa__h">
+          <HintLabel>
+            <span id="semantic-q-label">Поиск по смыслу (LLM)</span>
+            <MatchingInfo />
+          </HintLabel>
         </div>
-        <label>
-          Поиск по смыслу (LLM)
+        <div className="sa__ta">
           <textarea
+            className="sem-ta"
+            aria-labelledby="semantic-q-label"
+            aria-describedby="semantic-q-hint"
             rows={2}
             value={draft}
             maxLength={QUERY_MAX}
             placeholder="Например: аналитик с опытом интеграций 1С и REST, работал в банковской сфере"
             onChange={(e) => setDraft(e.target.value)}
           />
-        </label>
-        <ProviderSelect providers={providers} value={providerId} onChange={setProviderId} disabled={busy || running} />
-        <button type="submit" className="primary" disabled={busy || running || tooShort}>
-          Найти по смыслу
-        </button>
-        {params && data && !running && (
-          <button
-            type="button"
-            disabled={busy}
-            title="Заново оценить, не используя сохранённые оценки"
-            onClick={() => void run({ ...params, provider_id: providerId, force: true }, (x) => api.startSearch(x), "Не удалось выполнить поиск")}
-          >
-            Пересчитать
-          </button>
-        )}
+          <div className="foot">
+            <p className="hint" id="semantic-q-hint">
+              Область поиска ограничивают фильтры «Поиск», «Статус сотрудника» и «Технологии». Во внешнюю LLM уходит
+              только обезличенный текст
+            </p>
+            <span className={draft.length > 0 && draft.length < QUERY_MIN ? "counter counter--bad" : "counter"}>
+              {draft.length} / {QUERY_MAX}
+            </span>
+          </div>
+        </div>
+        <div className="sa__side">
+          <ProviderSelect providers={providers} value={providerId} onChange={setProviderId} disabled={busy || running} />
+          <div className="sa__btns">
+            <button
+              type="submit"
+              className="primary"
+              aria-label="Найти по смыслу"
+              title="Найти по смыслу"
+              disabled={busy || running || tooShort}
+            >
+              Найти
+            </button>
+            {params && data && !running && (
+              <button
+                type="button"
+                disabled={busy}
+                title="Заново оценить, не используя сохранённые оценки"
+                onClick={() => void run({ ...params, provider_id: providerId, force: true }, (x) => api.startSearch(x), "Не удалось выполнить поиск")}
+              >
+                Пересчитать
+              </button>
+            )}
+          </div>
+        </div>
       </form>
-      <p className="muted">
-        Запрос {QUERY_MIN}–{QUERY_MAX} знаков. Область поиска ограничивают фильтры «Поиск», «Статус сотрудника» и
-        «Технология». Во внешнюю LLM уходит только обезличенный текст и только после вашего подтверждения.
-      </p>
 
       {error && (
         <p className="error" role="alert">

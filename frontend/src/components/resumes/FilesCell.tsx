@@ -4,10 +4,12 @@ import { ApiError, api } from "../../api/client";
 import type { FileOut } from "../../api/types";
 import { formatSize } from "../../lib/employees";
 import { formatDateTime } from "../../lib/needs";
+import ActIcon from "../ActIcon";
 import Modal from "../Modal";
 
 interface Props {
   employeeKey: string;
+  employeeName: string; // для aria-label действий
   files: FileOut[]; // актуальные файлы сотрудника
   canAdd: boolean; // лимиты загружены
   onAdd: () => void;
@@ -16,7 +18,7 @@ interface Props {
 }
 
 // Столбец «Файлы» (FR-022): список, «Добавить», скачивание и удаление (FR-040), архив основного CV (FR-039).
-export default function FilesCell({ employeeKey, files, canAdd, onAdd, onView, onChanged }: Props) {
+export default function FilesCell({ employeeKey, employeeName, files, canAdd, onAdd, onView, onChanged }: Props) {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archive, setArchive] = useState<FileOut[] | null>(null);
   const [error, setError] = useState("");
@@ -92,8 +94,9 @@ export default function FilesCell({ employeeKey, files, canAdd, onAdd, onView, o
   return (
     <div className="files">
       {files.length > 0 && <ul className="files__list">{files.map(row)}</ul>}
-      <button type="button" disabled={!canAdd} onClick={onAdd}>
-        Добавить
+      <button type="button" className="act" disabled={!canAdd} onClick={onAdd} aria-label={`Добавить файл: ${employeeName}`}>
+        <ActIcon name="plus" size={16} />
+        <span>Добавить</span>
       </button>
       <button
         type="button"
@@ -120,7 +123,7 @@ export default function FilesCell({ employeeKey, files, canAdd, onAdd, onView, o
         </p>
       )}
       {confirm && (
-        <Modal title="Удалить файл?">
+        <Modal title="Удалить файл?" onClose={busy ? undefined : () => setConfirm(null)}>
           <p>«{confirm.file_name}» будет удалён и перестанет участвовать в сопоставлении и назначении.</p>
           <div className="modal__actions">
             <button

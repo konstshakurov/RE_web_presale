@@ -5,6 +5,7 @@ import { ApiError, api } from "../api/client";
 import type { EmployeeOut, EmployeeProfileData, FileOut, NeedOut } from "../api/types";
 import { formatSize } from "../lib/employees";
 import { formatDateTime, formatRate } from "../lib/needs";
+import ActIcon from "./ActIcon";
 import Modal from "./Modal";
 
 interface Props {
@@ -76,13 +77,36 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
   }, [e.jira_key]);
 
   return (
-    <Modal title={`${e.full_name} (${e.jira_key})`} wide>
-      <dl className="profile">
-        <dt>Статус</dt>
-        <dd>
+    <Modal
+      title={`${e.full_name} (${e.jira_key})`}
+      wide
+      size="profile"
+      onClose={onClose}
+      meta={
+        <>
           <span className="status">{e.status}</span>{" "}
           <span className="muted">{e.assignable ? "доступен для назначения" : "на потребность не назначается"}</span>
-        </dd>
+        </>
+      }
+      footer={
+        <>
+          <div className="modal__grp">
+            <button type="button" className="act" onClick={onViewCv}>
+              <ActIcon name="doc" />
+              Резюме
+            </button>
+            <Link className="act" to={`/resumes?q=${encodeURIComponent(e.jira_key)}`}>
+              <ActIcon name="folder" />
+              Файлы
+            </Link>
+          </div>
+          <button type="button" className="primary" onClick={onClose}>
+            Закрыть
+          </button>
+        </>
+      }
+    >
+      <dl className="profile">
         <dt>Отпуска</dt>
         <dd>{e.vacation_plan || <span className="muted">не указаны</span>}</dd>
         <dt>Подробнее об опыте</dt>
@@ -148,17 +172,6 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
           {error}
         </p>
       )}
-      <div className="modal__actions">
-        <button type="button" onClick={onViewCv}>
-          Резюме
-        </button>
-        <Link className="button" to={`/resumes?q=${encodeURIComponent(e.jira_key)}`}>
-          Файлы в разделе «Резюме»
-        </Link>
-        <button type="button" onClick={onClose}>
-          Закрыть
-        </button>
-      </div>
     </Modal>
   );
 }

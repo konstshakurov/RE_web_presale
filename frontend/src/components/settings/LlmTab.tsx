@@ -187,7 +187,7 @@ function ProviderDialog({
   }
 
   return (
-    <Modal title={provider ? "Изменить провайдера" : "Добавить провайдера"}>
+    <Modal title={provider ? "Изменить провайдера" : "Добавить провайдера"} onClose={onClose}>
       <form className="modal__form" onSubmit={(e) => void onSubmit(e)}>
         <label>
           Название
@@ -286,7 +286,7 @@ function DeleteDialog({
   }
 
   return (
-    <Modal title="Удалить провайдера">
+    <Modal title="Удалить провайдера" onClose={onClose}>
       <p>Удалить провайдера «{provider.name}»? Его ключ будет удалён.</p>
       {error && (
         <p className="error" role="alert">

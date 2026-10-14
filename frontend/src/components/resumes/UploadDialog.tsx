@@ -44,7 +44,7 @@ export default function UploadDialog({ employeeKey, employeeName, hasMainCv, lim
   }
 
   return (
-    <Modal title="Добавить файл">
+    <Modal title="Добавить файл" onClose={busy ? undefined : onClose}>
       <form className="modal__form" onSubmit={(e) => void onSubmit(e)}>
         <p className="muted">
           {employeeName} ({employeeKey})

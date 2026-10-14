@@ -120,7 +120,7 @@ function AddUserDialog({ onClose, onDone }: { onClose: () => void; onDone: () =>
   }
 
   return (
-    <Modal title="Добавить пользователя">
+    <Modal title="Добавить пользователя" onClose={onClose}>
       <form className="modal__form" onSubmit={(e) => void onSubmit(e)}>
         <label>
           Логин
@@ -177,7 +177,7 @@ function ConfirmDialog({
   }
 
   return (
-    <Modal title={revoke ? "Отозвать доступ" : "Вернуть доступ"}>
+    <Modal title={revoke ? "Отозвать доступ" : "Вернуть доступ"} onClose={onClose}>
       <p>
         {revoke
           ? `Отозвать доступ у ${user.login}? Все его сессии завершатся сразу.`

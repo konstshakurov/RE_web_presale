@@ -119,7 +119,7 @@ export default function StatusGroupsTab() {
         </section>
       )}
       {toDelete && (
-        <Modal title="Удалить группу">
+        <Modal title="Удалить группу" onClose={() => setToDelete(null)}>
           <p>Удалить группу «{toDelete.name}»? Потребности останутся, изменится только фильтр.</p>
           <div className="modal__actions">
             <button

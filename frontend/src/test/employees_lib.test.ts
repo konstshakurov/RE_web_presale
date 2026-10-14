@@ -122,7 +122,7 @@ describe("matchesResume", () => {
   });
 });
 
-describe("matchesResume: тумблер «Показывать уволенных»", () => {
+describe("matchesResume: тумблер «Уволенные»", () => {
   const fired = emp({ status: "Уволен", full_name: "Уволенов Иван" });
   it("по умолчанию уволенные скрыты, при включении видны", () => {
     expect(matchesResume(fired, [], "", "")).toBe(false);

@@ -615,17 +615,19 @@ describe("Резюме: поиск по смыслу и технологии", (
     await waitFor(() => expect(called("POST", "/semantic-search/next")).toHaveLength(1));
   });
 
-  it("фильтр «Технология»: подсказки, мульти-выбор, запрос к backend с match=all", async () => {
+  it("фильтр «Технологии»: подсказки, мульти-выбор, запрос к backend с match=all", async () => {
     serve((url) => {
       if (url.includes("/resume/employees?"))
         return json({ items: [{ employee_key: "EMP-1", full_name: "Тестов Тест", status: "Свободен", main_cv_file_id: 1, skills: ["1c", "rest"], skills_status: "ok" }], total: 1 });
     });
     renderAt("/resumes");
-    const input = await screen.findByLabelText("Технология (можно несколько)");
+    const input = await screen.findByLabelText("Технологии");
     await userEvent.type(input, "1c{Enter}");
     await userEvent.type(input, "rest{Enter}");
     expect(screen.getByRole("button", { name: "Убрать 1c" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Убрать rest" })).toBeInTheDocument();
+    // при 2+ технологиях виден переключатель «Все выбранные» (по умолчанию включён)
+    expect(screen.getByRole("switch", { name: "Все выбранные" })).toBeChecked();
     await userEvent.click(screen.getByRole("button", { name: "Применить" }));
     await waitFor(() => {
       const last = calls.filter((c) => c.url.includes("/resume/employees?")).pop()!;
@@ -634,6 +636,31 @@ describe("Резюме: поиск по смыслу и технологии", (
       expect(last.url).toContain("match=all");
     });
     expect(await screen.findByText("1c, rest")).toBeInTheDocument();
+  });
+
+  it("«Все выбранные» выключен: match=any; поиск по смыслу: счётчик N / 500, «Найти» от 3 знаков", async () => {
+    serve((url) => {
+      if (url.includes("/resume/employees?")) return json({ items: [], total: 0 });
+    });
+    renderAt("/resumes");
+    const input = await screen.findByLabelText("Технологии");
+    expect(screen.queryByRole("switch", { name: "Все выбранные" })).not.toBeInTheDocument();
+    await userEvent.type(input, "1c{Enter}");
+    await userEvent.type(input, "rest{Enter}");
+    await userEvent.click(screen.getByRole("switch", { name: "Все выбранные" }));
+    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
+    await waitFor(() => {
+      const last = calls.filter((c) => c.url.includes("/resume/employees?")).pop()!;
+      expect(last.url).toContain("match=any");
+    });
+    const go = screen.getByRole("button", { name: "Найти по смыслу" });
+    expect(screen.getByText("0 / 500")).toBeInTheDocument();
+    expect(go).toBeDisabled();
+    await userEvent.type(screen.getByLabelText("Поиск по смыслу (LLM)"), "1с");
+    expect(screen.getByText("2 / 500")).toBeInTheDocument();
+    expect(go).toBeDisabled();
+    await userEvent.type(screen.getByLabelText("Поиск по смыслу (LLM)"), "а");
+    expect(go).toBeEnabled();
   });
 });
 
@@ -655,7 +682,7 @@ describe("Профиль сотрудника (FR-003)", () => {
       if (/\/cv\/employees\/EMP-1\/files$/.test(url)) return json({ employee_key: "EMP-1", files: [], archive: [] });
     });
     renderAt("/employees");
-    await userEvent.click(await screen.findByRole("button", { name: /Профиль|Тестов Тест/ }));
+    await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));
     expect(await screen.findByText("Основной стек")).toBeInTheDocument();
     expect(screen.getByText("Проект Альфа")).toBeInTheDocument();
     expect(screen.getByText(/Опыт: 7 лет/)).toBeInTheDocument();

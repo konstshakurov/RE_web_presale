@@ -5,6 +5,7 @@ import type { NeedOut, NeedSort, SortOrder } from "../api/types";
 import { candidatesLabel } from "../lib/matching";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
+import { HintLabel } from "./HintButton";
 import MatchingInfo from "./matching/MatchingInfo";
 import NeedCandidates from "./matching/NeedCandidates";
 
@@ -68,7 +69,10 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
           <th>Контракт</th>
           <th>Ставка</th>
           <th>
-            Кандидаты <MatchingInfo />
+            <HintLabel>
+              Кандидаты
+              <MatchingInfo />
+            </HintLabel>
           </th>
           <SortHeader field="created" label="Создана" sort={sort} onSort={onSort} />
         </tr>

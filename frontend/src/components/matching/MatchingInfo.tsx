@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { HintButton } from "../HintButton";
 import Modal from "../Modal";
 
 // Описание логики подбора кандидатов (для РО): значок «i» рядом с заголовком и модальное окно.
@@ -7,17 +8,18 @@ export default function MatchingInfo() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button
-        type="button"
-        className="info-btn"
-        aria-label="Как подбираются кандидаты"
-        title="Как подбираются кандидаты"
-        onClick={() => setOpen(true)}
-      >
-        i
-      </button>
+      <HintButton label="Как подбираются кандидаты" onClick={() => setOpen(true)} />
       {open && (
-        <Modal title="Как подбираются кандидаты" wide>
+        <Modal
+          title="Как подбираются кандидаты"
+          wide
+          onClose={() => setOpen(false)}
+          footer={
+            <button type="button" className="primary" onClick={() => setOpen(false)}>
+              Понятно
+            </button>
+          }
+        >
           <div className="matching-info">
             <ol>
               <li>
@@ -50,11 +52,6 @@ export default function MatchingInfo() {
               </li>
             </ol>
             <p className="muted">Размер глубокой оценки (30) и пакета скрининга (50) задаёт администратор в «Настройках».</p>
-          </div>
-          <div className="modal__actions">
-            <button type="button" className="primary" onClick={() => setOpen(false)}>
-              Понятно
-            </button>
           </div>
         </Modal>
       )}

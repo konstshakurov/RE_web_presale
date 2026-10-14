@@ -5,6 +5,8 @@ import type { EmployeeOut } from "../api/types";
 import CvViewer from "../components/CvViewer";
 import EmployeeProfile from "../components/EmployeeProfile";
 import EmployeeSyncBar from "../components/EmployeeSyncBar";
+import ActIcon from "../components/ActIcon";
+import Switch from "../components/Switch";
 import { FIRED_STATUS, resumeStatusOptions } from "../lib/employees";
 import { useEmployees } from "../lib/useEmployees";
 
@@ -69,10 +71,7 @@ export default function EmployeesPage() {
           maxLength={200}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <label className="toolbar__toggle">
-          <input type="checkbox" role="switch" checked={showFired} onChange={(e) => setShowFired(e.target.checked)} />
-          Показывать уволенных
-        </label>
+        <Switch label="Уволенные" checked={showFired} onChange={(e) => setShowFired(e.target.checked)} />
       </div>
 
       {emps.error && (
@@ -110,14 +109,17 @@ export default function EmployeesPage() {
                 </div>
                 {e.extra_experience && <div className="card__desc">{e.extra_experience}</div>}
                 <div className="card__actions">
-                  <button type="button" onClick={() => setProfile(e)}>
-                    Профиль
+                  <button type="button" className="act" aria-label={`Профиль: ${e.full_name}`} onClick={() => setProfile(e)}>
+                    <ActIcon name="user" />
+                    <span>Профиль</span>
                   </button>
-                  <button type="button" onClick={() => setCvKey(e.jira_key)}>
-                    Резюме
+                  <button type="button" className="act" aria-label={`Резюме: ${e.full_name}`} onClick={() => setCvKey(e.jira_key)}>
+                    <ActIcon name="doc" />
+                    <span>Резюме</span>
                   </button>
-                  <Link className="button" to={`/resumes?q=${encodeURIComponent(e.jira_key)}`}>
-                    Файлы
+                  <Link className="act" aria-label={`Файлы: ${e.full_name}`} to={`/resumes?q=${encodeURIComponent(e.jira_key)}`}>
+                    <ActIcon name="folder" />
+                    <span>Файлы</span>
                   </Link>
                 </div>
               </li>

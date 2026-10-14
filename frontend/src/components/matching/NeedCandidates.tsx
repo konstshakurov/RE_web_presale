@@ -10,6 +10,7 @@ import CvViewer from "../CvViewer";
 import CandidateList from "./CandidateList";
 import type { CandidateRow } from "./CandidateList";
 import ProviderSelect from "./ProviderSelect";
+import { HintLabel } from "../HintButton";
 import MatchingInfo from "./MatchingInfo";
 import RunPreviewDialog from "./RunPreviewDialog";
 import RunStatusBar from "./RunStatusBar";
@@ -122,8 +123,10 @@ export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
   return (
     <div className="candidates-block">
       <div className="candidates-block__head">
-        <strong>Кандидаты на {needKey}</strong>
-        <MatchingInfo />
+        <HintLabel>
+          <strong>Кандидаты на {needKey}</strong>
+          <MatchingInfo />
+        </HintLabel>
         <ProviderSelect providers={providers} value={providerId} onChange={setProviderId} disabled={busy || running} />
         {none && !running && (
           <button

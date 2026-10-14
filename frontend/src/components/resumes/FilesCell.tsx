@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ApiError, api } from "../../api/client";
 import type { FileOut } from "../../api/types";
-import { formatSize } from "../../lib/employees";
 import { formatDateTime } from "../../lib/needs";
 import ActIcon from "../ActIcon";
 import Modal from "../Modal";
@@ -59,7 +58,7 @@ export default function FilesCell({ employeeKey, employeeName, files, canAdd, on
         <span className="file__kind">{f.kind_title}</span>{" "}
         <span className="file__name">{f.file_name}</span>
         <div className="muted file__meta">
-          {formatSize(f.size_bytes)}, {formatDateTime(f.uploaded_at)}, {f.uploaded_by}
+          {formatDateTime(f.uploaded_at)}
           {f.is_archived && f.archived_at ? `, в архиве с ${formatDateTime(f.archived_at)}` : ""}
         </div>
         {f.extraction_status === "error" && (
@@ -94,6 +93,7 @@ export default function FilesCell({ employeeKey, employeeName, files, canAdd, on
   return (
     <div className="files">
       {files.length > 0 && <ul className="files__list">{files.map(row)}</ul>}
+      {!files.some((f) => f.kind === "main_cv") && <p className="muted files__none">нет основного CV</p>}
       <button type="button" className="act" disabled={!canAdd} onClick={onAdd} aria-label={`Добавить файл: ${employeeName}`}>
         <ActIcon name="plus" size={16} />
         <span>Добавить</span>

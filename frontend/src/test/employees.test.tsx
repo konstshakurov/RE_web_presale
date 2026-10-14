@@ -298,7 +298,21 @@ describe("Резюме", () => {
     );
     const row = (await screen.findByText("tester_cv.docx")).closest("tr")!;
     expect(within(row).getByText("extra.docx")).toBeInTheDocument();
-    expect(within(row).getByRole("button", { name: /^Показать текст CV: / })).toBeInTheDocument();
+    expect(within(row).getAllByRole("button", { name: "Просмотр" }).length).toBeGreaterThan(0);
+    // 4 столбца, без «Содержание»; ключ в «Сотрудник» не показывается
+    const heads = within(row.closest("table")!).getAllByRole("columnheader").map((h) => h.textContent);
+    expect(heads).toEqual(["Сотрудник", "Файлы", "Описание", "Заметка"]);
+    expect(row.closest("table")!.querySelectorAll("col")).toHaveLength(4);
+    expect(within(row).queryByText("EMP-1")).not.toBeInTheDocument();
+    // «Файлы»: только дата-время, без размера и автора
+    expect(row.querySelector(".file__meta")!.textContent).toMatch(/^\d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}$/);
+    // поиск по смыслу: однострочное поле, 500 знаков, поле и «Найти» в одном ряду
+    const sem = screen.getByLabelText("Поиск по смыслу (LLM)") as HTMLInputElement;
+    expect(sem.tagName).toBe("INPUT");
+    expect(sem.type).toBe("text");
+    expect(sem.maxLength).toBe(500);
+    expect(sem.parentElement).toBe(screen.getByRole("button", { name: "Найти по смыслу" }).parentElement);
+    expect(sem.parentElement!.className).toContain("sa__row");
     expect(within(row).getByText("Не подключать к клиенту X")).toBeInTheDocument();
     expect(within(row).getByText("test.user, 05.10.2026, 14:00")).toBeInTheDocument();
     expect(screen.getByLabelText("Поиск по смыслу (LLM)")).toBeEnabled();

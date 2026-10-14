@@ -656,6 +656,11 @@ describe("Резюме: поиск по смыслу и технологии", (
     const go = screen.getByRole("button", { name: "Найти по смыслу" });
     expect(screen.getByText("0 / 500")).toBeInTheDocument();
     expect(go).toBeDisabled();
+    const field = screen.getByLabelText("Поиск по смыслу (LLM)") as HTMLInputElement;
+    expect(field.tagName).toBe("INPUT");
+    expect(field.type).toBe("text");
+    expect(field.maxLength).toBe(500);
+    expect(field.parentElement).toBe(go.parentElement);
     await userEvent.type(screen.getByLabelText("Поиск по смыслу (LLM)"), "1с");
     expect(screen.getByText("2 / 500")).toBeInTheDocument();
     expect(go).toBeDisabled();

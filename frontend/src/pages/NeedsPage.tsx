@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import { ApiError, api } from "../api/client";
 import type { NeedSort, NeedsPage as NeedsData, SortOrder, StatusGroup, SyncStamp } from "../api/types";
 import NeedsTable from "../components/NeedsTable";
-import SyncNotes from "../components/SyncNotes";
+import EmployeeSyncBar from "../components/EmployeeSyncBar";
 import { refreshErrorText } from "../lib/needs";
 
 const GROUP_KEY = "needs.group"; // выбор фильтра запоминается (FR-035)
@@ -146,7 +146,14 @@ export default function NeedsPage() {
 
   return (
     <section>
-      <h1>Потребности</h1>
+      <EmployeeSyncBar
+        title="Потребности"
+        sync={sync}
+        refreshing={refreshing}
+        onRefresh={() => void onRefresh()}
+        error={refreshError}
+        info={info}
+      />
 
       <nav className="filter" aria-label="Группы статусов">
         {(groups ?? []).map((g) => (
@@ -163,10 +170,6 @@ export default function NeedsPage() {
       </nav>
 
       <div className="toolbar">
-        <button type="button" className="primary" onClick={() => void onRefresh()} disabled={refreshing}>
-          {refreshing ? "Обновление…" : "Обновить"}
-        </button>
-        <SyncNotes sync={sync} />
         <form className="search" onSubmit={onSearch} role="search">
           <input
             type="search"
@@ -214,13 +217,6 @@ export default function NeedsPage() {
           </span>
         )}
       </div>
-
-      {refreshError && (
-        <p className="error" role="alert">
-          {refreshError}
-        </p>
-      )}
-      {info && <p className="muted">{info}</p>}
 
       {loading && !data && <p className="muted">Загрузка…</p>}
       {error && (

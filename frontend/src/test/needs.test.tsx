@@ -271,6 +271,9 @@ describe("Потребности", () => {
     renderNeeds();
     await screen.findByRole("cell", { name: "1" });
     expect(screen.getByText(/актуально на/)).toBeInTheDocument();
+    const refreshBtn = screen.getByRole("button", { name: "Обновить" });
+    expect(refreshBtn).toHaveClass("btn-secondary");
+    expect(refreshBtn.closest(".head-sync")).not.toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Обновить" }));
     await waitFor(() => expect(refreshBody).toBe('{"scope":"needs"}'));
     await waitFor(() =>

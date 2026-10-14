@@ -292,3 +292,25 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
 .hint-label > button.hint-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .hint-label > button.hint-btn:active { background: var(--panel-2); }
 .hint-btn svg { display: block; }
+
+/* Правка 7 (KON-89): токены secondary, блок «Обновить», единое правило нейтральных кнопок */
+:root, :root[data-theme="dark"] { --secondary: #5aa0fa; --secondary-hover-bg: rgba(90, 160, 250, 0.08); }
+@media (prefers-color-scheme: light) { :root { --secondary: #1a62c4; --secondary-hover-bg: rgba(26, 98, 196, 0.08); } }
+:root[data-theme="light"] { --secondary: #1a62c4; --secondary-hover-bg: rgba(26, 98, 196, 0.08); }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; margin: 0 0 4px; }
+.page-head h1 { flex: none; margin: 21px 0 12px; }
+.head-sync { display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px 12px; flex-wrap: nowrap; margin: 0 0 12px auto; flex: 1 1 420px; min-width: 0; }
+.head-sync .sync { justify-content: flex-start; text-align: left; flex: 0 1 auto; min-width: 0; align-items: center; padding-bottom: 6px; }
+.head-sync .btn-secondary { flex: none; margin-left: 4px; }
+.head-msg { margin: 0 0 8px; text-align: left; }
+.btn-secondary { height: 36px; padding: 0 16px; background: transparent; color: var(--secondary); border: 1px solid var(--secondary); border-radius: 4px; font: inherit; cursor: pointer; white-space: nowrap; }
+.btn-secondary:hover:not(:disabled) { background: var(--secondary-hover-bg); }
+.btn-secondary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-secondary:disabled { opacity: 0.5; cursor: default; }
+:is(.modal, .groups, .jira-banner, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__btns, .ga, .sec__f, .group-card)
+  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button),
+.button:not(.primary) { background: transparent; color: var(--secondary); border: 1px solid var(--secondary); border-radius: 4px; }
+:is(.modal, .groups, .jira-banner, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__btns, .ga, .sec__f, .group-card)
+  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button):hover:not(:disabled),
+.button:not(.primary):hover:not(:disabled) { background: var(--secondary-hover-bg); }
+:is(.modal, .groups, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__btns, .ga, .sec__f, .group-card) button:disabled { opacity: 0.5; }

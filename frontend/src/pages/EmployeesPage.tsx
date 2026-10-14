@@ -31,7 +31,14 @@ export default function EmployeesPage() {
 
   return (
     <section>
-      <h1>Сотрудники</h1>
+      <EmployeeSyncBar
+        title="Сотрудники"
+        sync={emps.sync}
+        refreshing={emps.refreshing}
+        onRefresh={() => void emps.refresh()}
+        error={emps.refreshError}
+        info={emps.info}
+      />
 
       <nav className="filter" aria-label="Статусы сотрудников">
         <button
@@ -55,13 +62,6 @@ export default function EmployeesPage() {
         ))}
       </nav>
 
-      <EmployeeSyncBar
-        sync={emps.sync}
-        refreshing={emps.refreshing}
-        onRefresh={() => void emps.refresh()}
-        error={emps.refreshError}
-        info={emps.info}
-      />
       <div className="toolbar">
         <input
           type="search"

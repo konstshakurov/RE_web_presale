@@ -1371,35 +1371,50 @@
               "decision": "conditional",
               "condition_text": "CR-005: внести в текст specs/fr_011_*.md статус «Поиск кандидата» и правило показа кнопок по переходам Jira (version 1.1 записана в 5.2).",
               "condition_deadline": "2026-10-16",
-              "condition_owner": "Константин"
+              "condition_owner": "Константин",
+              "condition_closed": true,
+              "condition_closed_date": "2026-10-15",
+              "resolution_notes": "Текст specs/fr_011_*.md обновлён 15.10.2026 (v1.1): статусы «Поиск кандидата», «Найм», «Кандидатов нет», матрица кнопок по переходам Jira (CR-005)."
             },
             {
               "req_id": "UC-002",
               "decision": "conditional",
               "condition_text": "CR-005: внести в текст specs/uc_002_*.md сценарий по кнопкам статуса (version 1.1 записана в 5.2).",
               "condition_deadline": "2026-10-16",
-              "condition_owner": "Константин"
+              "condition_owner": "Константин",
+              "condition_closed": true,
+              "condition_closed_date": "2026-10-15",
+              "resolution_notes": "Текст specs/uc_002_*.md обновлён 15.10.2026 (v1.1): сценарий по кнопкам статуса (CR-005)."
             },
             {
               "req_id": "FR-031",
               "decision": "conditional",
               "condition_text": "CR-001: внести в текст specs/fr_031_*.md пункт о закреплённой шапке: всегда видна при прокрутке, высота 56px, баннер Jira в потоке, модальные окна поверх, экран входа без изменений (version 1.1 записана в 5.2).",
               "condition_deadline": "2026-10-16",
-              "condition_owner": "Константин"
+              "condition_owner": "Константин",
+              "condition_closed": true,
+              "condition_closed_date": "2026-10-15",
+              "resolution_notes": "Текст specs/fr_031_*.md обновлён 15.10.2026 (v1.1): закреплённая шапка, баннер Jira в потоке, модальные поверх, вход без изменений (CR-001)."
             },
             {
               "req_id": "FR-038",
               "decision": "conditional",
               "condition_text": "CR-002: внести в текст specs/fr_038_*.md новый источник логотипа «regoose» (design/KON-78/logo/logo_B_CandaraLight.png, frontend/src/assets/regoose.png, фавикон favicon_dark_256.png) вместо input/design/Logo-Гусь-RE.png (version 1.1 записана в 5.2).",
               "condition_deadline": "2026-10-16",
-              "condition_owner": "Константин"
+              "condition_owner": "Константин",
+              "condition_closed": true,
+              "condition_closed_date": "2026-10-15",
+              "resolution_notes": "Текст specs/fr_038_*.md обновлён 15.10.2026 (v1.1): источник логотипа «regoose», фавикон favicon_dark_256.png (CR-002)."
             },
             {
               "req_id": "FR-024",
               "decision": "conditional",
               "condition_text": "CR-003: внести в текст specs/fr_024_*.md сценарий истёкшей сессии: сообщение «Сессия истекла. Войдите снова - вы вернётесь на прежнюю страницу.», условие показа (401 на защищённый маршрут, не первый вход и не ошибка пароля), возврат на прежнюю страницу (version 1.1 записана в 5.2).",
               "condition_deadline": "2026-10-16",
-              "condition_owner": "Константин"
+              "condition_owner": "Константин",
+              "condition_closed": true,
+              "condition_closed_date": "2026-10-15",
+              "resolution_notes": "Текст specs/fr_024_*.md обновлён 15.10.2026 (v1.1): сценарий истёкшей сессии, параметры LDAP, TLS не используется (CR-003)."
             },
             {
               "req_id": "FR-001",

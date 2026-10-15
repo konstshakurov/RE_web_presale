@@ -922,7 +922,7 @@
       "type": "functional",
       "title": "Статусы «Кандидатов нет» и «Найм»",
       "version": "1.1",
-      "status": "conditional_approved",
+      "status": "approved",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1002,6 +1002,14 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "condition_closed",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "resolution_notes": "Текст specs/fr_011_*.md обновлён 15.10.2026 (v1.1): статусы «Поиск кандидата», «Найм», «Кандидатов нет», матрица кнопок по переходам Jira (CR-005)."
         }
       ]
     },
@@ -2082,7 +2090,7 @@
       "type": "functional",
       "title": "Вход по корпоративному LDAP",
       "version": "1.1",
-      "status": "conditional_approved",
+      "status": "approved",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2155,6 +2163,14 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "condition_closed",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "resolution_notes": "Текст specs/fr_024_*.md обновлён 15.10.2026 (v1.1): сценарий истёкшей сессии, параметры LDAP, TLS не используется (CR-003)."
         }
       ]
     },
@@ -4141,7 +4157,7 @@
       "type": "use_case",
       "title": "Сменить статус потребности",
       "version": "1.1",
-      "status": "conditional_approved",
+      "status": "approved",
       "priority": "Should",
       "owner": "",
       "stability": "Unknown",
@@ -4236,6 +4252,14 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "condition_closed",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "resolution_notes": "Текст specs/uc_002_*.md обновлён 15.10.2026 (v1.1): сценарий по кнопкам статуса (CR-005)."
         }
       ]
     },
@@ -4760,7 +4784,7 @@
       "type": "functional",
       "title": "Структура приложения: разделы",
       "version": "1.1",
-      "status": "conditional_approved",
+      "status": "approved",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4825,6 +4849,14 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "condition_closed",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "resolution_notes": "Текст specs/fr_031_*.md обновлён 15.10.2026 (v1.1): закреплённая шапка, баннер Jira в потоке, модальные поверх, вход без изменений (CR-001)."
         }
       ]
     },
@@ -5381,7 +5413,7 @@
       "type": "functional",
       "title": "Логотип и фирменный вид интерфейса",
       "version": "1.1",
-      "status": "conditional_approved",
+      "status": "approved",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5454,6 +5486,14 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "condition_closed",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "resolution_notes": "Текст specs/fr_038_*.md обновлён 15.10.2026 (v1.1): источник логотипа «regoose», фавикон favicon_dark_256.png (CR-002)."
         }
       ]
     },

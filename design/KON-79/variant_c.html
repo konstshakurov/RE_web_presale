@@ -1,0 +1,144 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>KON-79 - Вариант C — боковая панель «Действия по потребности»</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><style>
+:root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;--border:#323f4b;--accent:#3e8ef7;--nav:#0f1b33;--err:#ff8a80;--ok:#34c38f;--warn:#f5b041;--primary:#2870d4;--primary-hover:#235fc0;--nav-text:#cbd2d9;--secondary:#5aa0fa;--sec-bg:rgba(90,160,250,.08);color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#f4f6f8;--panel:#fff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;--border:#cbd2d9;--accent:#1b66c9;--nav:#1f2933;--err:#b42318;--ok:#1a7f5a;--warn:#b7791f;--primary:#1f6fd6;--primary-hover:#1a5bb8;--secondary:#1a62c4;--sec-bg:rgba(26,98,196,.08);color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;color:var(--text);background:var(--bg);font-size:15px}
+a{color:var(--accent)}
+.proto-bar{background:#000;color:#fff;font-size:12px;padding:5px 24px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.proto-bar a{color:#9cf}
+.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:flex-end;gap:20px;padding:0 24px;height:56px;background:var(--nav);color:#fff}
+.topbar .logo{height:41px;margin-bottom:8px;padding:0 10px;display:flex;align-items:center;font-weight:600;background:#ffffff18;border-radius:4px}
+.topbar nav{display:flex;flex:1;gap:2px}
+.topbar nav a{color:var(--nav-text);text-decoration:none;padding:12px 16px;margin-top:8px;border-radius:6px 6px 0 0}
+.topbar nav a.on{background:var(--bg);color:var(--text);font-weight:600}
+.topbar .u{padding-bottom:12px}
+.content{padding:24px}
+h1{margin:0 0 12px}
+.filter{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--border);border-radius:16px;padding:4px 12px;color:var(--accent);background:transparent}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border)}
+th,td{text-align:left;padding:10px 12px;border-top:1px solid var(--border);vertical-align:top}
+th{background:var(--panel-2);font-size:13px}
+.st{display:inline-flex;align-items:center;gap:6px;border-radius:4px;padding:2px 8px;background:#34c38f22;color:var(--ok);font-size:14px}
+button.st{border:1px solid transparent;cursor:pointer;font:inherit;font-size:14px}
+.muted{color:var(--muted)}
+.btn{height:36px;padding:0 16px;border-radius:4px;font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--panel-2);color:var(--text)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.sec{background:transparent;border-color:var(--secondary);color:var(--secondary)}
+.btn.small{height:30px;padding:0 10px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.cand{margin:6px 0 0;padding:10px 12px;background:var(--panel-2);border-radius:6px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.pct{font-weight:600;background:#c9efdc;color:#0b5c3e;border-radius:12px;padding:1px 8px}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:10}
+.backdrop.side{justify-content:flex-end;align-items:stretch}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:6px;width:min(640px,92vw);max-height:90vh;display:flex;flex-direction:column}
+.side .modal{width:min(520px,92vw);max-height:none;height:100%;border-radius:0;border-width:0 0 0 1px}
+.m-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px}
+.m-head h2{margin:0;font-size:18px}
+.m-body{padding:16px 20px;overflow:auto;flex:1;min-height:0}
+.m-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.field label,.field .lab{font-size:14px}
+.field input[type=text],.field input[type=password],.field select,.field textarea{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:8px;font:inherit;width:100%}
+.field textarea{min-height:72px}
+.field.err input{border-color:var(--err)}
+.hint{font-size:13px;color:var(--muted)}
+.error{color:var(--err);font-size:14px}
+.box{border:1px solid var(--border);border-radius:6px;padding:10px 12px;background:var(--panel-2);margin-bottom:14px}
+.box.errbox{border-color:var(--err)}
+.box.warnbox{border-color:var(--warn)}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+.steps{display:flex;gap:6px;margin-bottom:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.steps span{padding:3px 10px;border-radius:12px;border:1px solid var(--border)}
+.steps span.on{border-color:var(--accent);color:var(--text);font-weight:600}
+.steps span.done{color:var(--ok)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tabs span{padding:8px 14px;border-bottom:3px solid transparent}
+.tabs span.on{border-color:var(--accent);font-weight:600}
+.prog{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin:10px 0}
+.prog i{display:block;height:100%;background:var(--primary);width:45%}
+.radio{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px}
+.radio.on{border-color:var(--accent)}
+.sum{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:14px}
+.sum dt{color:var(--muted)}.sum dd{margin:0}
+.ctx{font-size:13px;color:var(--muted);margin-bottom:12px}
+body[data-s="assign"] [data-v="assign"],
+body[data-s="assign_err"] [data-v="assign_err"],
+body[data-s="confirm"] [data-v="confirm"],
+body[data-s="progress"] [data-v="progress"],
+body[data-s="refused"] [data-v="refused"],
+body[data-s="reauth"] [data-v="reauth"],
+body[data-s="status"] [data-v="status"],
+body[data-s="status_req"] [data-v="status_req"],
+body[data-s="status_refused"] [data-v="status_refused"]{display:flex}
+</style></head><body>
+<div class="proto-bar"><b>Вариант C — боковая панель «Действия по потребности»</b> <a href="?s=list">Список</a> <a href="?s=assign">Назначить: форма</a> <a href="?s=assign_err">ставка обязательна</a> <a href="?s=confirm">подтверждение</a> <a href="?s=progress">отправка в Jira</a> <a href="?s=refused">отказ Jira</a> <a href="?s=reauth">сессия Jira истекла</a> <a href="?s=status">Статус: переходы</a> <a href="?s=status_req">обязательные поля</a> <a href="?s=status_refused">отказ Jira (статус)</a></div>
+<header class="topbar"><div class="logo">regoose</div><nav><a class="on" href="#">Потребности</a><a href="#">Сотрудники</a><a href="#">Резюме</a><a href="#">Настройки</a></nav><div class="u">Константин Шакуров ⇥</div></header>
+<main class="content"><h1>Потребности</h1>
+<div class="filter"><span class="chip on">Без кандидата 106</span><span class="chip">Кандидат назначен 51</span><span class="chip">Интервью 26</span><span class="chip">Закреплён 1</span><span class="chip">Прочие 319</span></div>
+<table><thead><tr><th>Ключ</th><th>Название</th><th>Статус</th><th>Клиент</th><th>Ставка</th></tr></thead><tbody>
+<tr><td><a href="#">5919</a></td><td>Аналитик Ак Барс Системный аналитик, Бизнес аналитик Middle, Middle + Full time Не назначен
+<div class="cand"><span><b>Белова Екатерина Олеговна</b> · <span class="muted">Свободен</span></span><span class="pct">87%</span><button class="btn small sec">Резюме</button><button class="btn small primary">Назначить</button></div>
+<div class="cand"><span><b>Орлов Игорь Сергеевич</b> · <span class="muted">Скоро освобождается</span></span><span class="pct">72%</span><button class="btn small sec">Резюме</button><button class="btn small primary">Назначить</button></div></td>
+<td><button class="st">Поиск кандидата <span aria-hidden="true">▾</span></button><div class="hint" style="margin-top:2px">Действия…</div></td><td>SA-590</td><td><b>3 600 RUB</b><div class="muted">с НДС, от производства</div></td></tr>
+<tr><td><a href="#">5906</a></td><td>Аналитик 4350427 БСС ООО — Выделенная команда Бизнес аналитик Middle</td><td><span class="st">Отказ по кандидату</span></td><td>БСС ООО</td><td><b>2 600 RUB</b><div class="muted">от клиента</div></td></tr>
+</tbody></table></main>
+<div class="backdrop side" data-v="assign"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><div class="ctx">Кандидат: <b>Белова Екатерина Олеговна</b> · 87% · Свободен</div>
+<div class="field"><label>Резюме</label><select><option>Основное CV — Белова_ЕО_CV_2026.docx (10.10.2026)</option><option>Доп. CV — Belova_eng.pdf</option><option>CV по шаблону клиента — Ак Барс</option></select></div>
+<div class="field"><label>Ставка, руб. с НДС </label><input type="text" value="3 800" placeholder="например, 3 800">
+<div class="hint">В потребности: 3 600 RUB с НДС, «от производства». Среднее за 6 мес.: 3 450, медиана 3 400 (ориентир).</div></div>
+<div class="field"><label>Комментарий (уйдёт комментарием в потребность)</label><textarea>Рекомендую кандидата: опыт интеграций, REST, SQL. Готова к интервью на этой неделе.</textarea></div>
+<div class="field"><span class="lab">Файлы (из БД сотрудника)</span>
+<label class="chk"><input type="checkbox" checked> Belova_eng.pdf <span class="muted">Доп. CV</span></label>
+<label class="chk"><input type="checkbox"> Примеры_работ.pdf <span class="muted">Материалы</span></label>
+<button class="btn small sec" style="align-self:flex-start;margin-top:6px">CV по шаблону клиента…</button></div></div><div class="m-foot"><button class="btn sec">Отмена</button><button class="btn primary">Назначить…</button></div></div></div>
+<div class="backdrop side" data-v="assign_err"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><div class="ctx">Кандидат: <b>Белова Екатерина Олеговна</b> · 87% · Свободен</div>
+<div class="field"><label>Резюме</label><select><option>Основное CV — Белова_ЕО_CV_2026.docx (10.10.2026)</option><option>Доп. CV — Belova_eng.pdf</option><option>CV по шаблону клиента — Ак Барс</option></select></div>
+<div class="field err"><label>Ставка, руб. с НДС <span class="error">*</span></label><input type="text" value="" placeholder="например, 3 800">
+<div class="hint">В потребности: 3 600 RUB с НДС, «от производства». Среднее за 6 мес.: 3 450, медиана 3 400 (ориентир).</div><div class="error">Укажите ставку: в потребности «Кто предлагает ставку» = «от производства».</div></div>
+<div class="field"><label>Комментарий (уйдёт комментарием в потребность)</label><textarea>Рекомендую кандидата: опыт интеграций, REST, SQL. Готова к интервью на этой неделе.</textarea></div>
+<div class="field"><span class="lab">Файлы (из БД сотрудника)</span>
+<label class="chk"><input type="checkbox" checked> Belova_eng.pdf <span class="muted">Доп. CV</span></label>
+<label class="chk"><input type="checkbox"> Примеры_работ.pdf <span class="muted">Материалы</span></label>
+<button class="btn small sec" style="align-self:flex-start;margin-top:6px">CV по шаблону клиента…</button></div></div><div class="m-foot"><button class="btn sec">Отмена</button><button class="btn primary">Назначить…</button></div></div></div>
+<div class="backdrop side" data-v="confirm"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><dl class="sum"><dt>Потребность</dt><dd>5919 · SA-590</dd><dt>Кандидат</dt><dd>Белова Екатерина Олеговна</dd><dt>Резюме</dt><dd>Основное CV — Белова_ЕО_CV_2026.docx</dd>
+<dt>Ставка</dt><dd>3 800 руб. с НДС</dd><dt>Файлы</dt><dd>Belova_eng.pdf</dd><dt>Комментарий</dt><dd>Рекомендую кандидата: опыт интеграций…</dd><dt>Исполнитель</dt><dd>Вы (Константин Шакуров)</dd></dl>
+<p class="hint">Файлы прикрепляются как есть, без обезличивания. Повторное назначение заменит предыдущее (FR-010).</p></div><div class="m-foot"><button class="btn sec">Изменить</button><button class="btn primary">Подтвердить и отправить в Jira</button></div></div></div>
+<div class="backdrop side" data-v="progress"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><p><b>Передаём в Jira…</b></p><div class="prog"><i></i></div>
+<ul class="hint" style="margin:6px 0;padding-left:18px"><li>✓ Перечитана потребность (статус «Поиск кандидата»)</li><li>✓ Профиль сотрудника записан</li><li><b>→ Вложения (1 из 2)</b></li><li>Комментарий, ставка, исполнитель</li></ul>
+<p class="hint">Не закрывайте окно. Обычно до 10 секунд.</p></div><div class="m-foot"><button class="btn sec" disabled>Свернуть</button></div></div></div>
+<div class="backdrop side" data-v="refused"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><div class="box errbox"><b class="error">Jira отказала в назначении</b>
+<p style="margin:6px 0 0">You do not have the permission to assign issues. (403)</p>
+<div class="hint">Текст ответа Jira показан как есть. Введённые данные сохранены — можно исправить и повторить.</div></div><div class="ctx">Кандидат: <b>Белова Екатерина Олеговна</b> · 87% · Свободен</div>
+<div class="field"><label>Резюме</label><select><option>Основное CV — Белова_ЕО_CV_2026.docx (10.10.2026)</option><option>Доп. CV — Belova_eng.pdf</option><option>CV по шаблону клиента — Ак Барс</option></select></div>
+<div class="field"><label>Ставка, руб. с НДС </label><input type="text" value="3 800" placeholder="например, 3 800">
+<div class="hint">В потребности: 3 600 RUB с НДС, «от производства». Среднее за 6 мес.: 3 450, медиана 3 400 (ориентир).</div></div>
+<div class="field"><label>Комментарий (уйдёт комментарием в потребность)</label><textarea>Рекомендую кандидата: опыт интеграций, REST, SQL. Готова к интервью на этой неделе.</textarea></div>
+<div class="field"><span class="lab">Файлы (из БД сотрудника)</span>
+<label class="chk"><input type="checkbox" checked> Belova_eng.pdf <span class="muted">Доп. CV</span></label>
+<label class="chk"><input type="checkbox"> Примеры_работ.pdf <span class="muted">Материалы</span></label>
+<button class="btn small sec" style="align-self:flex-start;margin-top:6px">CV по шаблону клиента…</button></div></div><div class="m-foot"><button class="btn sec">Отмена</button><button class="btn primary">Повторить</button></div></div></div>
+<div class="backdrop side" data-v="reauth"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="on">Назначить</span><span class="">Статус</span></div><div class="box warnbox"><b>Сессия Jira истекла</b>
+<p style="margin:6px 0 8px">Введите пароль Jira, чтобы продолжить. Введённые данные сохранены, пароль нигде не запоминается.</p>
+<div class="field" style="margin:0"><label>Пароль Jira</label><input type="password" value="••••••••"></div></div><div class="ctx">Кандидат: <b>Белова Екатерина Олеговна</b> · 87% · Свободен</div>
+<div class="field"><label>Резюме</label><select><option>Основное CV — Белова_ЕО_CV_2026.docx (10.10.2026)</option><option>Доп. CV — Belova_eng.pdf</option><option>CV по шаблону клиента — Ак Барс</option></select></div>
+<div class="field"><label>Ставка, руб. с НДС </label><input type="text" value="3 800" placeholder="например, 3 800">
+<div class="hint">В потребности: 3 600 RUB с НДС, «от производства». Среднее за 6 мес.: 3 450, медиана 3 400 (ориентир).</div></div>
+<div class="field"><label>Комментарий (уйдёт комментарием в потребность)</label><textarea>Рекомендую кандидата: опыт интеграций, REST, SQL. Готова к интервью на этой неделе.</textarea></div>
+<div class="field"><span class="lab">Файлы (из БД сотрудника)</span>
+<label class="chk"><input type="checkbox" checked> Belova_eng.pdf <span class="muted">Доп. CV</span></label>
+<label class="chk"><input type="checkbox"> Примеры_работ.pdf <span class="muted">Материалы</span></label>
+<button class="btn small sec" style="align-self:flex-start;margin-top:6px">CV по шаблону клиента…</button></div></div><div class="m-foot"><button class="btn sec">Отмена</button><button class="btn primary">Войти и продолжить</button></div></div></div>
+<div class="backdrop side" data-v="status"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="">Назначить</span><span class="on">Статус</span></div><div class="radio" style="opacity:.6"><input type="radio" disabled> <div><b>Поиск кандидата</b> <span class="muted">— текущий статус</span></div></div><div class="radio "><input type="radio" name="t" > <div><b>Кандидат назначен</b></div></div><div class="radio on"><input type="radio" name="t" checked> <div><b>Кандидатов нет</b> <span class="hint">— нужны причина и комментарий</span></div></div><div class="radio "><input type="radio" name="t" > <div><b>Найм</b> <span class="hint">— нужны поля Jira</span></div></div><div class="radio "><input type="radio" name="t" > <div><b>Неактуально</b></div></div><p class="hint">Переходы и обязательные поля запрашиваются у Jira по правам вашего аккаунта.</p></div><div class="m-foot"><button class="btn sec">Закрыть</button><button class="btn primary">Далее</button></div></div></div>
+<div class="backdrop side" data-v="status_req"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="">Назначить</span><span class="on">Статус</span></div><div class="radio on"><input type="radio" checked> <div><b>Кандидатов нет</b></div></div>
+<div class="field" style="margin-top:12px"><label>Причина отсутствия кандидата <span class="error">*</span></label><select><option>Нет специалистов данного уровня, но есть слабее</option><option>Низкая ставка</option><option>Требуется очное присутствие</option></select></div>
+<div class="field"><label>Комментарий <span class="error">*</span></label><textarea>Нет свободных аналитиков уровня Middle+ с опытом интеграций.</textarea><div class="hint">Видимость комментария: для всех.</div></div></div><div class="m-foot"><button class="btn sec">Закрыть</button><button class="btn primary">Сменить статус</button></div></div></div>
+<div class="backdrop side" data-v="status_refused"><div class="modal" role="dialog" aria-label="Потребность 5919"><div class="m-head"><h2>Потребность 5919</h2><span>✕</span></div><div class="m-body"><div class="box"><b>5919</b> · SA-590<div class="hint">Аналитик Ак Барс, Middle. Ставка в потребности: 3 600 RUB с НДС, «от производства».</div><div class="hint">Правила клиента: нужно предоставить CV; работа вне РФ — нельзя.</div></div><div class="tabs"><span class="">Назначить</span><span class="on">Статус</span></div><div class="box errbox"><b class="error">Jira отказала в смене статуса</b>
+<p style="margin:6px 0 0">Transition 'Кандидатов нет' is not valid for this issue in its current status. (400)</p>
+<div class="hint">Текст ответа Jira показан как есть. Введённые данные сохранены. Статус потребности мог измениться — обновите карточку.</div></div><div class="radio on"><input type="radio" checked> <div><b>Кандидатов нет</b></div></div>
+<div class="field" style="margin-top:12px"><label>Причина отсутствия кандидата <span class="error">*</span></label><select><option>Нет специалистов данного уровня, но есть слабее</option><option>Низкая ставка</option><option>Требуется очное присутствие</option></select></div>
+<div class="field"><label>Комментарий <span class="error">*</span></label><textarea>Нет свободных аналитиков уровня Middle+ с опытом интеграций.</textarea><div class="hint">Видимость комментария: для всех.</div></div></div><div class="m-foot"><button class="btn sec">Закрыть</button><button class="btn primary">Повторить</button></div></div></div>
+
+<script>const q=new URLSearchParams(location.search);document.body.dataset.s=q.get('s')||'list';</script></body></html>

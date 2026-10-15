@@ -34,8 +34,8 @@ tools: Bash, Read, Write, Edit, Glob, Grep, ToolSearch, mcp__519e482f-c794-4769-
 - Твоя область: `docker-compose*.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `infra/`,
   `scripts/`, CI-конфигурация, `.env.example`, сборочные части `requirements*.txt`.
 - **Не трогай:** `backend/app/`, `frontend/src/` (код продукта — нужна правка, опиши её задачей
-  для Dev), `src/jira_client/` (его пишет только агент OpenCode), `db/migrations/` (схему меняет
-  Pre.RE), `output/`, `skills/`, корневые `tests/`.
+  для Dev), `design/` (пишет только UX), `src/jira_client/` (его пишет только агент OpenCode),
+  `db/migrations/` (схему меняет Pre.RE), `output/`, `skills/`, корневые `tests/`.
 - Один писатель на область: если смежная задача Dev/QA в работе, не правь те же файлы.
 
 ## Правила

@@ -2,7 +2,7 @@
   "project": "re_web_presale",
   "formality_level": "Standard",
   "created": "2026-10-02",
-  "updated": "2026-10-05",
+  "updated": "2026-10-15",
   "requirements": [
     {
       "id": "FR-001",
@@ -47,6 +47,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -83,6 +98,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -119,6 +149,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -148,6 +193,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -206,6 +266,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -242,6 +317,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -278,6 +368,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -336,6 +441,21 @@
           "action": "baselined_with_open_condition",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -365,6 +485,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -394,6 +529,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -430,6 +580,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -466,6 +631,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -502,6 +682,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -543,6 +738,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -589,6 +799,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -618,6 +843,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -669,6 +909,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -705,6 +960,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -741,6 +1011,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -777,6 +1062,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -806,6 +1106,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -842,6 +1157,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -878,6 +1208,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -907,6 +1252,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -943,6 +1303,21 @@
           "action": "baselined_with_open_condition",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -979,6 +1354,21 @@
           "action": "baselined_with_open_condition",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1008,6 +1398,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1037,6 +1442,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1066,6 +1486,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1102,6 +1537,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1309,6 +1759,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1338,6 +1803,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1367,6 +1847,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1396,6 +1891,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1425,6 +1935,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1461,6 +1986,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1497,6 +2037,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1533,6 +2088,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1569,6 +2139,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1605,6 +2190,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1641,6 +2241,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1670,6 +2285,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1706,6 +2336,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1742,6 +2387,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1793,6 +2453,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1844,6 +2519,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1885,6 +2575,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1936,6 +2641,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1977,6 +2697,21 @@
           "action": "baselined_with_open_condition",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2013,6 +2748,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2042,6 +2792,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2108,7 +2873,7 @@
       "type": "functional",
       "title": "Структура приложения: разделы",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2129,6 +2894,13 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
         }
       ]
     },
@@ -2165,6 +2937,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2201,6 +2988,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2242,6 +3044,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2283,6 +3100,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2329,6 +3161,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2365,6 +3212,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2394,6 +3256,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2430,6 +3307,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2466,6 +3358,21 @@
           "action": "baselined",
           "baseline_version": "v1.0",
           "decided_by": "Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-001 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2481,6 +3388,187 @@
       "source_artifact": "output\\data\\re_web_presale\\specs\\comp_db_rewebpresale_физическая_модель_—_re_web_pre.md",
       "added": "2026-10-05",
       "last_reviewed": "2026-10-05"
+    },
+    {
+      "id": "CR-001",
+      "type": "change_request",
+      "title": "Шапка приложения закреплена и не скроллится со страницей",
+      "description": "Сейчас при прокрутке длинных страниц (таблица «Потребности», «Резюме», «Сотрудники») верхняя панель с логотипом, меню разделов и именем пользователя уходит за пределы экрана вместе со страницей. Нужно: шапка приложения всегда видна в верхней части окна (закреплена, sticky/fixed), на всех экранах после входа; прокручивается только содержимое под ней. Требования к закреплённой шапке: высота 56px как сейчас, не перекрывает содержимое (отступ контента), баннеры состояния Jira остаются в потоке страницы (скроллятся) и не перекрываются шапкой, обе темы, окна 1280 и 1024, модальные окна открываются поверх шапки; экран входа (шапка без меню) не меняется. Источник: замечание владельца по текущему стенду (скриншот 15.10.2026: шапка «Стабилен», страница «Скроллится»). Изменение интерфейса — идёт по цепочке UX → апрув владельца → Dev → QA (.claude/rules/ui_workflow.md).",
+      "initiator": "Константин Шакуров (владелец продукта)",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "development",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-031"
+      ],
+      "related_cr_ids": [],
+      "status": "approved",
+      "opened_date": "2026-10-15",
+      "impact_analysis": {
+        "affected_count": 61,
+        "affected_ids": [
+          "UC-001",
+          "FR-038",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "BP-001",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "BR-002",
+          "BR-009",
+          "BR-008",
+          "NFR-008",
+          "UC-002",
+          "UC-003",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "FR-002",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "FR-012",
+          "FR-017",
+          "FR-024",
+          "FR-025",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "BR-007",
+          "NFR-007",
+          "NFR-006",
+          "FR-031"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-001",
+            "FR-038",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "BP-001",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "BR-008",
+            "NFR-008",
+            "UC-002",
+            "UC-003",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "FR-002",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "FR-012",
+            "FR-017",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "BR-007",
+            "NFR-007",
+            "NFR-006"
+          ]
+        },
+        "volatile_req_ids": [],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-031"
+        ],
+        "analysis_date": "2026-10-15"
+      },
+      "score": {
+        "benefit": "Medium",
+        "benefit_n": 2,
+        "cost": "Low",
+        "cost_n": 1,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 4.0,
+        "formula_verdict": "🟡 Modify",
+        "ba_notes": "Автоматический Impact=High (61 узел) — артефакт BFS по derives от «корневого» FR-031: изменение чисто презентационное (позиционирование шапки в каркасе, styles.css/Layout), поведения и данных 60 производных требований не затрагивает. Реальный объём: каркас UI, одна Dev-задача ~1 SP + проверка QA. Benefit Medium: длинные таблицы («Потребности», «Резюме») постоянно используются, меню и пользователь всегда под рукой. Cost Low. Риски: перекрытие шапкой контента и баннера Jira, якоря/фокус, модалки поверх шапки — закрываются критериями приёмки. Трассировки FR-031 к BR нет (исторически: структура из ФТ ч.2) — на CR не влияет.",
+        "scored_date": "2026-10-15"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Изменение презентационное (позиционирование шапки в каркасе), выгода — меню и пользователь всегда доступны на длинных таблицах; реальный объём ~1 SP, поведения и данных производных требований не затрагивает. Автоматический Impact=High (61 узел) — артефакт обхода графа. Реализация по цепочке ui_workflow: UX (один вариант + «как сейчас») → апрув владельца → Dev → QA.",
+        "modification_notes": "",
+        "decision_date": "2026-10-15"
+      }
     }
   ],
   "links": [
@@ -3127,6 +4215,13 @@
       "relation": "satisfies",
       "rationale": "Физическая модель реализует все 9 сущностей ERD-001: Need, Client, AppUser, LlmProvider, AppSetting, StatusGroup в app_db; Employee, EmployeeFile, Recommendation в cv_db (ADR-003). Отклонения: JSON-атрибуты нормализованы, токены и ключи в secret_store, межбазовые связи мягкие.",
       "added": "2026-10-05"
+    },
+    {
+      "from": "CR-001",
+      "to": "FR-031",
+      "relation": "modifies",
+      "rationale": "CR CR-001 modifies FR-031",
+      "added_date": "2026-10-15"
     }
   ],
   "history": [
@@ -6113,6 +7208,82 @@
       "to": "ERD-001",
       "relation": "satisfies",
       "date": "2026-10-05"
+    },
+    {
+      "date": "2026-10-15",
+      "action": "cr_opened",
+      "cr_id": "CR-001",
+      "initiator": "Константин Шакуров (владелец продукта)"
+    },
+    {
+      "date": "2026-10-15",
+      "action": "cr_resolved",
+      "cr_id": "CR-001",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "FR-016",
+        "FR-037",
+        "BR-006",
+        "FR-029",
+        "UC-006",
+        "FR-034",
+        "NFR-009",
+        "BP-001",
+        "FR-012",
+        "BR-001",
+        "FR-035",
+        "NFR-008",
+        "BR-007",
+        "FR-010",
+        "NFR-007",
+        "FR-013",
+        "FR-026",
+        "FR-022",
+        "FR-027",
+        "FR-015",
+        "FR-011",
+        "BR-005",
+        "FR-030",
+        "FR-018",
+        "FR-039",
+        "NFR-010",
+        "FR-005",
+        "FR-033",
+        "FR-003",
+        "FR-020",
+        "BR-003",
+        "FR-004",
+        "FR-040",
+        "FR-009",
+        "FR-028",
+        "FR-002",
+        "FR-025",
+        "FR-001",
+        "FR-014",
+        "FR-017",
+        "BR-009",
+        "FR-024",
+        "UC-002",
+        "NFR-006",
+        "UC-001",
+        "UC-003",
+        "UC-005",
+        "FR-032",
+        "BR-010",
+        "FR-031",
+        "FR-021",
+        "FR-006",
+        "FR-007",
+        "FR-019",
+        "BR-008",
+        "FR-038",
+        "FR-008",
+        "BR-002",
+        "FR-036",
+        "UC-004",
+        "FR-023"
+      ]
     }
   ]
 }

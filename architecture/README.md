@@ -47,7 +47,7 @@
 
 ## Открытые вопросы
 
-1. Параметры LDAP получены от Support 09.10: сервер `ldap://freeipa01.simbirsoft:389/`, base DN `cn=users,cn=accounts,dc=simbirsoft,dc=dev`, bind `uid={login},cn=users,cn=accounts,dc=simbirsoft,dc=dev` (прямой bind, служебная учётка не нужна); открыто: TLS для LDAP (StartTLS/636). Значения — в `.env` (вне Git).
+1. Параметры LDAP получены от Support 09.10: сервер `ldap://freeipa01.simbirsoft:389/`, base DN `cn=users,cn=accounts,dc=simbirsoft,dc=dev`, bind `uid={login},cn=users,cn=accounts,dc=simbirsoft,dc=dev` (прямой bind, служебная учётка не нужна); TLS для LDAP не используется (`ldap://`, не `ldaps://`) — пароль пользователя идёт по внутренней сети открытым текстом, принято как ограничение внутреннего контура. Значения — в `.env` (вне Git).
 2. Срок выдачи и параметры ВМ: заявка подаётся после локального тестирования MVP; вне критического пути разработки.
 3. Срок жизни сессии Jira не измерен (определяет частоту повторного ввода пароля); замеряется на локальном стенде.
 4. Какое поле эпика потребности каноническое: `customfield_10101` (Epic Link) или `customfield_11032` («Epic link потребности») — вопрос владельцу процесса; клиент пока использует 10101 и Agile API.

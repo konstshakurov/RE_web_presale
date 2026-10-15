@@ -1260,6 +1260,426 @@
         "FR-039": true,
         "FR-040": true
       }
+    },
+    "APKG-CR005-CLOSE": {
+      "package_id": "APKG-CR005-CLOSE",
+      "package_title": "Закрытие CR-005: FR-008/FR-011/FR-026/UC-002 v1.1; возврат статусов остальных требований",
+      "approach": "predictive",
+      "approach_source": "из плана BA (3.1) — подход: Predictive (Waterfall)",
+      "audience": "developer",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040"
+      ],
+      "created_date": "2026-10-15",
+      "stakeholder_decisions": {
+        "Константин": {
+          "stakeholder_name": "Константин",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-008",
+              "decision": "conditional",
+              "condition_text": "(1) Запись в Jira от имени пользователя и автоперевод статуса «Кандидат назначен» подтвердить пробной интеграцией (KON-42/43) либо ответом Support; разработку не блокировать. (2) CR-005: внести в текст specs/fr_008_*.md пункт об автоматическом переводе статуса Jira и назначении из «Отказ по кандидату» (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "conditional",
+              "condition_text": "Способ авторизации в Jira от имени пользователя (OAuth 1.0a / Application Link или рабочая альтернатива) подтвердить пробной интеграцией или ответом Support. Не ждать ответа, идти методом проб.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "conditional",
+              "condition_text": "(1) Смена статуса в Jira зависит от способа авторизации (FR-025); подтвердить после пробной интеграции. (2) CR-005: внести в текст specs/fr_026_*.md белый список переходов (Поиск кандидата, Найм, Кандидатов нет) и пересечение с переходами Jira (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "conditional",
+              "condition_text": "Шаги авторизации в Jira (OAuth 1.0a) уточнить по итогам пробной интеграции или ответа Support.",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "conditional",
+              "condition_text": "CR-005: внести в текст specs/fr_011_*.md статус «Поиск кандидата» и правило показа кнопок по переходам Jira (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-10-16",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "conditional",
+              "condition_text": "CR-005: внести в текст specs/uc_002_*.md сценарий по кнопкам статуса (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-10-16",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "conditional",
+              "condition_text": "CR-001: внести в текст specs/fr_031_*.md пункт о закреплённой шапке: всегда видна при прокрутке, высота 56px, баннер Jira в потоке, модальные окна поверх, экран входа без изменений (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-10-16",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "conditional",
+              "condition_text": "CR-002: внести в текст specs/fr_038_*.md новый источник логотипа «regoose» (design/KON-78/logo/logo_B_CandaraLight.png, frontend/src/assets/regoose.png, фавикон favicon_dark_256.png) вместо input/design/Logo-Гусь-RE.png (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-10-16",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "conditional",
+              "condition_text": "CR-003: внести в текст specs/fr_024_*.md сценарий истёкшей сессии: сообщение «Сессия истекла. Войдите снова - вы вернётесь на прежнюю страницу.», условие показа (401 на защищённый маршрут, не первый вход и не ошибка пароля), возврат на прежнюю страницу (version 1.1 записана в 5.2).",
+              "condition_deadline": "2026-10-16",
+              "condition_owner": "Константин"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Закрытие CR-005 (Approved, 15.10.2026) и возврат статусов: инструмент 5.4 пометил under_change все 61 узел, по существу изменены FR-008, FR-011, FR-026, UC-002 (version 1.1 в 5.2). Тела спецификаций (.md, 7.1) ещё не обновлены — условное утверждение до правки текста; условия по Jira (до 2026-11-02) сохранены.",
+          "recorded_date": "2026-10-15"
+        }
+      },
+      "baseline_version": null,
+      "status": "open",
+      "verification_snapshot": {
+        "FR-001": true,
+        "FR-002": true,
+        "FR-003": true,
+        "FR-004": true,
+        "FR-005": true,
+        "FR-006": true,
+        "FR-007": true,
+        "FR-008": true,
+        "FR-009": true,
+        "FR-010": true,
+        "FR-011": true,
+        "FR-012": true,
+        "FR-013": true,
+        "FR-014": true,
+        "FR-015": true,
+        "FR-016": true,
+        "FR-017": true,
+        "FR-018": true,
+        "FR-019": true,
+        "FR-020": true,
+        "FR-021": true,
+        "FR-022": true,
+        "FR-023": true,
+        "FR-024": true,
+        "FR-025": true,
+        "FR-026": true,
+        "FR-027": true,
+        "FR-028": true,
+        "FR-029": true,
+        "FR-030": true,
+        "NFR-006": true,
+        "NFR-007": true,
+        "NFR-008": true,
+        "NFR-009": true,
+        "NFR-010": true,
+        "BR-001": true,
+        "BR-002": true,
+        "BR-003": true,
+        "BR-005": true,
+        "BR-006": true,
+        "BR-007": true,
+        "BR-008": true,
+        "BR-009": true,
+        "BR-010": true,
+        "UC-001": true,
+        "UC-002": true,
+        "UC-003": true,
+        "UC-004": true,
+        "UC-005": true,
+        "UC-006": true,
+        "BP-001": true,
+        "FR-031": true,
+        "FR-032": true,
+        "FR-033": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-036": true,
+        "FR-037": true,
+        "FR-038": true,
+        "FR-039": true,
+        "FR-040": true
+      }
     }
   },
   "baselines": [

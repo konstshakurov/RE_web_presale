@@ -84,6 +84,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -149,6 +164,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -230,6 +260,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -288,6 +333,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -391,6 +451,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -456,6 +531,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -537,6 +627,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -544,14 +649,14 @@
       "id": "FR-008",
       "type": "functional",
       "title": "Назначение сотрудника на потребность с передачей в Jira",
-      "version": "1.0",
+      "version": "1.1",
       "status": "conditional_approved",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\fr_008_назначение_сотрудника_на_потре.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-02",
+      "last_reviewed": "2026-10-15",
       "success_criteria": {
         "baseline": "Доля потребностей с назначением в течение 24 часов: к замеру (выгрузка из Jira)",
         "target": "100%",
@@ -632,6 +737,21 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -690,6 +810,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -764,6 +899,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -771,14 +921,14 @@
       "id": "FR-011",
       "type": "functional",
       "title": "Статусы «Кандидатов нет» и «Найм»",
-      "version": "1.0",
-      "status": "approved",
+      "version": "1.1",
+      "status": "conditional_approved",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\fr_011_статусы_«кандидатов_нет»_и_«на.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-02",
+      "last_reviewed": "2026-10-15",
       "stakeholders": [
         {
           "name": "Клиентская служба (клиентские менеджеры)",
@@ -835,6 +985,21 @@
           "action": "approval_decision",
           "from": "pending_approval",
           "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
         }
@@ -902,6 +1067,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -983,6 +1163,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1053,6 +1248,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -1144,6 +1354,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1202,6 +1427,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -1298,6 +1538,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1363,6 +1618,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -1444,6 +1714,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1517,6 +1802,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1575,6 +1875,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -1656,6 +1971,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1729,6 +2059,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1787,6 +2132,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -1868,6 +2228,21 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -1875,14 +2250,14 @@
       "id": "FR-026",
       "type": "functional",
       "title": "Смена статуса потребности по переходам Jira",
-      "version": "1.0",
+      "version": "1.1",
       "status": "conditional_approved",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\fr_026_смена_статуса_потребности_по_п.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-02",
+      "last_reviewed": "2026-10-15",
       "stakeholders": [
         {
           "name": "Клиентская служба (клиентские менеджеры)",
@@ -1933,6 +2308,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2007,6 +2397,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2065,6 +2470,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2139,6 +2559,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2204,6 +2639,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2456,6 +2906,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2514,6 +2979,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2588,6 +3068,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2654,6 +3149,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2712,6 +3222,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2793,6 +3318,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -2858,6 +3398,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -2939,6 +3494,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3004,6 +3574,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -3085,6 +3670,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3158,6 +3758,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3216,6 +3831,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -3297,6 +3927,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3362,6 +4007,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -3458,6 +4118,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3465,14 +4140,14 @@
       "id": "UC-002",
       "type": "use_case",
       "title": "Сменить статус потребности",
-      "version": "1.0",
-      "status": "approved",
+      "version": "1.1",
+      "status": "conditional_approved",
       "priority": "Should",
       "owner": "",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\uc_002_сменить_статус_потребности.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-02",
+      "last_reviewed": "2026-10-15",
       "stakeholders": [
         {
           "name": "Евгения",
@@ -3546,6 +4221,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3616,6 +4306,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -3712,6 +4417,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3782,6 +4502,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -3863,6 +4598,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -3921,6 +4671,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -4045,6 +4810,21 @@
           "to": "conditional_approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4118,6 +4898,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4183,6 +4978,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -4269,6 +5079,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4339,6 +5164,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -4430,6 +5270,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4503,6 +5358,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4561,6 +5431,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "conditional_approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "conditional_approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -4642,6 +5527,21 @@
           "to": "approved",
           "stakeholder": "Константин",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
         }
       ]
     },
@@ -4707,6 +5607,21 @@
           "from": "under_change",
           "to": "under_change",
           "reason": "CR CR-003 approved by Константин"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "approval_decision",
+          "from": "pending_approval",
+          "to": "approved",
+          "stakeholder": "Константин",
+          "raci": "accountable"
+        },
+        {
+          "date": "2026-10-15",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-005 approved by Константин"
         },
         {
           "date": "2026-10-15",
@@ -5480,7 +6395,7 @@
         "FR-008"
       ],
       "related_cr_ids": [],
-      "status": "open",
+      "status": "approved",
       "opened_date": "2026-10-15",
       "impact_analysis": {
         "affected_count": 61,
@@ -5638,7 +6553,13 @@
         "ba_notes": "Упрощение: убирается универсальный выбор переходов (FR-026) и ручной шаг смены статуса при назначении; остаются два перехода «Кандидатов нет» и «Найм» (FR-011). Реально затронуты FR-008, FR-011, FR-026, UC-001/UC-002 и задачи KON-43/44/79; остальные узлы графа (61) — артефакт обхода. Выгода High: меньше разработки и ошибок, сценарий совпадает с работой в Jira. Риск: автоперевод статуса Jira при записи через API нужно подтвердить пробой (post-function перехода).",
         "scored_date": "2026-10-15"
       },
-      "decision": null
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин",
+        "rationale": "Минимальная разработка по решению владельца 15.10.2026: статус при назначении меняет Jira; ручной перевод из приложения — по белому списку (Поиск кандидата, Найм, Кандидатов нет) и только если Jira отдаёт переход; «Кандидат назначен» — через «Назначить» после сопоставления. Матрица — design/KON-79/status_actions.md. Автоматический Impact=61 — артефакт обхода графа: по существу затронуты FR-008, FR-011, FR-026, UC-002 (и задачи KON-43/44/79).",
+        "modification_notes": "",
+        "decision_date": "2026-10-15"
+      }
     }
   ],
   "links": [
@@ -9614,6 +10535,128 @@
       "action": "cr_opened",
       "cr_id": "CR-005",
       "initiator": "Константин Шакуров (владелец продукта)"
+    },
+    {
+      "date": "2026-10-15",
+      "action": "cr_resolved",
+      "cr_id": "CR-005",
+      "decision": "Approved",
+      "decided_by": "Константин",
+      "updated_requirements": [
+        "FR-023",
+        "FR-033",
+        "BR-007",
+        "FR-034",
+        "FR-022",
+        "FR-029",
+        "NFR-009",
+        "UC-004",
+        "BR-005",
+        "FR-038",
+        "FR-040",
+        "FR-031",
+        "NFR-007",
+        "FR-026",
+        "FR-011",
+        "FR-014",
+        "FR-018",
+        "FR-032",
+        "FR-003",
+        "FR-005",
+        "NFR-008",
+        "FR-006",
+        "BR-003",
+        "FR-025",
+        "FR-035",
+        "FR-028",
+        "FR-012",
+        "FR-039",
+        "BP-001",
+        "FR-010",
+        "NFR-006",
+        "FR-013",
+        "BR-001",
+        "FR-036",
+        "FR-001",
+        "FR-002",
+        "FR-027",
+        "FR-021",
+        "FR-015",
+        "NFR-010",
+        "FR-037",
+        "BR-010",
+        "BR-008",
+        "UC-002",
+        "UC-006",
+        "FR-019",
+        "FR-030",
+        "FR-024",
+        "BR-009",
+        "FR-017",
+        "FR-009",
+        "FR-020",
+        "FR-016",
+        "UC-001",
+        "UC-005",
+        "BR-006",
+        "BR-002",
+        "FR-008",
+        "FR-004",
+        "UC-003",
+        "FR-007"
+      ]
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "FR-011",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "1.1"
+        }
+      },
+      "reason": "CR-005 (Approved, 15.10.2026): перевод статуса «Поиск кандидата», «Кандидатов нет», «Найм» по белому списку",
+      "note": "Новая формулировка: Система ДОЛЖНА позволять перевести потребность в статусы «Поиск кандидата», «Найм» и «Кандидатов нет» кнопками в столбце «Статус» раздела «Потребности». Кнопка показывается, только если Jira отдаёт этот переход для текущего статуса (FR-026). При переходе «Кандидатов нет» ДОЛЖНЫ запрашиваться обязательные «Причина отсутствия кандидата» (справочник Jira) и «Комментарий» (видимость «для всех»); для «Поиск кандидата» и «Найм» — поля по запросу Jira. Матрица кнопок: design/KON-79/status_actions.md.",
+      "date": "2026-10-15"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "FR-026",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "1.1"
+        }
+      },
+      "reason": "CR-005 (Approved, 15.10.2026): белый список целевых статусов вместо универсального выбора переходов",
+      "note": "Новая формулировка: Система ДОЛЖНА запрашивать у Jira допустимые переходы из текущего статуса потребности (с обязательными полями) и показывать пользователю только переходы в «Поиск кандидата», «Найм», «Кандидатов нет» (белый список; «Кандидат назначен» выставляет Jira при назначении через «Назначить»). Прочие переходы в приложении не показываются. Система НЕ ДОЛЖНА вводить собственных ограничений сверх белого списка: права определяются Jira; отказы Jira (403 и др.) показываются как есть.",
+      "date": "2026-10-15"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "FR-008",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "1.1"
+        }
+      },
+      "reason": "CR-005 (Approved, 15.10.2026): статус при назначении меняет Jira; ручная смена статуса не нужна",
+      "note": "Дополнение: после подтверждения назначения («Подтвердить и отправить в Jira») статус потребности «Кандидат назначен» устанавливает Jira (workflow); пользователь статус вручную не меняет. Файлы и комментарий статус не меняют. После успеха приложение перечитывает потребность и показывает актуальный статус. Назначение доступно в том числе для потребности в статусе «Отказ по кандидату» (через «Сопоставить» → «Назначить»). Окно и состояния: design/KON-79 (вариант A минимальный).",
+      "date": "2026-10-15"
+    },
+    {
+      "action": "requirement_updated",
+      "req_id": "UC-002",
+      "changes": {
+        "version": {
+          "from": "1.0",
+          "to": "1.1"
+        }
+      },
+      "reason": "CR-005 (Approved, 15.10.2026): сценарий по кнопкам статуса",
+      "note": "Новый сценарий: 1) Система показывает в столбце «Статус» кнопки «Поиск», «Найм», «Кандидатов нет» по текущему статусу и переходам Jira. 2) Пользователь нажимает кнопку. 3) Для «Кандидатов нет» система запрашивает причину (справочник Jira) и комментарий; для «Поиск» и «Найм» — подтверждение (поля по запросу Jira). 4) Система отправляет переход в Jira от имени пользователя. 5) Система перечитывает потребность и обновляет статус и кнопки. Отказ Jira показывается как есть, введённое сохраняется.",
+      "date": "2026-10-15"
     }
   ]
 }

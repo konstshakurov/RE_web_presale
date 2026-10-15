@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>KON-79 - Вариант A (минимальный) — «Назначить» без ручной смены статуса; «Кандидатов нет» / «Найм» отдельно</title>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>KON-79 - Вариант A (минимальный) — кнопки статуса по текущему статусу потребности</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"><style>
 :root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;--border:#323f4b;--accent:#3e8ef7;--nav:#0f1b33;--err:#ff8a80;--ok:#34c38f;--warn:#f5b041;--primary:#2870d4;--primary-hover:#235fc0;--nav-text:#cbd2d9;--secondary:#5aa0fa;--sec-bg:rgba(90,160,250,.08);color-scheme:dark}
 @media (prefers-color-scheme:light){:root{--bg:#f4f6f8;--panel:#fff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;--border:#cbd2d9;--accent:#1b66c9;--nav:#1f2933;--err:#b42318;--ok:#1a7f5a;--warn:#b7791f;--primary:#1f6fd6;--primary-hover:#1a5bb8;--secondary:#1a62c4;--sec-bg:rgba(26,98,196,.08);color-scheme:light}}
@@ -64,6 +64,9 @@ button.st{border:1px solid transparent;cursor:pointer;font:inherit;font-size:14p
 .sum{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:14px}
 .sum dt{color:var(--muted)}.sum dd{margin:0}
 .ctx{font-size:13px;color:var(--muted);margin-bottom:12px}
+.acts{display:flex;gap:4px 14px;flex-wrap:wrap;margin-top:6px}
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer}
+.lnk:hover{text-decoration:underline}
 body[data-s="assign"] [data-v="assign"],
 body[data-s="assign_err"] [data-v="assign_err"],
 body[data-s="confirm"] [data-v="confirm"],
@@ -74,7 +77,7 @@ body[data-s="status"] [data-v="status"],
 body[data-s="status_req"] [data-v="status_req"],
 body[data-s="status_refused"] [data-v="status_refused"]{display:flex}
 </style></head><body>
-<div class="proto-bar"><b>Вариант A (минимальный) — «Назначить» без ручной смены статуса; «Кандидатов нет» / «Найм» отдельно</b> <a href="?s=list">Список</a> <a href="?s=assign">Назначить: форма</a> <a href="?s=assign_err">ставка обязательна</a> <a href="?s=confirm">подтверждение</a> <a href="?s=progress">отправка в Jira</a> <a href="?s=refused">отказ Jira</a> <a href="?s=reauth">сессия Jira истекла</a> <a href="?s=status">Статус: переходы</a> <a href="?s=status_req">обязательные поля</a> <a href="?s=status_refused">отказ Jira (статус)</a></div>
+<div class="proto-bar"><b>Вариант A (минимальный) — кнопки статуса по текущему статусу потребности</b> <a href="?s=list">Список</a> <a href="?s=assign">Назначить: форма</a> <a href="?s=assign_err">ставка обязательна</a> <a href="?s=confirm">подтверждение</a> <a href="?s=progress">отправка в Jira</a> <a href="?s=refused">отказ Jira</a> <a href="?s=reauth">сессия Jira истекла</a> <a href="?s=status">Статус: переходы</a> <a href="?s=status_req">обязательные поля</a> <a href="?s=status_refused">отказ Jira (статус)</a></div>
 <header class="topbar"><div class="logo">regoose</div><nav><a class="on" href="#">Потребности</a><a href="#">Сотрудники</a><a href="#">Резюме</a><a href="#">Настройки</a></nav><div class="u">Константин Шакуров ⇥</div></header>
 <main class="content"><h1>Потребности</h1>
 <div class="filter"><span class="chip on">Без кандидата 106</span><span class="chip">Кандидат назначен 51</span><span class="chip">Интервью 26</span><span class="chip">Закреплён 1</span><span class="chip">Прочие 319</span></div>
@@ -82,9 +85,9 @@ body[data-s="status_refused"] [data-v="status_refused"]{display:flex}
 <tr><td><a href="#">5919</a></td><td>Аналитик Ак Барс Системный аналитик, Бизнес аналитик Middle, Middle + Full time Не назначен
 <div class="cand"><span><b>Белова Екатерина Олеговна</b> · <span class="muted">Свободен</span></span><span class="pct">87%</span><button class="btn small sec">Резюме</button><button class="btn small primary">Назначить</button></div>
 <div class="cand"><span><b>Орлов Игорь Сергеевич</b> · <span class="muted">Скоро освобождается</span></span><span class="pct">72%</span><button class="btn small sec">Резюме</button><button class="btn small primary">Назначить</button></div></td>
-<td><span class="st">Поиск кандидата</span><div class="hint" style="margin-top:6px">Статус меняет Jira при назначении</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn small sec">Кандидатов нет…</button><button class="btn small sec">Найм…</button></div></td><td>SA-590</td><td><b>3 600 RUB</b><div class="muted">с НДС, от производства</div></td></tr>
-<tr><td><a href="#">5906</a></td><td>Аналитик 4350427 БСС ООО — Выделенная команда Бизнес аналитик Middle</td><td><span class="st">Отказ по кандидату</span></td><td>БСС ООО</td><td><b>2 600 RUB</b><div class="muted">от клиента</div></td></tr>
-</tbody></table></main>
+<td><span class="st">Поиск кандидата</span><div class="acts"><button class="lnk">Найм</button><button class="lnk">Кандидатов нет</button></div></td><td>SA-590</td><td><b>3 600 RUB</b><div class="muted">с НДС, от производства</div></td></tr>
+<tr><td><a href="#">5906</a></td><td>Аналитик 4350427 БСС ООО — Выделенная команда Бизнес аналитик Middle</td><td><span class="st" style="background:#ff8a8022;color:var(--err)">Отказ по кандидату</span><div class="acts"><button class="lnk">Кандидат назначен</button></div></td><td>БСС ООО</td><td><b>2 600 RUB</b><div class="muted">от клиента</div></td></tr>
+<tr><td><a href="#">5921</a></td><td>Системный аналитик, Middle, проект «Тест»</td><td><span class="st" style="background:#9aa5b122;color:var(--muted)">Требуется кандидат</span><div class="acts"><button class="lnk">Поиск</button><button class="lnk">Найм</button><button class="lnk">Кандидатов нет</button></div></td><td>SA-701</td><td><b>—</b><div class="muted">не указана</div></td></tr><tr><td><a href="#">5915</a></td><td>Бизнес-аналитик, Senior</td><td><span class="st">Кандидатов нет</span><div class="acts"><button class="lnk">Поиск</button><button class="lnk">Найм</button></div></td><td>SA-655</td><td><b>4 200 RUB</b><div class="muted">от клиента</div></td></tr><tr><td><a href="#">5900</a></td><td>Аналитик RIVIERA OUTSOURCING</td><td><span class="st" style="background:#3e8ef722;color:var(--accent)">Интервью состоялось</span><div class="hint" style="margin-top:4px">Ведёт клиент — действий нет</div></td><td>SA-5443</td><td><b>60 USD</b></td></tr></tbody></table></main>
 <div class="backdrop" data-v="assign"><div class="modal" role="dialog" aria-label="Назначить кандидата"><div class="m-head"><h2>Назначить кандидата</h2><span>✕</span></div><div class="m-body"><div class="ctx">Потребность 5919 · SA-590 · Кандидат: <b>Белова Екатерина Олеговна</b></div>
 <div class="field"><label>Резюме</label><select><option>Основное CV — Белова_ЕО_CV_2026.docx (10.10.2026)</option><option>Доп. CV — Belova_eng.pdf</option><option>CV по шаблону клиента — Ак Барс</option></select></div>
 <div class="field"><label>Ставка, руб. с НДС </label><input type="text" value="3 800" placeholder="например, 3 800">

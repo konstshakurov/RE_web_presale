@@ -258,7 +258,10 @@ a { color: var(--accent); }
 /* Действия .act (UX-1 п. 3): серый текст + контурная иконка, без рамки и заливки */
 .act, .card__actions button.act, .card__actions a.act { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; line-height: 1.2; background: transparent; border: 0; border-radius: 4px; color: var(--muted); font: inherit; cursor: pointer; text-decoration: none; }
 .act .ico { flex: none; }
-.act:hover, .act:focus-visible, .act:active { color: var(--text); }
+.act:hover, .act:focus-visible, .act:active,
+.card__actions button.act:hover, .card__actions a.act:hover,
+.card__actions button.act:focus-visible, .card__actions a.act:focus-visible,
+.card__actions button.act:active, .card__actions a.act:active { color: var(--text); }
 .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .act:active { background: var(--panel-2); }
 .act:disabled { opacity: 0.5; cursor: default; color: var(--muted); background: transparent; }

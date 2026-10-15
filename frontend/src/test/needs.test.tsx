@@ -189,6 +189,28 @@ describe("Потребности", () => {
     await waitFor(() => expect(urls[urls.length - 1]).toContain("limit=500"));
   });
 
+  it("поиск без кнопки «Найти»: применяется через 350 мс паузы одним запросом, очистка - сразу", async () => {
+    const urls: string[] = [];
+    route((u) => {
+      if (u.includes("/sync/needs?")) {
+        urls.push(u);
+        return json(page([need()]));
+      }
+    });
+    renderNeeds();
+    await screen.findByRole("cell", { name: "1" });
+    expect(screen.queryByRole("button", { name: "Найти" })).toBeNull();
+    const input = screen.getByLabelText("Поиск по ключу и названию");
+    const before = urls.length;
+    await userEvent.type(input, "abc");
+    expect(urls.length).toBe(before); // пауза ещё не прошла - запросов нет
+    await waitFor(() => expect(urls[urls.length - 1]).toContain("q=abc"), { timeout: 2000 });
+    await new Promise((r) => setTimeout(r, 500));
+    expect(urls.filter((u) => u.includes("q=abc")).length).toBe(1);
+    await userEvent.clear(input);
+    await waitFor(() => expect(urls[urls.length - 1]).not.toContain("q=abc"), { timeout: 300 });
+  });
+
   it("колонка «Создана»: дата и время; сортировка по клику asc/desc, сброс на 1-ю страницу", async () => {
     const urls: string[] = [];
     route((u) => {
@@ -226,7 +248,7 @@ describe("Потребности", () => {
     expect(urls[0]).not.toContain("created_from");
     expect(screen.getByRole("button", { name: "Сбросить даты" })).toBeDisabled();
     await userEvent.type(screen.getByLabelText("Создана с"), "2026-10-01");
-    await userEvent.type(screen.getByLabelText("по"), "2026-10-09");
+    await userEvent.type(screen.getByLabelText("Создана по"), "2026-10-09");
     await waitFor(() => expect(urls[urls.length - 1]).toContain("created_to=2026-10-09"));
     const last = urls[urls.length - 1];
     expect(last).toContain("created_from=2026-10-01");
@@ -251,7 +273,7 @@ describe("Потребности", () => {
     renderNeeds();
     await screen.findByRole("cell", { name: "1" });
     const before = urls.length;
-    await userEvent.type(screen.getByLabelText("по"), "2026-10-01");
+    await userEvent.type(screen.getByLabelText("Создана по"), "2026-10-01");
     await waitFor(() => expect(urls.length).toBeGreaterThan(before));
     const n = urls.length;
     await userEvent.type(screen.getByLabelText("Создана с"), "2026-10-09");

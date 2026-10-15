@@ -210,6 +210,30 @@ describe("Сотрудники", () => {
     expect(within(dlg).getByText("Работал с ERP")).toBeInTheDocument();
   });
 
+  it("карточка без ключа (в т.ч. без jira_url); заголовки «Профиля» и CV - ФИО; поиск по ключу работает", async () => {
+    setup(
+      {
+        employees: [emp({ jira_url: null }), emp({ jira_key: "EMP-2", full_name: "Другой Сотрудник" })],
+        extra: (u) =>
+          u.endsWith("/main-cv") ? json({ file: file(), extraction_status: "ok", text: "Текст резюме" }) : undefined,
+      },
+      "/employees",
+    );
+    const card = await screen.findByRole("listitem", { name: "Тестов Тест" });
+    expect(within(card).queryByText("EMP-1")).not.toBeInTheDocument();
+    expect(within(card).queryByRole("link", { name: "Тестов Тест" })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("listitem", { name: "Другой Сотрудник" })).queryByText("EMP-2")).not.toBeInTheDocument();
+
+    await userEvent.click(within(card).getByRole("button", { name: /^Профиль: / }));
+    const prof = await screen.findByRole("dialog");
+    expect(within(prof).getByRole("heading", { name: "Тестов Тест" })).toBeInTheDocument();
+    await userEvent.click(within(prof).getByRole("button", { name: "Закрыть" }));
+
+    await userEvent.click(within(card).getByRole("button", { name: /^Резюме: / }));
+    const cv = await screen.findByRole("dialog");
+    expect(within(cv).getByRole("heading", { name: /^Тестов Тест — / })).toBeInTheDocument();
+  });
+
   it("профиль (M2): статус в шапке, нет строки «Статус», футер: Резюме/Файлы и «Закрыть», Esc и × закрывают", async () => {
     setup({}, "/employees");
     await userEvent.click(await screen.findByRole("button", { name: /^Профиль: / }));

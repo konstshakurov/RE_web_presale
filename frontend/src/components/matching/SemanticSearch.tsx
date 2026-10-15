@@ -56,7 +56,7 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
   const [busy, setBusy] = useState(false);
   const [previewRun, setPreviewRun] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<string | null>(null);
-  const [viewKey, setViewKey] = useState<string | null>(null);
+  const [view, setView] = useState<{ key: string; name?: string } | null>(null);
   const { providers, providerId, setProviderId } = useProviders();
   const itemsLen = useRef(0);
   itemsLen.current = items.length;
@@ -208,7 +208,7 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
         </p>
       )}
 
-      {data && items.length > 0 && <CandidateList rows={items.map(toSearchRow)} onResume={setViewKey} assign={false} />}
+      {data && items.length > 0 && <CandidateList rows={items.map(toSearchRow)} onResume={(key, name) => setView({ key, name })} assign={false} />}
       {data && items.length === 0 && !running && !error && <p className="empty">По запросу никого не найдено.</p>}
 
       {data && items.length > 0 && (
@@ -250,7 +250,7 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
           }}
         />
       )}
-      {viewKey && <CvViewer employeeKey={viewKey} onClose={() => setViewKey(null)} />}
+      {view && <CvViewer employeeKey={view.key} employeeName={view.name} onClose={() => setView(null)} />}
     </div>
   );
 }

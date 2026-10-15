@@ -4,10 +4,12 @@ import type { FormEvent } from "react";
 import { ApiError, api } from "../api/client";
 import type { NeedSort, NeedsPage as NeedsData, SortOrder, StatusGroup, SyncStamp } from "../api/types";
 import NeedsTable from "../components/NeedsTable";
+import ActIcon from "../components/ActIcon";
 import EmployeeSyncBar from "../components/EmployeeSyncBar";
 import { refreshErrorText } from "../lib/needs";
 
 const GROUP_KEY = "needs.group"; // выбор фильтра запоминается (FR-035)
+const SEARCH_DEBOUNCE_MS = 350;
 const LIMITS = [50, 100, 200, 500]; // API: limit <= 500
 
 function savedGroup(): string | null {
@@ -97,11 +99,28 @@ export default function NeedsPage() {
     setGroup(key);
   }
 
+  // Enter применяет поиск сразу; ввод - через 350 мс паузы (effect ниже); очистка - сразу.
+  function applySearch(v: string) {
+    const q = v.trim();
+    setQuery((prev) => {
+      if (prev !== q) setOffset(0);
+      return q;
+    });
+  }
+
   function onSearch(e: FormEvent) {
     e.preventDefault();
-    setOffset(0);
-    setQuery(search.trim());
+    applySearch(search);
   }
+
+  useEffect(() => {
+    if (search.trim() === "") {
+      applySearch("");
+      return;
+    }
+    const t = setTimeout(() => applySearch(search), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [search]);
 
   // Клик по заголовку: тот же столбец - меняет направление, другой - сначала новые сверху.
   function onSort(field: NeedSort) {
@@ -169,53 +188,67 @@ export default function NeedsPage() {
         ))}
       </nav>
 
-      <div className="toolbar">
-        <form className="search" onSubmit={onSearch} role="search">
-          <input
-            type="search"
-            aria-label="Поиск по ключу и названию"
-            placeholder="Ключ или название"
-            value={search}
-            maxLength={200}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button type="submit">Найти</button>
+      <div className="c2 dense nfilters">
+        <form className="gn" onSubmit={onSearch} role="search">
+          <div className="field">
+            <label htmlFor="needs-q">Поиск</label>
+            <input
+              id="needs-q"
+              type="search"
+              aria-label="Поиск по ключу и названию"
+              placeholder="Ключ или название"
+              value={search}
+              maxLength={200}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <span className="hint-label">
+              <label id="needs-dates-l">Создана</label>
+            </span>
+            <div className="datebox" role="group" aria-labelledby="needs-dates-l">
+              <ActIcon name="calendar" size={16} />
+              <input
+                type="date"
+                aria-label="Создана с"
+                value={createdFrom}
+                max={createdTo || undefined}
+                onChange={(e) => {
+                  setOffset(0);
+                  setCreatedFrom(e.target.value);
+                }}
+              />
+              <span className="datebox__dash" aria-hidden="true">
+                —
+              </span>
+              <input
+                type="date"
+                aria-label="Создана по"
+                value={createdTo}
+                min={createdFrom || undefined}
+                onChange={(e) => {
+                  setOffset(0);
+                  setCreatedTo(e.target.value);
+                }}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <span className="sp" aria-hidden="true">
+              &nbsp;
+            </span>
+            <div className="ctl">
+              <button type="button" className="btn-secondary" disabled={!rangeSet} onClick={resetDates}>
+                Сбросить даты
+              </button>
+            </div>
+          </div>
+          {rangeInvalid && (
+            <span className="error" role="alert">
+              Дата «с» позже даты «по»
+            </span>
+          )}
         </form>
-      </div>
-
-      <div className="datefilter">
-        <label>
-          Создана с{" "}
-          <input
-            type="date"
-            value={createdFrom}
-            max={createdTo || undefined}
-            onChange={(e) => {
-              setOffset(0);
-              setCreatedFrom(e.target.value);
-            }}
-          />
-        </label>
-        <label>
-          по{" "}
-          <input
-            type="date"
-            value={createdTo}
-            min={createdFrom || undefined}
-            onChange={(e) => {
-              setOffset(0);
-              setCreatedTo(e.target.value);
-            }}
-          />
-        </label>
-        <button type="button" disabled={!rangeSet} onClick={resetDates}>
-          Сбросить даты
-        </button>
-        {rangeInvalid && (
-          <span className="error" role="alert">
-            Дата «с» позже даты «по»
-          </span>
-        )}
       </div>
 
       {loading && !data && <p className="muted">Загрузка…</p>}

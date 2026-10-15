@@ -78,7 +78,7 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
 
   return (
     <Modal
-      title={`${e.full_name} (${e.jira_key})`}
+      title={e.full_name}
       wide
       size="profile"
       onClose={onClose}

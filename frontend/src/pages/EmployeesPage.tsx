@@ -17,7 +17,7 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [showFired, setShowFired] = useState(false);
   const [profile, setProfile] = useState<EmployeeOut | null>(null);
-  const [cvKey, setCvKey] = useState<string | null>(null);
+  const [cvView, setCvView] = useState<{ key: string; name: string } | null>(null);
 
   const items = emps.items ?? [];
   // «Уволен» - не статус-чип, а тумблер: действует вместе со статусом и поиском.
@@ -99,7 +99,6 @@ export default function EmployeesPage() {
                     e.full_name
                   )}
                 </h2>
-                <div className="muted">{e.jira_key}</div>
                 <div>
                   <span className="status">{e.status}</span>{" "}
                   {!e.assignable && <span className="muted">не назначается</span>}
@@ -113,7 +112,7 @@ export default function EmployeesPage() {
                     <ActIcon name="user" />
                     <span>Профиль</span>
                   </button>
-                  <button type="button" className="act" aria-label={`Резюме: ${e.full_name}`} onClick={() => setCvKey(e.jira_key)}>
+                  <button type="button" className="act" aria-label={`Резюме: ${e.full_name}`} onClick={() => setCvView({ key: e.jira_key, name: e.full_name })}>
                     <ActIcon name="doc" />
                     <span>Резюме</span>
                   </button>
@@ -132,12 +131,12 @@ export default function EmployeesPage() {
           employee={profile}
           onClose={() => setProfile(null)}
           onViewCv={() => {
-            setCvKey(profile.jira_key);
+            setCvView({ key: profile.jira_key, name: profile.full_name });
             setProfile(null);
           }}
         />
       )}
-      {cvKey && <CvViewer employeeKey={cvKey} onClose={() => setCvKey(null)} />}
+      {cvView && <CvViewer employeeKey={cvView.key} employeeName={cvView.name} onClose={() => setCvView(null)} />}
     </section>
   );
 }

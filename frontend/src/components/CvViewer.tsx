@@ -7,13 +7,14 @@ import Modal from "./Modal";
 
 interface Props {
   employeeKey: string;
+  employeeName?: string; // для заголовка; нет - показывается ключ
   fileId?: number; // нет - актуальное основное CV сотрудника
   onClose: () => void;
 }
 
 // Просмотр CV в окне (FR-037): извлечённый текст, поиск с переходом между совпадениями, скачивание исходника.
 // Подсветка технологий из потребности (предложение FR-037) - заглушка до сопоставления (KON-41).
-export default function CvViewer({ employeeKey, fileId, onClose }: Props) {
+export default function CvViewer({ employeeKey, employeeName, fileId, onClose }: Props) {
   const [data, setData] = useState<CvText | null>(null);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -48,7 +49,8 @@ export default function CvViewer({ employeeKey, fileId, onClose }: Props) {
   };
 
   const file = data?.file ?? null;
-  const title = file ? `${employeeKey}  ${file.file_name}` : `${employeeKey}  Резюме`;
+  const who = employeeName || employeeKey;
+  const title = file ? `${who} — ${file.file_name}` : `${who} — Резюме`;
   const noText = data !== null && text === null;
   const failed = data?.extraction_status === "error" || file?.extraction_status === "error";
 

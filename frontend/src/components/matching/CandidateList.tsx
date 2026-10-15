@@ -21,7 +21,7 @@ export interface CandidateRow {
 
 interface Props {
   rows: CandidateRow[];
-  onResume: (key: string) => void;
+  onResume: (key: string, name?: string) => void;
   assign?: boolean; // кнопка «Назначить» (только в потребностях)
   assignHint?: string;
 }
@@ -96,7 +96,7 @@ export default function CandidateList({ rows, onResume, assign = true, assignHin
             </td>
             <td>
               <div className="card__actions">
-                <button type="button" onClick={() => onResume(r.key)}>
+                <button type="button" onClick={() => onResume(r.key, r.name)}>
                   Резюме
                 </button>
                 {assign && (

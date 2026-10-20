@@ -1695,6 +1695,792 @@
         "FR-039": true,
         "FR-040": true
       }
+    },
+    "APKG-CR006-007-CLOSE": {
+      "package_id": "APKG-CR006-007-CLOSE",
+      "package_title": "Закрытие CR-006, CR-007: FR-008/011/015/018/026/029 и UC-001 обновлены; возврат статусов остальных требований",
+      "approach": "predictive",
+      "approach_source": "из плана BA (3.1) — подход: Predictive (Waterfall)",
+      "audience": "developer",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-017",
+        "UC-002",
+        "FR-013",
+        "UC-006",
+        "FR-032",
+        "FR-029",
+        "NFR-009",
+        "FR-031",
+        "FR-034",
+        "FR-026",
+        "FR-024",
+        "FR-030",
+        "UC-001",
+        "FR-001",
+        "FR-002",
+        "NFR-008",
+        "BR-001",
+        "FR-005",
+        "BR-007",
+        "FR-036",
+        "FR-038",
+        "FR-018",
+        "BR-008",
+        "FR-040",
+        "FR-008",
+        "FR-004",
+        "FR-014",
+        "FR-021",
+        "FR-035",
+        "FR-019",
+        "FR-016",
+        "FR-010",
+        "FR-037",
+        "FR-022",
+        "FR-015",
+        "FR-009",
+        "FR-006",
+        "BR-009",
+        "FR-025",
+        "BR-002",
+        "FR-033",
+        "FR-028",
+        "UC-004",
+        "UC-005",
+        "FR-020",
+        "FR-003",
+        "NFR-010",
+        "FR-011",
+        "FR-027",
+        "FR-023",
+        "BR-005",
+        "FR-012",
+        "UC-003",
+        "NFR-007",
+        "NFR-006",
+        "BR-003",
+        "BR-006",
+        "BP-001",
+        "FR-007",
+        "BR-010",
+        "FR-039"
+      ],
+      "created_date": "2026-10-20",
+      "stakeholder_decisions": {
+        "Константин": {
+          "stakeholder_name": "Константин",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Закрытие CR-006 и CR-007 по решению владельца 20.10.2026: тексты FR-008 v1.2, FR-015 v1.1, FR-018 v2.0, FR-011 v1.2, FR-026 v1.2, FR-029 v1.1, UC-001 v1.1 обновлены; остальные требования возвращаются из under_change без изменений содержания.",
+          "recorded_date": "2026-10-20"
+        }
+      },
+      "baseline_version": null,
+      "status": "open",
+      "verification_snapshot": {
+        "FR-017": true,
+        "UC-002": true,
+        "FR-013": true,
+        "UC-006": true,
+        "FR-032": true,
+        "FR-029": true,
+        "NFR-009": true,
+        "FR-031": true,
+        "FR-034": true,
+        "FR-026": true,
+        "FR-024": true,
+        "FR-030": true,
+        "UC-001": true,
+        "FR-001": true,
+        "FR-002": true,
+        "NFR-008": true,
+        "BR-001": true,
+        "FR-005": true,
+        "BR-007": true,
+        "FR-036": true,
+        "FR-038": true,
+        "FR-018": true,
+        "BR-008": true,
+        "FR-040": true,
+        "FR-008": true,
+        "FR-004": true,
+        "FR-014": true,
+        "FR-021": true,
+        "FR-035": true,
+        "FR-019": true,
+        "FR-016": true,
+        "FR-010": true,
+        "FR-037": true,
+        "FR-022": true,
+        "FR-015": true,
+        "FR-009": true,
+        "FR-006": true,
+        "BR-009": true,
+        "FR-025": true,
+        "BR-002": true,
+        "FR-033": true,
+        "FR-028": true,
+        "UC-004": true,
+        "UC-005": true,
+        "FR-020": true,
+        "FR-003": true,
+        "NFR-010": true,
+        "FR-011": true,
+        "FR-027": true,
+        "FR-023": true,
+        "BR-005": true,
+        "FR-012": true,
+        "UC-003": true,
+        "NFR-007": true,
+        "NFR-006": true,
+        "BR-003": true,
+        "BR-006": true,
+        "BP-001": true,
+        "FR-007": true,
+        "BR-010": true,
+        "FR-039": true
+      }
+    },
+    "APKG-CR008-CLOSE": {
+      "package_id": "APKG-CR008-CLOSE",
+      "package_title": "Закрытие CR-008 (откат CR-007): FR-018 v3.0, FR-008/011/026 v1.3, UC-001 обновлены; возврат статусов остальных требований",
+      "approach": "predictive",
+      "approach_source": "из плана BA (3.1) — подход: Predictive (Waterfall)",
+      "audience": "developer",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-018",
+        "FR-022",
+        "FR-009",
+        "FR-008",
+        "FR-004",
+        "FR-021",
+        "BR-002",
+        "FR-036",
+        "FR-023",
+        "UC-001",
+        "FR-001",
+        "NFR-008",
+        "FR-012",
+        "FR-024",
+        "FR-028",
+        "BR-008",
+        "UC-004",
+        "FR-002",
+        "FR-006",
+        "FR-027",
+        "FR-035",
+        "UC-002",
+        "BR-003",
+        "FR-019",
+        "FR-031",
+        "BR-010",
+        "FR-017",
+        "BR-007",
+        "FR-032",
+        "NFR-007",
+        "FR-010",
+        "FR-034",
+        "BP-001",
+        "FR-033",
+        "FR-037",
+        "BR-001",
+        "UC-005",
+        "FR-015",
+        "BR-005",
+        "FR-040",
+        "NFR-006",
+        "FR-029",
+        "FR-016",
+        "UC-003",
+        "BR-006",
+        "FR-013",
+        "FR-020",
+        "FR-005",
+        "FR-039",
+        "FR-003",
+        "FR-030",
+        "FR-014",
+        "NFR-009",
+        "FR-025",
+        "FR-007",
+        "FR-011",
+        "FR-026",
+        "FR-038",
+        "NFR-010",
+        "UC-006",
+        "BR-009"
+      ],
+      "created_date": "2026-10-20",
+      "stakeholder_decisions": {
+        "Константин": {
+          "stakeholder_name": "Константин",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Откат CR-007 по пробе KON-99: ставка при назначении через ScriptRunner; при найме не вводится. Ставка клиента не отправляется. Открыто: видимость кнопки «Ставка» для ролей РН/РО/Presale проверяется фактическим ответом Jira.",
+          "recorded_date": "2026-10-20"
+        }
+      },
+      "baseline_version": null,
+      "status": "open",
+      "verification_snapshot": {
+        "FR-018": true,
+        "FR-022": true,
+        "FR-009": true,
+        "FR-008": true,
+        "FR-004": true,
+        "FR-021": true,
+        "BR-002": true,
+        "FR-036": true,
+        "FR-023": true,
+        "UC-001": true,
+        "FR-001": true,
+        "NFR-008": true,
+        "FR-012": true,
+        "FR-024": true,
+        "FR-028": true,
+        "BR-008": true,
+        "UC-004": true,
+        "FR-002": true,
+        "FR-006": true,
+        "FR-027": true,
+        "FR-035": true,
+        "UC-002": true,
+        "BR-003": true,
+        "FR-019": true,
+        "FR-031": true,
+        "BR-010": true,
+        "FR-017": true,
+        "BR-007": true,
+        "FR-032": true,
+        "NFR-007": true,
+        "FR-010": true,
+        "FR-034": true,
+        "BP-001": true,
+        "FR-033": true,
+        "FR-037": true,
+        "BR-001": true,
+        "UC-005": true,
+        "FR-015": true,
+        "BR-005": true,
+        "FR-040": true,
+        "NFR-006": true,
+        "FR-029": true,
+        "FR-016": true,
+        "UC-003": true,
+        "BR-006": true,
+        "FR-013": true,
+        "FR-020": true,
+        "FR-005": true,
+        "FR-039": true,
+        "FR-003": true,
+        "FR-030": true,
+        "FR-014": true,
+        "NFR-009": true,
+        "FR-025": true,
+        "FR-007": true,
+        "FR-011": true,
+        "FR-026": true,
+        "FR-038": true,
+        "NFR-010": true,
+        "UC-006": true,
+        "BR-009": true
+      }
     }
   },
   "baselines": [
@@ -1808,5 +2594,5 @@
       }
     }
   ],
-  "updated": "2026-10-15"
+  "updated": "2026-10-20"
 }

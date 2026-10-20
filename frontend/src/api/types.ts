@@ -48,6 +48,22 @@ export interface Rate {
   unit?: string | null;
 }
 
+// GET /needs/rate-benchmark (FR-019, KON-95): mean/median только при count >= 3; рубли приведены к «с НДС».
+export interface RateGroup {
+  currency: string;
+  unit?: string | null;
+  count: number;
+  mean?: number | null;
+  median?: number | null;
+}
+
+export interface RateBenchmark {
+  period_months: number;
+  vat_percent: number;
+  groups: RateGroup[];
+  as_of: string;
+}
+
 export interface NeedOut {
   jira_key: string;
   title: string;
@@ -112,6 +128,8 @@ export interface SyncErrorBody {
   state: string; // needs_reauthorization | no_permission | unavailable | blocked | not_enabled | error
   code: string;
   message: string;
+  step?: string | null; // KON-43: шаг записи, на котором отказ
+  completed?: string[]; // KON-43: шаги, уже выполненные (повтор не дублирует вложения)
 }
 
 export interface RuleOut {
@@ -470,4 +488,59 @@ export interface EmployeeProfileData {
   sections: Record<string, string>; // BR-007: profile, stack, industries, skills, languages, education, projects
   note?: string | null;
   synced_at: string;
+}
+
+// Типы /needs/{key}/status-actions, /status, /assign по backend/openapi.json (KON-43).
+export type StatusActionKind = "search" | "hire" | "no_candidates";
+
+export interface JiraOption {
+  id: string;
+  name: string;
+}
+
+export interface ActionField {
+  field_id: string;
+  name: string;
+  required: boolean;
+  kind: "reason" | "vat" | "currency" | "unit" | "other" | string;
+  options: JiraOption[];
+  prefill_id?: string | null;
+}
+
+export interface StatusActionOut {
+  action: StatusActionKind | string;
+  label: string;
+  target_status: string;
+  comment_required: boolean;
+  fields: ActionField[];
+}
+
+export interface StatusActions {
+  need_key: string;
+  status: string;
+  actions: StatusActionOut[];
+}
+
+export interface StatusChangeBody {
+  action: string;
+  comment: string;
+  fields: Record<string, string>;
+}
+
+export interface AssignBody {
+  employee_key: string;
+  resume_file_id: number | null;
+  extra_file_ids: number[];
+  rate_rub: number | null;
+  comment: string;
+  completed: string[];
+}
+
+export interface OpResult {
+  need_key: string;
+  status: string | null;
+  refreshed: boolean;
+  steps: string[];
+  warnings?: string[];
+  rate_pending?: boolean; // назначение выполнено, ставка не записана (CR-008): повтор тем же запросом
 }

@@ -208,7 +208,7 @@ describe("Потребности: сопоставление", () => {
     expect(await screen.findByText("Тестов Тест")).toBeInTheDocument();
     expect(called("POST", "/needs/AN-1/match")).toHaveLength(1);
     expect(screen.getByText("82%")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Назначить" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Назначить" })).toBeEnabled();
   });
 
   it("обоснование и рекомендации видны сразу; метка устаревшего результата", async () => {

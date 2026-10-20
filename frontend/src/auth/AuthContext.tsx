@@ -10,7 +10,7 @@ interface AuthState {
   sessionExpired: boolean; // сессию отобрал 401 (а не выход) - вход показывает сообщение (FR-024)
   login: (login: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  relogin: (password: string) => Promise<void>; // повторный ввод пароля Jira (FR-029)
+  relogin: (password: string) => Promise<MeResponse>; // повторный ввод пароля Jira (FR-029)
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -56,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const relogin = useCallback(
     async (password: string) => {
-      apply(await api.jiraRelogin(password));
+      const me = await api.jiraRelogin(password);
+      apply(me);
+      return me;
     },
     [apply],
   );

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ApiError, api } from "../../api/client";
-import type { MatchItem, MatchState } from "../../api/types";
+import type { MatchItem, MatchState, NeedOut } from "../../api/types";
 import { PAGE_SIZE, isAwaiting, isRunning } from "../../lib/matching";
 import { formatDateTime } from "../../lib/needs";
 import { usePolling } from "../../lib/usePolling";
 import { useProviders } from "../../lib/useProviders";
+import AssignDialog from "../AssignDialog";
 import CvViewer from "../CvViewer";
 import CandidateList from "./CandidateList";
 import type { CandidateRow } from "./CandidateList";
@@ -19,6 +20,8 @@ interface Props {
   needKey: string;
   autoStart: boolean; // открыт кнопкой «Сопоставить»: сразу ставим расчёт (кэш вернётся без LLM)
   onTotal?: (n: number) => void; // число кандидатов в результате - для колонки «Кандидаты» списка
+  need?: NeedOut; // для окна «Назначить»: контекст и признак «ставка обязательна»
+  onAssigned?: () => void; // назначение выполнено: список перечитывает потребность
 }
 
 // Скрининг идёт, только когда допустимых кандидатов больше размера глубокой оценки
@@ -42,7 +45,7 @@ export function toRow(i: MatchItem): CandidateRow {
 }
 
 // Блок «Кандидаты» потребности (FR-036, FR-005): расчёт в фоне, опрос, подтверждение внешней отправки (FR-023).
-export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
+export default function NeedCandidates({ needKey, autoStart, onTotal, need, onAssigned }: Props) {
   const [data, setData] = useState<MatchState | null>(null);
   const [items, setItems] = useState<MatchItem[]>([]);
   const [error, setError] = useState("");
@@ -50,6 +53,7 @@ export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
   const [previewRun, setPreviewRun] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<string | null>(null);
   const [view, setView] = useState<{ key: string; name?: string } | null>(null);
+  const [assign, setAssign] = useState<{ key: string; name: string } | null>(null);
   const { providers, providerId, setProviderId } = useProviders();
   const itemsLen = useRef(0);
   itemsLen.current = items.length;
@@ -182,7 +186,11 @@ export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
         </p>
       )}
 
-      {data && items.length > 0 && <CandidateList rows={items.map(toRow)} onResume={(key, name) => setView({ key, name })} />}
+      {data && items.length > 0 && <CandidateList
+          rows={items.map(toRow)}
+          onResume={(key, name) => setView({ key, name })}
+          onAssign={(key, name) => setAssign({ key, name: name ?? key })}
+        />}
       {data && items.length === 0 && !running && data.status !== "none" && !error && (
         <p className="empty">Подходящих кандидатов нет. Можно перейти к смене статуса потребности на «Кандидатов нет».</p>
       )}
@@ -225,6 +233,20 @@ export default function NeedCandidates({ needKey, autoStart, onTotal }: Props) {
             setDismissed(previewRun);
             setPreviewRun(null);
             void reload();
+          }}
+        />
+      )}
+      {assign && (
+        <AssignDialog
+          needKey={needKey}
+          need={need}
+          employeeKey={assign.key}
+          employeeName={assign.name}
+          onClose={() => setAssign(null)}
+          onPartial={() => onAssigned?.()}
+          onDone={() => {
+            setAssign(null);
+            onAssigned?.();
           }}
         />
       )}

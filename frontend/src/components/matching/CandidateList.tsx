@@ -23,11 +23,8 @@ interface Props {
   rows: CandidateRow[];
   onResume: (key: string, name?: string) => void;
   assign?: boolean; // кнопка «Назначить» (только в потребностях)
-  assignHint?: string;
+  onAssign?: (key: string, name?: string) => void; // окно «Назначить» (FR-008, KON-44)
 }
-
-// Назначение кандидата (FR-008) - этап 2 (KON-44): кнопка пока заглушка.
-const ASSIGN_STUB = "Назначение появится на этапе 2";
 
 export const GAPS_TITLE = "Чего не хватает до 100%";
 export const GAPS_FULL = "Полное совпадение";
@@ -50,7 +47,7 @@ export function GapsBlock({ gaps }: { gaps?: string[] | null }) {
   );
 }
 
-export default function CandidateList({ rows, onResume, assign = true, assignHint = ASSIGN_STUB }: Props) {
+export default function CandidateList({ rows, onResume, assign = true, onAssign }: Props) {
   return (
     <table className="needs candidates">
       <thead>
@@ -100,7 +97,7 @@ export default function CandidateList({ rows, onResume, assign = true, assignHin
                   Резюме
                 </button>
                 {assign && (
-                  <button type="button" disabled title={assignHint}>
+                  <button type="button" disabled={!onAssign} onClick={() => onAssign?.(r.key, r.name)}>
                     Назначить
                   </button>
                 )}

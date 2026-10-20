@@ -1,5 +1,6 @@
 import type {
   AdminUser,
+  AssignBody,
   CvLimits,
   CvText,
   Dictionary,
@@ -17,6 +18,7 @@ import type {
   MatchSettings,
   MatchState,
   MeResponse,
+  OpResult,
   NeedGroups,
   NeedsPage,
   NeedsQuery,
@@ -24,12 +26,15 @@ import type {
   ProviderOut,
   ProviderPatch,
   ProviderPublic,
+  RateBenchmark,
   RefreshResult,
   ResumeItem,
   RunOut,
   RunTask,
   SearchParams,
   SearchState,
+  StatusActions,
+  StatusChangeBody,
   StatusGroupsData,
   SyncErrorBody,
   SyncScope,
@@ -176,6 +181,7 @@ export const api = {
     p.set("offset", String(q.offset));
     return request<NeedsPage>("GET", `/sync/needs?${p}`);
   },
+  rateBenchmark: (periodMonths = 6) => request<RateBenchmark>("GET", `/needs/rate-benchmark?period_months=${periodMonths}`),
   needGroups: () => request<NeedGroups>("GET", "/sync/needs/groups"),
   refresh: (scope: SyncScope) => request<RefreshResult>("POST", "/sync/refresh", { scope }),
   employees: (limit: number, offset: number) =>
@@ -267,5 +273,10 @@ export const api = {
   matchSettings: () => request<MatchSettings>("GET", "/admin/matching/settings"),
   saveMatchSettings: (body: { deep_size: number; screen_batch: number }) =>
     request<MatchSettings>("PUT", "/admin/matching/settings", body),
+  // Назначение и смена статуса (KON-43): запись в Jira токеном пользователя; пароль в этих запросах не передаётся
+  statusActions: (key: string) => request<StatusActions>("GET", `/needs/${encodeURIComponent(key)}/status-actions`),
+  changeStatus: (key: string, body: StatusChangeBody) =>
+    request<OpResult>("POST", `/needs/${encodeURIComponent(key)}/status`, body),
+  assign: (key: string, body: AssignBody) => request<OpResult>("POST", `/needs/${encodeURIComponent(key)}/assign`, body),
   epic: (key: string) => request<EpicOut>("GET", `/sync/epics/${encodeURIComponent(key)}`),
 };

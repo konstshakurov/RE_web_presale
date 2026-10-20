@@ -270,7 +270,7 @@ export default function NeedsPage() {
               )}
             </div>
           ) : (
-            <NeedsTable items={data.items} sort={{ sort, order }} onSort={onSort} />
+            <NeedsTable items={data.items} sort={{ sort, order }} onSort={onSort} onChanged={() => void Promise.all([loadGroups(), loadNeeds()])} />
           )}
           <div className="pager">
             <span>

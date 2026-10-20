@@ -67,6 +67,31 @@ a { color: var(--accent); }
 .needs__details td { background: var(--panel-2); }
 .status { color: var(--ok); background: var(--panel-2); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
 .rate__vat { display: block; color: var(--muted); }
+.acts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; }
+.link.link--inline { display: inline; }
+.link.link--inline:hover { text-decoration: underline; }
+.box { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; background: var(--panel-2); margin-bottom: 14px; }
+.box p { margin: 6px 0 0; }
+.box--err { border-color: var(--err); }
+.box--warn { border-color: var(--warn); }
+.ctx { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.hint { font-size: 13px; color: var(--muted); }
+.sum { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; margin: 0 0 12px; }
+.sum dt { color: var(--muted); }
+.sum dd { margin: 0; }
+.prog { height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; margin: 10px 0; }
+.prog i { display: block; height: 100%; width: 40%; background: var(--primary); animation: prog 1.4s ease-in-out infinite alternate; }
+@keyframes prog { from { margin-left: 0; } to { margin-left: 60%; } }
+@media (prefers-reduced-motion: reduce) { .prog i { animation: none; width: 60%; } }
+.steps-list { margin: 6px 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+.modal__acts { margin-left: auto; display: flex; gap: 8px; }
+.files-pick { border: 0; padding: 0; margin: 0 0 14px; }
+.files-pick legend { padding: 0; margin-bottom: 4px; }
+.files-pick .chk { flex-direction: row; align-items: flex-start; gap: 8px; padding: 4px 0; }
+.files-pick .btn-secondary { align-self: flex-start; margin-top: 6px; }
+.field--err input { border-color: var(--err); }
+.modal textarea { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px; font: inherit; width: 100%; }
+.modal .link { padding: 0; }
 .link { background: none; border: 0; color: var(--accent); cursor: pointer; display: block; padding: 2px 0; }
 .rules h3 { margin: 0 0 8px; }
 .rules dl { margin: 0; }

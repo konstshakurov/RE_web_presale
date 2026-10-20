@@ -8,6 +8,7 @@ import ClientRules from "./ClientRules";
 import { HintLabel } from "./HintButton";
 import MatchingInfo from "./matching/MatchingInfo";
 import NeedCandidates from "./matching/NeedCandidates";
+import StatusActions from "./StatusActions";
 
 export interface NeedsSort {
   sort: NeedSort;
@@ -18,6 +19,7 @@ interface Props {
   items: NeedOut[];
   sort?: NeedsSort;
   onSort?: (sort: NeedSort) => void; // клик по заголовку «Создана»
+  onChanged?: () => void; // статус изменён или кандидат назначен: страница перечитывает список
 }
 
 function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: string } & Pick<Props, "sort" | "onSort">) {
@@ -38,7 +40,7 @@ export function shortKey(key: string): string {
   return key.replace(/^[A-Z][A-Z0-9_]*-(?=\d+$)/, "");
 }
 
-export default function NeedsTable({ items, sort, onSort }: Props) {
+export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
   const [open, setOpen] = useState<string | null>(null);
   // Число кандидатов в сохранённом результате: нет ключа - расчёта не было, показываем «Сопоставить»
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -97,6 +99,13 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                 <td>{n.title}</td>
                 <td>
                   <span className="status">{n.status}</span>
+                  <StatusActions
+                    need={n}
+                    onChanged={() => {
+                      onChanged?.();
+                      setRefresh((x) => x + 1);
+                    }}
+                  />
                 </td>
                 <td>
                   {n.epic_name || n.epic_key || "—"}
@@ -166,6 +175,11 @@ export default function NeedsTable({ items, sort, onSort }: Props) {
                       key={`${n.jira_key}:${cand.start}`}
                       needKey={n.jira_key}
                       autoStart={cand.start}
+                      need={n}
+                      onAssigned={() => {
+                        onChanged?.();
+                        setRefresh((x) => x + 1);
+                      }}
                       onTotal={(total) => setCounts((c) => (c[n.jira_key] === total ? c : { ...c, [n.jira_key]: total }))}
                     />
                   </td>

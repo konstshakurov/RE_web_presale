@@ -8,7 +8,9 @@
 from __future__ import annotations
 
 import base64
+import inspect
 import json
+import logging
 from datetime import datetime, timezone
 
 import httpx
@@ -16,6 +18,7 @@ import pytest
 
 from app.integrations.jira import (
     CODE_AUTH_FAILED,
+    CODE_JIRA_ERROR,
     CODE_JIRA_UNAVAILABLE,
     CODE_LOGIN_BLOCKED,
     CODE_NEEDS_REAUTHORIZATION,
@@ -656,3 +659,394 @@ class TestNoSecrets:
         assert FAKE_PROBE_PASSWORD not in str(exc.value)
         assert FAKE_PROBE_PASSWORD not in repr(exc.value.describe())
         assert exc.value.describe()["code"] == CODE_AUTH_FAILED
+
+
+# ---------------------------------------------------------------------------
+# 7. Запись (KON-42): публичные методы порта поверх JiraClient
+# ---------------------------------------------------------------------------
+
+TRANSITIONS_PATH = "/rest/api/2/issue/%s/transitions" % DEMAND_KEY
+ISSUE_PATH = "/rest/api/2/issue/%s" % DEMAND_KEY
+ATTACHMENTS_PATH = "/rest/api/2/issue/%s/attachments" % DEMAND_KEY
+COMMENT_PATH = "/rest/api/2/issue/%s/comment" % DEMAND_KEY
+
+#: Обезличенный ответ ``expand=transitions.fields``: переход 21 и 171.
+TRANSITIONS_PAYLOAD = {
+    "transitions": [
+        {
+            "id": "21",
+            "name": "Кандидат назначен",
+            "to": {"id": "10", "name": "Кандидат назначен"},
+            "fields": {
+                "customfield_10707": {
+                    "required": True,
+                    "name": "Профиль сотрудника",
+                    "fieldId": "customfield_10707",
+                }
+            },
+        },
+        {
+            "id": "171",
+            "name": "Кандидатов нет",
+            "to": {"id": "12", "name": "Кандидатов нет"},
+            "fields": {
+                "customfield_16100": {
+                    "required": True,
+                    "name": "Причина отсутствия кандидата",
+                    "fieldId": "customfield_16100",
+                    "allowedValues": [
+                        {"id": "23300", "value": "Не подходит по ставке"},
+                        {"id": "23301", "value": "Другое"},
+                    ],
+                }
+            },
+        },
+    ]
+}
+
+
+def _positional_kinds(callable_) -> list:
+    """Виды позиционных параметров: имена у порта и assign разные, важна позиция."""
+    kinds = (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    return [p.kind for p in inspect.signature(callable_).parameters.values() if p.kind in kinds]
+
+
+class TestWriteTransitions:
+    def test_get_transitions_maps_fields_and_allowed_values(self, adapter_factory):
+        adapter, session, _ = _signed_in(
+            adapter_factory, lambda: response(TRANSITIONS_PAYLOAD)
+        )
+
+        transitions = adapter.get_transitions(session.sealed_token, DEMAND_KEY)
+
+        by_id = {t.id: t for t in transitions}
+        assert set(by_id) == {"21", "171"}
+        assert by_id["21"].to_status == "Кандидат назначен"
+        reason = by_id["171"].fields[0]
+        assert reason.field_id == "customfield_16100"
+        assert reason.required is True
+        assert [v.id for v in reason.allowed_values] == ["23300", "23301"]
+        assert reason.allowed_values[0].name == "Не подходит по ставке"
+
+    def test_do_transition_sends_comment_through_update(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+
+        adapter.do_transition(
+            session.sealed_token,
+            DEMAND_KEY,
+            "171",
+            fields={"customfield_16100": {"id": "23300"}},
+            comment="причина",
+        )
+
+        request = handler.calls[-1]
+        assert request.method == "POST" and request.url.path == TRANSITIONS_PATH
+        assert json.loads(request.content) == {
+            "transition": {"id": "171"},
+            "fields": {"customfield_16100": {"id": "23300"}},
+            "update": {"comment": [{"add": {"body": "причина"}}]},
+        }
+
+    def test_do_transition_without_comment_sends_no_update(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+
+        adapter.do_transition(
+            session.sealed_token, DEMAND_KEY, "21", fields={"assignee": {"name": "u"}}
+        )
+
+        body = json.loads(handler.calls[-1].content)
+        assert body == {"transition": {"id": "21"}, "fields": {"assignee": {"name": "u"}}}
+
+    def test_do_transition_does_not_recheck_transitions(self, adapter_factory):
+        """validate=False: доступность перехода уже проверена — один вызов (NFR-009)."""
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+        before = len(handler.calls)
+
+        adapter.do_transition(session.sealed_token, DEMAND_KEY, "21", fields={})
+
+        assert len(handler.calls) - before == 1
+        assert handler.calls[-1].url.path == TRANSITIONS_PATH
+
+
+class TestWriteFieldsAndFiles:
+    def test_set_fields_puts_fields(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+
+        adapter.set_fields(session.sealed_token, DEMAND_KEY, {"customfield_20809": 3000})
+
+        request = handler.calls[-1]
+        assert request.method == "PUT" and request.url.path == ISSUE_PATH
+        assert json.loads(request.content) == {"fields": {"customfield_20809": 3000}}
+
+    def test_assign_candidate_puts_assignee_by_login(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+
+        adapter.assign_candidate(session.sealed_token, DEMAND_KEY, "candidate-login")
+
+        assert json.loads(handler.calls[-1].content) == {
+            "fields": {"assignee": {"name": "candidate-login"}}
+        }
+
+    def test_add_comment_posts_body(self, adapter_factory):
+        adapter, session, handler = _signed_in(
+            adapter_factory, lambda: response({"id": "1", "body": "т"}, 201)
+        )
+
+        adapter.add_comment(session.sealed_token, DEMAND_KEY, "текст")
+
+        request = handler.calls[-1]
+        assert request.method == "POST" and request.url.path == COMMENT_PATH
+        assert json.loads(request.content) == {"body": "текст"}
+
+    def test_attach_file_sends_no_check_header(self, adapter_factory):
+        adapter, session, handler = _signed_in(
+            adapter_factory, lambda: response([{"id": "1", "filename": "cv.docx"}], 200)
+        )
+
+        adapter.attach_file(
+            session.sealed_token, DEMAND_KEY, "cv.docx", b"abc", "application/msword"
+        )
+
+        request = handler.calls[-1]
+        assert request.method == "POST" and request.url.path == ATTACHMENTS_PATH
+        assert request.headers["X-Atlassian-Token"] == "no-check"
+        assert b"cv.docx" in request.content
+
+
+class TestWriteRefusals:
+    def test_expired_session_during_write_is_needs_reauthorization(self, adapter_factory):
+        adapter, session, _ = _signed_in(
+            adapter_factory, lambda: error_response(["Необходимо ввести имя пользователя"], 401)
+        )
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.do_transition(session.sealed_token, DEMAND_KEY, "21", fields={})
+
+        assert exc.value.code == CODE_NEEDS_REAUTHORIZATION
+        assert exc.value.needs_reauthorization is True
+
+    def test_jira_text_is_kept_verbatim(self, adapter_factory):
+        adapter, session, _ = _signed_in(
+            adapter_factory, lambda: error_response(["Поле обязательно"], 400)
+        )
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_fields(session.sealed_token, DEMAND_KEY, {"customfield_16100": {"id": "1"}})
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert "Поле обязательно" in exc.value.message
+
+    def test_empty_comment_is_request_error_without_call(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+        before = len(handler.calls)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.add_comment(session.sealed_token, DEMAND_KEY, "   ")
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert len(handler.calls) == before
+
+    def test_empty_fields_is_request_error_without_call(self, adapter_factory):
+        adapter, session, handler = _signed_in(adapter_factory, lambda: response(None, 204))
+        before = len(handler.calls)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_fields(session.sealed_token, DEMAND_KEY, {})
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert len(handler.calls) == before
+
+
+class TestWritePortShape:
+    """Адаптер реализует публичный ``JiraPort`` целиком; узкого порта assign больше нет (KON-97)."""
+
+    def test_adapter_satisfies_jira_port(self, adapter_factory):
+        adapter = adapter_factory(router(**login_routes()))
+        assert isinstance(adapter, JiraPort)
+
+    def test_candidate_assignment_is_exposed(self, adapter_factory):
+        adapter = adapter_factory(router(**login_routes()))
+        assert callable(getattr(adapter, "assign_candidate", None))
+
+
+class TestWriteNoSecrets:
+    def test_write_logs_carry_no_secrets(self, adapter_factory, caplog):
+        adapter, session, _ = _signed_in(adapter_factory, lambda: response(None, 204))
+
+        with caplog.at_level(logging.DEBUG):
+            adapter.do_transition(
+                session.sealed_token, DEMAND_KEY, "21",
+                fields={"assignee": {"name": "u"}}, comment="к",
+            )
+            adapter.add_comment(session.sealed_token, DEMAND_KEY, "к")
+
+        text = "\n".join(record.getMessage() for record in caplog.records)
+        assert FAKE_RAW_TOKEN not in text
+        assert FAKE_PROBE_PASSWORD not in text
+        assert session.sealed_token not in text
+
+
+# ---------------------------------------------------------------------------
+# 8. Ставка кнопкой «Ставка» (ScriptRunner, KON-99, CR-008): set_rate
+# ---------------------------------------------------------------------------
+
+RATE_PATH = "/rest/scriptrunner/latest/custom/rateCalculationLogic"
+RATE_KW = dict(amount="2700", vat="20999", currency="21001", unit="21006")
+
+
+def _rate_issue(amount=2700.0, vat="20999", currency="21001", unit="21006"):
+    return lambda: response({"key": DEMAND_KEY, "fields": {
+        "customfield_20809": amount,
+        "customfield_20810": {"id": vat, "value": "Да"},
+        "customfield_20811": {"id": currency, "value": "руб."},
+        "customfield_20812": {"id": unit, "value": "ч (час)"},
+    }})
+
+
+def _rate_adapter(adapter_factory, *, post=lambda: response(None, 200), issue=None):
+    routes = {RATE_PATH: post, ISSUE_PATH: issue or _rate_issue(), **login_routes()}
+    handler = router(default=MYSELF_OK, **routes)
+    adapter = adapter_factory(handler)
+    session = adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
+    return adapter, session, handler
+
+
+def _posts(handler):
+    return [r for r in handler.calls if r.url.path == RATE_PATH]
+
+
+class TestSetRate:
+    def test_body_format_matches_probe(self, adapter_factory):
+        adapter, session, handler = _rate_adapter(adapter_factory)
+
+        adapter.set_rate(session.sealed_token, DEMAND_KEY, username="oper", **RATE_KW)
+
+        request = _posts(handler)[0]
+        assert request.method == "POST"
+        assert request.headers["content-type"].startswith("application/json")
+        assert json.loads(request.content) == {
+            "issueKey": DEMAND_KEY,
+            "currentUserUsername": "oper",
+            "customfield_21105": "22412",
+            "customfield_20809": "2700",
+            "customfield_20810": "20999",
+            "customfield_20811": "21001",
+            "customfield_20812": "21006",
+        }
+
+    def test_amount_is_number_string_and_login_from_myself_by_default(self, adapter_factory):
+        adapter, session, handler = _rate_adapter(
+            adapter_factory, issue=_rate_issue(amount=2700.5)
+        )
+
+        adapter.set_rate(session.sealed_token, DEMAND_KEY, **{**RATE_KW, "amount": 2700.50})
+
+        body = json.loads(_posts(handler)[0].content)
+        assert body["customfield_20809"] == "2700.5"
+        assert body["currentUserUsername"] == PROBE_USER
+        assert body["customfield_21105"] == "22412"       # передаётся всегда
+
+    def test_session_cookie_is_used_and_no_secrets_leak(self, adapter_factory, caplog):
+        adapter, session, handler = _rate_adapter(adapter_factory)
+
+        with caplog.at_level(logging.DEBUG):
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="oper", **RATE_KW)
+
+        assert FAKE_RAW_TOKEN in _posts(handler)[0].headers.get("cookie", "")
+        text = "\n".join(r.getMessage() for r in caplog.records)
+        assert FAKE_RAW_TOKEN not in text and FAKE_PROBE_PASSWORD not in text
+        assert FAKE_RAW_TOKEN not in _posts(handler)[0].content.decode()
+
+    @pytest.mark.parametrize("kw", [
+        {"vat": "888888"}, {"currency": "999999"}, {"unit": "1"}, {"proposer": "22411"},
+        {"proposer": "777777"}, {"proposer": ""},
+    ])
+    def test_unknown_reference_ids_rejected_before_send(self, adapter_factory, kw):
+        adapter, session, handler = _rate_adapter(adapter_factory)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **{**RATE_KW, **kw})
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert _posts(handler) == []
+
+    @pytest.mark.parametrize("amount", [None, "", "  ", "abc", "-5", float("nan")])
+    def test_empty_or_bad_amount_is_not_sent(self, adapter_factory, amount):
+        adapter, session, handler = _rate_adapter(adapter_factory)
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(
+                session.sealed_token, DEMAND_KEY, username="o", **{**RATE_KW, "amount": amount}
+            )
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert _posts(handler) == []
+
+    def test_200_without_write_is_detected_by_reread(self, adapter_factory):
+        adapter, session, handler = _rate_adapter(
+            adapter_factory, issue=_rate_issue(amount=2500.0)   # Jira ответила 200, значение старое
+        )
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **RATE_KW)
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert "не записана" in exc.value.message
+        assert len(_posts(handler)) == 1
+
+    def test_reread_detects_ignored_reference_value(self, adapter_factory):
+        adapter, session, _ = _rate_adapter(adapter_factory, issue=_rate_issue(currency="21002"))
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **RATE_KW)
+
+        assert exc.value.code == CODE_JIRA_ERROR
+
+    def test_missing_amount_in_reread_is_failure(self, adapter_factory):
+        adapter, session, _ = _rate_adapter(adapter_factory, issue=_rate_issue(amount=None))
+
+        with pytest.raises(JiraIntegrationError):
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **RATE_KW)
+
+    def test_500_is_request_error_not_unavailable(self, adapter_factory):
+        adapter, session, _ = _rate_adapter(
+            adapter_factory,
+            post=lambda: response({"message": "NullPointerException"}, 500),
+        )
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, "ANALYTICS-999999999", username="o", **RATE_KW)
+
+        assert exc.value.code == CODE_JIRA_ERROR
+        assert exc.value.retryable is False and exc.value.status == 500
+
+    def test_503_stays_unavailable(self, adapter_factory):
+        adapter, session, _ = _rate_adapter(adapter_factory, post=lambda: response(None, 503))
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **RATE_KW)
+
+        assert exc.value.code == CODE_JIRA_UNAVAILABLE
+
+    @pytest.mark.parametrize("status,headers,code", [
+        (401, {"x-seraph-loginreason": "AUTHENTICATED_FAILED"}, CODE_NEEDS_REAUTHORIZATION),
+        (403, {}, "no_permission"),
+    ])
+    def test_401_403_as_before(self, adapter_factory, status, headers, code):
+        adapter, session, _ = _rate_adapter(
+            adapter_factory,
+            post=lambda: error_response(["отказ"], status, headers),
+        )
+
+        with pytest.raises(JiraIntegrationError) as exc:
+            adapter.set_rate(session.sealed_token, DEMAND_KEY, username="o", **RATE_KW)
+
+        assert exc.value.code == code
+
+    def test_port_exposes_set_rate_with_contract_signature(self, adapter_factory):
+        adapter = adapter_factory(router(**login_routes()))
+        params = inspect.signature(adapter.set_rate).parameters
+        assert isinstance(adapter, JiraPort)
+        assert params["proposer"].default == "22412"
+        for name in ("amount", "vat", "currency", "unit"):
+            assert params[name].kind is inspect.Parameter.KEYWORD_ONLY

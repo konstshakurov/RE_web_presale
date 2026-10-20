@@ -8,6 +8,8 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 
 from .app_repo import AppRepo, create_pool
+from .assign import build_assign
+from .assign.router import router as assign_router
 from .auth import Ldap3Adapter
 from .auth import router as auth_router
 from .auth.admin import router as admin_router
@@ -26,6 +28,7 @@ from .secrets import SecretStore
 from .status_groups.repo import StatusGroupRepo
 from .status_groups.router import router as status_groups_router
 from .sync.factory import build_sync_service, open_cv_pool
+from .sync.rate_benchmark import router as rate_benchmark_router
 from .sync.router import router as sync_router
 from .validation import install_validation_handler, reject_nul
 
@@ -69,6 +72,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     seed_admins(repo, settings.admin_logins)
     cv_pool = open_cv_pool(settings)
     app.state.sync = build_sync_service(settings, pool, cv_pool, jira_adapter)
+    # назначение и статус-действия в Jira (KON-43); без Jira запись недоступна
+    app.state.assign = build_assign(
+        jira_adapter, app.state.jira_session.get_user_jira_token, pool, cv_pool)
     # файлы CV: только пул cv_rw; лимит файла читается из app_db (app_setting)
     app.state.cv = CvRepo(cv_pool) if cv_pool is not None else None
     app.state.cv_limits = CvLimits(pool, settings.cv_max_file_mb)
@@ -97,9 +103,11 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(status_groups_router)
 app.include_router(sync_router)
+app.include_router(rate_benchmark_router)
 app.include_router(cv_router)
 app.include_router(llm_router)
 app.include_router(matching_router)
+app.include_router(assign_router)
 
 
 @app.get("/health")

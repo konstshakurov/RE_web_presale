@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import replace
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, Iterator, List, Mapping, Optional, Sequence
 
 import httpx
@@ -37,17 +38,26 @@ from jira_client import (
 from jira_client import fields as F
 
 from .errors import (
+    CODE_JIRA_ERROR,
+    CODE_JIRA_UNAVAILABLE,
     CODE_NEEDS_REAUTHORIZATION,
     JiraIntegrationError,
     classify,
 )
 from .port import (
+    RATE_CURRENCY_IDS,
+    RATE_PROPOSER_PRODUCTION,
+    RATE_UNIT_IDS,
+    RATE_VAT_IDS,
     SESSION_JIRA_UNAVAILABLE,
     SESSION_NEEDS_REAUTHORIZATION,
     SESSION_NO_PERMISSION,
     SESSION_OK,
+    AllowedValue,
     SealedSession,
     SessionCheck,
+    TransitionField,
+    TransitionView,
 )
 
 
@@ -297,6 +307,258 @@ class JiraAdapter:
                     max_pages=max_pages,
                 )
             )
+
+    # -- запись (KON-42) ----------------------------------------------------
+
+    @contextmanager
+    def _write(self, sealed_token: str) -> Iterator[JiraClient]:
+        """Клиент на одну операцию записи; ``ValueError`` клиента — ошибка запроса.
+
+        ``JiraClient`` поднимает ``ValueError`` на заведомо негодных данных
+        (пустой комментарий или файл, пустой набор полей). Это не сбой Jira, а
+        неверный запрос приложения: переводим в ``jira_error`` и показываем
+        текст как есть (FR-029) — так же делал мост ``assign.jira_write``.
+        """
+        try:
+            with self._client(sealed_token) as client:
+                yield client
+        except ValueError as exc:
+            raise JiraIntegrationError(str(exc), code=CODE_JIRA_ERROR) from exc
+
+    def get_transitions(self, sealed_token: str, issue_key: str) -> List[TransitionView]:
+        """Переходы из текущего статуса вместе с полями (``expand=transitions.fields``)."""
+        with self._client(sealed_token) as client:
+            return [_transition_view(t) for t in client.get_transitions(issue_key)]
+
+    def do_transition(
+        self,
+        sealed_token: str,
+        issue_key: str,
+        transition_id: str,
+        *,
+        fields: Mapping[str, Any],
+        comment: Optional[str] = None,
+    ) -> None:
+        """Переход; комментарий — через ``update.comment.add``.
+
+        ``validate=False``: доступность перехода и обязательные поля сервис
+        проверяет по свежему списку ``get_transitions``; повторный запрос
+        переходов здесь — лишний вызов и лишние 10 с (NFR-009).
+        """
+        try:
+            with self._write(sealed_token) as client:
+                client.transition(
+                    issue_key,
+                    transition_id,
+                    fields=fields or None,
+                    comment=comment,
+                    validate=False,
+                )
+        except JiraIntegrationError as exc:
+            # D3 (проба KON-42): неизвестный/недоступный id перехода Jira 8.13 отвечает 500
+            # «Внутренняя ошибка сервера». Повторять такой запрос бессмысленно: не
+            # ``jira_unavailable``/retryable, а отказ с текстом Jira. 502/503/504 и таймаут
+            # (status не 500) остаются «Jira недоступна».
+            if exc.code == CODE_JIRA_UNAVAILABLE and exc.status == 500:
+                raise JiraIntegrationError(
+                    "Jira отклонила переход (внутренняя ошибка 500): переход %s неизвестен или "
+                    "недоступен из текущего статуса" % transition_id,
+                    code=CODE_JIRA_ERROR,
+                    reason=exc.reason,
+                    status=exc.status,
+                    retryable=False,
+                ) from exc
+            raise
+
+    def set_fields(self, sealed_token: str, issue_key: str, fields: Mapping[str, Any]) -> None:
+        """``PUT /rest/api/2/issue/{key}`` — изменить поля задачи."""
+        with self._write(sealed_token) as client:
+            client.set_fields(issue_key, fields)
+
+    def add_comment(self, sealed_token: str, issue_key: str, body: str) -> None:
+        """Добавить комментарий. Пустое тело отклонит клиент (``ValueError``)."""
+        with self._write(sealed_token) as client:
+            client.add_comment(issue_key, body)
+
+    def attach_file(
+        self,
+        sealed_token: str,
+        issue_key: str,
+        filename: str,
+        content: bytes,
+        mime_type: str,
+    ) -> None:
+        """Загрузить вложение.
+
+        ``size_limit=0``: своих ограничений приложение не вводит, размер судит
+        Jira (FR-026). Заголовок ``X-Atlassian-Token: no-check`` ставит клиент.
+        """
+        with self._write(sealed_token) as client:
+            client.add_attachment(
+                issue_key,
+                filename=filename,
+                content=content,
+                mime_type=mime_type,
+                size_limit=0,
+            )
+
+    def assign_candidate(self, sealed_token: str, issue_key: str, username: str) -> None:
+        """Назначить исполнителя (``assignee``) по логину."""
+        with self._write(sealed_token) as client:
+            client.assign(issue_key, username)
+
+    def set_rate(
+        self,
+        sealed_token: str,
+        issue_key: str,
+        *,
+        amount: Any,
+        vat: str,
+        currency: str,
+        unit: str,
+        proposer: str = RATE_PROPOSER_PRODUCTION,
+        username: Optional[str] = None,
+    ) -> None:
+        """Записать ставку кнопкой «Ставка» Jira (ScriptRunner, проба KON-99, CR-008).
+
+        Защита от «200 без записи»: Jira принимает неверный id справочника и запрос без
+        ``customfield_21105`` с кодом 200, но ничего не пишет. Поэтому: id проверяются до
+        отправки, пустая ставка не уходит (Jira даёт 500), ``21105`` передаётся всегда, а после
+        записи «Планируемая ставка» перечитывается и сверяется. Пароль и токен в сообщения не
+        попадают.
+        """
+        value = _rate_amount(amount)
+        for name, got, allowed in (
+            ("НДС", vat, RATE_VAT_IDS),
+            ("валюта", currency, RATE_CURRENCY_IDS),
+            ("единица измерения", unit, RATE_UNIT_IDS),
+            ("кто предлагает ставку", proposer, frozenset({RATE_PROPOSER_PRODUCTION})),
+        ):
+            if str(got) not in allowed:
+                raise JiraIntegrationError(
+                    "Ставка не отправлена: неизвестное значение справочника «%s»" % name,
+                    code=CODE_JIRA_ERROR,
+                )
+        try:
+            with self._write(sealed_token) as client:
+                login = username or str((client.myself() or {}).get("name") or "")
+                if not login:
+                    raise JiraIntegrationError(
+                        "Ставка не отправлена: логин пользователя Jira не определён",
+                        code=CODE_JIRA_ERROR,
+                    )
+                client.request(
+                    "POST",
+                    RATE_ENDPOINT,
+                    json_body={
+                        "issueKey": issue_key,
+                        "currentUserUsername": login,
+                        F_RATE_PROPOSER: str(proposer),
+                        F_RATE_AMOUNT: value,
+                        F_RATE_VAT: str(vat),
+                        F_RATE_CURRENCY: str(currency),
+                        F_RATE_UNIT: str(unit),
+                    },
+                    headers={"Content-Type": "application/json;charset=utf-8"},
+                )
+                issue = client.get_issue(issue_key, [F_RATE_AMOUNT, F_RATE_VAT, F_RATE_CURRENCY,
+                                                     F_RATE_UNIT])
+        except JiraIntegrationError as exc:
+            # Проба KON-99: 500 - пустая ставка или несуществующий ключ. Повтор того же запроса
+            # бессмысленен: ошибка запроса, а не «Jira недоступна» (502/503/504 и таймаут
+            # остаются недоступностью).
+            if exc.code == CODE_JIRA_UNAVAILABLE and exc.status == 500:
+                raise JiraIntegrationError(
+                    "Jira отклонила запись ставки (внутренняя ошибка 500): проверьте ключ "
+                    "потребности и значение ставки",
+                    code=CODE_JIRA_ERROR,
+                    reason=exc.reason,
+                    status=exc.status,
+                    retryable=False,
+                ) from exc
+            raise
+        if not _rate_matches(
+            (issue or {}).get("fields") or {}, value, vat=vat, currency=currency, unit=unit
+        ):
+            raise JiraIntegrationError(
+                "Jira ответила 200, но ставка не записана: значение в потребности не изменилось",
+                code=CODE_JIRA_ERROR,
+            )
+
+
+def _transition_view(transition: Any) -> TransitionView:
+    """Перевести ``jira_client.Transition`` в :class:`TransitionView` порта.
+
+    Единственное место, где форма ``jira_client`` пересекает границу порта:
+    наружу уходят только типы порта.
+    """
+    target = getattr(transition, "to_status", None)
+    to_status = (getattr(target, "name", "") or "") if target is not None else ""
+    fields = tuple(
+        TransitionField(
+            field_id=spec.field_id,
+            name=spec.name,
+            required=bool(spec.required),
+            allowed_values=tuple(
+                AllowedValue(id=value.id or "", name=value.name)
+                for value in (spec.allowed_values or [])
+            ),
+        )
+        for spec in (transition.fields or [])
+    )
+    return TransitionView(
+        id=str(transition.id),
+        name=transition.name,
+        to_status=to_status,
+        fields=fields,
+    )
+
+
+#: Кнопка «Ставка» Jira (ScriptRunner, проба KON-99) и поля тела запроса.
+RATE_ENDPOINT = "/rest/scriptrunner/latest/custom/rateCalculationLogic"
+F_RATE_PROPOSER = "customfield_21105"
+F_RATE_AMOUNT = "customfield_20809"
+F_RATE_VAT = "customfield_20810"
+F_RATE_CURRENCY = "customfield_20811"
+F_RATE_UNIT = "customfield_20812"
+
+
+def _rate_amount(amount: Any) -> str:
+    """Ставка числом-строкой для Jira; пустая или нечисловая - отказ до отправки."""
+    if amount is None or isinstance(amount, bool) or str(amount).strip() == "":
+        raise JiraIntegrationError(
+            "Ставка не отправлена: ставка не задана (Jira ответила бы 500)", code=CODE_JIRA_ERROR
+        )
+    try:
+        dec = Decimal(str(amount).strip().replace(",", "."))
+    except InvalidOperation:
+        dec = None
+    if dec is None or not dec.is_finite() or dec < 0:
+        raise JiraIntegrationError(
+            "Ставка не отправлена: ставка должна быть неотрицательным числом",
+            code=CODE_JIRA_ERROR,
+        )
+    return format(dec.normalize(), "f")
+
+
+def _option_id(raw: Any) -> Optional[str]:
+    return str(raw["id"]) if isinstance(raw, dict) and raw.get("id") is not None else None
+
+
+def _rate_matches(
+    fields: Mapping[str, Any], amount: str, *, vat: str, currency: str, unit: str
+) -> bool:
+    """Перечитанные поля совпали с записанными. Сумма обязательна; id - если Jira их отдала."""
+    try:
+        if Decimal(str(fields.get(F_RATE_AMOUNT))) != Decimal(amount):
+            return False
+    except (InvalidOperation, ValueError, TypeError):
+        return False
+    for field_id, expected in ((F_RATE_VAT, vat), (F_RATE_CURRENCY, currency), (F_RATE_UNIT, unit)):
+        got = _option_id(fields.get(field_id))
+        if got is not None and got != str(expected):
+            return False
+    return True
 
 
 def _check_from(result: Any) -> SessionCheck:

@@ -279,6 +279,44 @@ class SyncRepo:
         with self._app.connection() as conn:
             return conn.execute("SELECT count(*) FROM app.jira_need").fetchone()[0]
 
+    def rate_benchmark(
+        self, since: datetime, vat_percent: float, min_count: int
+    ) -> list[dict[str, Any]]:
+        """Средняя и медианная ставка (FR-019) по группам валюта x единица, расчёт в SQL.
+        Рубли без НДС приводятся к «с НДС» (BR-009); прочие валюты в сумму не входят; при
+        count < min_count среднее и медиана не считаются (None)."""
+        sql = (
+            "WITH base AS ("
+            " SELECT rate_currency AS currency, rate_unit AS unit,"
+            "  CASE WHEN rate_currency = 'RUB' AND rate_includes_vat IS NOT TRUE"
+            "   THEN rate_amount * (1 + %(vat)s::numeric / 100) ELSE rate_amount END AS amount"
+            " FROM app.jira_need"
+            " WHERE rate_amount IS NOT NULL AND rate_currency IS NOT NULL"
+            "  AND jira_created_at >= %(since)s) "
+            "SELECT currency, unit, count(*) AS cnt,"
+            " CASE WHEN count(*) >= %(min)s THEN round(avg(amount), 2) END AS mean,"
+            " CASE WHEN count(*) >= %(min)s"
+            "  THEN round((percentile_cont(0.5) WITHIN GROUP (ORDER BY amount))::numeric, 2)"
+            " END AS median "
+            "FROM base GROUP BY currency, unit ORDER BY currency, unit NULLS LAST"
+        )
+        with self._app.connection() as conn:
+            rows = conn.execute(
+                sql, {"vat": vat_percent, "since": since, "min": min_count}
+            ).fetchall()
+        return [
+            {"currency": r[0], "unit": r[1], "count": r[2],
+             "mean": None if r[3] is None else float(r[3]),
+             "median": None if r[4] is None else float(r[4])}
+            for r in rows
+        ]
+
+    def get_setting(self, key: str) -> str | None:
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "SELECT value FROM app.app_setting WHERE key = %s", (key,)).fetchone()
+        return row[0] if row else None
+
     def need_group_counts(self) -> dict[str, Any]:
         """Группы статусов (FR-035) со счётчиками; «Прочие» и «Все статусы» - виртуальные."""
         with self._app.connection() as conn:

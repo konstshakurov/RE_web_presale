@@ -1,6 +1,70 @@
 {
   "components": {
     "schemas": {
+      "ActionOut": {
+        "properties": {
+          "action": {
+            "description": "search | hire | no_candidates",
+            "title": "Action",
+            "type": "string"
+          },
+          "comment_required": {
+            "title": "Comment Required",
+            "type": "boolean"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/FieldOut"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "target_status": {
+            "title": "Target Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "label",
+          "target_status",
+          "comment_required",
+          "fields"
+        ],
+        "title": "ActionOut",
+        "type": "object"
+      },
+      "ActionsOut": {
+        "properties": {
+          "actions": {
+            "description": "Белый список ∩ переходы Jira; пусто - кнопок под чипом нет",
+            "items": {
+              "$ref": "#/components/schemas/ActionOut"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "need_key": {
+            "title": "Need Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "need_key",
+          "status",
+          "actions"
+        ],
+        "title": "ActionsOut",
+        "type": "object"
+      },
       "AddUserRequest": {
         "properties": {
           "login": {
@@ -13,6 +77,71 @@
           "login"
         ],
         "title": "AddUserRequest",
+        "type": "object"
+      },
+      "AssignIn": {
+        "properties": {
+          "comment": {
+            "default": "",
+            "maxLength": 32000,
+            "title": "Comment",
+            "type": "string"
+          },
+          "completed": {
+            "description": "Шаги, выполненные прошлой попыткой (из ошибки)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Completed",
+            "type": "array"
+          },
+          "employee_key": {
+            "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "extra_file_ids": {
+            "description": "Доп. CV и Материалы",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Extra File Ids",
+            "type": "array"
+          },
+          "rate_rub": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "«Ставка, руб. с НДС» (CR-008). Обязательна, если «Кто предлагает ставку» = «Производство» (БП-2); при «Клиент» не отправляется. Пишется в Jira отдельным вызовом после назначения",
+            "title": "Rate Rub"
+          },
+          "resume_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Пусто - Основное CV (FR-008)",
+            "title": "Resume File Id"
+          }
+        },
+        "required": [
+          "employee_key"
+        ],
+        "title": "AssignIn",
         "type": "object"
       },
       "CreateGroupRequest": {
@@ -323,6 +452,56 @@
           "needs_total"
         ],
         "title": "EpicOut",
+        "type": "object"
+      },
+      "FieldOut": {
+        "properties": {
+          "field_id": {
+            "title": "Field Id",
+            "type": "string"
+          },
+          "kind": {
+            "description": "reason | rate | vat | currency | unit | other",
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "options": {
+            "description": "Значения справочника Jira (не хранятся)",
+            "items": {
+              "$ref": "#/components/schemas/OptionOut"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "prefill_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Предзаполнение из потребности (ставка)",
+            "title": "Prefill Id"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "field_id",
+          "name",
+          "required",
+          "kind",
+          "options"
+        ],
+        "title": "FieldOut",
         "type": "object"
       },
       "FileLink": {
@@ -1467,6 +1646,24 @@
         "title": "NextRequest",
         "type": "object"
       },
+      "OptionOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "OptionOut",
+        "type": "object"
+      },
       "OrderRequest": {
         "properties": {
           "ids": {
@@ -2063,6 +2260,96 @@
         "title": "Rate",
         "type": "object"
       },
+      "RateBenchmark": {
+        "properties": {
+          "as_of": {
+            "description": "Момент расчёта; окно периода считается от него",
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/RateGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "period_months": {
+            "title": "Period Months",
+            "type": "integer"
+          },
+          "vat_percent": {
+            "description": "НДС для приведения рублей к «с НДС» (BR-009)",
+            "title": "Vat Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "period_months",
+          "vat_percent",
+          "groups",
+          "as_of"
+        ],
+        "title": "RateBenchmark",
+        "type": "object"
+      },
+      "RateGroup": {
+        "properties": {
+          "count": {
+            "description": "Потребностей со ставкой за период",
+            "title": "Count",
+            "type": "integer"
+          },
+          "currency": {
+            "description": "RUB | USD | KZT; валюты не складываются",
+            "title": "Currency",
+            "type": "string"
+          },
+          "mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Среднее; рубли с НДС. None при count < 3",
+            "title": "Mean"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Медиана; рубли с НДС. None при count < 3",
+            "title": "Median"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Единица измерения ставки; None - не указана",
+            "title": "Unit"
+          }
+        },
+        "required": [
+          "currency",
+          "count"
+        ],
+        "title": "RateGroup",
+        "type": "object"
+      },
       "RefreshRequest": {
         "properties": {
           "scope": {
@@ -2125,6 +2412,59 @@
           "sync"
         ],
         "title": "RefreshResult",
+        "type": "object"
+      },
+      "ResultOut": {
+        "properties": {
+          "need_key": {
+            "title": "Need Key",
+            "type": "string"
+          },
+          "rate_pending": {
+            "default": false,
+            "description": "Назначение выполнено, ставка не записана: повтор - тем же запросом с completed=steps (назначение не откатывается, FR-029)",
+            "title": "Rate Pending",
+            "type": "boolean"
+          },
+          "refreshed": {
+            "title": "Refreshed",
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Статус из Jira после операции; null - не перечитан",
+            "title": "Status"
+          },
+          "steps": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "warnings": {
+            "description": "Операция выполнена, но требует внимания оператора",
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "need_key",
+          "status",
+          "refreshed",
+          "steps"
+        ],
+        "title": "ResultOut",
         "type": "object"
       },
       "ResumeItem": {
@@ -3131,6 +3471,35 @@
           "reserved"
         ],
         "title": "StatusGroupsOut",
+        "type": "object"
+      },
+      "StatusIn": {
+        "properties": {
+          "action": {
+            "description": "search | hire | no_candidates",
+            "title": "Action",
+            "type": "string"
+          },
+          "comment": {
+            "default": "",
+            "description": "Для no_candidates обязателен",
+            "maxLength": 32000,
+            "title": "Comment",
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "field_id -> id значения справочника Jira",
+            "title": "Fields",
+            "type": "object"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "StatusIn",
         "type": "object"
       },
       "StatusInfo": {
@@ -6166,6 +6535,260 @@
         "summary": "Get Match Counts",
         "tags": [
           "matching"
+        ]
+      }
+    },
+    "/needs/rate-benchmark": {
+      "get": {
+        "operationId": "rate_benchmark_needs_rate_benchmark_get",
+        "parameters": [
+          {
+            "description": "Период по дате создания потребности, месяцев",
+            "in": "query",
+            "name": "period_months",
+            "required": false,
+            "schema": {
+              "default": 6,
+              "description": "Период по дате создания потребности, месяцев",
+              "maximum": 60,
+              "minimum": 1,
+              "title": "Period Months",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateBenchmark"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Rate Benchmark",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/needs/{key}/assign": {
+      "post": {
+        "description": "Назначить кандидата: профиль, исполнитель, вложения, комментарий, переход «Кандидат\nназначен» (FR-008, FR-009, FR-010, FR-013), затем ставка отдельным вызовом ScriptRunner\n(CR-008, FR-018): только при «Производство». Сбой ставки - 200 с ``rate_pending`` и\nпредупреждением, назначение не откатывается.",
+        "operationId": "assign_needs__key__assign_post",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права Jira"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Assign",
+        "tags": [
+          "assign"
+        ]
+      }
+    },
+    "/needs/{key}/status": {
+      "post": {
+        "operationId": "change_status_needs__key__status_post",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права Jira"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Change Status",
+        "tags": [
+          "assign"
+        ]
+      }
+    },
+    "/needs/{key}/status-actions": {
+      "get": {
+        "description": "Кнопки статуса в столбце «Статус» (FR-011, FR-026).",
+        "operationId": "status_actions_needs__key__status_actions_get",
+        "parameters": [
+          {
+            "description": "Ключ потребности Jira",
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "description": "Ключ потребности Jira",
+              "pattern": "^[A-Z][A-Z0-9_]*-[0-9]+$",
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права Jira"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Status Actions",
+        "tags": [
+          "assign"
         ]
       }
     },

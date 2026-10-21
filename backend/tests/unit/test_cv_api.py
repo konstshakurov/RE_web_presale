@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 from app.cv.repo import NOT_ARCHIVED, NOT_FOUND, OK, PROTECTED, FileRow
 from app.cv.router import router as cv_router
+from app.validation import install_validation_handler
 
 from ._cv_fakes import build_docx, make_client
 
@@ -30,9 +31,17 @@ class FakeCvRepo:
         self.seq = 0
         self.tick = datetime(2026, 10, 1, tzinfo=UTC)
         self.employees = {EMP}
+        self.notes = {}
 
     def employee_exists(self, key):
         return key in self.employees
+
+    def set_note(self, key, note, author):
+        if key not in self.employees:
+            return None
+        self.tick += timedelta(seconds=1)
+        self.notes[key] = (note, author, self.tick)
+        return self.notes[key]
 
     def list_files(self, employee_key=None, *, include_archived=False):
         rows = [f for f in self.files.values()
@@ -325,3 +334,66 @@ def test_store_not_configured_gives_503():
     client, headers, _ = make_client(None, FakeLimits())
     assert client.get("/cv/files").status_code == 503
     assert upload(client, headers).status_code == 503
+
+
+# --- Заметка о сотруднике (FR-033, KON-94) ---
+
+NOTE_URL = f"/cv/employees/{EMP}/note"
+
+
+def test_note_create_and_replace_author_from_session(env, caplog):
+    client, headers, repo, *_ = env
+    secret = "предпочитает финтех"
+    with caplog.at_level("DEBUG"):
+        r = client.put(NOTE_URL, json={"note": f"  {secret}  "}, headers=headers)
+    assert r.status_code == 200
+    first = r.json()
+    assert first["note"] == secret  # края обрезаны
+    assert first["note_author"] == "ivan"  # логин сессии, в теле автора нет
+    assert first["employee_key"] == EMP
+    assert secret not in caplog.text
+    r2 = client.put(NOTE_URL, json={"note": "в проекты банков не подключать"}, headers=headers)
+    second = r2.json()
+    assert second["note"] == "в проекты банков не подключать"
+    assert second["note_updated_at"] > first["note_updated_at"]  # сопоставление увидит правку
+    assert repo.notes[EMP][0] == second["note"]
+
+
+def test_note_author_in_body_is_ignored(env):
+    client, headers, *_ = env
+    r = client.put(NOTE_URL, json={"note": "x", "note_author": "petr"}, headers=headers)
+    assert r.json()["note_author"] == "ivan"
+
+
+@pytest.mark.parametrize("empty", ["", "   \n"])
+def test_note_clear(env, empty):
+    client, headers, *_ = env
+    client.put(NOTE_URL, json={"note": "текст"}, headers=headers)
+    r = client.put(NOTE_URL, json={"note": empty}, headers=headers)
+    assert r.status_code == 200
+    assert r.json()["note"] is None
+    assert r.json()["note_author"] == "ivan"
+
+
+def test_note_length_limit(env):
+    client, headers, repo, _, app = env
+    install_validation_handler(app)  # как в main: ввод не эхом в ответ
+    assert client.put(NOTE_URL, json={"note": "я" * 2000}, headers=headers).status_code == 200
+    r = client.put(NOTE_URL, json={"note": "я" * 2001}, headers=headers)
+    assert r.status_code == 422
+    assert "яяя" not in r.text
+    assert repo.notes[EMP][0] == "я" * 2000  # отказ не затёр прежнюю
+
+
+def test_note_unknown_employee_404(env):
+    client, headers, *_ = env
+    r = client.put("/cv/employees/NOPE-9/note", json={"note": "x"}, headers=headers)
+    assert r.status_code == 404
+
+
+def test_note_requires_login_and_csrf(env):
+    client, headers, *_ = env
+    assert client.put(NOTE_URL, json={"note": "x"}).status_code == 403
+    app = FastAPI()
+    app.include_router(cv_router)
+    assert TestClient(app).put(NOTE_URL, json={"note": "x"}).status_code == 401

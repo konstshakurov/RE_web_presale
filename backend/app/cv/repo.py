@@ -57,6 +57,25 @@ class CvRepo:
                 "SELECT 1 FROM cv.employee WHERE jira_key = %s", (employee_key,)
             ).fetchone() is not None
 
+    def set_note(
+        self, employee_key: str, note: str | None, author: str
+    ) -> tuple[str | None, str, datetime] | None:
+        """Заметка сотрудника (FR-033): замена целиком, последний сохранивший побеждает.
+
+        note_updated_at всегда новый - по нему сопоставление считает оценку устаревшей.
+        Пустая заметка (None) - очистка; автор и время правки остаются. Журнала нет (NFR-005).
+        None в ответе - сотрудника нет.
+        """
+        with self._pool.connection() as conn:
+            r = conn.execute(
+                "UPDATE cv.employee SET note = %s, note_author = %s, "
+                "note_updated_at = GREATEST(clock_timestamp(), "
+                "COALESCE(note_updated_at + interval '1 microsecond', clock_timestamp())) "
+                "WHERE jira_key = %s RETURNING note, note_author, note_updated_at",
+                (note, author, employee_key),
+            ).fetchone()
+        return (r[0], r[1], r[2]) if r else None
+
     def list_employee_names(self) -> list[str]:
         """ФИО всех карточек: словарь обезличивания шлюза LLM (FR-023)."""
         with self._pool.connection() as conn:

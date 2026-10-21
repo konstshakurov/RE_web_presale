@@ -1647,6 +1647,59 @@
         "title": "NextRequest",
         "type": "object"
       },
+      "NoteOut": {
+        "properties": {
+          "employee_key": {
+            "title": "Employee Key",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null - заметки нет (не задана или очищена)",
+            "title": "Note"
+          },
+          "note_author": {
+            "description": "Логин пользователя, сохранившего последним (из сессии)",
+            "title": "Note Author",
+            "type": "string"
+          },
+          "note_updated_at": {
+            "format": "date-time",
+            "title": "Note Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_key",
+          "note",
+          "note_author",
+          "note_updated_at"
+        ],
+        "title": "NoteOut",
+        "type": "object"
+      },
+      "NoteRequest": {
+        "properties": {
+          "note": {
+            "description": "Текст заметки, до 2000 знаков; пустая строка очищает заметку",
+            "maxLength": 2000,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "title": "NoteRequest",
+        "type": "object"
+      },
       "OptionOut": {
         "properties": {
           "id": {
@@ -5461,6 +5514,69 @@
           }
         ],
         "summary": "Main Cv Text",
+        "tags": [
+          "cv"
+        ]
+      }
+    },
+    "/cv/employees/{employee_key}/note": {
+      "put": {
+        "description": "Сохранить заметку о сотруднике (FR-033): заменяет прежнюю, пустая строка очищает.\n\nАвтор - из сессии, дата - серверная; журнал изменений не ведётся (NFR-005), в Jira заметка\nне уходит. Правка меняет note_updated_at, поэтому оценки сопоставления с этим сотрудником\nсчитаются устаревшими (FR-005). Текст заметки в логи не пишется.",
+        "operationId": "save_note_cv_employees__employee_key__note_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "title": "Employee Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "CSRF или права"
+          },
+          "404": {
+            "description": "Сотрудник не найден"
+          },
+          "422": {
+            "description": "Заметка длиннее 2000 знаков"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Save Note",
         "tags": [
           "cv"
         ]

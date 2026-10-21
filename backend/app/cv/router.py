@@ -99,6 +99,22 @@ class MainCvText(BaseModel):
     message: str | None = None
 
 
+NOTE_MAX = 2000  # допущение: лимит длины заметки в требовании не задан (KON-94)
+
+
+class NoteRequest(BaseModel):
+    note: str = Field(
+        max_length=NOTE_MAX,
+        description=f"Текст заметки, до {NOTE_MAX} знаков; пустая строка очищает заметку")
+
+
+class NoteOut(BaseModel):
+    employee_key: str
+    note: str | None = Field(description="null - заметки нет (не задана или очищена)")
+    note_author: str = Field(description="Логин пользователя, сохранившего последним (из сессии)")
+    note_updated_at: datetime
+
+
 class LimitsOut(BaseModel):
     max_file_mb: int
     max_file_bytes: int
@@ -203,6 +219,29 @@ def employee_files(
         files=[file_out(f) for f in rows if not f.is_archived],
         archive=[file_out(f) for f in rows if f.is_archived],
     )
+
+
+@router.put("/employees/{employee_key}/note", response_model=NoteOut,
+            responses={404: {"description": EMPLOYEE_NOT_FOUND},
+                       422: {"description": f"Заметка длиннее {NOTE_MAX} знаков"}})
+def save_note(
+    employee_key: str, body: NoteRequest, request: Request,
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> NoteOut:
+    """Сохранить заметку о сотруднике (FR-033): заменяет прежнюю, пустая строка очищает.
+
+    Автор - из сессии, дата - серверная; журнал изменений не ведётся (NFR-005), в Jira заметка
+    не уходит. Правка меняет note_updated_at, поэтому оценки сопоставления с этим сотрудником
+    считаются устаревшими (FR-005). Текст заметки в логи не пишется.
+    """
+    note = body.note.strip() or None
+    saved = _repo(request).set_note(employee_key, note, ctx.login)
+    if saved is None:
+        raise HTTPException(status_code=404, detail=EMPLOYEE_NOT_FOUND)
+    log.info("cv: %s %s заметку сотрудника %s", ctx.login,
+             "сохранил" if note else "очистил", employee_key)
+    return NoteOut(employee_key=employee_key, note=saved[0], note_author=saved[1],
+                   note_updated_at=saved[2])
 
 
 @router.post(

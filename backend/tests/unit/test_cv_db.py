@@ -200,3 +200,15 @@ def test_connection_is_cv_role_only(env):
         assert not any(t.startswith("app.") or "secret" in t or "app_setting" in t
                        for t in tables)
         assert c.execute("SELECT current_user").fetchone()[0] == "cv_rw"
+
+
+def test_set_note_on_db(env):
+    """FR-033: замена, очистка (ограничение employee_note_chk), note_updated_at растёт."""
+    repo, *_ = env
+    a = repo.set_note(E1, "первая", "ivan")
+    b = repo.set_note(E1, "вторая", "petr")
+    assert (a[0], a[1]) == ("первая", "ivan") and (b[0], b[1]) == ("вторая", "petr")
+    assert b[2] > a[2]
+    c = repo.set_note(E1, None, "ivan")
+    assert c[0] is None and c[1] == "ivan" and c[2] > b[2]
+    assert repo.set_note("KONT36-404", "x", "ivan") is None

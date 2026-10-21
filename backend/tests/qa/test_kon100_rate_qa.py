@@ -106,7 +106,6 @@ def test_api_rejects_bad_rate_without_calling_jira(bad):
     assert not {"set_fields", "attach_file", "do_transition", "set_rate"} & set(j.names())
 
 
-@pytest.mark.xfail(strict=True, reason="BUG KON-103: у ставки нет верхней границы; 1e999999 доходит до set_rate")
 def test_api_rejects_absurd_rate_magnitude_without_calling_jira():
     j = FakeJira(**PROD)
     client, headers, _ = _api(j)

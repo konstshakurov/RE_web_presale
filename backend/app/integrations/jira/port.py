@@ -190,6 +190,7 @@ RATE_VAT_IDS = frozenset({RATE_VAT_YES, RATE_VAT_NO})
 RATE_CURRENCY_IDS = frozenset({RATE_CURRENCY_RUB, RATE_CURRENCY_EUR, RATE_CURRENCY_GBR,
                                RATE_CURRENCY_KZT, RATE_CURRENCY_USD})
 RATE_UNIT_IDS = frozenset({RATE_UNIT_HOUR})
+MAX_RATE_RUB = 1_000_000  # верхняя граница ставки, руб. (KON-103)
 
 
 @runtime_checkable

@@ -32,6 +32,7 @@ from typing import Any, Protocol
 
 from ..integrations.jira import (
     CODE_JIRA_ERROR,
+    MAX_RATE_RUB,
     RATE_CURRENCY_RUB,
     RATE_PROPOSER_PRODUCTION,
     RATE_UNIT_HOUR,
@@ -286,6 +287,8 @@ class AssignService:
                               "Укажите ставку: она обязательна для потребности «от производства»")
         if not rate.is_finite() or rate <= 0:
             raise AssignError("bad_request", "Ставка должна быть положительным числом")
+        if rate > MAX_RATE_RUB:
+            raise AssignError("bad_request", f"Ставка не может превышать {MAX_RATE_RUB:,} руб.".replace(",", " "))
         return rate
 
     # --- статус-действия (FR-011, FR-026) ---

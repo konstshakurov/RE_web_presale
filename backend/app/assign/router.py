@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext
+from ..integrations.jira import MAX_RATE_RUB
 from ..jira_session.service import require_jira_ok
 from .service import AssignError, AssignInput, AssignService
 
@@ -92,7 +93,7 @@ class AssignIn(BaseModel):
     resume_file_id: int | None = Field(None, description="Пусто - Основное CV (FR-008)")
     extra_file_ids: list[int] = Field(default_factory=list, description="Доп. CV и Материалы")
     rate_rub: Decimal | None = Field(
-        None, gt=0, description="«Ставка, руб. с НДС» (CR-008). Обязательна, если «Кто предлагает "
+        None, gt=0, le=MAX_RATE_RUB, description="«Ставка, руб. с НДС» (CR-008). Обязательна, если «Кто предлагает "
         "ставку» = «Производство» (БП-2); при «Клиент» не отправляется. Пишется в Jira отдельным "
         "вызовом после назначения")
     comment: str = Field("", max_length=32000)

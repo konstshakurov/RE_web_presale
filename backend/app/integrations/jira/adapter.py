@@ -45,6 +45,7 @@ from .errors import (
     classify,
 )
 from .port import (
+    MAX_RATE_RUB,
     RATE_CURRENCY_IDS,
     RATE_PROPOSER_PRODUCTION,
     RATE_UNIT_IDS,
@@ -537,6 +538,10 @@ def _rate_amount(amount: Any) -> str:
         raise JiraIntegrationError(
             "Ставка не отправлена: ставка должна быть неотрицательным числом",
             code=CODE_JIRA_ERROR,
+        )
+    if dec > MAX_RATE_RUB:
+        raise JiraIntegrationError(
+            f"Ставка не отправлена: ставка не может превышать {MAX_RATE_RUB}", code=CODE_JIRA_ERROR
         )
     return format(dec.normalize(), "f")
 

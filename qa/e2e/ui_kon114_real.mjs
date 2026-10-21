@@ -1,0 +1,67 @@
+// KON-114 (Pre.QA): сквозной прогон БЕЗ моков на QA-стенде (фейк Jira, тестовый LDAP; заметка хранится в cv_db).
+// Пароль берётся из qa/stand/.qa.env (QA_LDAP_PW_USER) и нигде не печатается. Запуск: node qa/e2e/ui_kon114_real.mjs
+import { chromium } from "@playwright/test";
+import { readFileSync, mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const OUT = resolve(HERE, "..", "ui_kon114");
+mkdirSync(OUT, { recursive: true });
+const env = Object.fromEntries(readFileSync(resolve(HERE, "..", "stand", ".qa.env"), "utf-8").split(/\r?\n/).map((l) => /^([A-Z0-9_]+)=(.*)$/.exec(l)).filter(Boolean).map((m) => [m[1], m[2]]));
+const BASE = env.QA_BASE_URL || "http://127.0.0.1:18080";
+const results = [];
+const check = (n, ok, x = "") => { results.push({ n, ok: !!ok }); console.log((ok ? "PASS " : "FAIL ") + n + (x ? " :: " + x : "")); };
+
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ baseURL: BASE, locale: "ru-RU", viewport: { width: 1280, height: 800 }, colorScheme: "dark" });
+const page = await ctx.newPage();
+const puts = [];
+page.on("response", (r) => { if (r.request().method() === "PUT" && /\/note$/.test(r.url())) puts.push(r.status()); });
+await page.goto("/login");
+await page.getByLabel("Логин").fill("qa-user");
+await page.getByLabel("Пароль").fill(env.QA_LDAP_PW_USER);
+await page.getByRole("button", { name: "Войти" }).click();
+await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+await page.goto("/resumes");
+const btn = page.locator("[data-note-key]").first();
+await btn.waitFor({ timeout: 90000 });
+const key = await btn.getAttribute("data-note-key");
+const row = page.locator("tr", { has: page.locator(`[data-note-key="${key}"]`) });
+const cellBefore = await row.locator("td").last().innerText();
+console.log("INFO сотрудников в таблице:", await page.locator("[data-note-key]").count(), "; заметка до:", JSON.stringify(cellBefore.slice(0, 60)));
+const TXT = "QA KON-114: проверка сквозной записи\nвторая строка";
+await btn.click();
+let dlg = page.getByRole("dialog");
+await dlg.getByLabel("Заметка", { exact: true }).fill(TXT);
+await dlg.getByRole("button", { name: /^(Сохранить|Очистить заметку)$/ }).click();
+await dlg.waitFor({ state: "detached" });
+check("PUT /cv/employees/{key}/note вернул 200", puts[0] === 200, String(puts));
+let cell = await row.locator("td").last().innerText();
+check("в ячейке новый текст, без автора/даты/пометок", cell.includes("проверка сквозной записи") && !/qa-user|Сохранено|Изменена/.test(cell), JSON.stringify(cell));
+check("role=status «Сохранено»", (await page.getByRole("status").innerText()) === "Сохранено");
+await page.screenshot({ path: `${OUT}/real_saved_dark_1280.png` });
+await page.reload();
+await page.locator(`[data-note-key="${key}"]`).waitFor({ timeout: 60000 });
+cell = await page.locator("tr", { has: page.locator(`[data-note-key="${key}"]`) }).locator("td").last().innerText();
+check("после перезагрузки страницы заметка сохранилась (cv_db)", cell.includes("проверка сквозной записи") && cell.includes("вторая строка"), JSON.stringify(cell));
+await page.locator(`[data-note-key="${key}"]`).click();
+dlg = page.getByRole("dialog");
+const meta = await dlg.locator(".modal__meta").innerText();
+check("в окне автор = логин сессии и дата", /^Изменена: qa-user, \d\d\.\d\d\.\d\d, \d\d:\d\d$/.test(meta), meta);
+await page.screenshot({ path: `${OUT}/real_reopen_dark_1280.png` });
+await dlg.getByRole("button", { name: "Очистить", exact: true }).click();
+await dlg.getByRole("button", { name: "Очистить заметку" }).click();
+await dlg.waitFor({ state: "detached" });
+check("очистка: PUT 200", puts[1] === 200, String(puts));
+await page.reload();
+await page.locator(`[data-note-key="${key}"]`).waitFor({ timeout: 60000 });
+cell = await page.locator("tr", { has: page.locator(`[data-note-key="${key}"]`) }).locator("td").last().innerText();
+check("после очистки и перезагрузки «нет заметки»", cell.includes("нет заметки"), JSON.stringify(cell));
+// 2001 знак: клиент не отправляет
+await page.locator(`[data-note-key="${key}"]`).click();
+dlg = page.getByRole("dialog");
+await dlg.getByLabel("Заметка", { exact: true }).fill("я".repeat(2001));
+check("2001 знак: «Сохранить» disabled, запроса нет", (await dlg.getByRole("button", { name: "Сохранить" }).isDisabled()) && puts.length === 2);
+await browser.close();
+console.log(`ИТОГО: ${results.filter((r) => r.ok).length}/${results.length} PASS`);

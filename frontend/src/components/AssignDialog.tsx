@@ -58,6 +58,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
   const [rateError, setRateError] = useState("");
   const [comment, setComment] = useState("");
   const [partial, setPartial] = useState(""); // предупреждение: назначено, но ставка не записана
+  const [assigned, setAssigned] = useState(false); // назначение выполнено: повтор пишет только ставку, остальные поля заблокированы
   const [bench, setBench] = useState<RateBenchmark | null>(null); // ориентир (FR-019); ошибка/пусто - скрыт
   const [extra, setExtra] = useState<number[]>([]);
   const done = useRef<string[]>([]); // шаги, уже выполненные прошлой попыткой: повтор не дублирует вложения
@@ -151,6 +152,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
       // назначение не откатывается; повтор запишет только ставку (completed = выполненные шаги)
       done.current = result.steps;
       setPartial((result.warnings ?? []).join(" ") || "Кандидат назначен, но ставка не записана в Jira.");
+      setAssigned(true);
       setStage("form");
       onPartial?.();
     } else if (ok) onDone();
@@ -194,7 +196,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
   ) : (
     <>
       <button type="button" onClick={stage === "confirm" ? () => setStage("form") : onClose}>
-        {stage === "confirm" ? "Назад" : "Отмена"}
+        {stage === "confirm" ? "Назад" : assigned ? "Закрыть" : "Отмена"}
       </button>
       <span className="modal__acts">{primary}</span>
     </>
@@ -217,7 +219,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
             <dt>Резюме</dt>
             <dd>{selectedResume ? `${selectedResume.kind_title} — ${selectedResume.file_name}` : "—"}</dd>
             <dt>Ставка</dt>
-            <dd>{rateEditable && parsedRate ? `${parsedRate.toLocaleString("ru-RU")} руб. с НДС` : "не указана"}</dd>
+            <dd>{rateEditable && parsedRate ? `${parsedRate.toLocaleString("ru-RU")} руб. с НДС` : rateEditable ? "не указана" : "ставка клиента, не передаётся"}</dd>
             <dt>Файлы</dt>
             <dd>{attach.length ? attach.map((f) => f.file_name).join(", ") : "—"}</dd>
             <dt>Комментарий</dt>
@@ -238,7 +240,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
       )}
 
       {stage === "form" && (
-        <>
+        <div className="assign-form">
           {partial && !failure && (
             <section className="box box--warn" role="alert">
               <strong>Кандидат назначен, ставка не записана</strong>
@@ -262,7 +264,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
           )}
           <div className="field">
             <label htmlFor="assign-resume">Резюме</label>
-            <select id="assign-resume" value={resumeId} disabled={files === null} onChange={(e) => setResumeId(e.target.value)}>
+            <select id="assign-resume" value={resumeId} disabled={files === null || assigned} onChange={(e) => setResumeId(e.target.value)}>
               <option value="main">{main ? fileLabel(main) : "Основное CV"}</option>
               {extras.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -279,7 +281,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
               id="assign-rate"
               type="text"
               inputMode="decimal"
-              placeholder="например, 3 800"
+              placeholder={rateEditable ? "например, 3 800" : undefined}
               value={rate}
               disabled={!rateEditable}
               aria-invalid={rateError ? true : undefined}
@@ -291,6 +293,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
             />
             <div className="hint" id="assign-rate-hint">
               {need ? `В потребности: ${rateText(need)}.` : ""}
+              {!rateEditable ? " Ставку предлагает клиент — здесь не вводится." : ""}
               {rateEditable && benchmarkText(bench, need?.rate) ? ` ${benchmarkText(bench, need?.rate)}` : ""}
             </div>
             {rateError && (
@@ -301,7 +304,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
           </div>
           <div className="field">
             <label htmlFor="assign-comment">Комментарий (уйдёт комментарием в потребность)</label>
-            <textarea id="assign-comment" rows={3} value={comment} maxLength={32000} onChange={(e) => setComment(e.target.value)} />
+            <textarea id="assign-comment" rows={3} value={comment} disabled={assigned} maxLength={32000} onChange={(e) => setComment(e.target.value)} />
           </div>
           <fieldset className="field files-pick">
             <legend>Файлы (из БД сотрудника)</legend>
@@ -311,6 +314,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
                 <input
                   type="checkbox"
                   checked={extra.includes(f.id)}
+                  disabled={assigned}
                   onChange={(e) => setExtra((x) => (e.target.checked ? [...x, f.id] : x.filter((i) => i !== f.id)))}
                 />
                 {f.file_name} <span className="muted">{f.kind_title}</span>
@@ -320,7 +324,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
               CV по шаблону клиента…
             </button>
           </fieldset>
-        </>
+        </div>
       )}
     </Modal>
   );

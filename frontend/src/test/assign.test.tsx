@@ -336,6 +336,27 @@ describe("Окно «Назначить»", () => {
     expect(calls.filter((c) => c.url.includes("/sync/needs?")).length).toBeGreaterThan(1);
   });
 
+  it("«от производства»: поле активно, «*» и placeholder; в прогрессе шаг «Ставка» последним", async () => {
+    let release: () => void = () => {};
+    post = (url) =>
+      url.endsWith("/assign") ? (new Promise<Response>((res) => (release = () => res(json(OK)))) as unknown as Response) : undefined;
+    const dlg = await openAssign();
+    const rateField = within(dlg).getByLabelText(/Ставка/);
+    expect(rateField).toBeEnabled();
+    expect(rateField).toHaveAttribute("placeholder", "например, 3 800");
+    expect(within(dlg).getByText("*")).toBeInTheDocument();
+    await userEvent.type(rateField, "3 800");
+    await within(dlg).findByRole("checkbox", { name: /Works/ });
+    await userEvent.click(within(dlg).getByRole("button", { name: "Назначить…" }));
+    const conf = screen.getByRole("dialog", { name: "Подтвердите назначение" });
+    expect(within(conf).getByText(/3.800 руб\. с НДС/)).toBeInTheDocument();
+    await userEvent.click(within(conf).getByRole("button", { name: "Подтвердить и отправить в Jira" }));
+    const items = (await screen.findAllByRole("listitem")).map((li) => li.textContent);
+    expect(items[items.length - 1]).toBe("Ставка");
+    release();
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("«от производства»: без ставки дальше не идём, сообщение «Укажите ставку…»", async () => {
     const dlg = await openAssign();
     await within(dlg).findByRole("checkbox", { name: /Works/ });
@@ -393,9 +414,14 @@ describe("Окно «Назначить»", () => {
     post = (url) => (url.endsWith("/assign") ? json(OK) : undefined);
     const dlg = await openAssign();
     await within(dlg).findByRole("checkbox", { name: /Works/ });
-    expect(within(dlg).getByLabelText(/Ставка/)).toBeDisabled();
+    const rateField = within(dlg).getByLabelText(/Ставка/);
+    expect(rateField).toBeDisabled();
+    expect(rateField).not.toHaveAttribute("placeholder");
+    expect(within(dlg).queryByText("*")).toBeNull();
+    expect(within(dlg).getByText(/В потребности:.*Ставку предлагает клиент — здесь не вводится\./)).toBeInTheDocument();
     await userEvent.click(within(dlg).getByRole("button", { name: "Назначить…" }));
     const conf = screen.getByRole("dialog", { name: "Подтвердите назначение" });
+    expect(within(conf).getByText("ставка клиента, не передаётся")).toBeInTheDocument();
     await userEvent.click(within(conf).getByRole("button", { name: "Подтвердить и отправить в Jira" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(posts("/assign")[0].body).toMatchObject({ rate_rub: null });
@@ -423,6 +449,13 @@ describe("Окно «Назначить»", () => {
     const form = await screen.findByRole("dialog", { name: "Назначить кандидата" });
     expect(await within(form).findByText(/ставка не записана в Jira: Jira отклонила/)).toBeInTheDocument();
     expect(within(form).getByLabelText(/Ставка/)).toHaveValue("3 800"); // введённое сохранено
+    expect(within(form).getByRole("alert")).toHaveTextContent("Кандидат назначен, ставка не записана");
+    expect(within(form).getByLabelText(/Резюме/)).toBeDisabled();
+    expect(within(form).getByLabelText(/Комментарий/)).toBeDisabled();
+    expect(within(form).getByRole("checkbox", { name: /Works/ })).toBeDisabled();
+    expect(within(form).getByLabelText(/Ставка/)).toBeEnabled();
+    expect(within(form).queryByRole("button", { name: "Отмена" })).toBeNull();
+    expect(within(form).getByRole("button", { name: "Закрыть" })).toBeEnabled();
     await userEvent.click(within(form).getByRole("button", { name: "Повторить" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(posts("/assign")[1].body).toMatchObject({ rate_rub: 3800, completed: ["fields", "attach:1", "transition"] });

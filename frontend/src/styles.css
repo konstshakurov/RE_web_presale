@@ -175,6 +175,8 @@ a { color: var(--accent); }
 .note { white-space: pre-wrap; }
 .modal--wide { width: min(960px, 92%); max-width: none; min-width: 0; max-height: calc(100% - 32px); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
 .modal--profile { width: min(720px, 92%); }
+.modal--note { width: min(560px, 100%); box-sizing: border-box; }
+.modal--note .modal__meta { color: var(--muted); }
 .modal__head { flex: none; display: flex; gap: 12px; align-items: flex-start; padding: 16px 24px; border-bottom: 1px solid var(--border); }
 .modal__title { flex: 1; min-width: 0; }
 .modal__head h2 { margin: 0; font-size: 18px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -332,10 +334,10 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
 .btn-secondary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn-secondary:disabled { opacity: 0.5; cursor: default; }
 :is(.modal, .groups, .jira-banner, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__row, .ga, .sec__f, .group-card)
-  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button),
+  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.note-dlg__danger):not(.note-dlg__clear):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button),
 .button:not(.primary) { background: transparent; color: var(--secondary); border: 1px solid var(--secondary); border-radius: 4px; }
 :is(.modal, .groups, .jira-banner, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__row, .ga, .sec__f, .group-card)
-  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button):hover:not(:disabled),
+  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.note-dlg__danger):not(.note-dlg__clear):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button):hover:not(:disabled),
 .button:not(.primary):hover:not(:disabled) { background: var(--secondary-hover-bg); }
 :is(.modal, .groups, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__row, .ga, .sec__f, .group-card) button:disabled { opacity: 0.5; }
 
@@ -355,3 +357,24 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
 .datebox input[type="date"] { height: 32px; width: auto; min-width: 0; background: transparent; border: 0; color: var(--text); font: inherit; padding: 0 2px; }
 .datebox:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .gn > .error { grid-column: 1 / -1; }
+
+/* Редактор заметки в «Резюме» (KON-115, вариант B) */
+.note-dlg { display: flex; flex-direction: column; gap: 6px; }
+.note-dlg label { font-weight: 600; }
+.modal .note-dlg textarea { min-height: 220px; resize: vertical; display: block; line-height: 1.4; padding: 8px; }
+.modal .note-dlg textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.modal .note-dlg textarea[readonly] { opacity: 0.7; }
+.modal .note-dlg textarea.is-over { border-color: var(--err); }
+.note-dlg__row { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.note-dlg__row .hint, .note-dlg__over { font-size: 13px; }
+.note-dlg__over { color: var(--err); }
+.note-dlg__cnt { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.note-dlg__cnt.is-warn { color: var(--text); font-weight: 600; }
+.note-dlg__cnt.is-over { color: var(--err); font-weight: 600; }
+.note-dlg__err { font-size: 13px; }
+.modal__foot .note-dlg__st { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.modal .note-dlg__clear { background: transparent; border: 0; color: var(--muted); }
+.modal .note-dlg__clear:hover:not(:disabled) { color: var(--text); }
+.modal button.note-dlg__danger { color: var(--err); }
+.modal__acts { align-items: center; }
+.sr-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

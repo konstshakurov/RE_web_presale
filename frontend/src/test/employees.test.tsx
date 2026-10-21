@@ -310,7 +310,7 @@ describe("Сотрудники", () => {
 });
 
 describe("Резюме", () => {
-  it("таблица: файлы, содержание, заметка с автором, поле поиска по смыслу доступно", async () => {
+  it("таблица: файлы, содержание, заметка без автора, поле поиска по смыслу доступно", async () => {
     setup(
       {
         employees: [
@@ -338,7 +338,8 @@ describe("Резюме", () => {
     expect(sem.parentElement).toBe(screen.getByRole("button", { name: "Найти по смыслу" }).parentElement);
     expect(sem.parentElement!.className).toContain("sa__row");
     expect(within(row).getByText("Не подключать к клиенту X")).toBeInTheDocument();
-    expect(within(row).getByText("test.user, 05.10.2026, 14:00")).toBeInTheDocument();
+    expect(within(row).queryByText(/test.user/)).not.toBeInTheDocument(); // автор и дата только в окне (KON-115)
+    expect(within(row).getByRole("button", { name: "Изменить заметку: Тестов Тест" })).toBeEnabled();
     expect(screen.getByLabelText("Поиск по смыслу (LLM)")).toBeEnabled();
     expect(screen.getByLabelText("Технологии")).toBeEnabled();
     // значок «i» с описанием логики подбора рядом с поиском по смыслу

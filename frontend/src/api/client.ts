@@ -1,4 +1,5 @@
 import type {
+  NoteOut,
   AdminUser,
   AssignBody,
   CvLimits,
@@ -207,6 +208,8 @@ export const api = {
       `/cv/employees/${encodeURIComponent(key)}/files?kind=${encodeURIComponent(kind)}&file_name=${encodeURIComponent(file.name)}`,
       file,
     ),
+  saveNote: (key: string, note: string) =>
+    request<NoteOut>("PUT", `/cv/employees/${encodeURIComponent(key)}/note`, { note }),
   deleteFile: (id: number) => request<void>("DELETE", `/cv/files/${id}`),
   restoreFile: (id: number) => request<EmployeeFiles>("POST", `/cv/files/${id}/restore`),
   fileText: (id: number) => request<CvText>("GET", `/cv/files/${id}/text`),

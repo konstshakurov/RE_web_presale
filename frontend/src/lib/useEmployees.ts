@@ -52,5 +52,10 @@ export function useEmployees() {
     }
   }, [load]);
 
-  return { items, counts, sync, error, refreshing, refreshError, info, refresh };
+  // Локально подставляет ответ сохранения заметки (FR-033), без перезагрузки списка
+  const patch = useCallback((key: string, p: Partial<EmployeeOut>) => {
+    setItems((cur) => cur && cur.map((e) => (e.jira_key === key ? { ...e, ...p } : e)));
+  }, []);
+
+  return { patch, items, counts, sync, error, refreshing, refreshError, info, refresh };
 }

@@ -182,6 +182,12 @@ export interface StatusGroupsData {
 }
 
 // Типы /sync/employees и /cv по backend/openapi.json (EmployeeOut, EmployeesPage, FileOut, CvLimits; KON-35, KON-36).
+export interface NoteOut {
+  note: string;
+  note_author?: string | null;
+  note_updated_at?: string | null;
+}
+
 export interface EmployeeOut {
   jira_key: string;
   jira_url?: string | null;

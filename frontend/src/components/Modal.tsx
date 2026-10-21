@@ -8,15 +8,18 @@ interface Props {
   title: string;
   children: ReactNode;
   wide?: boolean; // широкая модалка: шапка и футер закреплены, прокручивается только тело (UX-1 п. 9)
-  size?: "profile"; // 720px вместо 960px (п. 8)
+  size?: "profile" | "note"; // 720px (п. 8) / 560px (окно заметки) вместо 960px
   meta?: ReactNode; // строка под заголовком в шапке (статус «Профиля»)
   footer?: ReactNode; // футер широкой модалки
   onClose?: () => void; // Esc (и × в широкой модалке)
+  onBackdropClick?: () => void; // щелчок по подложке (по умолчанию не закрывает)
+  closeLabel?: string; // aria-label кнопки ×
+  closeDisabled?: boolean; // × недоступен (идёт сохранение)
 }
 
 // Модальное окно. Узкое: заголовок и содержимое, структура прежняя, Esc закрывает при onClose.
 // Широкое (wide): слоты шапка / тело / футер, × и Esc.
-export default function Modal({ title, children, wide, size, meta, footer, onClose }: Props) {
+export default function Modal({ title, children, wide, size, meta, footer, onClose, onBackdropClick, closeLabel, closeDisabled }: Props) {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
 
@@ -47,9 +50,14 @@ export default function Modal({ title, children, wide, size, meta, footer, onClo
     );
   }
   return (
-    <div className="modal-backdrop">
+    <div
+      className="modal-backdrop"
+      onMouseDown={(ev) => {
+        if (ev.target === ev.currentTarget) onBackdropClick?.();
+      }}
+    >
       <div
-        className={size === "profile" ? "modal modal--wide modal--profile" : "modal modal--wide"}
+        className={size ? `modal modal--wide modal--${size}` : "modal modal--wide"}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -60,7 +68,7 @@ export default function Modal({ title, children, wide, size, meta, footer, onClo
             {meta && <div className="modal__meta">{meta}</div>}
           </div>
           {onClose && (
-            <button type="button" className="modal__x" aria-label="Закрыть окно" title="Закрыть" onClick={onClose}>
+            <button type="button" className="modal__x" aria-label={closeLabel ?? "Закрыть окно"} title="Закрыть" disabled={closeDisabled} onClick={onClose}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>

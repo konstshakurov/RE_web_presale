@@ -30,6 +30,10 @@
 
 ## 3. ER-диаграмма
 
+![ER-диаграмма re_web_presale (KON-29)](img/er_diagram_KON-29.png)
+
+Исходник диаграммы (Mermaid):
+
 ```mermaid
 erDiagram
     %% ---------- app_db ----------

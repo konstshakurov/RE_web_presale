@@ -160,8 +160,17 @@ def test_status_groups_filter_other_and_counters(repo, pools):
     assert f(group=str(g2))[1] == 2  # «Интервью не пройдено» входит в две группы
     assert [i["status"] for i in f(group="other")[0]] == ["Отложено"]
     assert f(group="all")[1] == 4 and f(status="Отложено")[1] == 1
+    # счётчики глобальны: на общей (QA) БД есть чужие потребности с теми же статусами — их вычитаем
+    with pools[0].connection() as c:
+        foreign = dict(c.execute(
+            "SELECT status, count(*) FROM app.jira_need WHERE jira_key NOT LIKE %s GROUP BY status",
+            (f"{P}-%",)).fetchall())
     counts = {g[1]: g[3] for g in repo.need_group_counts()["groups"] if g[1].startswith("kont35")}
-    assert counts == {"kont35-a": 2, "kont35-b": 2}  # счётчики пересекаются, не суммируются
+    own = {"kont35-a": 2, "kont35-b": 2}  # счётчики пересекаются, не суммируются
+    n = lambda *names: sum(foreign.get(x, 0) for x in names)  # noqa: E731
+    ext = {"kont35-a": n("Требуется кандидат", "Интервью не пройдено"),
+           "kont35-b": n("Интервью не пройдено", "Кандидат назначен")}
+    assert counts == {k: own[k] + ext[k] for k in own}
 
 
 def test_created_range_sort_direction_and_other_filters(repo):

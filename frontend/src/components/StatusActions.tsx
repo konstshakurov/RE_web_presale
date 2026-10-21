@@ -209,7 +209,7 @@ function StatusForm({
           Перевести потребность в «{action.target_status}»?
         </p>
       )}
-      {action.action === "hire" && shown.length > 0 && <p className="hint">Поля ставки предзаполнены из потребности и обязательны в Jira.</p>}
+      {action.action === "hire" && shown.length > 0 && <p className="hint">Предзаполнено из потребности. Обязательно в Jira.</p>}
       {shown.map((f) => {
         const required = f.required || f.kind === "reason";
         return (

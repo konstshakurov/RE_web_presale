@@ -66,7 +66,7 @@ def test_tc02_valid_ldap_not_in_list_denied_no_session_and_same_text(env):
     assert not repo.sessions and "re_session" not in c.cookies
 
 
-@pytest.mark.parametrize("pw", ["", " ", "\x00"])
+@pytest.mark.parametrize("pw", [" ", "\x00"])
 def test_tc04_empty_like_password_never_creates_session(env, pw):
     app, repo, _ = env
     r = login(client_for(app), "ivan", pw)
@@ -74,12 +74,36 @@ def test_tc04_empty_like_password_never_creates_session(env, pw):
 
 
 @pytest.mark.parametrize("name", [
-    "*", "*)(uid=*", "ivan)(|(uid=*", "ivan\\00", "ivan,cn=users", "  ", "",
+    "*", "*)(uid=*", "ivan)(|(uid=*", "ivan\\00", "ivan,cn=users",
 ])
 def test_tc05_injection_like_logins_are_not_accepted(env, name):
     app, repo, _ = env
     r = login(client_for(app), name)
     assert r.status_code == 401 and not repo.sessions
+
+
+def _assert_schema_rejection(r, repo, ldap, secret=None):
+    # FR-024/NFR-006 не требуют именно 401 для пустого ввода: пустой логин/пароль - ошибка
+    # формата запроса (422, штатная валидация схемы), LDAP при этом не вызывается и сессия
+    # не создаётся. Раскрытия причины отказа аутентификации (неверный пароль / нет в списке)
+    # в ответе нет. KON-110.
+    assert r.status_code == 422 and not repo.sessions and ldap.calls == []
+    assert DENIED_TEXT not in r.text and "re_session" not in r.cookies
+    if secret:
+        assert secret not in r.text
+
+
+def test_tc04_empty_password_is_schema_error_without_ldap_call(env):
+    app, repo, ldap = env
+    r = login(client_for(app), "ivan", "")
+    _assert_schema_rejection(r, repo, ldap)
+
+
+@pytest.mark.parametrize("name", ["", "  "])
+def test_tc05_blank_login_is_schema_error_without_ldap_call(env, name):
+    app, repo, ldap = env
+    r = login(client_for(app), name)
+    _assert_schema_rejection(r, repo, ldap, FAKE_PASSWORD)
 
 
 def test_tc05b_login_is_normalized_but_not_wildcarded(env):

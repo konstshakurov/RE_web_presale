@@ -272,7 +272,7 @@ describe("Столбец «Статус»: кнопки", () => {
     expect(calls.filter((c) => c.url.includes("/sync/needs?")).length).toBeGreaterThan(1);
   });
 
-  it("«Найм»: поля ставки предзаполнены из потребности", async () => {
+  it("«Найм»: подсказка и предзаполнение из потребности", async () => {
     actions = {
       need_key: "AN-5919",
       status,
@@ -283,6 +283,7 @@ describe("Столбец «Статус»: кнопки", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Найм, AN-5919" }));
     const dlg = screen.getByRole("dialog", { name: "Найм" });
     expect(within(dlg).getByLabelText(/Включает НДС/)).toHaveValue("v1");
+    expect(within(dlg).getByText("Предзаполнено из потребности. Обязательно в Jira.")).toBeInTheDocument();
     await userEvent.click(within(dlg).getByRole("button", { name: "Перевести в «Найм»" }));
     await waitFor(() => expect(posts("/status")).toHaveLength(1));
     expect(posts("/status")[0].body).toEqual({ action: "hire", comment: "", fields: { cf_vat: "v1" } });

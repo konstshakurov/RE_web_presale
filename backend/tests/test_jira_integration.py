@@ -228,6 +228,10 @@ class TestLogin:
             adapter.login(PROBE_USER, FAKE_PROBE_PASSWORD)
 
         assert exc.value.code == CODE_JIRA_UNAVAILABLE
+        # KON-119: без ведущего «: » и без внутреннего ID требования
+        assert exc.value.message.startswith("Превышено время ожидания ответа Jira")
+        assert "NFR" not in exc.value.message
+        assert not exc.value.message.startswith(":")
 
     def test_server_error_is_jira_unavailable(self, adapter_factory):
         handler = router(default=lambda: error_response(["ошибка"], 500))

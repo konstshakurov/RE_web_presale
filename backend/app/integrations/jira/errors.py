@@ -136,7 +136,18 @@ def classify(exc: BaseException) -> JiraIntegrationError:
             status=exc.status,
         )
 
-    if isinstance(exc, (JiraTimeoutError, JiraUnavailableError)):
+    if isinstance(exc, JiraTimeoutError):
+        # Лимит вызова - NFR-009. str(exc) у таймаута начинается с «: » (пустые метод и путь)
+        # и содержит внутренний ID требования, поэтому текст для пользователя строим сами (KON-119).
+        limit = f"{exc.timeout:.0f}" if exc.timeout else "10"
+        return JiraIntegrationError(
+            f"Превышено время ожидания ответа Jira ({limit} с).",
+            code=CODE_JIRA_UNAVAILABLE,
+            status=exc.status,
+            retryable=True,
+        )
+
+    if isinstance(exc, JiraUnavailableError):
         return JiraIntegrationError(
             str(exc) or "Jira не отвечает",
             code=CODE_JIRA_UNAVAILABLE,

@@ -191,20 +191,20 @@ afterEach(() => {
 describe("Потребности: сопоставление", () => {
   it("«Сопоставить»: POST с CSRF, индикатор не блокирует интерфейс, затем кандидаты", async () => {
     counts = {};
-    let polls = 0;
+    // опрос отвечает «идёт», пока тест сам не отпустит расчёт: иначе под нагрузкой индикатор успевает исчезнуть
+    let finished = false;
     serve((url, method) => {
       if (url.endsWith("/needs/AN-1/match") && method === "POST")
         return json(state({ status: "running", items: [], total: 0, evaluated: 0, calculated_at: null, stage: "screening" }), 202);
-      if (url.includes("/needs/AN-1/match?")) {
-        polls += 1;
-        return json(polls < 2 ? state({ status: "running", items: [], total: 0, calculated_at: null }) : state());
-      }
+      if (url.includes("/needs/AN-1/match?"))
+        return json(finished ? state() : state({ status: "running", items: [], total: 0, calculated_at: null }));
     });
     renderAt("/needs");
     await userEvent.click(await screen.findByRole("button", { name: "Сопоставить AN-1" }));
     expect(await screen.findByRole("status")).toHaveTextContent(/Расчёт идёт/);
     // интерфейс доступен: кнопка «Обновить» не заблокирована
     expect(screen.getByRole("button", { name: "Обновить" })).toBeEnabled();
+    finished = true;
     expect(await screen.findByText("Тестов Тест")).toBeInTheDocument();
     expect(called("POST", "/needs/AN-1/match")).toHaveLength(1);
     expect(screen.getByText("82%")).toBeInTheDocument();

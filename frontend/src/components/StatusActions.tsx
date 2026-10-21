@@ -72,8 +72,8 @@ export function StatusDialog({ need, actionKey, onClose, onDone }: DialogProps) 
   }
 
   useEffect(() => {
+    // однократно при монтировании диалога; плагин react-hooks в проекте не подключён
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loaded && action) return <StatusForm need={need} action={action} onClose={onClose} onDone={onDone} />;

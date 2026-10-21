@@ -19,6 +19,25 @@
   POST /__qa/put {"key","summary","status","project","type","created_days_ago","fields":{...}}
                                             создать/заменить задачу с произвольными полями (KON-63: ставки);
   GET  /__qa/stats                          счётчики запросов чтения
+Запись (KON-113, NFR-009; нужна cookie ``fake-session-*``):
+  GET  /rest/api/2/issue/{key}/transitions?expand=transitions.fields   переходы из текущего статуса
+  POST /rest/api/2/issue/{key}/transitions   переход: id 21 «Кандидат назначен», 31 «Поиск кандидата»,
+                                            801 «Найм» (поля НДС/валюта/единица), 171 «Кандидатов нет»
+                                            (поле «Причина»); комментарий - update.comment[].add.body;
+                                            неизвестный/недоступный id -> 500 (как Jira 8.13, проба D3)
+  PUT  /rest/api/2/issue/{key}               поля (assignee, customfield_*), 204
+  POST /rest/api/2/issue/{key}/attachments   multipart, нужен X-Atlassian-Token: no-check; тело не хранится
+  POST /rest/api/2/issue/{key}/comment       комментарий
+  POST /rest/scriptrunner/latest/custom/rateCalculationLogic   ставка (формат KON-99); пустая ставка и
+                                            несуществующий ключ -> 500, неверные id справочников -> 200 без записи
+  POST /__qa/delay {"delay": сек, "ops": ["fields","attach","transition","comment","rate"]}
+                                            искусственная задержка перед ответом на указанные операции
+                                            (ops пусто - на все записи); {"delay":0} снимает
+  POST /__qa/write_fail {"mode": "none|500|503|401", "ops": [...]}   отказ записи указанных операций
+  POST /__qa/drop {"regex": "^ANALYTICS-9[0-9]{5}$"}   удалить задачи по ключу (очистка синтетики)
+  GET  /__qa/writes[?clear=1]               журнал записей (операция, ключ, длительность на стороне фейка)
+  GET  /__qa/issue/{key}                    состояние: поля, комментарии, вложения (имена)
+  /__qa/gen принимает "rate": true - потребности со ставкой (ориентир ставки, NFR-002)
 Все данные вымышленные. Набор строится кодом, детерминированно, относительно момента старта.
 """
 import json
@@ -53,6 +72,51 @@ ISSUES: dict = {}          # key -> {"key", "project", "type", "fields": {...}, 
 EPICS: dict = {}           # key -> {"name", "summary", "fields"}
 FAIL = {"mode": "none", "delay": 0.0}
 STATS = {"search": 0, "issue": 0, "epic": 0, "epic_children": 0, "denied": 0}
+DELAY = {"delay": 0.0, "ops": []}        # KON-113: управляемая задержка записи
+WFAIL = {"mode": "none", "ops": []}      # KON-113: отказ записи
+WLOG: list = []                          # журнал записей
+EXTRA: dict = {}                         # key -> {"comments": [...], "attachments": [...]}
+KEY_RE = r"[A-Z][A-Z0-9_]*-\d+"
+#: справочники ставки (проба KON-99): id -> значение
+RATE_OPTS = {
+    "customfield_21105": {"22411": "Клиент", "22412": "Производство"},
+    "customfield_20810": {"20999": "Да", "21000": "Нет"},
+    "customfield_20811": {"21001": "руб.", "21004": "KZT", "21002": "EUR", "21005": "USD", "21003": "GBR"},
+    "customfield_20812": {"21006": "ч (час)"},
+}
+#: переходы: (id, имя, целевой статус)
+TRANSITIONS = (("21", "Кандидат назначен", "Кандидат назначен"), ("31", "Поиск кандидата", "Поиск кандидата"),
+               ("801", "Найм", "Найм"), ("171", "Кандидатов нет", "Кандидатов нет"))
+
+
+def _tr_fields(tid):
+    if tid == "801":
+        return {fid: {"required": True, "name": nm, "allowedValues": [
+                    {"id": i, "name": v} for i, v in RATE_OPTS[fid].items()]}
+                for fid, nm in (("customfield_20810", "Включает НДС"), ("customfield_20811", "Валюта"),
+                                ("customfield_20812", "Единица измерения"))}
+    if tid == "171":
+        return {"customfield_16100": {"required": True, "name": "Причина отсутствия кандидата",
+                                      "allowedValues": [{"id": "30001", "name": "Нет подходящих"},
+                                                        {"id": "30002", "name": "Клиент отказался"}]}}
+    return {}
+
+
+def _apply_delay(op: str) -> None:
+    if DELAY["delay"] and (not DELAY["ops"] or op in DELAY["ops"]):
+        time.sleep(DELAY["delay"])
+
+
+def _wlog(op: str, key: str, t0: float, code: int) -> None:
+    WLOG.append({"op": op, "key": key, "server_ms": round((time.perf_counter() - t0) * 1000), "code": code})
+
+
+def _gen_rate(i: int) -> dict:
+    """Ставка для нагрузочных потребностей: рубли с/без НДС, USD, EUR - разные группы ориентира."""
+    cur = ("руб.", "руб.", "руб.", "USD", "EUR")[i % 5]
+    return {"customfield_20809": 2000 + (i * 37) % 2500, "customfield_20811": {"value": cur},
+            "customfield_20810": {"value": "да" if i % 3 else "нет"}, "customfield_20812": {"value": "час"},
+            "customfield_21105": {"value": "от клиента" if i % 4 == 0 else "от производства"}}
 NOW0 = datetime.now(UTC)
 
 
@@ -216,6 +280,17 @@ class Handler(BaseHTTPRequestHandler):
     # --- управление сценарием ---
     def _qa(self, method, path):
         global NOW0
+        if method == "GET" and path == "/__qa/writes":
+            out = list(WLOG)
+            if "clear=1" in (self.path or ""):
+                WLOG.clear()
+            return self._send(200, {"writes": out})
+        if method == "GET" and path.startswith("/__qa/issue/"):
+            it = ISSUES.get(path.rsplit("/", 1)[-1])
+            if not it:
+                return self._send(404)
+            return self._send(200, {"fields": it["fields"],
+                                    **EXTRA.get(it["key"], {"comments": [], "attachments": []})})
         if method == "GET" and path == "/__qa/stats":
             return self._send(200, {**STATS, "issues": len(ISSUES), "fail": FAIL})
         if method != "POST":
@@ -224,6 +299,10 @@ class Handler(BaseHTTPRequestHandler):
         with LOCK:
             if path == "/__qa/reset":
                 FAIL.update(mode="none", delay=0.0)
+                DELAY.update(delay=0.0, ops=[])
+                WFAIL.update(mode="none", ops=[])
+                WLOG.clear()
+                EXTRA.clear()
                 for k in STATS:
                     STATS[k] = 0
                 seed()
@@ -257,7 +336,7 @@ class Handler(BaseHTTPRequestHandler):
                          STATUSES[i % len(STATUSES)] if status == "mixed" else status,
                          f"Аналитик нагрузочный {start + i}: интеграции, REST, SQL",
                          created, upd, description="Нагрузочная потребность. Требования: SQL, BPMN.",
-                         customfield_10101=f"CLN-{1 + i % 3}")
+                         customfield_10101=f"CLN-{1 + i % 3}", **(_gen_rate(i) if data.get("rate") else {}))
                 return self._send(200, {"issues": len(ISSUES)})
             if path == "/__qa/put":
                 now = datetime.now(UTC)
@@ -267,16 +346,142 @@ class Handler(BaseHTTPRequestHandler):
                      str(data.get("summary", "Аналитик (QA put)")),
                      now - timedelta(days=float(data.get("created_days_ago", 1))), now, **fields)
                 return self._send(200, {"issues": len(ISSUES)})
+            if path == "/__qa/drop":
+                # KON-113: удалить только свои синтетические задачи по регулярному выражению ключа
+                rx = re.compile(str(data["regex"]))
+                gone = [k for k in ISSUES if rx.match(k)]
+                for k in gone:
+                    ISSUES.pop(k, None)
+                    EXTRA.pop(k, None)
+                return self._send(200, {"dropped": len(gone), "issues": len(ISSUES)})
+            if path == "/__qa/delay":
+                DELAY.update(delay=float(data.get("delay", 0)), ops=list(data.get("ops") or []))
+                return self._send(200, DELAY)
+            if path == "/__qa/write_fail":
+                WFAIL.update(mode=str(data.get("mode", "none")), ops=list(data.get("ops") or []))
+                return self._send(200, WFAIL)
             if path == "/__qa/fail":
                 FAIL.update(mode=str(data.get("mode", "none")), delay=float(data.get("delay", 0)))
                 return self._send(200, FAIL)
         return self._send(404)
+
+    # --- запись (KON-113) ---
+    def _write(self, method, path) -> bool:
+        """Операции записи Jira; True - обработано. Задержка и отказ - по сценарию."""
+        ops = (
+            ("fields", "PUT", rf"^/rest/api/2/issue/({KEY_RE})$"),
+            ("attach", "POST", rf"^/rest/api/2/issue/({KEY_RE})/attachments$"),
+            ("transition", "POST", rf"^/rest/api/2/issue/({KEY_RE})/transitions$"),
+            ("comment", "POST", rf"^/rest/api/2/issue/({KEY_RE})/comment$"),
+            ("rate", "POST", r"^/rest/scriptrunner/latest/custom/rateCalculationLogic$"),
+        )
+        op = key = None
+        for name, meth, rx in ops:
+            m = re.match(rx, path)
+            if m and meth == method:
+                op, key = name, (m.group(1) if m.groups() else "")
+                break
+        if op is None:
+            return False
+        length = int(self.headers.get("Content-Length") or 0)
+        raw = self.rfile.read(length) if length else b""
+        t0 = time.perf_counter()
+        if "fake-session-" not in (self.headers.get("Cookie") or ""):
+            self._send(401, {"errorMessages": ["not authenticated"]})
+            return True
+        _apply_delay(op)
+        if WFAIL["mode"] != "none" and (not WFAIL["ops"] or op in WFAIL["ops"]):
+            code = int(WFAIL["mode"])
+            _wlog(op, key or "", t0, code)
+            self._send(code, {"errorMessages": ["write failed (fake, scenario)"]})
+            return True
+        try:
+            body = json.loads(raw) if raw and op != "attach" else {}
+        except ValueError:
+            self._send(400, {"errorMessages": ["bad json"]})
+            return True
+        with LOCK:
+            code, payload = self._write_apply(op, key, body, raw)
+        _wlog(op, key or "", t0, code)
+        if code == 204:
+            self.send_response(204)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+        else:
+            self._send(code, payload)
+        return True
+
+    def _write_apply(self, op, key, body, raw):
+        if op == "rate":
+            it = ISSUES.get(str(body.get("issueKey") or ""))
+            if it is None:
+                return 500, {"errorMessages": ["NullPointerException (fake, KON-99)"]}
+            if str(body.get("customfield_20809", "")).strip() == "":
+                return 500, {"errorMessages": ["NumberFormatException: empty String (fake, KON-99)"]}
+            if "customfield_21105" not in body:
+                return 200, {}      # Jira молча игнорирует (KON-99)
+            for fid, opts in RATE_OPTS.items():
+                if str(body.get(fid)) not in opts:
+                    return 200, {}  # неверный id справочника: 200 без записи
+            f = it["fields"]
+            f["customfield_20809"] = float(str(body["customfield_20809"]))
+            for fid, opts in RATE_OPTS.items():
+                oid = str(body[fid])
+                f[fid] = {"id": oid, "value": opts[oid]}
+            it["updated"] = datetime.now(UTC)
+            return 200, {}
+        it = ISSUES.get(key)
+        if it is None:
+            return 404, {"errorMessages": ["Issue Does Not Exist"]}
+        ex = EXTRA.setdefault(key, {"comments": [], "attachments": []})
+        if op == "fields":
+            fields = body.get("fields")
+            if not isinstance(fields, dict) or not fields:
+                return 400, {"errorMessages": ["fields required"]}
+            it["fields"].update(fields)
+            it["updated"] = datetime.now(UTC)
+            return 204, None
+        if op == "comment":
+            text = str(body.get("body") or "")
+            ex["comments"].append(text)
+            return 201, {"id": str(len(ex["comments"])), "body": text, "author": {"name": "qa"}}
+        if op == "attach":
+            if self.headers.get("X-Atlassian-Token") != "no-check":
+                return 403, {"errorMessages": ["XSRF check failed"]}
+            m = re.search(rb'filename="([^"]+)"', raw[:2000])
+            name = m.group(1).decode("utf-8", "replace") if m else "file"
+            ex["attachments"].append({"filename": name, "bytes": len(raw)})
+            it["updated"] = datetime.now(UTC)
+            return 200, [{"id": str(len(ex["attachments"])), "filename": name, "size": len(raw)}]
+        if op == "transition":
+            tid = str((body.get("transition") or {}).get("id"))
+            cur = it["fields"]["status"]["name"]
+            tr = next((t for t in TRANSITIONS if t[0] == tid and t[2] != cur), None)
+            if tr is None:
+                return 500, {"errorMessages": ["Внутренняя ошибка сервера (fake, D3)"]}
+            given = body.get("fields") or {}
+            miss = [fid for fid, sp in _tr_fields(tid).items() if sp["required"] and fid not in given]
+            if miss:
+                return 400, {"errors": {m: "required" for m in miss}, "errorMessages": []}
+            it["fields"].update(given)
+            for c in ((body.get("update") or {}).get("comment") or []):
+                ex["comments"].append(str((c.get("add") or {}).get("body") or ""))
+            it["fields"]["status"] = {"name": tr[2]}
+            it["updated"] = datetime.now(UTC)
+            return 204, None
+        return 404, {}
+
+    def do_PUT(self):
+        if not self._write("PUT", urlparse(self.path).path):
+            self._send(404)
 
     # --- вход ---
     def do_POST(self):
         path = urlparse(self.path).path
         if path.startswith("/__qa/"):
             return self._qa("POST", path)
+        if self._write("POST", path):
+            return
         length = int(self.headers.get("Content-Length") or 0)
         try:
             data = json.loads(self.rfile.read(length) or b"{}")
@@ -342,6 +547,15 @@ class Handler(BaseHTTPRequestHandler):
                 page = [_render(i, fields) for i in found[start:start + size]]
                 return self._send(200, {"startAt": start, "maxResults": size, "total": len(found),
                                         "issues": page})
+            mt = re.match(rf"^/rest/api/2/issue/({KEY_RE})/transitions$", path)
+            if mt:
+                it = ISSUES.get(mt.group(1))
+                if it is None:
+                    return self._send(404, {"errorMessages": ["Issue Does Not Exist"]})
+                cur = it["fields"]["status"]["name"]
+                return self._send(200, {"transitions": [
+                    {"id": t[0], "name": t[1], "to": {"name": t[2]}, "hasScreen": bool(_tr_fields(t[0])),
+                     "fields": _tr_fields(t[0])} for t in TRANSITIONS if t[2] != cur]})
             m = re.match(r"^/rest/api/2/issue/([A-Z][A-Z0-9_]*-\d+)$", path)
             if m:
                 STATS["issue"] += 1

@@ -1,0 +1,498 @@
+{
+ "assign": {
+  "files": {
+   "main": 71,
+   "extra": 72
+  },
+  "S1_first_assign_no_delay": {
+   "total_s": {
+    "n": 20,
+    "p50": 0.245,
+    "p95": 0.259,
+    "max": 0.264,
+    "min": 0.239,
+    "mean": 0.246
+   },
+   "per_call_s": {
+    "fields": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "attach": {
+     "n": 40,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "transition": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "rate": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    }
+   },
+   "calls_per_run": [
+    "fields",
+    "attach",
+    "attach",
+    "transition",
+    "rate"
+   ]
+  },
+  "S1b_reassign_with_comment_no_delay": {
+   "total_s": {
+    "n": 20,
+    "p50": 0.242,
+    "p95": 0.261,
+    "max": 0.282,
+    "min": 0.238,
+    "mean": 0.246
+   },
+   "per_call_s": {
+    "fields": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "attach": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "comment": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    },
+    "rate": {
+     "n": 20,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    }
+   }
+  },
+  "S1c_status_change_no_delay": {
+   "total_s": {
+    "n": 10,
+    "p50": 0.063,
+    "p95": 0.065,
+    "max": 0.065,
+    "min": 0.059,
+    "mean": 0.062
+   },
+   "per_call_s": {
+    "transition": {
+     "n": 10,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "min": 0.0,
+     "mean": 0.0
+    }
+   }
+  },
+  "S2_delay_9s": {
+   "fields": {
+    "http": 200,
+    "total_s": 9.21,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "delayed_call_s": [
+     9.0
+    ]
+   },
+   "attach": {
+    "http": 200,
+    "total_s": 9.2,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "delayed_call_s": [
+     9.0
+    ]
+   },
+   "transition": {
+    "http": 200,
+    "total_s": 9.21,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "delayed_call_s": [
+     9.0
+    ]
+   },
+   "rate": {
+    "http": 200,
+    "total_s": 9.2,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "delayed_call_s": [
+     9.0
+    ]
+   },
+   "comment": {
+    "http": 200,
+    "total_s": 9.24,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "delayed_call_s": [
+     9.0
+    ]
+   },
+   "all_calls_9s": {
+    "http": 200,
+    "total_s": 36.2,
+    "rate_pending": false,
+    "status": "Кандидат назначен",
+    "calls": [
+     [
+      "fields",
+      9.0
+     ],
+     [
+      "attach",
+      9.0
+     ],
+     [
+      "transition",
+      9.0
+     ],
+     [
+      "rate",
+      9.0
+     ]
+    ]
+   }
+  },
+  "S3_delay_11s": {
+   "fields": {
+    "http": 503,
+    "elapsed_s": 10.04,
+    "code": "jira_unavailable",
+    "step": "fields",
+    "completed": [],
+    "message": ": Превышен лимит 10 с на вызов Jira (NFR-009)",
+    "retry": {
+     "http": 200,
+     "elapsed_s": 0.21,
+     "status": "Кандидат назначен",
+     "rate_pending": false,
+     "sent_completed": []
+    },
+    "jira_state_after_timeout_before_retry": {
+     "attachments": 0,
+     "comments": 0,
+     "status": "Поиск кандидата",
+     "rate": 2500
+    },
+    "jira_state_final": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    }
+   },
+   "attach": {
+    "http": 503,
+    "elapsed_s": 10.03,
+    "code": "jira_unavailable",
+    "step": "attach:71",
+    "completed": [
+     "fields"
+    ],
+    "message": ": Превышен лимит 10 с на вызов Jira (NFR-009)",
+    "retry": {
+     "http": 200,
+     "elapsed_s": 0.27,
+     "status": "Кандидат назначен",
+     "rate_pending": false,
+     "sent_completed": [
+      "fields"
+     ]
+    },
+    "jira_state_after_timeout_before_retry": {
+     "attachments": 1,
+     "comments": 0,
+     "status": "Поиск кандидата",
+     "rate": 2500
+    },
+    "jira_state_final": {
+     "attachments": 3,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    }
+   },
+   "transition": {
+    "http": 503,
+    "elapsed_s": 10.08,
+    "code": "jira_unavailable",
+    "step": "transition",
+    "completed": [
+     "fields",
+     "attach:71"
+    ],
+    "message": ": Превышен лимит 10 с на вызов Jira (NFR-009)",
+    "retry": {
+     "http": 200,
+     "elapsed_s": 0.17,
+     "status": "Кандидат назначен",
+     "rate_pending": false,
+     "sent_completed": [
+      "fields",
+      "attach:71"
+     ]
+    },
+    "jira_state_after_timeout_before_retry": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2500
+    },
+    "jira_state_final": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    }
+   },
+   "comment": {
+    "http": 503,
+    "elapsed_s": 10.07,
+    "code": "jira_unavailable",
+    "step": "comment",
+    "completed": [
+     "fields",
+     "attach:71"
+    ],
+    "message": ": Превышен лимит 10 с на вызов Jira (NFR-009)",
+    "retry": {
+     "http": 200,
+     "elapsed_s": 0.2,
+     "status": "Кандидат назначен",
+     "rate_pending": false,
+     "sent_completed": [
+      "fields",
+      "attach:71"
+     ]
+    },
+    "jira_state_after_timeout_before_retry": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2500
+    },
+    "jira_state_final": {
+     "attachments": 1,
+     "comments": 2,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    }
+   },
+   "rate": {
+    "http": 200,
+    "elapsed_s": 10.08,
+    "code": null,
+    "step": null,
+    "completed": null,
+    "message": "",
+    "rate_pending": true,
+    "steps": [
+     "fields",
+     "attach:71",
+     "transition"
+    ],
+    "warnings": [
+     "Кандидат назначен, но ставка не записана в Jira: : Превышен лимит 10 с на вызов Jira (NFR-009). Введённое сохранено, повторите запись ставки"
+    ],
+    "retry": {
+     "http": 200,
+     "elapsed_s": 0.15,
+     "status": "Кандидат назначен",
+     "rate_pending": false,
+     "sent_completed": [
+      "fields",
+      "attach:71",
+      "transition"
+     ]
+    },
+    "jira_state_after_timeout_before_retry": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    },
+    "jira_state_final": {
+     "attachments": 1,
+     "comments": 1,
+     "status": "Кандидат назначен",
+     "rate": 2700.0
+    }
+   }
+  },
+  "S4_status_change_delay": {
+   "9s": {
+    "http": 200,
+    "elapsed_s": 9.06,
+    "code": null,
+    "message": null,
+    "status": "Найм"
+   },
+   "11s": {
+    "http": 503,
+    "elapsed_s": 10.02,
+    "code": "jira_unavailable",
+    "message": ": Превышен лимит 10 с на вызов Jira (NFR-009)",
+    "status": null
+   }
+  }
+ },
+ "bench": {
+  "cache": {
+   "before": 607,
+   "synthetic": 520,
+   "total": 607
+  },
+  "rate_benchmark_6m_seq": {
+   "n": 200,
+   "p50": 0.013,
+   "p95": 0.021,
+   "max": 0.029,
+   "min": 0.008,
+   "mean": 0.014
+  },
+  "rate_benchmark_12m_seq": {
+   "n": 100,
+   "p50": 0.011,
+   "p95": 0.019,
+   "max": 0.025,
+   "min": 0.008,
+   "mean": 0.012
+  },
+  "rate_benchmark_60m_seq": {
+   "n": 100,
+   "p50": 0.012,
+   "p95": 0.018,
+   "max": 0.023,
+   "min": 0.009,
+   "mean": 0.013
+  },
+  "rate_benchmark_groups": [
+   [
+    "RUB",
+    "ч (час)",
+    61
+   ],
+   [
+    "RUB",
+    "час",
+    322
+   ],
+   [
+    "USD",
+    "час",
+    109
+   ]
+  ],
+  "rate_benchmark_6m_10users": {
+   "n": 300,
+   "p50": 0.126,
+   "p95": 0.159,
+   "max": 0.177,
+   "min": 0.011,
+   "mean": 0.126,
+   "users": 10,
+   "errors": 0,
+   "wall_s": 7.4,
+   "rps": 40.5
+  },
+  "needs_list_limit100_seq": {
+   "n": 100,
+   "p50": 0.017,
+   "p95": 0.032,
+   "max": 0.037,
+   "min": 0.013,
+   "mean": 0.019
+  },
+  "needs_groups_seq": {
+   "n": 50,
+   "p50": 0.013,
+   "p95": 0.021,
+   "max": 0.023,
+   "min": 0.01,
+   "mean": 0.014
+  },
+  "jira_reads_during_cache_calls": {
+   "search": 7,
+   "issue": 0,
+   "epic": 0,
+   "epic_children": 0
+  },
+  "_note_jira_reads": "включает фоновый опрос синхронизации; список/ориентир сами Jira не вызывают",
+  "status_actions_sample": {
+   "http": 200,
+   "status": "Поиск кандидата",
+   "actions": [
+    "hire",
+    "no_candidates"
+   ]
+  },
+  "status_actions_seq_fake0": {
+   "n": 100,
+   "p50": 0.056,
+   "p95": 0.061,
+   "max": 0.069,
+   "min": 0.054,
+   "mean": 0.057
+  },
+  "status_actions_seq_fake_delay_0_5s": {
+   "n": 20,
+   "p50": 1.06,
+   "p95": 1.063,
+   "max": 1.072,
+   "min": 1.017,
+   "mean": 1.058
+  }
+ },
+ "cleanup": {
+  "fake_dropped": {
+   "dropped": 0,
+   "issues": 43
+  },
+  "fake_drop_employee": {
+   "dropped": 0,
+   "issues": 43
+  },
+  "jira_need_deleted": "0",
+  "employee_files_deleted": "6",
+  "employee_deleted": "SET\n1",
+  "left_synthetic_needs": "0",
+  "left_total_needs": "24"
+ }
+}

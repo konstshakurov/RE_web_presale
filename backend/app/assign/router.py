@@ -171,7 +171,8 @@ def assign(
     """Назначить кандидата: профиль, исполнитель, вложения, комментарий, переход «Кандидат
     назначен» (FR-008, FR-009, FR-010, FR-013), затем ставка отдельным вызовом ScriptRunner
     (CR-008, FR-018): только при «Производство». Сбой ставки - 200 с ``rate_pending`` и
-    предупреждением, назначение не откатывается."""
+    предупреждением, назначение не откатывается; истёкшая сессия Jira - 409
+    ``needs_reauthorization`` с ``completed`` (повтор запишет только ставку)."""
     inp = AssignInput(
         employee_key=body.employee_key, resume_file_id=body.resume_file_id,
         extra_file_ids=tuple(body.extra_file_ids), rate_rub=body.rate_rub,

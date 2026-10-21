@@ -339,12 +339,60 @@ def test_assign_rate_failure_is_partial_success_and_retry_writes_only_rate():
     assert [c[0] for c in j.calls if c[0] == "set_rate"] == ["set_rate"]
 
 
-@pytest.mark.parametrize("code", ["no_permission", "needs_reauthorization", "jira_unavailable"])
+@pytest.mark.parametrize("code", ["no_permission", "jira_unavailable", "jira_error"])
 def test_assign_rate_refusal_keeps_assignment_for_any_code(code):
     j = FakeJira(**PROD)
     j.fail["set_rate"] = JiraIntegrationError("отказ Jira", code=code, status=403)
     r = svc(j).assign(USER, KEY, AssignInput(EMP, rate_rub=Decimal("1")))
     assert r.rate_pending and "отказ Jira" in r.warnings[0] and "do_transition" in j.names()
+
+
+@pytest.mark.parametrize("code", ["needs_reauthorization", "auth_failed"])
+def test_assign_rate_expired_session_raises_with_completed_and_retry_writes_only_rate(code):
+    """KON-116: истёкшая сессия на шаге ставки - не rate_pending, а ошибка с completed (UC-005)."""
+    j = FakeJira(**PROD)
+    j.fail["set_rate"] = JiraIntegrationError("Сессия истекла", code=code, status=401)
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP, rate_rub=Decimal("2700"), comment="к"))
+    err = e.value
+    assert err.code == code and err.step == "rate"
+    assert "transition" in err.completed and "rate" not in err.completed
+    assert "do_transition" in j.names()                 # назначение не откатывается
+    j.fail.clear()
+    j.calls.clear()
+    j.status = "Кандидат назначен"
+    j.transitions = [T_SEARCH]
+    r2 = s.assign(USER, KEY, AssignInput(EMP, rate_rub=Decimal("2700"), comment="к",
+                                         completed=tuple(err.completed)))
+    assert not r2.rate_pending and r2.steps[-1] == "rate"
+    assert j.names().count("set_rate") == 1
+    assert not {"set_fields", "attach_file", "do_transition", "add_comment"} & set(j.names())
+
+
+def test_api_rate_expired_session_is_409_with_completed_not_rate_pending():
+    j = FakeJira(**PROD)
+    j.fail["set_rate"] = JiraIntegrationError("Сессия истекла", code=CODE_NEEDS_REAUTHORIZATION)
+    client, headers, _ = _api(j)
+    r = client.post(f"/needs/{KEY}/assign", headers=headers,
+                    json={"employee_key": EMP, "rate_rub": 2700})
+    assert r.status_code == 409
+    d = r.json()["detail"]
+    assert d["state"] == "needs_reauthorization" and d["step"] == "rate"
+    assert "transition" in d["completed"] and "rate" not in d["completed"]
+    assert "rate_pending" not in d
+
+
+def test_api_rate_server_error_and_timeout_stay_rate_pending():
+    for exc in (JiraIntegrationError("Jira 500", code="jira_error", status=500),
+                JiraIntegrationError("таймаут", code="jira_unavailable", status=503)):
+        j = FakeJira(**PROD)
+        j.fail["set_rate"] = exc
+        client, headers, _ = _api(j)
+        r = client.post(f"/needs/{KEY}/assign", headers=headers,
+                        json={"employee_key": EMP, "rate_rub": 2700})
+        assert r.status_code == 200 and r.json()["rate_pending"] is True
+        assert "transition" in r.json()["steps"]
 
 
 def test_assign_rate_sent_on_reassign_without_transition():

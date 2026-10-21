@@ -81,6 +81,10 @@ PROPOSER_PRODUCTION = "от производства"
 STEP_ATTACH = "attach:"  # + id файла
 
 
+# коды истёкшей сессии Jira: не частичный успех, а запрос пароля (роутер даёт 409)
+REAUTH_CODES = frozenset({"needs_reauthorization", "auth_failed"})
+
+
 class AssignError(Exception):
     """Отказ операции. ``message`` - текст Jira как есть либо понятная причина до отправки."""
 
@@ -460,7 +464,8 @@ class AssignService:
             step(STEP_COMMENT, lambda: self._jira.add_comment(token, need_key, text))
         rate_pending = False
         if rate is not None:
-            # назначение уже выполнено и не откатывается: сбой ставки - частичный успех (FR-029)
+            # назначение уже выполнено и не откатывается: сбой ставки - частичный успех (FR-029);
+            # исключение - истёкшая сессия Jira (409 с completed, повтор пишет только ставку)
             try:
                 self._jira_call(lambda: self._jira.set_rate(
                     token, need_key, amount=rate, vat=RATE_VAT_YES, currency=RATE_CURRENCY_RUB,
@@ -468,6 +473,8 @@ class AssignService:
                     step=STEP_RATE, completed=done)
                 done.append(STEP_RATE)
             except AssignError as err:
+                if err.code in REAUTH_CODES:
+                    raise  # истёкшая сессия: как на других шагах - 409, UI просит пароль (KON-116)
                 rate_pending = True
                 warnings.append(
                     f"Кандидат назначен, но ставка не записана в Jira: {err.message}. "

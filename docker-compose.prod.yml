@@ -1,0 +1,77 @@
+# Боевой оверлей (KON-49/KON-108). Запуск:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+name: re_web_presale
+
+services:
+  db:
+    # порты не публикуем наружу (Docker обходит ufw)
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  api:
+    ports: []
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker:
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  web:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  proxy:
+    ports:
+      - "443:443"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "https://127.0.0.1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - /opt/re_web_presale/infra/nginx/nginx.tls.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/re_web_presale/tls:/etc/nginx/tls:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

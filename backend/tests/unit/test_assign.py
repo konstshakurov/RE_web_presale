@@ -792,3 +792,49 @@ def test_unknown_transition_500_is_not_retryable_unavailable(adapter_factory, va
     with pytest.raises(JiraIntegrationError) as e:
         adapter503.do_transition(vault.seal(FAKE_RAW_TOKEN), KEY, "21", fields={}, comment="к")
     assert e.value.code == CODE_JIRA_UNAVAILABLE and e.value.retryable is True
+
+
+# --- «Поддержка» на переходе 21 (KON-122) ---
+
+SUPPORT = TransitionField("customfield_11602", "Поддержка", False,
+                          av(("11501", "Группа 51"), ("11503", "  не  ТРЕБУЕТСЯ "),
+                             ("11502", "Ментор")))
+T_ASSIGN_SUP = TransitionView("21", "Кандидат назначен", "Кандидат назначен", (SUPPORT,))
+
+
+def test_support_not_needed_sent_in_transition_fields_by_name():
+    j = FakeJira(transitions=[T_ASSIGN_SUP], customfield_11602={"id": "11502"})
+    s = svc(j)
+    s.assign(USER, KEY, AssignInput(EMP))
+    tr = next(c for c in j.calls if c[0] == "do_transition")
+    assert tr[2]["customfield_11602"] == {"id": "11503"}   # даже при другом значении на потребности
+    assert all("customfield_11602" not in c[1] for c in j.calls if c[0] == "set_fields")
+
+
+def test_support_option_missing_is_error_before_any_write():
+    other = TransitionField("customfield_11602", "Поддержка", False, av(("11501", "Группа 51")))
+    t = TransitionView("21", "Кандидат назначен", "Кандидат назначен", (other,))
+    j = FakeJira(transitions=[t])
+    with pytest.raises(AssignError) as e:
+        svc(j).assign(USER, KEY, AssignInput(EMP))
+    assert e.value.code == "support_option_missing" and "Не требуется" in e.value.message
+    assert not {"set_fields", "attach_file", "do_transition"} & set(j.names())
+
+
+def test_support_field_absent_on_screen_transition_without_it():
+    j = FakeJira()
+    svc(j).assign(USER, KEY, AssignInput(EMP))
+    tr = next(c for c in j.calls if c[0] == "do_transition")
+    assert "customfield_11602" not in tr[2]
+
+
+def test_support_retry_does_not_duplicate_attach_and_resends_field():
+    j = FakeJira(transitions=[T_ASSIGN_SUP])
+    j.tr_errors = [JiraIntegrationError("отказ", code="jira_error", status=400), None]
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP))
+    s.assign(USER, KEY, AssignInput(EMP, completed=tuple(e.value.completed)))
+    assert j.names().count("attach_file") == 1
+    trs = [c for c in j.calls if c[0] == "do_transition"]
+    assert len(trs) == 2 and all(c[2]["customfield_11602"] == {"id": "11503"} for c in trs)

@@ -69,6 +69,10 @@ F_REASON = "customfield_16100"
 #: «Нужно предоставить CV» (правило клиента): при «Да» Jira не пропускает переход 21 из-за
 #: экранного валидатора «Вложение» (проба KON-42, D1; CR-006).
 F_NEED_CV = "customfield_11506"
+#: «Поддержка»: Jira проверяет поле на переходе 21, хотя REST отдаёт required:false (проба KON-42,
+#: Z1; KON-122). Всегда «Не требуется»; id опции - из allowedValues перехода, не хардкод.
+F_SUPPORT = "customfield_11602"
+SUPPORT_NOT_NEEDED = "Не требуется"
 CV_RESTORE_WARNING = (
     "Значение 11506 «Нужно предоставить CV» осталось «Нет»: верните «Да» вручную в Jira")
 CURRENCY_NAMES = {"RUB": "руб.", "USD": "usd", "KZT": "kzt"}
@@ -185,6 +189,12 @@ def _pick(spec: TransitionField, wanted: str | None) -> str | None:
         if _norm(v.name).startswith(w + " ") or w.startswith(_norm(v.name) + " "):
             return v.id
     return None
+
+
+def _pick_exact(spec: TransitionField, wanted: str) -> str | None:
+    """Id значения справочника по точному имени (без учёта регистра и пробелов)."""
+    w = _norm(wanted)
+    return next((v.id for v in spec.allowed_values if _norm(v.name) == w), None)
 
 
 def _prefill(spec: TransitionField, need: NeedRow | None) -> str | None:
@@ -432,6 +442,15 @@ class AssignService:
                     pre = _prefill(f, need)
                     if pre:
                         in_transition[f.field_id] = {"id": pre}
+            support = by_id.get(F_SUPPORT)
+            if support is not None:  # нет на экране перехода - не отправляем и не падаем
+                option = _pick_exact(support, SUPPORT_NOT_NEEDED)
+                if option is None:
+                    raise AssignError(
+                        "support_option_missing",
+                        f"В поле «{support.name or F_SUPPORT}» перехода «{STATUS_ASSIGNED}» нет "
+                        f"значения «{SUPPORT_NOT_NEEDED}»: назначьте кандидата вручную в Jira")
+                in_transition[F_SUPPORT] = {"id": option}  # всегда, даже если на потребности другое
             missing = self._missing(t, in_transition)
             if missing:
                 raise AssignError(

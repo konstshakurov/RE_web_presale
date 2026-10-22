@@ -25,14 +25,14 @@ git rev-parse HEAD
 
 **[PowerShell]**
 ```powershell
-# 3. Соберите архив только нужных путей (backend, frontend, src, db, infra, scripts,
-#    docker-compose*.yml, .env.example, .dockerignore, .gitignore, README.md).
-#    Исключены: .git, .env*, node_modules, output/, input/, estimate/, design/, qa/,
-#    tests/, tests_load/, __pycache__, .claude/, docs/, skills/, phase.py, любые ключи.
-tar -czf re_web_presale_deploy.tar.gz `
-  backend/ frontend/ src/ db/ infra/ scripts/ `
+# 3. Соберите архив из ЗАФИКСИРОВАННОЙ версии (git archive берёт только закоммиченные файлы:
+#    без node_modules, __pycache__, .env*, output/, input/, design/, qa/ и т.п.).
+#    Не используйте tar по рабочей папке: он тянет frontend/node_modules и падает на длинных путях.
+git archive --format=tar.gz -o re_web_presale_deploy.tar.gz HEAD `
+  backend frontend src db infra scripts `
   docker-compose.yml docker-compose.prod.yml docker-compose.migrations.yml `
   .env.example .dockerignore .gitignore README.md
+# Размер архива должен быть ~0,7 МБ, не байты.
 # 4. Доставьте на ВМ:
 scp re_web_presale_deploy.tar.gz user@vm-re.simbirsoft:/tmp/
 ```

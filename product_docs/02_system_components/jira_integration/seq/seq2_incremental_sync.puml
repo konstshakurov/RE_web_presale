@@ -1,0 +1,53 @@
+@startuml
+title SEQ-2. Фоновый инкрементальный опрос потребностей (FR-028)
+participant "Scheduler (worker)" as SCH
+participant "SyncService" as SS
+database "app_db" as DB
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+
+activate SCH
+loop Каждые 5 минут (сотрудники раз в час)
+  SCH -> SS : Выполнить опрос poll(needs)
+  activate SS
+  SS -> DB : Получить активных пользователей с токеном
+  activate DB
+  DB --> SS : Логины и токены
+  deactivate DB
+  alt Нет активных пользователей
+    SS --> SCH : paused (повторная проверка через 15 с)
+  else Все токены отвергнуты ранее
+    SS -> DB : Записать ошибку needs_reauthorization
+    activate DB
+    DB --> SS : Записано
+    deactivate DB
+    SS --> SCH : needs_reauthorization (Jira не вызывается)
+  else Есть живой токен
+    SS -> DB : Взять блокировку try_lock(needs) и прочитать водяной знак
+    activate DB
+    DB --> SS : Блокировка получена, курсор since
+    deactivate DB
+    SS -> JA : Прочитать изменённые search_incremental [токен, since, ANALYTICS, Аналитик]
+    activate JA
+    loop Страницы по 100 записей
+      JA -> JIRA : Найти потребности GET /rest/api/2/search [jql updated > since ORDER BY updated ASC]
+      activate JIRA
+      JIRA --> JA : issues, total
+      deactivate JIRA
+    end
+    JA --> SS : issues
+    deactivate JA
+    SS -> DB : Сохранить потребности upsert, связать с сотрудниками по Профилю, записать успех и штамп
+    activate DB
+    DB --> SS : Записано
+    deactivate DB
+    SS --> SCH : ok [fetched, upserted]
+  end
+  deactivate SS
+end
+note over SS, JIRA
+При 401 токен помечается отвергнутым, берётся токен следующего пользователя.
+При недоступности Jira перебор прекращается, кэш остаётся прежним, штамп stale.
+end note
+deactivate SCH
+@enduml

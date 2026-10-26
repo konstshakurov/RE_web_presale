@@ -1,0 +1,75 @@
+@startuml
+title SEQ-5. Смена статуса потребности (UC-002, FR-011, FR-026)
+actor "Пользователь" as U
+participant "Frontend (SPA)" as FE
+participant "Backend api" as API
+participant "AssignService" as AS
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+
+activate U
+U -> FE : Кликнуть на статус потребности
+activate FE
+FE -> API : Получить действия GET /needs/{key}/status-actions
+activate API
+API -> AS : list_actions [логин, ключ]
+activate AS
+AS -> JA : Прочитать потребность и переходы get_issue, get_transitions
+activate JA
+JA -> JIRA : Получить потребность GET /rest/api/2/issue/{key}
+activate JIRA
+JIRA --> JA : Потребность
+deactivate JIRA
+JA -> JIRA : Получить переходы GET /rest/api/2/issue/{key}/transitions [expand=transitions.fields]
+activate JIRA
+JIRA --> JA : Переходы с полями
+deactivate JIRA
+JA --> AS : Потребность и переходы
+deactivate JA
+AS --> API : Белый список (Поиск, Найм, Кандидатов нет) пересечён с переходами Jira
+deactivate AS
+API --> FE : 200 действия, поля, справочники Jira
+deactivate API
+FE --> U : Кнопки действий
+U -> FE : Выбрать действие, указать причину и комментарий
+FE -> API : Сменить статус POST /needs/{key}/status [action, comment, fields]
+activate API
+API -> AS : change_status [логин, ключ, действие]
+activate AS
+AS -> JA : Перечитать потребность и переходы перед записью
+activate JA
+JA -> JIRA : Получить потребность и переходы GET /rest/api/2/issue/{key}, GET .../transitions
+activate JIRA
+JIRA --> JA : Актуальные данные
+deactivate JIRA
+JA --> AS : Потребность и переходы
+deactivate JA
+alt Перехода нет, не хватает полей или нет комментария
+  AS --> API : AssignError
+  API --> FE : 409 или 422 с текстом причины
+else Можно выполнить
+  AS -> JA : Выполнить переход do_transition [id, поля, комментарий]
+  activate JA
+  JA -> JIRA : Сменить статус POST /rest/api/2/issue/{key}/transitions [update.comment.add]
+  activate JIRA
+  JIRA --> JA : 204 или отказ с текстом
+  deactivate JIRA
+  JA --> AS : Результат
+  deactivate JA
+  AS -> JA : Перечитать потребность и обновить кэш
+  activate JA
+  JA -> JIRA : Получить потребность GET /rest/api/2/issue/{key}
+  activate JIRA
+  JIRA --> JA : Потребность с новым статусом
+  deactivate JIRA
+  JA --> AS : Потребность
+  deactivate JA
+  AS --> API : OpResult с новым статусом
+  API --> FE : 200 статус
+end
+deactivate AS
+deactivate API
+FE --> U : Новый статус или текст отказа Jira
+deactivate FE
+deactivate U
+@enduml

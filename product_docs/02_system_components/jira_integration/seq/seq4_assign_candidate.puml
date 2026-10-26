@@ -1,0 +1,111 @@
+@startuml
+title SEQ-4. Назначение кандидата на потребность (UC-001, FR-008, CR-006, CR-008)
+actor "Пользователь" as U
+participant "Frontend (SPA)" as FE
+participant "Backend api" as API
+participant "AssignService" as AS
+database "cv_db" as CV
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+participant "ScriptRunner (Jira)" as SR
+
+activate U
+U -> FE : Назначить сотрудника [ставка, комментарий, файлы]
+activate FE
+FE -> API : Назначить кандидата POST /needs/{key}/assign
+activate API
+API -> AS : assign [логин, ключ, вход] после require_jira_ok
+activate AS
+AS -> CV : Получить профиль сотрудника и файлы CV
+activate CV
+CV --> AS : jira_login и содержимое файлов
+deactivate CV
+AS -> JA : Перечитать потребность и переходы get_issue, get_transitions
+activate JA
+JA -> JIRA : Получить потребность GET /rest/api/2/issue/{key}
+activate JIRA
+JIRA --> JA : Потребность
+deactivate JIRA
+JA -> JIRA : Получить переходы GET /rest/api/2/issue/{key}/transitions [expand=transitions.fields]
+activate JIRA
+JIRA --> JA : Переходы и их поля
+deactivate JIRA
+JA --> AS : Потребность и переходы
+deactivate JA
+AS -> AS : Проверить до записи (переход 21 доступен, ставка, Поддержка = Не требуется)
+activate AS
+deactivate AS
+alt Проверка не пройдена
+  AS --> API : AssignError (422 или 409)
+else Проверки пройдены
+  AS -> JA : Записать профиль и исполнителя set_fields (если нет на экране перехода)
+  activate JA
+  JA -> JIRA : Изменить поля PUT /rest/api/2/issue/{key}
+  activate JIRA
+  JIRA --> JA : 204
+  deactivate JIRA
+  JA --> AS : Готово
+  deactivate JA
+  loop Каждый файл CV и материалов
+    AS -> JA : Приложить файл attach_file
+    activate JA
+    JA -> JIRA : Загрузить вложение POST /rest/api/2/issue/{key}/attachments [X-Atlassian-Token: no-check]
+    activate JIRA
+    JIRA --> JA : 200
+    deactivate JIRA
+    JA --> AS : Файл приложен
+    deactivate JA
+  end
+  AS -> JA : Выполнить переход 21 do_transition [поля, комментарий]
+  activate JA
+  JA -> JIRA : Сменить статус POST /rest/api/2/issue/{key}/transitions [update.comment.add]
+  activate JIRA
+  JIRA --> JA : 204 или 400 attachment (валидатор при customfield_11506 = Да)
+  deactivate JIRA
+  opt Валидатор Вложение отклонил переход и 11506 = Да (обход CR-006)
+    JA -> JIRA : Временно снять правило PUT /rest/api/2/issue/{key} [customfield_11506 = Нет]
+    activate JIRA
+    JIRA --> JA : 204
+    deactivate JIRA
+    JA -> JIRA : Повторить переход POST /rest/api/2/issue/{key}/transitions
+    activate JIRA
+    JIRA --> JA : 204
+    deactivate JIRA
+    JA -> JIRA : Вернуть правило PUT /rest/api/2/issue/{key} [customfield_11506 = Да], всегда
+    activate JIRA
+    JIRA --> JA : 204
+    deactivate JIRA
+  end
+  JA --> AS : Переход выполнен или отказ с текстом Jira
+  deactivate JA
+  opt Кто предлагает ставку = Производство
+    AS -> JA : Записать ставку set_rate [сумма, НДС Да, RUB, час]
+    activate JA
+    JA -> SR : Внести ставку POST /rest/scriptrunner/latest/custom/rateCalculationLogic
+    activate SR
+    SR --> JA : 200 (запись не гарантирована)
+    deactivate SR
+    JA -> JIRA : Сверить запись GET /rest/api/2/issue/{key} [fields=ставка, НДС, валюта, единица]
+    activate JIRA
+    JIRA --> JA : Поля ставки
+    deactivate JIRA
+    JA --> AS : Ставка записана или jira_error (rate_pending)
+    deactivate JA
+  end
+  AS -> JA : Перечитать потребность и обновить кэш get_issue
+  activate JA
+  JA -> JIRA : Получить потребность GET /rest/api/2/issue/{key}
+  activate JIRA
+  JIRA --> JA : Потребность с новым статусом
+  deactivate JIRA
+  JA --> AS : Потребность
+  deactivate JA
+  AS --> API : OpResult [steps, warnings, rate_pending]
+end
+deactivate AS
+API --> FE : 200 статус, steps, warnings, rate_pending (при отказе код и текст причины)
+deactivate API
+FE --> U : Кандидат назначен; при rate_pending предложить повторить запись ставки
+deactivate FE
+deactivate U
+@enduml

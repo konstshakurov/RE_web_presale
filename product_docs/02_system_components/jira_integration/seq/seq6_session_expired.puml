@@ -1,0 +1,59 @@
+@startuml
+title SEQ-6. Истёкшая сессия Jira и повторный ввод пароля (FR-025, FR-029)
+actor "Пользователь" as U
+participant "Frontend (SPA)" as FE
+participant "Backend api" as API
+participant "AssignService" as AS
+participant "JiraSessionService" as JS
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+
+activate U
+U -> FE : Выполнить действие в Jira, например назначение
+activate FE
+FE -> API : Назначить кандидата POST /needs/{key}/assign
+activate API
+API -> AS : assign [логин, ключ, вход]
+activate AS
+AS -> JA : Вызвать Jira с токеном пользователя
+activate JA
+JA -> JIRA : Запрос с cookie сессии
+activate JIRA
+JIRA --> JA : 401 login_required или invalid_cookie_or_expired
+deactivate JIRA
+JA --> AS : JiraIntegrationError needs_reauthorization
+deactivate JA
+AS --> API : AssignError с completed (выполненные шаги)
+deactivate AS
+API --> FE : 409 needs_reauthorization, completed
+deactivate API
+FE --> U : Запросить пароль Jira, введённые данные остаются на экране
+U -> FE : Ввести пароль
+FE -> API : Повторить вход в Jira POST /auth/jira-relogin [password]
+activate API
+API -> JS : establish [логин, пароль]
+activate JS
+JS -> JA : Войти в Jira login [логин, пароль]
+activate JA
+JA -> JIRA : Создать сессию POST /rest/auth/1/session
+activate JIRA
+JIRA --> JA : 200 новая cookie
+deactivate JIRA
+JA --> JS : SealedSession
+deactivate JA
+JS --> API : jira_status = ok (токен заменён в secret_store)
+deactivate JS
+API --> FE : 200 профиль и jira_status
+deactivate API
+FE -> API : Повторить назначение POST /needs/{key}/assign [то же тело, completed]
+activate API
+API -> AS : assign [логин, ключ, вход, completed]
+activate AS
+AS --> API : Выполнены только оставшиеся шаги, без дублей вложений и комментариев
+deactivate AS
+API --> FE : 200 результат
+deactivate API
+FE --> U : Операция завершена
+deactivate FE
+deactivate U
+@enduml

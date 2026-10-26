@@ -1,0 +1,53 @@
+@startuml
+title SEQ-1. Вход в приложение и создание сессии Jira (UC-005)
+actor "Пользователь" as U
+participant "Frontend (SPA)" as FE
+participant "Backend api" as API
+participant "LDAP (FreeIPA)" as LDAP
+database "app_db" as DB
+participant "JiraSessionService" as JS
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+
+activate U
+U -> FE : Ввести логин и пароль
+activate FE
+FE -> API : Войти POST /auth/login [логин, пароль]
+activate API
+API -> LDAP : Проверить пароль (LDAP bind)
+activate LDAP
+LDAP --> API : Результат bind
+deactivate LDAP
+alt Неверный пароль или LDAP недоступен
+  API --> FE : 401 или 503 с текстом отказа
+else Bind успешен
+  API -> DB : Проверить список допущенных и создать серверную сессию
+  activate DB
+  DB --> API : Пользователь допущен, сессия создана
+  deactivate DB
+  API -> JS : Создать сессию Jira after_login_hook [логин, пароль]
+  activate JS
+  JS -> JA : Войти в Jira login [логин, пароль]
+  activate JA
+  JA -> JIRA : Создать сессию POST /rest/auth/1/session [username, password]
+  activate JIRA
+  JIRA --> JA : 200 cookie JSESSIONID или отказ (401, блокировка, 5xx)
+  deactivate JIRA
+  JA -> JA : Запечатать токен AES-256-GCM (при успехе)
+  activate JA
+  deactivate JA
+  JA --> JS : SealedSession или JiraIntegrationError
+  deactivate JA
+  JS -> DB : Сохранить токен в secret_store (при отказе, кроме недоступности, удалить прежний)
+  activate DB
+  DB --> JS : Сохранено
+  deactivate DB
+  JS --> API : jira_status = ok или код отказа и текст Jira
+  deactivate JS
+  API --> FE : 200 профиль, роль, jira_status, cookie сессии
+end
+deactivate API
+FE --> U : Приложение открыто; при отказе Jira запись заблокирована с текстом отказа
+deactivate FE
+deactivate U
+@enduml

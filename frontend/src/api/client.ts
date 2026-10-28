@@ -6,6 +6,7 @@ import type {
   CvText,
   Dictionary,
   TechTerms,
+  DeptHead,
   EmployeeFiles,
   EmployeeOut,
   EmployeesPage,
@@ -198,6 +199,7 @@ export const api = {
     }
     return { ...first, items };
   },
+  deptHeads: () => request<DeptHead[]>("GET", "/sync/employees/dept-heads"),
   cvLimits: () => request<CvLimits>("GET", "/cv/limits"),
   cvFiles: () => request<{ items: FileOut[] }>("GET", "/cv/files"),
   employeeFiles: (key: string) =>

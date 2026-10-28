@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import type { EmployeeOut } from "../api/types";
@@ -6,28 +6,44 @@ import CvViewer from "../components/CvViewer";
 import EmployeeProfile from "../components/EmployeeProfile";
 import EmployeeSyncBar from "../components/EmployeeSyncBar";
 import ActIcon from "../components/ActIcon";
+import DeptHeadSelect, { DeptHeadHint } from "../components/DeptHeadSelect";
+import StatusChips from "../components/StatusChips";
 import Switch from "../components/Switch";
-import { FIRED_STATUS, resumeStatusOptions } from "../lib/employees";
+import {
+  EMPTY_FILTERS,
+  applyEmployeeFilters,
+  baseEmployees,
+  deptHeadLabel,
+  filtersActive,
+  statusCountOptions,
+  totalForSummary,
+  type EmployeeFilters,
+} from "../lib/employeeFilters";
+import { useDeptHeads } from "../lib/useDeptHeads";
 import { useEmployees } from "../lib/useEmployees";
 
-// «Сотрудники» (FR-002, FR-031): карточки Jira, фильтр по 10 статусам, отпуска, профиль, переход к CV.
+// «Сотрудники» (FR-002, FR-031, CR-012): карточки Jira, мультивыбор статусов, РО, поиск, «Уволенные»; профиль, переход к CV.
 export default function EmployeesPage() {
   const emps = useEmployees();
-  const [status, setStatus] = useState(""); // "" - все
-  const [search, setSearch] = useState("");
-  const [showFired, setShowFired] = useState(false);
+  const dh = useDeptHeads();
+  const [filters, setFilters] = useState<EmployeeFilters>(EMPTY_FILTERS);
   const [profile, setProfile] = useState<EmployeeOut | null>(null);
   const [cvView, setCvView] = useState<{ key: string; name: string } | null>(null);
 
   const items = emps.items ?? [];
-  // «Уволен» - не статус-чип, а тумблер: действует вместе со статусом и поиском.
-  const visible = showFired ? items : items.filter((e) => e.status !== FIRED_STATUS);
-  const q = search.trim().toLowerCase();
-  const shown = visible.filter(
-    (e) =>
-      (!status || e.status === status) &&
-      (!q || e.full_name.toLowerCase().includes(q) || e.jira_key.toLowerCase().includes(q)),
-  );
+  const patchFilters = (p: Partial<EmployeeFilters>) => setFilters((f) => ({ ...f, ...p }));
+  // Счётчики статусов и «Все» - с учётом РО и «Уволенные», без поиска.
+  const base = baseEmployees(items, filters);
+  const shown = applyEmployeeFilters(items, filters);
+  const total = totalForSummary(items, filters.showFired);
+  const active = filtersActive(filters);
+  const reset = () => setFilters(EMPTY_FILTERS);
+
+  const parts: ReactNode[] = [];
+  if (filters.statuses.length) parts.push(<span key="st">статус: <b>{filters.statuses.join(", ")}</b></span>);
+  if (filters.deptHead) parts.push(<span key="ro">РО: <b>{deptHeadLabel(filters.deptHead, dh.list)}</b></span>);
+  if (filters.search.trim()) parts.push(<span key="q">поиск: <b>«{filters.search.trim()}»</b></span>);
+  if (filters.showFired) parts.push(<b key="fired">включая уволенных</b>);
 
   return (
     <section>
@@ -40,52 +56,81 @@ export default function EmployeesPage() {
         info={emps.info}
       />
 
-      <nav className="filter" aria-label="Статусы сотрудников">
-        <button
-          type="button"
-          className={status === "" ? "filter__item filter__item--active" : "filter__item"}
-          aria-pressed={status === ""}
-          onClick={() => setStatus("")}
-        >
-          Все <span className="filter__count">{visible.length}</span>
-        </button>
-        {resumeStatusOptions(emps.counts).map((o) => (
-          <button
-            key={o.status}
-            type="button"
-            className={status === o.status ? "filter__item filter__item--active" : "filter__item"}
-            aria-pressed={status === o.status}
-            onClick={() => setStatus(o.status)}
-          >
-            {o.status} <span className="filter__count">{o.count}</span>
-          </button>
-        ))}
-      </nav>
+      <StatusChips
+        options={statusCountOptions(base)}
+        selected={filters.statuses}
+        total={base.length}
+        onChange={(statuses) => patchFilters({ statuses })}
+      />
 
-      <div className="toolbar">
-        <input
-          type="search"
-          aria-label="Поиск по ФИО и ключу"
-          placeholder="ФИО или ключ"
-          value={search}
-          maxLength={200}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Switch label="Уволенные" checked={showFired} onChange={(e) => setShowFired(e.target.checked)} />
+      <div className="toolbar toolbar--fields" role="search">
+        <label className="fld">
+          <span>Поиск</span>
+          <input
+            type="search"
+            aria-label="Поиск по ФИО и ключу"
+            placeholder="ФИО или ключ"
+            value={filters.search}
+            maxLength={200}
+            onChange={(e) => patchFilters({ search: e.target.value })}
+          />
+        </label>
+        <DeptHeadSelect value={filters.deptHead} onChange={(deptHead) => patchFilters({ deptHead })} list={dh.list} state={dh.state} />
+        <div className="switchbox">
+          <Switch label="Уволенные" checked={filters.showFired} onChange={(e) => patchFilters({ showFired: e.target.checked })} />
+        </div>
+        <DeptHeadHint state={dh.state} list={dh.list} onRetry={() => void dh.retry()} />
       </div>
+
+      {emps.items && (
+        <p className="fsum">
+          <span aria-live="polite">
+            Показано <b>{shown.length}</b> из {total}
+          </span>
+          {active && (
+            <>
+              <span>
+                {parts.map((p, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && <span aria-hidden="true"> · </span>}
+                    {p}
+                  </Fragment>
+                ))}{" "}
+                <span className="muted">(все условия сразу)</span>
+              </span>
+              <button type="button" className="link linkbtn" onClick={reset}>
+                Сбросить фильтры
+              </button>
+            </>
+          )}
+        </p>
+      )}
 
       {emps.error && (
         <p className="error" role="alert">
-          {emps.error}
+          Не удалось загрузить сотрудников. Проверьте соединение и обновите страницу.
         </p>
       )}
-      {emps.items === null && !emps.error && <p className="muted">Загрузка…</p>}
+      {emps.items === null && !emps.error && (
+        <p className="muted" role="status">
+          <span className="spinner" aria-hidden="true" /> Загрузка…
+        </p>
+      )}
 
       {emps.items &&
         (shown.length === 0 ? (
-          <div className="empty">
-            <p>Нет данных</p>
-          </div>
+          active ? (
+            <div className="empty">
+              <p>По выбранным фильтрам сотрудников нет.</p>
+              <button type="button" className="btn-secondary" onClick={reset}>
+                Сбросить фильтры
+              </button>
+            </div>
+          ) : (
+            <div className="empty">
+              <p>Нет данных</p>
+            </div>
+          )
         ) : (
           <ul className="cards">
             {shown.map((e) => (

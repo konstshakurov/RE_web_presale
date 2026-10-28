@@ -80,6 +80,7 @@ interface World {
   employees?: EmployeeOut[];
   files?: FileOut[];
   archive?: FileOut[];
+  deptHeads?: { login: string; display_name: string }[] | "fail";
   extra?: (url: string, init?: RequestInit) => Response | undefined;
 }
 
@@ -91,6 +92,9 @@ function setup(w: World, path: string) {
     if (r) return r;
     if (url.endsWith("/auth/me")) return json(ME);
     if (url.includes("/sync/employees?")) return json(employeesPage(w.employees ?? [emp()]));
+    if (url.endsWith("/sync/employees/dept-heads")) {
+      return w.deptHeads === "fail" ? json({ detail: "x" }, 500) : json(w.deptHeads ?? []);
+    }
     if (url.endsWith("/cv/limits")) return json(LIMITS);
     if (url.endsWith("/cv/files")) return json({ items: w.files ?? [] });
     if (/\/cv\/employees\/[^/]+\/files$/.test(url)) {
@@ -129,7 +133,7 @@ describe("Сотрудники", () => {
     expect(within(card).getByText(/10\.11-24\.11/)).toBeInTheDocument();
     expect(screen.getByRole("listitem", { name: "Другой Сотрудник" })).toBeInTheDocument();
     // 10 статусов без «Уволен» (он - тумблер) + «Все»
-    expect(within(screen.getByRole("navigation", { name: "Статусы сотрудников" })).getAllByRole("button")).toHaveLength(10);
+    expect(within(screen.getByRole("navigation", { name: /^Статусы сотрудников/ })).getAllByRole("button")).toHaveLength(10);
 
     await userEvent.click(screen.getByRole("button", { name: /Декрет/ }));
     expect(screen.queryByRole("listitem", { name: "Тестов Тест" })).not.toBeInTheDocument();
@@ -148,7 +152,7 @@ describe("Сотрудники", () => {
       "/employees",
     );
     await screen.findByRole("listitem", { name: "Тестов Тест" });
-    const nav = screen.getByRole("navigation", { name: "Статусы сотрудников" });
+    const nav = screen.getByRole("navigation", { name: /^Статусы сотрудников/ });
     expect(within(nav).queryByRole("button", { name: /Уволен/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("listitem", { name: "Иванов Пётр" })).not.toBeInTheDocument();
     expect(within(nav).getByRole("button", { name: /Все/ })).toHaveTextContent("2");
@@ -560,5 +564,136 @@ describe("Резюме", () => {
     setup({ employees: [emp(), emp({ jira_key: "EMP-2", full_name: "Иванов Иван" })] }, "/resumes?q=EMP-2");
     expect(await screen.findByText("Иванов Иван")).toBeInTheDocument();
     expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
+  });
+});
+
+describe("Сотрудники: фильтры статусов и РО (CR-012)", () => {
+  const HEADS = [
+    { login: "orlov", display_name: "Павел Орлов" },
+    { login: "anna", display_name: "Анна Яблокова" },
+    { login: "boris", display_name: "Борис Белов" },
+  ];
+  const WORLD = [
+    emp({ jira_key: "E-1", full_name: "Алексеев А", status: "Свободен", dept_head_login: "orlov" }),
+    emp({ jira_key: "E-2", full_name: "Борисов Б", status: "Декрет", dept_head_login: "orlov" }),
+    emp({ jira_key: "E-3", full_name: "Васильев В", status: "Свободен", dept_head_login: "anna" }),
+    emp({ jira_key: "E-4", full_name: "Григорьев Г", status: "Внутренний проект", dept_head_login: null }),
+    emp({ jira_key: "E-5", full_name: "Дмитриев Д", status: "Уволен", dept_head_login: null }),
+  ];
+  const card = (name: string) => screen.queryByRole("listitem", { name });
+  const chip = (name: RegExp) => screen.getByRole("button", { name });
+
+  async function open(over: Partial<World> = {}) {
+    setup({ employees: WORLD, deptHeads: HEADS, ...over }, "/employees");
+    await screen.findByRole("listitem", { name: "Алексеев А" });
+  }
+
+  it("мультивыбор статусов (ИЛИ), снятие одного и всех; «Все» нажат при нуле выбранных", async () => {
+    await open();
+    expect(chip(/^Все/)).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(chip(/^Свободен/));
+    await userEvent.click(chip(/^Декрет/));
+    expect(chip(/^Все/)).toHaveAttribute("aria-pressed", "false");
+    expect(chip(/^Свободен/)).toHaveAttribute("aria-pressed", "true");
+    expect(card("Алексеев А")).toBeInTheDocument();
+    expect(card("Борисов Б")).toBeInTheDocument();
+    expect(card("Васильев В")).toBeInTheDocument();
+    expect(card("Григорьев Г")).not.toBeInTheDocument();
+    expect(screen.getByText(/Показано/)).toHaveTextContent("Показано 3 из 4");
+
+    await userEvent.click(chip(/^Свободен/)); // снять один
+    expect(card("Алексеев А")).not.toBeInTheDocument();
+    expect(card("Борисов Б")).toBeInTheDocument();
+
+    await userEvent.click(chip(/^Декрет/)); // снят последний - «Все»
+    expect(chip(/^Все/)).toHaveAttribute("aria-pressed", "true");
+    expect(card("Григорьев Г")).toBeInTheDocument();
+
+    await userEvent.click(chip(/^Свободен/));
+    await userEvent.click(chip(/^Декрет/));
+    await userEvent.click(chip(/^Все/)); // «Все» снимает все выбранные
+    expect(chip(/^Декрет/)).toHaveAttribute("aria-pressed", "false");
+    expect(card("Григорьев Г")).toBeInTheDocument();
+  });
+
+  it("«РО»: по умолчанию «Все», имена по алфавиту, «Без РО» последним; счётчики учитывают РО", async () => {
+    await open();
+    const select = screen.getByLabelText("РО") as HTMLSelectElement;
+    expect(select.value).toBe("");
+    expect([...select.options].map((o) => o.text)).toEqual(["Все", "Анна Яблокова", "Борис Белов", "Павел Орлов", "Без РО"]);
+
+    await userEvent.selectOptions(select, "orlov");
+    expect(card("Алексеев А")).toBeInTheDocument();
+    expect(card("Борисов Б")).toBeInTheDocument();
+    expect(card("Васильев В")).not.toBeInTheDocument();
+    expect(chip(/^Все/)).toHaveTextContent("2");
+    expect(chip(/^Внутренний проект/)).toHaveTextContent("0");
+
+    await userEvent.selectOptions(select, "");
+    expect(card("Васильев В")).toBeInTheDocument();
+  });
+
+  it("«Без РО» и И-комбинации: статус, поиск, «Уволенные»; сброс возвращает всё", async () => {
+    await open();
+    await userEvent.selectOptions(screen.getByLabelText("РО"), "__none__");
+    expect(card("Григорьев Г")).toBeInTheDocument();
+    expect(card("Алексеев А")).not.toBeInTheDocument();
+    expect(card("Дмитриев Д")).not.toBeInTheDocument(); // уволенный скрыт
+
+    await userEvent.click(screen.getByRole("switch", { name: "Уволенные" }));
+    expect(card("Дмитриев Д")).toBeInTheDocument();
+    await userEvent.click(chip(/^Внутренний проект/));
+    expect(card("Дмитриев Д")).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Поиск по ФИО и ключу"), "нет такого");
+    expect(screen.getByText("По выбранным фильтрам сотрудников нет.")).toBeInTheDocument();
+    const sum = screen.getByText(/Показано/).closest("p")!;
+    expect(sum).toHaveTextContent("статус: Внутренний проект · РО: Без РО · поиск: «нет такого» · включая уволенных");
+
+    await userEvent.click(within(sum).getByRole("button", { name: "Сбросить фильтры" }));
+    expect((screen.getByLabelText("РО") as HTMLSelectElement).value).toBe("");
+    expect(screen.getByRole("switch", { name: "Уволенные" })).not.toBeChecked();
+    expect(screen.getByLabelText("Поиск по ФИО и ключу")).toHaveValue("");
+    expect(chip(/^Все/)).toHaveAttribute("aria-pressed", "true");
+    expect(card("Васильев В")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Сбросить фильтры" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Показано/)).toHaveTextContent("Показано 4 из 4");
+  });
+
+  it("РО загружаются: поле отключено, «Загружаем список РО…»", async () => {
+    let release: (r: Response) => void = () => {};
+    const gate = new Promise<Response>((r) => (release = r));
+    setup(
+      { employees: WORLD, extra: (u) => (u.endsWith("/dept-heads") ? (gate as unknown as Response) : undefined) },
+      "/employees",
+    );
+    await screen.findByRole("listitem", { name: "Алексеев А" });
+    expect(screen.getByLabelText("РО")).toBeDisabled();
+    expect(screen.getByLabelText("РО")).toHaveDisplayValue("Загрузка…");
+    expect(screen.getByText(/Загружаем список РО/)).toBeInTheDocument();
+    release(json(HEADS));
+    await waitFor(() => expect(screen.getByLabelText("РО")).toBeEnabled());
+  });
+
+  it("ошибка списка РО: поле отключено, остальные фильтры работают, «Повторить» перезагружает", async () => {
+    await open({ deptHeads: "fail" });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось загрузить список РО. Остальные фильтры работают.");
+    expect(screen.getByLabelText("РО")).toBeDisabled();
+    expect(screen.getByLabelText("РО")).toHaveDisplayValue("Список недоступен");
+    await userEvent.click(chip(/^Декрет/));
+    expect(card("Борисов Б")).toBeInTheDocument();
+    expect(card("Алексеев А")).not.toBeInTheDocument();
+  });
+
+  it("нет РО ни у кого: поле отключено, «Нет данных» и подсказка", async () => {
+    await open({ deptHeads: [] });
+    await waitFor(() => expect(screen.getByLabelText("РО")).toHaveDisplayValue("Нет данных"));
+    expect(screen.getByLabelText("РО")).toBeDisabled();
+    expect(screen.getByText(/фильтр недоступен/)).toBeInTheDocument();
+  });
+
+  it("пусто без фильтров - «Нет данных»", async () => {
+    setup({ employees: [], deptHeads: HEADS }, "/employees");
+    expect(await screen.findByText("Нет данных", { selector: "p" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Сбросить фильтры" })).not.toBeInTheDocument();
   });
 });

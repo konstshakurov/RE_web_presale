@@ -199,6 +199,8 @@ export interface EmployeeOut {
   note?: string | null;
   note_author?: string | null;
   note_updated_at?: string | null;
+  dept_head_login?: string | null; // РО (customfield_14401); пусто - «Без РО»
+  dept_head_display_name?: string | null;
   synced_at: string;
 }
 
@@ -549,4 +551,10 @@ export interface OpResult {
   steps: string[];
   warnings?: string[];
   rate_pending?: boolean; // назначение выполнено, ставка не записана (CR-008): повтор тем же запросом
+}
+
+// GET /sync/employees/dept-heads (DeptHeadOut, KON-136): РО для фильтра, без пустых и дублей.
+export interface DeptHead {
+  login: string;
+  display_name: string;
 }

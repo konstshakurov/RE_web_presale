@@ -22,6 +22,8 @@ from datetime import datetime
 from typing import Protocol
 
 from ..llm_gateway import AnonymizationError, GatewayError
+from ..sync.mapping import NOT_ASSIGNABLE_STATUSES
+from ..sync.repo import DISMISSED_STATUS
 from .prompts import (
     MATCH_SYSTEM,
     SKILLS_SYSTEM,
@@ -253,22 +255,34 @@ class SearchState:
 
 @dataclass(frozen=True)
 class SearchFilters:
-    """Детерминированные фильтры «Резюме», сужающие область поиска по смыслу."""
-    status: str | None = None
+    """Детерминированные фильтры «Резюме», сужающие область поиска по смыслу (по И).
+
+    ``statuses`` - между собой ИЛИ; пусто - допустимые по FR-002 (без NOT_ASSIGNABLE_STATUSES).
+    ``dept_head`` - логин РО либо NO_DEPT_HEAD («Без РО»). «Уволен» не попадает в область
+    поиска по смыслу никогда (решение владельца 28.10.2026), в т.ч. при явном статусе;
+    ``include_dismissed`` принимается для совместимости и область не расширяет."""
+    statuses: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
     match_all: bool = True
     text: str | None = None
+    dept_head: str | None = None
+    include_dismissed: bool | None = None
 
     def to_dict(self) -> dict:
-        return {"status": self.status, "tags": list(self.tags), "match_all": self.match_all,
-                "text": self.text}
+        return {"statuses": list(self.statuses), "tags": list(self.tags),
+                "match_all": self.match_all, "text": self.text, "dept_head": self.dept_head,
+                "include_dismissed": self.include_dismissed}
 
     @staticmethod
     def from_dict(d: dict | None) -> SearchFilters:
         d = d or {}
+        statuses = tuple(d.get("statuses") or ())
+        if not statuses and d.get("status"):  # прогоны, сохранённые до CR-014
+            statuses = (d["status"],)
         return SearchFilters(
-            status=d.get("status") or None, tags=tuple(d.get("tags") or ()),
-            match_all=bool(d.get("match_all", True)), text=d.get("text") or None)
+            statuses=statuses, tags=tuple(d.get("tags") or ()),
+            match_all=bool(d.get("match_all", True)), text=d.get("text") or None,
+            dept_head=d.get("dept_head") or None, include_dismissed=d.get("include_dismissed"))
 
 
 @dataclass(frozen=True)
@@ -980,9 +994,11 @@ class MatchingService:
     ) -> tuple[list[CandRow], list[Scored], list[Scored], dict[int, str]]:
         """Область поиска (допустимые статусы либо явно выбранный статус, основное CV с
         текстом, фильтры «Технология» и «Поиск») и ранжирование по технологиям и тексту."""
-        cands = self._repo.list_candidates(only_assignable=not f.status)
-        if f.status:
-            cands = [c for c in cands if c.status == f.status]
+        cands = self._repo.list_candidates(only_assignable=not f.statuses, dept_head=f.dept_head)
+        if f.statuses:
+            cands = [c for c in cands if c.status in f.statuses]
+        # решение владельца 28.10.2026: «Уволен» вне области поиска по смыслу всегда
+        cands = [c for c in cands if c.status != DISMISSED_STATUS]
         if f.tags:
             want = set(f.tags)
             cands = [c for c in cands if (want <= set(c.skills) if f.match_all
@@ -1343,6 +1359,9 @@ class MatchingService:
 
     def list_resume(self, **kw):
         return self._repo.list_resume(**kw)
+
+    def resume_status_counts(self, **kw) -> list[tuple[str, int]]:
+        return self._repo.resume_status_counts(**kw)
 
     def technologies(self) -> list[tuple[str, int]]:
         return self._repo.list_technologies()

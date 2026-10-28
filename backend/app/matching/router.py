@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Annotated
 
@@ -23,6 +24,7 @@ from pydantic import BaseModel, Field
 from ..auth.deps import SessionContext, authenticated, authenticated_csrf, require_admin
 from ..cv.repo import CvRepo
 from ..llm_gateway import AnonymizationError, GatewayError, LeakError
+from ..sync.repo import NO_DEPT_HEAD
 from .profile import guess_years, parse_sections
 from .screening import (
     DEEP_SIZE_MAX,
@@ -145,8 +147,19 @@ class SearchRequest(BaseModel):
     force: bool = Field(False, description="Пересчитать, даже если оценки в кэше")
     status: str | None = Field(
         None, max_length=128, description=(
-            "Фильтр «Статус сотрудника»; без него - все статусы, кроме Коммерческий проект, "
-            "Уволен, Декрет, Недоступен для подключения (FR-002)"))
+            "Устарело: один статус, заменён списком ``statuses`` (принимается для совместимости, "
+            "складывается со ``statuses``)"))
+    statuses: list[str] = Field(
+        default_factory=list, max_length=50, description=(
+            "Фильтр «Статус сотрудника» (чипы), между собой ИЛИ; без статусов - все, кроме "
+            "Коммерческий проект, Уволен, Декрет, Недоступен для подключения (FR-002)"))
+    dept_head: str | None = Field(
+        None, max_length=128, description=f"Фильтр «РО»: логин; «{NO_DEPT_HEAD}» - без РО")
+    include_dismissed: bool | None = Field(
+        None, description=(
+            "Принимается для совместимости и ни на что не влияет: «Уволен» никогда не входит "
+            "в область поиска по смыслу (решение владельца 28.10.2026), в т.ч. при явном "
+            "статусе; пустая область - без вызова LLM"))
     technology: list[str] = Field(default_factory=list, description="Фильтр «Технология»")
     match: str = Field("all", pattern="^(all|any)$")
     q: str | None = Field(None, max_length=200, description="Фильтр «Поиск» (текстовый)")
@@ -290,9 +303,16 @@ class ResumeItem(BaseModel):
     skills_status: str | None = Field(description="pending | ok | failed; null - не извлекались")
 
 
+class ResumeStatusCount(BaseModel):
+    status: str
+    count: int
+
+
 class ResumeList(BaseModel):
     items: list[ResumeItem]
     total: int
+    statuses: list[ResumeStatusCount] = Field(
+        description="Счётчики статусов: с учётом РО и «Уволенные», без поиска и технологий")
 
 
 class TechnologyOut(BaseModel):
@@ -410,11 +430,25 @@ def _search_out(s: SearchState) -> SearchStateOut:
         screen_total=s.screen_total, can_evaluate_next=s.can_evaluate_next)
 
 
-def _filters(status: str | None, technology: list[str] | None, match: str,
-             text: str | None) -> SearchFilters:
+def _statuses(status: Sequence[str] | str | None) -> tuple[str, ...]:
+    """Статусы без пустых и повторов, порядок сохраняется (между собой ИЛИ)."""
+    items = [status] if isinstance(status, str) else list(status or [])
+    return tuple(dict.fromkeys(x.strip() for x in items if x and x.strip()))
+
+
+def _filters(status: Sequence[str] | str | None, technology: list[str] | None, match: str,
+             text: str | None, dept_head: str | None = None,
+             include_dismissed: bool | None = None) -> SearchFilters:
     tags = tuple(sorted({t.strip().lower() for t in (technology or []) if t.strip()}))
-    return SearchFilters(status=(status or "").strip() or None, tags=tags,
-                         match_all=match == "all", text=(text or "").strip() or None)
+    return SearchFilters(
+        statuses=_statuses(status), tags=tags, match_all=match == "all",
+        text=(text or "").strip() or None, dept_head=(dept_head or "").strip() or None,
+        include_dismissed=include_dismissed)
+
+
+def _body_filters(body: SearchRequest) -> SearchFilters:
+    return _filters([*([body.status] if body.status else []), *body.statuses],
+                    body.technology, body.match, body.q, body.dept_head, body.include_dismissed)
 
 
 def _raise(exc: Exception) -> None:
@@ -531,7 +565,7 @@ def start_semantic_search(
     try:
         state = _service(request).start_search(
             ctx.login, body.query, provider_id=body.provider_id, force=body.force,
-            filters=_filters(body.status, body.technology, body.match, body.q), limit=body.limit)
+            filters=_body_filters(body), limit=body.limit)
     except (MatchingError, GatewayError) as exc:
         _raise(exc)
     log.info("matching: %s запустил поиск по смыслу", ctx.login)  # текст запроса в лог не пишем
@@ -552,7 +586,7 @@ def evaluate_next_search(
     try:
         state = _service(request).evaluate_next_search(
             ctx.login, body.query, provider_id=body.provider_id,
-            filters=_filters(body.status, body.technology, body.match, body.q), limit=body.limit)
+            filters=_body_filters(body), limit=body.limit)
     except (MatchingError, GatewayError, AnonymizationError) as exc:
         _raise(exc)
     log.info("matching: %s запустил оценку следующих в поиске", ctx.login)
@@ -564,10 +598,16 @@ def evaluate_next_search(
 def get_semantic_search(
     request: Request,
     query: str = Query(..., max_length=MAX_QUERY_CHARS + 200, description="Запрос поиска"),
-    status: str | None = Query(None, max_length=128),
+    status: Annotated[list[str] | None, Query(
+        max_length=50, description="Статус; параметр можно повторить - выбираются все (ИЛИ)")
+    ] = None,
     technology: Annotated[list[str] | None, Query()] = None,
     match: str = Query("all", pattern="^(all|any)$"),
     q: str | None = Query(None, max_length=200),
+    dept_head: str | None = Query(
+        None, max_length=128, description=f"Логин РО; «{NO_DEPT_HEAD}» - без РО"),
+    include_dismissed: bool | None = Query(
+        None, description="Совместимость: уволенные в поиске по смыслу не участвуют, см. POST"),
     limit: int = Query(10, ge=1, le=100), offset: int = Query(0, ge=0),
     ctx: SessionContext = Depends(authenticated),
 ) -> SearchStateOut:
@@ -575,7 +615,8 @@ def get_semantic_search(
     - ранжирование по технологиям и тексту без обращения к LLM."""
     try:
         return _search_out(_service(request).get_search(
-            ctx.login, query, filters=_filters(status, technology, match, q),
+            ctx.login, query,
+            filters=_filters(status, technology, match, q, dept_head, include_dismissed),
             limit=limit, offset=offset))
     except MatchingError as exc:
         _raise(exc)
@@ -710,7 +751,14 @@ def list_resume(
     request: Request,
     q: str | None = Query(None, max_length=200,
                           description="Поиск по ФИО, ключу, имени файла и тексту CV"),
-    status: str | None = Query(None, max_length=128, description="Статус сотрудника из Jira"),
+    status: Annotated[list[str] | None, Query(
+        max_length=50, description="Статус сотрудника из Jira; параметр можно повторить - "
+                                   "выбираются все (ИЛИ); одиночное значение работает как раньше",
+    )] = None,
+    dept_head: str | None = Query(
+        None, max_length=128, description=f"Логин РО; «{NO_DEPT_HEAD}» - сотрудники без РО"),
+    include_dismissed: bool = Query(
+        True, description="false - скрыть «Уволен» («Показывать уволенных» выключено)"),
     technology: Annotated[
         list[str] | None, Query(description="Технологии (повторяемый параметр)")] = None,
     match: str = Query("all", pattern="^(all|any)$",
@@ -718,14 +766,21 @@ def list_resume(
     limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0),
     _: SessionContext = Depends(authenticated),
 ) -> ResumeList:
-    """Таблица раздела «Резюме» с фильтрами без LLM. Технологии - из навыков Основного CV."""
+    """Таблица раздела «Резюме» с фильтрами без LLM. Технологии - из навыков Основного CV.
+    Все фильтры по И; ``statuses`` в ответе - счётчики чипов с учётом РО и «Уволенные»
+    (без поиска и технологий)."""
     svc = _service(request)
     svc.collect_pending_skills()
     tags = sorted({t.strip().lower() for t in (technology or []) if t.strip()})
     rows, total = svc.list_resume(
-        query=(q or "").strip() or None, status=status or None, tags=tags,
-        match_all=match == "all", limit=limit, offset=offset)
-    return ResumeList(total=total, items=[ResumeItem(
+        query=(q or "").strip() or None, status=list(_statuses(status)), tags=tags,
+        match_all=match == "all", limit=limit, offset=offset,
+        dept_head=(dept_head or "").strip() or None, include_dismissed=include_dismissed)
+    counts = svc.resume_status_counts(
+        dept_head=(dept_head or "").strip() or None, include_dismissed=include_dismissed)
+    statuses = [ResumeStatusCount(status=a, count=b) for a, b in counts]
+    return ResumeList(total=total, statuses=statuses,
+                      items=[ResumeItem(
         employee_key=r.employee_key, full_name=r.full_name, status=r.status,
         assignable=r.assignable, description=r.extra_experience, vacation_plan=r.vacation_plan,
         note=r.note, note_author=r.note_author, note_updated_at=r.note_updated_at,

@@ -117,6 +117,75 @@ def test_resume_filters_and_technologies():
     assert techs["sql"] == 1 and techs["java"] == 1
 
 
+def test_resume_multi_status_dept_head_and_counts():
+    w = _world()
+    w.repo.employees["EMP-1"].update(dept_head="ivanov")
+    w.repo.employees["EMP-2"].update(status="Ожидает подключения", dept_head="petrov")
+    w.repo.add_employee("EMP-3", "Сотрудник-03", status="Уволен", assignable=False)
+    w.repo.add_employee("EMP-4", "Сотрудник-04", status="Ожидает подключения",
+                        dept_head="ivanov")
+    client, _, _, _ = _client(w)
+
+    def keys(**params):
+        r = client.get("/resume/employees", params=params)
+        assert r.status_code == 200
+        return [i["employee_key"] for i in r.json()["items"]]
+
+    assert keys(status=["Свободен", "Уволен"]) == ["EMP-1", "EMP-3"]       # ИЛИ
+    assert keys(status="Ожидает подключения") == ["EMP-2", "EMP-4"]        # одиночный (совм.)
+    assert keys(dept_head="ivanov") == ["EMP-1", "EMP-4"]
+    assert keys(dept_head="__none__") == ["EMP-3"]                          # «Без РО»
+    assert keys(dept_head="ivanov", status="Ожидает подключения") == ["EMP-4"]   # И
+    assert keys(include_dismissed="false") == ["EMP-1", "EMP-2", "EMP-4"]
+    assert keys(dept_head="__none__", include_dismissed="false") == []
+    assert keys() == ["EMP-1", "EMP-2", "EMP-3", "EMP-4"]
+    # счётчики: с учётом РО и «Уволенные», но не поиска/технологий/статусов
+    r = client.get("/resume/employees", params={"dept_head": "ivanov", "q": "нет такого"})
+    assert r.json()["items"] == [] and r.json()["statuses"] == [
+        {"status": "Ожидает подключения", "count": 1}, {"status": "Свободен", "count": 1}]
+    r = client.get("/resume/employees", params={"include_dismissed": "false",
+                                                "status": "Свободен"})
+    assert {s["status"]: s["count"] for s in r.json()["statuses"]} == {
+        "Свободен": 1, "Ожидает подключения": 2}
+
+
+def test_semantic_search_scope_params_over_http():
+    w = _world()
+    w.repo.employees["EMP-1"].update(dept_head="ivanov")
+    w.repo.employees["EMP-2"].update(status="Ожидает подключения", dept_head="petrov")
+    w.repo.add_employee("EMP-3", "Сотрудник-03", status="Уволен", assignable=False,
+                        text="Системный аналитик SQL")
+    w.repo.set_main_cv("EMP-2", "Системный аналитик SQL")   # попадает в пул по тексту запроса
+    client, headers, _, _ = _client(w)
+    query = "Нужен системный аналитик SQL"
+
+    def scope(**body):
+        r = client.post("/resume/semantic-search", headers=headers,
+                        json={"query": query, **body})
+        assert r.status_code == 202
+        return {i["employee_key"] for i in r.json()["items"]}
+
+    assert scope() == {"EMP-1", "EMP-2"}                                    # по FR-002
+    assert scope(statuses=["Свободен", "Уволен"]) == {"EMP-1"}     # «Уволен» отброшен
+    assert scope(status="Ожидает подключения") == {"EMP-2"}                  # устаревший
+    assert scope(dept_head="ivanov") == {"EMP-1"}
+    assert scope(dept_head="__none__", statuses=["Уволен"]) == set()
+    assert scope(include_dismissed=True) == {"EMP-1", "EMP-2"}     # уволенных не добавляет
+    assert scope(include_dismissed=True, statuses=["Уволен"]) == set()
+    assert scope(include_dismissed=False, statuses=["Свободен", "Уволен"]) == {"EMP-1"}
+    r = client.get("/resume/semantic-search", params=[
+        ("query", query), ("status", "Свободен"), ("status", "Уволен"), ("dept_head", "ivanov")])
+    assert r.status_code == 200 and {i["employee_key"] for i in r.json()["items"]} == {"EMP-1"}
+    r = client.get("/resume/semantic-search", params=[
+        ("query", query), ("status", "Уволен"), ("include_dismissed", "true")])
+    assert r.status_code == 200 and r.json()["items"] == []
+    r = client.post("/resume/semantic-search/next", headers=headers,
+                    json={"query": query, "statuses": ["Уволен"]})
+    assert r.status_code == 202 and r.json()["items"] == []
+    assert w.llm_client.calls == [] or all(
+        "Сотрудник-03" not in c["prompt"] for c in w.llm_client.calls)
+
+
 def test_extract_skills_endpoint_and_unknown_employee():
     w = _world()
     cv = FakeCvRepo()

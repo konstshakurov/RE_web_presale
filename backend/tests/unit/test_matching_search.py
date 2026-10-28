@@ -162,7 +162,7 @@ def test_filters_status_technology_and_text():
     w.repo.employees["EMP-2"]["assignable"] = True   # флаг разошёлся со статусом: решает статус
     st = _get(w)
     assert {i.employee_key for i in st.items} == {"EMP-1", "EMP-3"}   # допустимые статусы
-    st = _get(w, filters=SearchFilters(status="Коммерческий проект"))
+    st = _get(w, filters=SearchFilters(statuses=("Коммерческий проект",)))
     assert [i.employee_key for i in st.items] == ["EMP-2"]            # явный статус выигрывает
     st = _get(w, filters=SearchFilters(tags=("rest",)))
     assert {i.employee_key for i in st.items} == {"EMP-1", "EMP-3"}
@@ -171,8 +171,47 @@ def test_filters_status_technology_and_text():
     st = _get(w, filters=SearchFilters(tags=("rest", "kafka"), match_all=False))
     assert len(st.items) == 2
     assert _get(w, filters=SearchFilters(text="visio")).items == []  # EMP-2 недопустим по статусу
-    st = _get(w, filters=SearchFilters(status="Коммерческий проект", text="visio"))
+    st = _get(w, filters=SearchFilters(statuses=("Коммерческий проект",), text="visio"))
     assert [i.employee_key for i in st.items] == ["EMP-2"]
+
+
+def test_filters_statuses_dept_head_dismissed_and_legacy_scope():
+    w = _world()
+    w.repo.employees["EMP-1"]["dept_head"] = "ivanov"
+    w.repo.employees["EMP-2"].update(status="Ожидает подключения", dept_head="petrov")
+    w.repo.add_employee("EMP-4", "Сотрудник-04", status="Уволен", assignable=False,
+                        text="Системный аналитик REST SQL")
+
+    def keys(**kw):
+        return {i.employee_key for i in _get(w, filters=SearchFilters(**kw)).items}
+
+    assert keys(statuses=("Свободен", "Ожидает подключения")) == {"EMP-1", "EMP-2", "EMP-3"}
+    assert keys(dept_head="ivanov") == {"EMP-1"}
+    assert keys(dept_head="__none__") == {"EMP-3"}
+    assert keys(statuses=("Уволен",), dept_head="__none__") == set()    # «Уволен» вне поиска
+    assert keys(statuses=("Свободен",), dept_head="petrov") == set()          # И
+    assert keys(include_dismissed=True) == {"EMP-1", "EMP-2", "EMP-3"}    # не добавляет уволенных
+    assert keys(include_dismissed=True, statuses=("Уволен",)) == set()
+    assert keys(include_dismissed=False, statuses=("Свободен", "Уволен")) == {"EMP-1", "EMP-3"}
+    assert keys(statuses=("Свободен", "Уволен")) == {"EMP-1", "EMP-3"}  # явный «Уволен» отброшен
+    # область, сохранённая в прогоне до CR-014, читается
+    old = SearchFilters.from_dict({"status": "Уволен", "tags": ["sql"], "match_all": True})
+    assert old.statuses == ("Уволен",) and old.tags == ("sql",)
+    new = SearchFilters(statuses=("a", "b"), dept_head="x", include_dismissed=True)
+    assert SearchFilters.from_dict(new.to_dict()) == new
+
+
+def test_dismissed_only_scope_makes_no_llm_calls():
+    w = _world()
+    w.repo.add_employee("EMP-4", "Сотрудник-04", status="Уволен", assignable=False,
+                        text="Системный аналитик REST SQL")
+    for f in (SearchFilters(statuses=("Уволен",)),
+              SearchFilters(statuses=("Уволен",), include_dismissed=True)):
+        st = w.svc.start_search(LOGIN, QUERY, filters=f)
+        assert st.items == [] and st.tasks == []
+        st = w.svc.evaluate_next_search(LOGIN, QUERY, filters=f)
+        assert st.items == [] and st.tasks == []
+    assert w.llm_client.calls == [] and w.run_all() == 0
 
 
 def test_search_larger_than_n_screens_all_then_deep_top_n():

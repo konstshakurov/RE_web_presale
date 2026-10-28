@@ -72,10 +72,11 @@ class FakeMatchRepo:
 
     # --- данные сотрудников ---
     def add_employee(self, key, name, *, status="Свободен", assignable=True, text="Текст CV",
-                     note=None, note_updated_at=None, extra=None) -> int:
+                     note=None, note_updated_at=None, extra=None, dept_head=None) -> int:
         self.employees[key] = dict(
             name=name, status=status, assignable=assignable, note=note,
-            note_author="РО" if note else None, note_updated_at=note_updated_at, extra=extra)
+            note_author="РО" if note else None, note_updated_at=note_updated_at, extra=extra,
+            dept_head=dept_head)
         return self.set_main_cv(key, text)
 
     def set_main_cv(self, key, text) -> int:
@@ -93,13 +94,17 @@ class FakeMatchRepo:
                 return fid, f
         return None
 
-    def list_candidates(self, *, only_assignable=True):
+    def list_candidates(self, *, only_assignable=True, dept_head=None):
         out = []
         for key, e in sorted(self.employees.items(), key=lambda kv: (kv[1]["name"], kv[0])):
             cur = self._current(key)
             if cur is None or cur[1]["status"] != "ok":
                 continue
             if only_assignable and e["status"] in NOT_ASSIGNABLE_STATUSES:
+                continue
+            if dept_head == "__none__" and e["dept_head"] is not None:
+                continue
+            if dept_head not in (None, "__none__") and e["dept_head"] != dept_head:
                 continue
             fid, f = cur
             out.append(CandRow(key, e["name"], e["status"], e["assignable"], e["note"],
@@ -127,13 +132,33 @@ class FakeMatchRepo:
     def get_skills_many(self, ids):
         return {i: tuple(sorted(self.skills[i])) for i in ids if self.skills.get(i)}
 
-    def list_resume(self, *, query, status, tags, match_all, limit, offset):
+    def resume_status_counts(self, *, dept_head=None, include_dismissed=True):
+        out: dict[str, int] = {}
+        for e in self.employees.values():
+            if not include_dismissed and e["status"] == "Уволен":
+                continue
+            if dept_head == "__none__" and e["dept_head"] is not None:
+                continue
+            if dept_head not in (None, "__none__") and e["dept_head"] != dept_head:
+                continue
+            out[e["status"]] = out.get(e["status"], 0) + 1
+        return sorted(out.items())
+
+    def list_resume(self, *, query, status, tags, match_all, limit, offset, dept_head=None,
+                    include_dismissed=True):
         rows = []
         for key, e in sorted(self.employees.items(), key=lambda kv: kv[1]["name"]):
             cur = self._current(key)
             fid = cur[0] if cur else None
             sk = set(self.skills.get(fid, [])) if fid else set()
-            if status and e["status"] != status:
+            sts = [status] if isinstance(status, str) else list(status or [])
+            if sts and e["status"] not in sts:
+                continue
+            if not include_dismissed and e["status"] == "Уволен":
+                continue
+            if dept_head == "__none__" and e["dept_head"] is not None:
+                continue
+            if dept_head not in (None, "__none__") and e["dept_head"] != dept_head:
                 continue
             if tags and not (set(tags) <= sk if match_all else set(tags) & sk):
                 continue

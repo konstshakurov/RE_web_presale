@@ -257,6 +257,44 @@ def test_resume_filters(env):
     assert techs.get("kafka") == 1 and techs.get("sql", 0) >= 2
 
 
+def test_resume_dept_head_statuses_dismissed_and_counts(env):
+    cv_pool, _, repo, _, _ = env
+    with cv_pool.connection() as c:
+        c.execute("UPDATE cv.employee SET dept_head_login = 'kont38-ro1', "
+                  "dept_head_display_name = 'РО Один' WHERE jira_key IN "
+                  "('KONT38-10', 'KONT38-12', 'KONT38-13')")
+        c.execute("UPDATE cv.employee SET dept_head_login = 'kont38-ro2' "
+                  "WHERE jira_key = 'KONT38-11'")
+
+    def keys(**kw):
+        base = dict(query="KONT38", status=None, tags=[], match_all=True, limit=100, offset=0)
+        base.update(kw)
+        rows, total = repo.list_resume(**base)
+        assert total == len(rows)
+        return [r.employee_key for r in rows]
+
+    assert keys(status=["Свободен", "Ожидает подключения"]) == [
+        "KONT38-10", "KONT38-11", "KONT38-14", "KONT38-15"]
+    assert keys(status="Уволен") == ["KONT38-13"]                   # одиночное значение
+    assert keys(dept_head="kont38-ro1") == ["KONT38-10", "KONT38-12", "KONT38-13"]
+    assert keys(dept_head="KONT38-RO1") == ["KONT38-10", "KONT38-12", "KONT38-13"]
+    assert keys(dept_head="__none__") == ["KONT38-14", "KONT38-15"]  # «Без РО»
+    assert keys(dept_head="kont38-ro1", include_dismissed=False) == ["KONT38-10", "KONT38-12"]
+    assert keys(dept_head="kont38-ro1", status=["Уволен", "Свободен"]) == [
+        "KONT38-10", "KONT38-13"]                                    # И с ИЛИ внутри
+
+    counts = dict(repo.resume_status_counts(dept_head="kont38-ro1"))
+    assert counts["Свободен"] >= 1 and counts["Уволен"] >= 1
+    assert "Уволен" not in dict(repo.resume_status_counts(include_dismissed=False))
+    assert dict(repo.resume_status_counts(dept_head="__none__")).get("Свободен", 0) >= 2
+
+    cands = [c.employee_key for c in repo.list_candidates(dept_head="kont38-ro1")
+             if c.employee_key.startswith("KONT38-")]
+    assert cands == ["KONT38-10"]                                    # допустимые + РО
+    assert [c.employee_key for c in repo.list_candidates(dept_head="__none__")
+            if c.employee_key.startswith("KONT38-")] == []           # у 14/15 нет текста/CV
+
+
 def test_end_to_end_with_real_repos_cache_and_status_filter(env):
     _, app_pool, repo, _, files = env
     client = FakeClient(lambda p: reply_for(p) if p.startswith("ПОТРЕБНОСТЬ") else skills_reply(p))

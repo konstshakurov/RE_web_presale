@@ -159,6 +159,24 @@
         "title": "CreateGroupRequest",
         "type": "object"
       },
+      "DeptHeadOut": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "login": {
+            "title": "Login",
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "display_name"
+        ],
+        "title": "DeptHeadOut",
+        "type": "object"
+      },
       "DictionaryBody": {
         "properties": {
           "companies": {
@@ -241,6 +259,30 @@
           "assignable": {
             "title": "Assignable",
             "type": "boolean"
+          },
+          "dept_head_display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Отображаемое имя РО",
+            "title": "Dept Head Display Name"
+          },
+          "dept_head_login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Руководитель отдела (customfield_14401), логин; пусто - «Без РО»",
+            "title": "Dept Head Login"
           },
           "extra_experience": {
             "anyOf": [
@@ -2678,6 +2720,14 @@
             "title": "Items",
             "type": "array"
           },
+          "statuses": {
+            "description": "Счётчики статусов: с учётом РО и «Уволенные», без поиска и технологий",
+            "items": {
+              "$ref": "#/components/schemas/ResumeStatusCount"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
           "total": {
             "title": "Total",
             "type": "integer"
@@ -2685,9 +2735,28 @@
         },
         "required": [
           "items",
-          "total"
+          "total",
+          "statuses"
         ],
         "title": "ResumeList",
+        "type": "object"
+      },
+      "ResumeStatusCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ],
+        "title": "ResumeStatusCount",
         "type": "object"
       },
       "RuleOut": {
@@ -3056,11 +3125,36 @@
       },
       "SearchRequest": {
         "properties": {
+          "dept_head": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Фильтр «РО»: логин; «__none__» - без РО",
+            "title": "Dept Head"
+          },
           "force": {
             "default": false,
             "description": "Пересчитать, даже если оценки в кэше",
             "title": "Force",
             "type": "boolean"
+          },
+          "include_dismissed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Принимается для совместимости и ни на что не влияет: «Уволен» никогда не входит в область поиска по смыслу (решение владельца 28.10.2026), в т.ч. при явном статусе; пустая область - без вызова LLM",
+            "title": "Include Dismissed"
           },
           "limit": {
             "default": 10,
@@ -3117,8 +3211,17 @@
                 "type": "null"
               }
             ],
-            "description": "Фильтр «Статус сотрудника»; без него - все статусы, кроме Коммерческий проект, Уволен, Декрет, Недоступен для подключения (FR-002)",
+            "description": "Устарело: один статус, заменён списком ``statuses`` (принимается для совместимости, складывается со ``statuses``)",
             "title": "Status"
+          },
+          "statuses": {
+            "description": "Фильтр «Статус сотрудника» (чипы), между собой ИЛИ; без статусов - все, кроме Коммерческий проект, Уволен, Декрет, Недоступен для подключения (FR-002)",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Statuses",
+            "type": "array"
           },
           "technology": {
             "description": "Фильтр «Технология»",
@@ -7146,7 +7249,7 @@
     },
     "/resume/employees": {
       "get": {
-        "description": "Таблица раздела «Резюме» с фильтрами без LLM. Технологии - из навыков Основного CV.",
+        "description": "Таблица раздела «Резюме» с фильтрами без LLM. Технологии - из навыков Основного CV.\nВсе фильтры по И; ``statuses`` в ответе - счётчики чипов с учётом РО и «Уволенные»\n(без поиска и технологий).",
         "operationId": "list_resume_resume_employees_get",
         "parameters": [
           {
@@ -7169,9 +7272,31 @@
             }
           },
           {
-            "description": "Статус сотрудника из Jira",
+            "description": "Статус сотрудника из Jira; параметр можно повторить - выбираются все (ИЛИ); одиночное значение работает как раньше",
             "in": "query",
             "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Статус сотрудника из Jira; параметр можно повторить - выбираются все (ИЛИ); одиночное значение работает как раньше",
+              "title": "Status"
+            }
+          },
+          {
+            "description": "Логин РО; «__none__» - сотрудники без РО",
+            "in": "query",
+            "name": "dept_head",
             "required": false,
             "schema": {
               "anyOf": [
@@ -7183,8 +7308,20 @@
                   "type": "null"
                 }
               ],
-              "description": "Статус сотрудника из Jira",
-              "title": "Status"
+              "description": "Логин РО; «__none__» - сотрудники без РО",
+              "title": "Dept Head"
+            }
+          },
+          {
+            "description": "false - скрыть «Уволен» («Показывать уволенных» выключено)",
+            "in": "query",
+            "name": "include_dismissed",
+            "required": false,
+            "schema": {
+              "default": true,
+              "description": "false - скрыть «Уволен» («Показывать уволенных» выключено)",
+              "title": "Include Dismissed",
+              "type": "boolean"
             }
           },
           {
@@ -7425,19 +7562,24 @@
             }
           },
           {
+            "description": "Статус; параметр можно повторить - выбираются все (ИЛИ)",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "maxLength": 128,
-                  "type": "string"
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50,
+                  "type": "array"
                 },
                 {
                   "type": "null"
                 }
               ],
+              "description": "Статус; параметр можно повторить - выбираются все (ИЛИ)",
               "title": "Status"
             }
           },
@@ -7486,6 +7628,43 @@
                 }
               ],
               "title": "Q"
+            }
+          },
+          {
+            "description": "Логин РО; «__none__» - без РО",
+            "in": "query",
+            "name": "dept_head",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Логин РО; «__none__» - без РО",
+              "title": "Dept Head"
+            }
+          },
+          {
+            "description": "Совместимость: уволенные в поиске по смыслу не участвуют, см. POST",
+            "in": "query",
+            "name": "include_dismissed",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Совместимость: уволенные в поиске по смыслу не участвуют, см. POST",
+              "title": "Include Dismissed"
             }
           },
           {
@@ -7724,19 +7903,24 @@
         "operationId": "list_employees_sync_employees_get",
         "parameters": [
           {
+            "description": "Статус; параметр можно повторить - выбираются все",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "maxLength": 128,
-                  "type": "string"
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50,
+                  "type": "array"
                 },
                 {
                   "type": "null"
                 }
               ],
+              "description": "Статус; параметр можно повторить - выбираются все",
               "title": "Status"
             }
           },
@@ -7773,6 +7957,37 @@
               ],
               "description": "Поиск по ФИО",
               "title": "Q"
+            }
+          },
+          {
+            "description": "Логин РО; «__none__» - сотрудники без РО",
+            "in": "query",
+            "name": "dept_head",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Логин РО; «__none__» - сотрудники без РО",
+              "title": "Dept Head"
+            }
+          },
+          {
+            "description": "false - скрыть уволенных («Показывать уволенных» выключено)",
+            "in": "query",
+            "name": "include_dismissed",
+            "required": false,
+            "schema": {
+              "default": true,
+              "description": "false - скрыть уволенных («Показывать уволенных» выключено)",
+              "title": "Include Dismissed",
+              "type": "boolean"
             }
           },
           {
@@ -7827,6 +8042,37 @@
           }
         ],
         "summary": "List Employees",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/employees/dept-heads": {
+      "get": {
+        "description": "Различные руководители отделов для фильтра (без пустых; «Без РО» добавляет клиент).",
+        "operationId": "list_dept_heads_sync_employees_dept_heads_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeptHeadOut"
+                  },
+                  "title": "Response List Dept Heads Sync Employees Dept Heads Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "List Dept Heads",
         "tags": [
           "sync"
         ]

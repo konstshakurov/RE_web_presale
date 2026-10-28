@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from app.sync.mapping import NOT_ASSIGNABLE_STATUSES
+from app.sync.repo import DISMISSED_STATUS, NO_DEPT_HEAD
 
 if TYPE_CHECKING:
     from psycopg_pool import ConnectionPool
@@ -221,6 +222,15 @@ def _gaps_json(gaps: Sequence[str] | None) -> str | None:
     return None if gaps is None else json.dumps(list(gaps), ensure_ascii=False)
 
 
+def _dept_head_cond(dept_head: str | None) -> tuple[str, list[str]]:
+    """Условие РО по cv.employee e: логин (без регистра, как хранится) либо «Без РО»."""
+    if dept_head == NO_DEPT_HEAD:
+        return " AND e.dept_head_login IS NULL", []
+    if dept_head:
+        return " AND e.dept_head_login = %s", [dept_head.lower()]
+    return "", []
+
+
 _CAND = (
     "e.jira_key, e.full_name, e.status, e.assignable, e.note, e.note_author, "
     "e.note_updated_at, e.extra_experience, f.id, f.file_name, "
@@ -364,16 +374,21 @@ class MatchRepo:
 
     # --- кандидаты и карточки ---
 
-    def list_candidates(self, *, only_assignable: bool = True) -> list[CandRow]:
+    def list_candidates(
+        self, *, only_assignable: bool = True, dept_head: str | None = None,
+    ) -> list[CandRow]:
         """Сотрудники с актуальным основным CV и извлечённым текстом (FR-005). Отбор идёт по
         самому статусу: все, кроме NOT_ASSIGNABLE_STATUSES (FR-002); сохранённый флаг
-        cv.employee.assignable не используется - он мог разойтись со статусом."""
+        cv.employee.assignable не используется - он мог разойтись со статусом.
+        ``dept_head`` - фильтр РО (логин либо NO_DEPT_HEAD), только для поиска по смыслу."""
+        dh_sql, dh_params = _dept_head_cond(dept_head)
         with self._pool.connection() as conn:
             rows = conn.execute(
                 f"SELECT {_CAND} FROM cv.employee e {_MAIN_JOIN} "
                 "AND f.extraction_status = 'ok' "
-                "WHERE (NOT %s OR e.status <> ALL(%s::text[])) ORDER BY e.full_name, e.jira_key",
-                (only_assignable, sorted(NOT_ASSIGNABLE_STATUSES)),
+                f"WHERE (NOT %s OR e.status <> ALL(%s::text[])){dh_sql} "
+                "ORDER BY e.full_name, e.jira_key",
+                (only_assignable, sorted(NOT_ASSIGNABLE_STATUSES), *dh_params),
             ).fetchall()
         return [CandRow(*r[:-1], tuple(r[-1])) for r in rows]
 
@@ -427,14 +442,27 @@ class MatchRepo:
     # --- «Резюме»: фильтры (FR-032) ---
 
     def list_resume(
-        self, *, query: str | None, status: str | None, tags: Sequence[str], match_all: bool,
-        limit: int, offset: int,
+        self, *, query: str | None, status: str | Sequence[str] | None, tags: Sequence[str],
+        match_all: bool, limit: int, offset: int, dept_head: str | None = None,
+        include_dismissed: bool = True,
     ) -> tuple[list[ResumeRow], int]:
+        """Все фильтры по И. ``status`` - один статус или список (между собой ИЛИ);
+        ``dept_head`` - логин РО либо NO_DEPT_HEAD («Без РО»); ``include_dismissed=False``
+        скрывает «Уволен»."""
         conds = ["TRUE"]
         params: list[Any] = []
-        if status:
-            conds.append("e.status = %s")
-            params.append(status)
+        statuses = [status] if isinstance(status, str) else list(status or [])
+        statuses = [s for s in statuses if s]
+        if statuses:
+            conds.append("e.status = ANY(%s::text[])")
+            params.append(statuses)
+        if not include_dismissed:
+            conds.append("e.status <> %s")
+            params.append(DISMISSED_STATUS)
+        dh_sql, dh_params = _dept_head_cond(dept_head)
+        if dh_sql:
+            conds.append(dh_sql.removeprefix(" AND "))
+            params += dh_params
         if tags:
             if match_all:
                 conds.append(
@@ -473,6 +501,25 @@ class MatchRepo:
             ).fetchall()
         out = [ResumeRow(*r[:12], tuple(r[12]), r[13]) for r in rows]
         return out, total
+
+    def resume_status_counts(
+        self, *, dept_head: str | None = None, include_dismissed: bool = True,
+    ) -> list[tuple[str, int]]:
+        """Счётчики статусов чипов «Резюме»: с учётом РО и «Уволенные», без поиска и технологий
+        (как на «Сотрудниках»)."""
+        conds = ["TRUE"]
+        params: list[Any] = []
+        if not include_dismissed:
+            conds.append("e.status <> %s")
+            params.append(DISMISSED_STATUS)
+        dh_sql, dh_params = _dept_head_cond(dept_head)
+        if dh_sql:
+            conds.append(dh_sql.removeprefix(" AND "))
+            params += dh_params
+        with self._pool.connection() as conn:
+            return [(r[0], r[1]) for r in conn.execute(
+                f"SELECT e.status, count(*) FROM cv.employee e WHERE {' AND '.join(conds)} "
+                "GROUP BY e.status ORDER BY e.status", params).fetchall()]
 
     def list_technologies(self, limit: int = 500) -> list[tuple[str, int]]:
         """Подсказки фильтра «Технология»: теги актуальных основных CV и число сотрудников."""

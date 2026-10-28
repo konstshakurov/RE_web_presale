@@ -33,7 +33,7 @@ a { color: var(--accent); }
 .login label { display: flex; flex-direction: column; gap: 4px; }
 .login input { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px; font: inherit; }
 .login input[aria-invalid="true"] { border-color: var(--err); }
-.login input:disabled { opacity: 0.6; }
+.login input:disabled, .login input[readonly] { opacity: 0.6; }
 .login button { background: var(--primary); color: #fff; border: 1px solid var(--primary); border-radius: 4px; padding: 8px; font: inherit; cursor: pointer; }
 .login button:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
 .login button:disabled { opacity: 0.5; cursor: default; }

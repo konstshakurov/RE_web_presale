@@ -4,6 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 import Header from "../components/Header";
+import { storePasswordCredential } from "../lib/credentials";
 
 // Возврат на маршрут, с которого увела потеря сессии; только внутренние пути.
 function returnPath(state: unknown): string {
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [missing, setMissing] = useState({ login: false, password: false });
   // Пароль не в state: читается из поля в момент отправки. Поле не очищается до ответа сервера,
   // чтобы менеджер паролей браузера увидел штатную отправку формы (CR-011); при отказе — очищается.
+  // Во время отправки поля readOnly, а не disabled: Chrome не учитывает disabled-поля при снимке формы.
   const loginRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -28,6 +30,7 @@ export default function LoginPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (busy) return;
     const pwInput = passwordRef.current!;
     const name = loginRef.current!.value.trim();
     const typed = pwInput.value;
@@ -40,7 +43,7 @@ export default function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      await login(name, typed);
+      await login(name, typed, () => storePasswordCredential(name, typed));
     } catch (err) {
       pwInput.value = "";
       setError(err instanceof Error ? err.message : "Не удалось войти");
@@ -73,7 +76,8 @@ export default function LoginPage() {
               type="text"
               autoComplete="username"
               required
-              disabled={busy || loading}
+              disabled={loading}
+              readOnly={busy}
               aria-invalid={missing.login || undefined}
             />
           </label>
@@ -86,7 +90,8 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               required
-              disabled={busy || loading}
+              disabled={loading}
+              readOnly={busy}
               aria-invalid={missing.password || undefined}
             />
           </label>

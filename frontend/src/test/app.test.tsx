@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -101,6 +101,61 @@ describe("вход", () => {
   });
 });
 
+describe("передача пароля менеджеру паролей (CR-011)", () => {
+  class FakePasswordCredential {
+    constructor(public init: { id: string; password: string; name?: string }) {}
+  }
+  const store = vi.fn();
+
+  async function submit() {
+    renderAt("/login");
+    await userEvent.type(await screen.findByLabelText("Логин"), "test.user");
+    await userEvent.type(screen.getByLabelText("Пароль"), FAKE_PASSWORD);
+    await userEvent.click(screen.getByRole("button", { name: "Войти" }));
+  }
+
+  beforeEach(() => {
+    store.mockReset().mockResolvedValue(undefined);
+    vi.stubGlobal("PasswordCredential", FakePasswordCredential);
+    Object.defineProperty(navigator, "credentials", { value: { store }, configurable: true });
+  });
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, "credentials");
+  });
+
+  it("успешный вход: store вызван один раз с логином и паролем", async () => {
+    fetchMock.mockResolvedValueOnce(json(401, {})).mockResolvedValueOnce(json(200, me("user")));
+    await submit();
+    expect(await screen.findByRole("heading", { name: "Потребности" })).toBeInTheDocument();
+    expect(store).toHaveBeenCalledTimes(1);
+    const cred = store.mock.calls[0][0] as FakePasswordCredential;
+    expect(cred.init).toEqual({ id: "test.user", password: FAKE_PASSWORD, name: "test.user" });
+  });
+
+  it.each([401, 503])("отказ %i: store не вызывается", async (status) => {
+    fetchMock.mockResolvedValueOnce(json(401, {})).mockResolvedValueOnce(json(status, { detail: "Отказ" }));
+    await submit();
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(store).not.toHaveBeenCalled();
+  });
+
+  it("ошибка store не мешает входу", async () => {
+    store.mockRejectedValue(new Error("denied"));
+    fetchMock.mockResolvedValueOnce(json(401, {})).mockResolvedValueOnce(json(200, me("user")));
+    await submit();
+    expect(await screen.findByRole("heading", { name: "Потребности" })).toBeInTheDocument();
+  });
+
+  it("без API вход проходит без ошибок", async () => {
+    vi.stubGlobal("PasswordCredential", undefined);
+    Reflect.deleteProperty(navigator, "credentials");
+    fetchMock.mockResolvedValueOnce(json(401, {})).mockResolvedValueOnce(json(200, me("user")));
+    await submit();
+    expect(await screen.findByRole("heading", { name: "Потребности" })).toBeInTheDocument();
+    expect(store).not.toHaveBeenCalled();
+  });
+});
+
 describe("вход: состояния (KON-81)", () => {
   it("пустые поля: подсказки, aria-invalid, запрос не уходит", async () => {
     fetchMock.mockResolvedValueOnce(json(401, {}));
@@ -114,7 +169,7 @@ describe("вход: состояния (KON-81)", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("загрузка: «Входим…», поля и кнопка заблокированы", async () => {
+  it("отправка: поля readOnly (не disabled), кнопка недоступна, повторный submit не шлёт запрос", async () => {
     let release!: (r: Response) => void;
     fetchMock
       .mockResolvedValueOnce(json(401, {}))
@@ -125,7 +180,13 @@ describe("вход: состояния (KON-81)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Войти" }));
     const busy = await screen.findByRole("button", { name: "Входим…" });
     expect(busy).toBeDisabled();
-    expect(screen.getByLabelText("Логин")).toBeDisabled();
+    for (const label of ["Логин", "Пароль"]) {
+      const input = screen.getByLabelText(label);
+      expect(input).toHaveAttribute("readonly");
+      expect(input).not.toBeDisabled();
+    }
+    fireEvent.submit(busy.closest("form")!);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     release(json(401, { detail: "Неверный логин или пароль, либо нет доступа" }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
   });

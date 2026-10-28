@@ -8,7 +8,8 @@ interface AuthState {
   user: MeResponse | null;
   loading: boolean;
   sessionExpired: boolean; // сессию отобрал 401 (а не выход) - вход показывает сообщение (FR-024)
-  login: (login: string, password: string) => Promise<void>;
+  // onAuthenticated вызывается после успешного ответа, до apply (до размонтирования формы входа)
+  login: (login: string, password: string, onAuthenticated?: () => void) => Promise<void>;
   logout: () => Promise<void>;
   relogin: (password: string) => Promise<MeResponse>; // повторный ввод пароля Jira (FR-029)
 }
@@ -40,8 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [apply]);
 
   const login = useCallback(
-    async (loginName: string, password: string) => {
-      apply(await api.login({ login: loginName, password }));
+    async (loginName: string, password: string, onAuthenticated?: () => void) => {
+      const me = await api.login({ login: loginName, password });
+      onAuthenticated?.();
+      apply(me);
     },
     [apply],
   );

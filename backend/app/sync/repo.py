@@ -19,6 +19,9 @@ SCOPE_NEEDS = "needs"
 SCOPE_EMPLOYEES = "employees"
 
 #: Ключи advisory-lock: один опрос потребностей/сотрудников одновременно (worker и «Обновить»).
+#: Значение фильтра РО «Без РО»: dept_head_login IS NULL.
+NO_DEPT_HEAD = "__none__"
+DISMISSED_STATUS = "Уволен"
 LOCK_KEYS = {SCOPE_NEEDS: 3501, SCOPE_EMPLOYEES: 3502}
 
 
@@ -391,31 +394,46 @@ class SyncRepo:
             return 0
         params = [
             (r.jira_key, r.full_name, r.status, r.assignable, r.extra_experience, r.jira_login,
-             r.vacation_plan)
+             r.vacation_plan, r.dept_head_login, r.dept_head_display_name)
             for r in rows
         ]
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn, conn.transaction():
             conn.cursor().executemany(
                 "INSERT INTO cv.employee (jira_key, full_name, status, assignable, "
-                "extra_experience, jira_login, vacation_plan) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+                "extra_experience, jira_login, vacation_plan, dept_head_login, "
+                "dept_head_display_name) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) "
                 "ON CONFLICT (jira_key) DO UPDATE SET full_name = EXCLUDED.full_name, "
                 "status = EXCLUDED.status, assignable = EXCLUDED.assignable, "
                 "extra_experience = EXCLUDED.extra_experience, jira_login = EXCLUDED.jira_login, "
-                "vacation_plan = EXCLUDED.vacation_plan, synced_at = now()",
+                "vacation_plan = EXCLUDED.vacation_plan, "
+                "dept_head_login = EXCLUDED.dept_head_login, "
+                "dept_head_display_name = EXCLUDED.dept_head_display_name, synced_at = now()",
                 params,
             )
         return len(rows)
 
     def list_employees(
-        self, *, status: str | None, assignable: bool | None, query: str | None,
-        limit: int, offset: int,
+        self, *, status: str | list[str] | None, assignable: bool | None, query: str | None,
+        limit: int, offset: int, dept_head: str | None = None, include_dismissed: bool = True,
     ) -> tuple[list[dict[str, Any]], int]:
+        """Все фильтры по И. ``status`` - один или несколько статусов; ``dept_head`` - логин РО
+        либо ``NO_DEPT_HEAD`` («Без РО», IS NULL); ``include_dismissed=False`` скрывает «Уволен»."""
         conds: list[str] = []
         params: list[Any] = []
-        if status:
-            conds.append("status = %s")
-            params.append(status)
+        statuses = [status] if isinstance(status, str) else list(status or [])
+        statuses = [s for s in statuses if s]
+        if statuses:
+            conds.append("status = ANY(%s::text[])")
+            params.append(statuses)
+        if not include_dismissed:
+            conds.append("status <> %s")
+            params.append(DISMISSED_STATUS)
+        if dept_head == NO_DEPT_HEAD:
+            conds.append("dept_head_login IS NULL")
+        elif dept_head:
+            conds.append("dept_head_login = %s")
+            params.append(dept_head.lower())
         if assignable is not None:
             conds.append("assignable = %s")
             params.append(assignable)
@@ -428,7 +446,8 @@ class SyncRepo:
             total = conn.execute(f"SELECT count(*) FROM cv.employee{where}", params).fetchone()[0]
             cur = conn.execute(
                 "SELECT jira_key, full_name, status, assignable, extra_experience, "
-                "vacation_plan, note, note_author, note_updated_at, synced_at "
+                "vacation_plan, dept_head_login, dept_head_display_name, "
+                "note, note_author, note_updated_at, synced_at "
                 "FROM cv.employee"
                 f"{where} ORDER BY full_name, jira_key LIMIT %s OFFSET %s",
                 [*params, limit, offset],
@@ -436,6 +455,17 @@ class SyncRepo:
             cols = [d.name for d in cur.description]
             items = [dict(zip(cols, r, strict=True)) for r in cur.fetchall()]
         return items, total
+
+    def list_dept_heads(self) -> list[dict[str, str]]:
+        """Различные РО (login + display_name), без пустых и дублей, по имени."""
+        with self._pool_for(SCOPE_EMPLOYEES).connection() as conn:
+            rows = conn.execute(
+                "SELECT dept_head_login, max(dept_head_display_name) FROM cv.employee "
+                "WHERE dept_head_login IS NOT NULL GROUP BY dept_head_login "
+                "ORDER BY lower(coalesce(max(dept_head_display_name), dept_head_login)), "
+                "dept_head_login"
+            ).fetchall()
+        return [{"login": r[0], "display_name": r[1] or r[0]} for r in rows]
 
     def employee_status_counts(self) -> list[tuple[str, int]]:
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn:

@@ -26,6 +26,13 @@ F_EXTRA_EXPERIENCE = "customfield_13504"
 #: Не customfield_11515: там числовой «ID пользователя», не логин.
 F_PROFILE = "customfield_10707"
 F_VACATION = "customfield_10814"  # «Отпуск», radiobuttons; даты 10815/10816 не нужны
+#: «Руководитель отдела» (тип user, KON-133): логин - name (не key: JQL по key не находит).
+F_DEPT_HEAD = "customfield_14401"
+#: РО-заглушки Jira, означающие «РО не назначен» (решение владельца, CR-012): хранятся как «Без РО».
+#: Сравнение после нормализации (strip, casefold, схлопывание пробелов). ТОЧНОЕ НАПИСАНИЕ В ОТЧЁТЕ
+#: ПРОБЫ KON-133 ЗАМАСКИРОВАНО: значение по умолчанию - допущение, сверить с живыми данными.
+DEPT_HEAD_PLACEHOLDERS = frozenset({"не назначен"})
+DEPT_HEAD_NAME_MAX = 200
 
 #: Только нужные поля (FR-028): без списка Jira отдаёт сотни полей.
 NEED_FIELDS: tuple[str, ...] = (
@@ -36,7 +43,7 @@ NEED_FIELDS: tuple[str, ...] = (
 #: Дети эпика приходят со всех направлений: проект и тип нужны для отбора потребностей аналитики.
 EPIC_CHILD_FIELDS: tuple[str, ...] = (*NEED_FIELDS, "project", "issuetype")
 EMPLOYEE_FIELDS: tuple[str, ...] = (
-    "summary", "status", "updated", F_EXTRA_EXPERIENCE, F_PROFILE, F_VACATION,
+    "summary", "status", "updated", F_EXTRA_EXPERIENCE, F_PROFILE, F_VACATION, F_DEPT_HEAD,
 )
 
 #: Правила и условия клиента на эпике (FR-015): поле Jira -> название для пользователя.
@@ -99,6 +106,8 @@ class EmployeeRow:
     extra_experience: str | None
     jira_login: str | None = None
     vacation_plan: str | None = None  # значение «Отпуск» как есть, пусто -> None
+    dept_head_login: str | None = None  # «Руководитель отдела», name в нижнем регистре
+    dept_head_display_name: str | None = None  # его displayName как есть (strip)
 
 
 def parse_jira_dt(value: Any) -> datetime | None:
@@ -147,6 +156,27 @@ def _profile_login(value: Any) -> str | None:
     """Логин из поля типа user в нижнем регистре; ``name``, иначе ``key``. Пусто -> None."""
     login = _login(value)
     return login.lower() if login and len(login) <= 128 else None
+
+
+def _norm_placeholder(value: str) -> str:
+    return " ".join(value.split()).casefold()
+
+
+def _dept_head(value: Any) -> tuple[str | None, str | None]:
+    """(логин, отображаемое имя) из user-поля РО; пусто и заглушка «не назначен» -> (None, None).
+
+    Ключа может не быть, значение может быть null (KON-133 п. 2.4): вход приходит через ``.get()``.
+    """
+    login = _profile_login(value)
+    if login is None:
+        return None, None
+    display = value.get("displayName")
+    display = display.strip()[:DEPT_HEAD_NAME_MAX] if isinstance(display, str) else ""
+    if _norm_placeholder(login) in DEPT_HEAD_PLACEHOLDERS or (
+        display and _norm_placeholder(display) in DEPT_HEAD_PLACEHOLDERS
+    ):
+        return None, None
+    return login, display or None
 
 
 def _vacation_plan(value: Any) -> str | None:
@@ -260,6 +290,7 @@ def map_employee(issue: dict[str, Any]) -> EmployeeRow | None:
     name = _text(fields.get("summary"))
     if not status or not name:
         return None
+    head_login, head_name = _dept_head(fields.get(F_DEPT_HEAD))
     return EmployeeRow(
         jira_key=key,
         full_name=name,
@@ -268,6 +299,8 @@ def map_employee(issue: dict[str, Any]) -> EmployeeRow | None:
         extra_experience=_text(fields.get(F_EXTRA_EXPERIENCE)),
         jira_login=_profile_login(fields.get(F_PROFILE)),
         vacation_plan=_vacation_plan(fields.get(F_VACATION)),
+        dept_head_login=head_login,
+        dept_head_display_name=head_name,
     )
 
 

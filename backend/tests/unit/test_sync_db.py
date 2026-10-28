@@ -23,7 +23,7 @@ from app.jira_session.service import JiraStatusInfo
 from app.secrets import SecretStore
 from app.sync import SyncService, SyncSettings
 from app.sync.mapping import map_employee, map_need
-from app.sync.repo import SCOPE_EMPLOYEES, SCOPE_NEEDS, NeedFilter, SyncRepo
+from app.sync.repo import NO_DEPT_HEAD, SCOPE_EMPLOYEES, SCOPE_NEEDS, NeedFilter, SyncRepo
 from app.sync.router import router as sync_router
 
 from ._sync_fakes import FakeJira, issue
@@ -253,6 +253,34 @@ def test_employees_upsert_keeps_note_and_is_idempotent(repo, pools):
     only_free = repo.list_employees(status=None, assignable=True, query="Заявка", limit=50,
                                     offset=0)[0]
     assert f"{P}-91" not in {i["jira_key"] for i in only_free}
+
+
+def test_employees_dept_head_filters_and_list(repo, pools):
+    def emp(n, status, head=None):
+        f = {} if head is None else {
+            "customfield_14401": {"name": head, "displayName": head.upper()}}
+        return map_employee(issue(f"{P}-{n}", status, **f))
+
+    repo.upsert_employees([
+        emp(70, "Свободен", "Head.A"), emp(71, "Уволен", "head.a"), emp(72, "Свободен"),
+        emp(73, "Скоро освобождается", "head.b"), emp(74, "Свободен", "не назначен")])
+    kw = {"assignable": None, "query": "Заявка", "limit": 100, "offset": 0}
+
+    def got(**extra):
+        items, _ = repo.list_employees(**{**kw, **extra})
+        return {i["jira_key"] for i in items if i["jira_key"].startswith(P)}
+
+    assert got(status=None, dept_head="head.a") == {f"{P}-70", f"{P}-71"}
+    assert got(status=None, dept_head=NO_DEPT_HEAD) == {f"{P}-72", f"{P}-74"}
+    assert got(status=["Свободен", "Скоро освобождается"], dept_head=None) == {
+        f"{P}-70", f"{P}-72", f"{P}-73", f"{P}-74"}
+    assert got(status=None, dept_head="head.a", include_dismissed=False) == {f"{P}-70"}
+    assert got(status="Свободен", dept_head="head.b") == set()
+    heads = [h for h in repo.list_dept_heads() if h["login"] in ("head.a", "head.b")]
+    assert heads == [{"login": "head.a", "display_name": "HEAD.A"},
+                     {"login": "head.b", "display_name": "HEAD.B"}]
+    assert len({h["login"] for h in repo.list_dept_heads()}) == len(repo.list_dept_heads())
+    assert all(h["login"] for h in repo.list_dept_heads())
 
 
 def test_advisory_lock_is_exclusive(repo):

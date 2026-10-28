@@ -29,6 +29,8 @@ class FakeSyncRepo:
         self.has_cv = with_cv
         self.upsert_calls = 0
         self.list_calls: list[dict] = []
+        self.employee_calls: list[dict] = []
+        self.dept_heads: list[dict] = []
 
     def set_poller(self, login: str, secret_updated_at: datetime = T0) -> None:
         self.pollers = [p for p in self.pollers if p.login != login]
@@ -92,6 +94,16 @@ class FakeSyncRepo:
         for r in rows:
             self.employees[r.jira_key] = r
         return len(rows)
+
+    def list_employees(self, **kw):
+        self.employee_calls.append(kw)
+        return [], 0
+
+    def employee_status_counts(self):
+        return []
+
+    def list_dept_heads(self):
+        return list(self.dept_heads)
 
     def get_epic(self, key):
         return self.epics.get(key)

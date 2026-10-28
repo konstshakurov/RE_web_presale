@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext, authenticated
 from ..jira_session.service import require_jira_ok
-from .repo import SCOPE_EMPLOYEES, SCOPE_NEEDS, NeedFilter
+from .repo import NO_DEPT_HEAD, SCOPE_EMPLOYEES, SCOPE_NEEDS, NeedFilter
 from .service import (
     STATE_NEEDS_REAUTH,
     STATE_NOT_ENABLED,
@@ -109,10 +109,18 @@ class EmployeeOut(BaseModel):
     extra_experience: str | None = Field(
         None, description="Подробнее об опыте (customfield_13504) - «описание» FR-002")
     vacation_plan: str | None = Field(None, description="Поле Jira «Отпуск» как есть (FR-002)")
+    dept_head_login: str | None = Field(
+        None, description="Руководитель отдела (customfield_14401), логин; пусто - «Без РО»")
+    dept_head_display_name: str | None = Field(None, description="Отображаемое имя РО")
     note: str | None = None
     note_author: str | None = None
     note_updated_at: datetime | None = None
     synced_at: datetime
+
+
+class DeptHeadOut(BaseModel):
+    login: str
+    display_name: str
 
 
 class EmployeesPage(BaseModel):
@@ -280,9 +288,15 @@ def need_groups(request: Request, _: SessionContext = Depends(authenticated)) ->
 def list_employees(
     request: Request,
     _: SessionContext = Depends(authenticated),
-    status: Annotated[str | None, Query(max_length=128)] = None,
+    status: Annotated[list[str] | None, Query(
+        max_length=50, description="Статус; параметр можно повторить - выбираются все")] = None,
     assignable: bool | None = None,
     q: Annotated[str | None, Query(max_length=200, description="Поиск по ФИО")] = None,
+    dept_head: Annotated[str | None, Query(
+        max_length=128,
+        description=f"Логин РО; «{NO_DEPT_HEAD}» - сотрудники без РО")] = None,
+    include_dismissed: Annotated[bool, Query(
+        description="false - скрыть уволенных («Показывать уволенных» выключено)")] = True,
     limit: Annotated[int, Query(ge=1, le=LIMIT_MAX)] = 100,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> EmployeesPage:
@@ -294,7 +308,8 @@ def list_employees(
                     "message": "База сотрудников не настроена (CV_DB_URL)"},
         )
     items, total = service.repo.list_employees(
-        status=status, assignable=assignable, query=q, limit=limit, offset=offset
+        status=status, assignable=assignable, query=q, limit=limit, offset=offset,
+        dept_head=dept_head, include_dismissed=include_dismissed,
     )
     counts = service.repo.employee_status_counts()
     return EmployeesPage(
@@ -303,6 +318,21 @@ def list_employees(
         statuses=[StatusCount(status=s, count=c) for s, c in counts],
         sync=_stamp(service.sync_info(SCOPE_EMPLOYEES)),
     )
+
+
+@router.get("/employees/dept-heads", response_model=list[DeptHeadOut])
+def list_dept_heads(
+    request: Request, _: SessionContext = Depends(authenticated),
+) -> list[DeptHeadOut]:
+    """Различные руководители отделов для фильтра (без пустых; «Без РО» добавляет клиент)."""
+    service = _service(request)
+    if not service.repo.has_cv:
+        raise HTTPException(
+            status_code=503,
+            detail={"state": "not_enabled", "code": "not_enabled",
+                    "message": "База сотрудников не настроена (CV_DB_URL)"},
+        )
+    return [DeptHeadOut(**d) for d in service.repo.list_dept_heads()]
 
 
 @router.get("/status", response_model=list[SyncStamp])

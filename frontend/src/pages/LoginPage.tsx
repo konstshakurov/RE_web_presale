@@ -19,7 +19,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [missing, setMissing] = useState({ login: false, password: false });
-  // Пароль не в state: читается из поля в момент отправки и сразу очищается.
+  // Пароль не в state: читается из поля в момент отправки. Поле не очищается до ответа сервера,
+  // чтобы менеджер паролей браузера увидел штатную отправку формы (CR-011); при отказе — очищается.
   const loginRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -36,12 +37,12 @@ export default function LoginPage() {
       setError("");
       return;
     }
-    pwInput.value = "";
     setError("");
     setBusy(true);
     try {
       await login(name, typed);
     } catch (err) {
+      pwInput.value = "";
       setError(err instanceof Error ? err.message : "Не удалось войти");
     } finally {
       setBusy(false);

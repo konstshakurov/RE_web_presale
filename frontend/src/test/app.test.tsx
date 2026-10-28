@@ -66,6 +66,27 @@ describe("вход", () => {
     expect(window.location.href).not.toContain(FAKE_PASSWORD);
   });
 
+  it("форма распознаётся менеджером паролей; пароль не очищается до ответа сервера (CR-011)", async () => {
+    let release!: (r: Response) => void;
+    fetchMock
+      .mockResolvedValueOnce(json(401, {}))
+      .mockReturnValueOnce(new Promise<Response>((r) => (release = r)));
+    renderAt("/login");
+    const loginInput = await screen.findByLabelText("Логин");
+    const pwInput = screen.getByLabelText("Пароль");
+    expect(loginInput.closest("form")).toBe(pwInput.closest("form"));
+    expect(loginInput).toHaveAttribute("autocomplete", "username");
+    expect(pwInput).toHaveAttribute("autocomplete", "current-password");
+    await userEvent.type(loginInput, "test.user");
+    await userEvent.type(pwInput, FAKE_PASSWORD);
+    await userEvent.click(screen.getByRole("button", { name: "Войти" }));
+    await screen.findByRole("button", { name: "Входим…" });
+    expect(pwInput).toHaveValue(FAKE_PASSWORD);
+    release(json(401, { detail: "Неверный логин или пароль, либо нет доступа" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(pwInput).toHaveValue("");
+  });
+
   it("отказ показывает текст ошибки и очищает пароль", async () => {
     fetchMock
       .mockResolvedValueOnce(json(401, {}))

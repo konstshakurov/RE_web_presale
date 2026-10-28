@@ -8,7 +8,8 @@ Python 3.12, FastAPI. Каркас: `app/main.py` (api, `/health`), `app/worker.
 Необязательные переменные (умолчания в `app/sync/settings.py`): `SYNC_NEEDS_INTERVAL_SEC` (300),
 `SYNC_EMPLOYEES_INTERVAL_SEC` (3600), `SYNC_EPIC_TTL_SEC` (3600), `SYNC_INITIAL_LOAD_DAYS` (183),
 `SYNC_PAUSE_RECHECK_SEC` (15), `JIRA_UTC_OFFSET_HOURS` (4), `JIRA_NEED_PROJECT`, `JIRA_NEED_ISSUETYPE`,
-`JIRA_EMPLOYEE_PROJECT`, `JIRA_EMPLOYEE_ISSUETYPE`. Нужна миграция V005 (app_db и cv_db).
+`JIRA_EMPLOYEE_PROJECT`, `JIRA_EMPLOYEE_ISSUETYPE`, `DEPT_HEAD_HIDDEN_LOGINS` (логины РО через запятую, нижний регистр: скрыть из списка «РО»; данные и фильтр не меняются; значение только в .env; пусто - не скрывать).
+РО с `active: false` в Jira скрываются из списка автоматически (cv V012). Нужна миграция V005 (app_db и cv_db).
 БД-тесты: `TEST_APP_DB_URL`, `TEST_CV_DB_URL` (роли app_rw / cv_rw, миграции app_db V001-V008 и cv_db V001-V008).
 
 ## Файлы сотрудников (KON-36)

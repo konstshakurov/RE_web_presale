@@ -83,3 +83,22 @@ def test_dept_heads_endpoint_returns_list_and_requires_login(env):  # noqa: F811
     assert r.json() == repo.dept_heads
     client.cookies.clear()
     assert client.get("/sync/employees/dept-heads").status_code == 401
+
+
+@pytest.mark.parametrize(
+    "extra,expected", [({"active": True}, True), ({"active": False}, False), ({}, True)])
+def test_dept_head_active_parsed(extra, expected):
+    row = _emp({"name": "head.a", "displayName": "Имя", **extra})
+    assert row.dept_head_active is expected
+
+
+def test_dept_head_active_none_without_head():
+    assert _emp().dept_head_active is None
+
+
+def test_hidden_logins_setting_normalized():
+    from app.sync.settings import load_sync_settings
+    assert load_sync_settings({}).dept_head_hidden_logins == ()
+    envv = {"DEPT_HEAD_HIDDEN_LOGINS": " Aa.B, ,cc.d,aa.b "}
+    got = load_sync_settings(envv).dept_head_hidden_logins
+    assert got == ("aa.b", "cc.d")

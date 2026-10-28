@@ -21,6 +21,7 @@ class SyncSettings:
     employee_issuetype: str = "Epic"
     jira_base_url: str = ""
     heartbeat_path: str = "/tmp/worker.heartbeat"  # пульс для healthcheck compose
+    dept_head_hidden_logins: tuple[str, ...] = ()  # РО, скрытые в списке (DEPT_HEAD_HIDDEN_LOGINS)
 
 
 def _num(env: Mapping[str, str], name: str, default: float) -> float:
@@ -63,4 +64,7 @@ def load_sync_settings(env: Mapping[str, str] | None = None) -> SyncSettings:
         employee_issuetype=text("JIRA_EMPLOYEE_ISSUETYPE", d.employee_issuetype),
         jira_base_url=(e.get("JIRA_BASE_URL") or "").strip().rstrip("/"),
         heartbeat_path=text("WORKER_HEARTBEAT_PATH", d.heartbeat_path),
+        dept_head_hidden_logins=tuple(sorted({
+            x.strip().lower() for x in (e.get("DEPT_HEAD_HIDDEN_LOGINS") or "").split(",")
+            if x.strip()})),
     )

@@ -332,7 +332,8 @@ def list_dept_heads(
             detail={"state": "not_enabled", "code": "not_enabled",
                     "message": "База сотрудников не настроена (CV_DB_URL)"},
         )
-    return [DeptHeadOut(**d) for d in service.repo.list_dept_heads()]
+    hidden = service.settings.dept_head_hidden_logins
+    return [DeptHeadOut(**d) for d in service.repo.list_dept_heads(hidden)]
 
 
 @router.get("/status", response_model=list[SyncStamp])

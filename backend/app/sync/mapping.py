@@ -108,6 +108,7 @@ class EmployeeRow:
     vacation_plan: str | None = None  # значение «Отпуск» как есть, пусто -> None
     dept_head_login: str | None = None  # «Руководитель отдела», name в нижнем регистре
     dept_head_display_name: str | None = None  # его displayName как есть (strip)
+    dept_head_active: bool | None = None  # active user-объекта РО; None - РО нет
 
 
 def parse_jira_dt(value: Any) -> datetime | None:
@@ -160,6 +161,12 @@ def _profile_login(value: Any) -> str | None:
 
 def _norm_placeholder(value: str) -> str:
     return " ".join(value.split()).casefold()
+
+
+def _dept_head_active(value: Any) -> bool:
+    """Признак активности пользователя Jira у РО; ключа нет или не bool - считаем активным."""
+    active = value.get("active") if isinstance(value, dict) else None
+    return active if isinstance(active, bool) else True
 
 
 def _dept_head(value: Any) -> tuple[str | None, str | None]:
@@ -301,6 +308,7 @@ def map_employee(issue: dict[str, Any]) -> EmployeeRow | None:
         vacation_plan=_vacation_plan(fields.get(F_VACATION)),
         dept_head_login=head_login,
         dept_head_display_name=head_name,
+        dept_head_active=_dept_head_active(fields.get(F_DEPT_HEAD)) if head_login else None,
     )
 
 

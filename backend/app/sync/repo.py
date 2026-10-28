@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -394,21 +394,22 @@ class SyncRepo:
             return 0
         params = [
             (r.jira_key, r.full_name, r.status, r.assignable, r.extra_experience, r.jira_login,
-             r.vacation_plan, r.dept_head_login, r.dept_head_display_name)
+             r.vacation_plan, r.dept_head_login, r.dept_head_display_name, r.dept_head_active)
             for r in rows
         ]
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn, conn.transaction():
             conn.cursor().executemany(
                 "INSERT INTO cv.employee (jira_key, full_name, status, assignable, "
                 "extra_experience, jira_login, vacation_plan, dept_head_login, "
-                "dept_head_display_name) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) "
+                "dept_head_display_name, dept_head_active) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
                 "ON CONFLICT (jira_key) DO UPDATE SET full_name = EXCLUDED.full_name, "
                 "status = EXCLUDED.status, assignable = EXCLUDED.assignable, "
                 "extra_experience = EXCLUDED.extra_experience, jira_login = EXCLUDED.jira_login, "
                 "vacation_plan = EXCLUDED.vacation_plan, "
                 "dept_head_login = EXCLUDED.dept_head_login, "
-                "dept_head_display_name = EXCLUDED.dept_head_display_name, synced_at = now()",
+                "dept_head_display_name = EXCLUDED.dept_head_display_name, "
+                "dept_head_active = EXCLUDED.dept_head_active, synced_at = now()",
                 params,
             )
         return len(rows)
@@ -456,14 +457,22 @@ class SyncRepo:
             items = [dict(zip(cols, r, strict=True)) for r in cur.fetchall()]
         return items, total
 
-    def list_dept_heads(self) -> list[dict[str, str]]:
-        """Различные РО (login + display_name), без пустых и дублей, по имени."""
+    def list_dept_heads(self, hidden_logins: Iterable[str] = ()) -> list[dict[str, str]]:
+        """Различные РО (login + display_name), без пустых и дублей, по имени.
+
+        Скрыты (только из этого списка; данные и фильтр по логину не меняются): РО, у которых
+        ВСЕ записи с active = false (NULL - данных нет, не скрываем), и ``hidden_logins``.
+        """
+        hidden = sorted({h.strip().lower() for h in hidden_logins if h and h.strip()})
         with self._pool_for(SCOPE_EMPLOYEES).connection() as conn:
             rows = conn.execute(
                 "SELECT dept_head_login, max(dept_head_display_name) FROM cv.employee "
-                "WHERE dept_head_login IS NOT NULL GROUP BY dept_head_login "
+                "WHERE dept_head_login IS NOT NULL AND NOT (dept_head_login = ANY(%s)) "
+                "GROUP BY dept_head_login "
+                "HAVING NOT bool_and(dept_head_active IS NOT DISTINCT FROM false) "
                 "ORDER BY lower(coalesce(max(dept_head_display_name), dept_head_login)), "
-                "dept_head_login"
+                "dept_head_login",
+                (hidden,),
             ).fetchall()
         return [{"login": r[0], "display_name": r[1] or r[0]} for r in rows]
 

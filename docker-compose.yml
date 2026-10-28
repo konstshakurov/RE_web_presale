@@ -34,6 +34,8 @@ x-backend-env: &backend-env
   JIRA_NEED_ISSUETYPE: ${JIRA_NEED_ISSUETYPE:-}
   JIRA_EMPLOYEE_PROJECT: ${JIRA_EMPLOYEE_PROJECT:-}
   JIRA_EMPLOYEE_ISSUETYPE: ${JIRA_EMPLOYEE_ISSUETYPE:-}
+  # Логины РО (через запятую, нижний регистр), скрываемые в списке «РО»; значение - только в .env
+  DEPT_HEAD_HIDDEN_LOGINS: ${DEPT_HEAD_HIDDEN_LOGINS:-}
   WORKER_HEARTBEAT_PATH: ${WORKER_HEARTBEAT_PATH:-}
   LLM_BASE_URL: ${LLM_BASE_URL:-}
   LLM_API_KEY: ${LLM_API_KEY:-}

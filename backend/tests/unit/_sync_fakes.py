@@ -102,7 +102,8 @@ class FakeSyncRepo:
     def employee_status_counts(self):
         return []
 
-    def list_dept_heads(self):
+    def list_dept_heads(self, hidden_logins=()):
+        self.hidden_logins_seen = tuple(hidden_logins)
         return list(self.dept_heads)
 
     def get_epic(self, key):

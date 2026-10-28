@@ -283,6 +283,31 @@ def test_employees_dept_head_filters_and_list(repo, pools):
     assert all(h["login"] for h in repo.list_dept_heads())
 
 
+def test_list_dept_heads_hides_inactive_and_configured(repo):
+    def emp(n, head, active=None, display=None):
+        u = {"name": head, "displayName": display or head.upper()}
+        if active is not None:
+            u["active"] = active
+        return map_employee(issue(f"{P}-{n}", "Свободен", customfield_14401=u))
+
+    repo.upsert_employees([
+        emp(80, "hd.act", True), emp(81, "hd.act", True),
+        emp(82, "hd.off", False), emp(83, "hd.off", False),
+        emp(84, "hd.mix", False), emp(85, "hd.mix", True),
+        emp(86, "hd.nokey"), emp(87, "hd.cfg", True)])
+    mine = {"hd.act", "hd.off", "hd.mix", "hd.nokey", "hd.cfg"}
+
+    def logins(**kw):
+        return [h["login"] for h in repo.list_dept_heads(**kw) if h["login"] in mine]
+
+    assert logins() == ["hd.act", "hd.cfg", "hd.mix", "hd.nokey"]
+    assert logins(hidden_logins=["HD.CFG "]) == ["hd.act", "hd.mix", "hd.nokey"]
+    # данные и фильтр скрытого РО работают
+    items, _ = repo.list_employees(status=None, assignable=None, query="Заявка", limit=100,
+                                   offset=0, dept_head="hd.off")
+    assert {i["jira_key"] for i in items if i["jira_key"].startswith(P)} == {f"{P}-82", f"{P}-83"}
+
+
 def test_advisory_lock_is_exclusive(repo):
     with repo.try_lock(SCOPE_NEEDS) as first:
         assert first

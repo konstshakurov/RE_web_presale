@@ -11,6 +11,7 @@
   (cert 644, key 600), `/opt/re_web_presale/app/` (код).
 - Docker Engine + Compose v2 установлены (`infra/vm_setup_report.md`).
 - ufw: только 22/tcp и 443/tcp.
+- `.env` на ВМ: необязательная `DEPT_HEAD_HIDDEN_LOGINS` — логины РО через запятую (нижний регистр), скрываемые в списке «РО»; значение хранится только в `.env`. После выкладки cv V012 применить миграции (`db/migrations/apply.sh up cv_db`).
 
 ## 1. Повторный деплой (обновление версии)
 

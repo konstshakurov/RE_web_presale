@@ -3,9 +3,10 @@
 Использование: send_mail.py --subject "Тема" [--to a@b,c@d] [--attach файл.md] < тело_письма
 Настройки - из окружения (ops.env):
   SMTP_HOST      пусто = почта не настроена: пишет в журнал "mail_skipped" и выходит с кодом 0
-  SMTP_PORT      587 (STARTTLS) или 465 (SSL); по умолчанию 587
-  SMTP_SECURITY  starttls (по умолчанию) | ssl | none
-  SMTP_USER      логин (пусто = без авторизации)
+  SMTP_PORT      587 (STARTTLS) или 465 (SSL) или 25 (внутренний relay без TLS); по умолчанию 587
+  SMTP_SECURITY  starttls | ssl | none. По умолчанию: none для порта 25, ssl для 465, иначе starttls
+  SMTP_STARTTLS  1 - принудительно STARTTLS (для порта 25 по умолчанию выключен); 0 - без STARTTLS
+  SMTP_USER      логин (пусто = без авторизации: login() не вызывается)
   SMTP_PASSWORD  пароль, либо SMTP_PASSWORD_FILE - путь к файлу с паролем (права 600)
   SMTP_FROM      адрес отправителя (по умолчанию SMTP_USER)
   SMTP_VERIFY_TLS 1 (по умолчанию) | 0 - не проверять сертификат внутреннего сервера
@@ -43,8 +44,21 @@ def main():
     if not to:
         log("warn", "mail_skipped", "получатель не задан (ALERT_EMAIL_TO)")
         return 0
-    security = env("SMTP_SECURITY", "starttls").lower()
-    port = int(env("SMTP_PORT", "") or (465 if security == "ssl" else 587))
+    sec_env = env("SMTP_SECURITY", "").strip().lower()
+    port = int(env("SMTP_PORT", "") or (465 if sec_env == "ssl" else 587))
+    if sec_env:
+        security = sec_env
+    elif port == 465:
+        security = "ssl"
+    elif port == 25:
+        security = "none"
+    else:
+        security = "starttls"
+    st = env("SMTP_STARTTLS", "").strip()
+    if st == "1" and security == "none":
+        security = "starttls"
+    elif st == "0" and security == "starttls":
+        security = "none"
     user = env("SMTP_USER", "")
     password = env("SMTP_PASSWORD", "")
     pwf = env("SMTP_PASSWORD_FILE", "")

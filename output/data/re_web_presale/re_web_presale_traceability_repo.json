@@ -2,14 +2,14 @@
   "project": "re_web_presale",
   "formality_level": "Standard",
   "created": "2026-10-02",
-  "updated": "2026-10-26",
+  "updated": "2026-10-29",
   "requirements": [
     {
       "id": "FR-001",
       "type": "functional",
       "title": "Раздел новых потребностей со ставками",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -158,6 +158,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -166,7 +208,7 @@
       "type": "functional",
       "title": "Список сотрудников со статусами и фильтром",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -305,6 +347,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -313,7 +397,7 @@
       "type": "functional",
       "title": "Профиль сотрудника с кратким опытом",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -452,6 +536,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -460,7 +586,7 @@
       "type": "functional",
       "title": "Хранение сотрудников и нескольких CV",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -592,6 +718,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -600,7 +768,7 @@
       "type": "functional",
       "title": "Рекомендация кандидата с % соответствия и обоснованием",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -761,6 +929,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -769,7 +979,7 @@
       "type": "functional",
       "title": "Проверка CV на противоречия",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -908,6 +1118,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -916,7 +1168,7 @@
       "type": "functional",
       "title": "Диалог с LLM в контексте потребности или CV",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1055,6 +1307,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1063,7 +1357,7 @@
       "type": "functional",
       "title": "Назначение сотрудника на потребность с передачей в Jira",
       "version": "1.3",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Volatile",
@@ -1224,6 +1518,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1232,7 +1568,7 @@
       "type": "functional",
       "title": "Исполнитель потребности = пользователь, проведший назначение",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1364,6 +1700,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1372,7 +1750,7 @@
       "type": "functional",
       "title": "Повторное назначение на уже назначенную потребность",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1504,6 +1882,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1512,7 +1932,7 @@
       "type": "functional",
       "title": "Статусы «Кандидатов нет» и «Найм»",
       "version": "1.3",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Volatile",
@@ -1659,6 +2079,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1667,7 +2129,7 @@
       "type": "functional",
       "title": "Рекомендации по адаптации CV и сопроводительное письмо",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1806,6 +2268,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1814,7 +2318,7 @@
       "type": "functional",
       "title": "Комментарий с результатом скрининга в Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -1953,6 +2457,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -1961,7 +2507,7 @@
       "type": "functional",
       "title": "Выявление дублей потребностей",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2105,6 +2651,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2113,7 +2701,7 @@
       "type": "functional",
       "title": "Показ правил и условий клиента",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2262,6 +2850,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2270,7 +2900,7 @@
       "type": "functional",
       "title": "История отправок сотрудника клиентам",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2402,6 +3032,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2410,7 +3082,7 @@
       "type": "functional",
       "title": "Сделать CV по шаблону клиента",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2564,6 +3236,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2572,7 +3286,7 @@
       "type": "functional",
       "title": "Ввод ставки при назначении",
       "version": "3.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2711,6 +3425,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2719,7 +3475,7 @@
       "type": "functional",
       "title": "Средняя и медианная ставки за период",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -2858,6 +3614,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -2866,7 +3664,7 @@
       "type": "functional",
       "title": "Отображение статуса потребности (19 статусов)",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3005,6 +3803,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3013,7 +3853,7 @@
       "type": "functional",
       "title": "Управление списком разрешённых пользователей",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3145,6 +3985,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3153,7 +4035,7 @@
       "type": "functional",
       "title": "Добавление файла сотрудника в разделе «Резюме»",
       "version": "2.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3292,6 +4174,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3300,7 +4224,7 @@
       "type": "functional",
       "title": "Обезличивание текста перед отправкой во внешнюю LLM",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3439,6 +4363,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3447,7 +4413,7 @@
       "type": "functional",
       "title": "Вход по корпоративному LDAP",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3587,6 +4553,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3595,7 +4603,7 @@
       "type": "functional",
       "title": "Авторизация в Jira от имени пользователя (сессионный токен)",
       "version": "2.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -3734,6 +4742,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3742,7 +4792,7 @@
       "type": "functional",
       "title": "Смена статуса потребности по переходам Jira",
       "version": "1.4",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Volatile",
@@ -3881,6 +4931,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -3889,7 +4981,7 @@
       "type": "functional",
       "title": "Основное CV — главный источник компетенций",
       "version": "2.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4021,6 +5113,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4029,7 +5163,7 @@
       "type": "functional",
       "title": "Синхронизация данных из Jira (опрос и кэш)",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4161,6 +5295,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4169,7 +5345,7 @@
       "type": "functional",
       "title": "Поведение при отказах Jira",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4301,6 +5477,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4309,7 +5527,7 @@
       "type": "functional",
       "title": "Настройка LLM-провайдеров",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4448,6 +5666,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4627,7 +5887,7 @@
       "type": "non_functional",
       "title": "Защита токенов и ключей",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4766,6 +6026,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4774,7 +6076,7 @@
       "type": "non_functional",
       "title": "Отдельная БД для CV",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -4906,6 +6208,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -4914,7 +6258,7 @@
       "type": "non_functional",
       "title": "Актуальность данных из Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5046,6 +6390,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5054,7 +6440,7 @@
       "type": "non_functional",
       "title": "Время записи в Jira",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5186,6 +6572,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5194,7 +6622,7 @@
       "type": "non_functional",
       "title": "Таймаут LLM",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5326,6 +6754,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5334,7 +6804,7 @@
       "type": "business_rule",
       "title": "Права на операции в Jira определяет Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5473,6 +6943,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5481,7 +6993,7 @@
       "type": "business_rule",
       "title": "Кто предлагает ставку",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5620,6 +7132,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5628,7 +7182,7 @@
       "type": "business_rule",
       "title": "Состав ставки: валюта, НДС, единица",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5767,6 +7321,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5775,7 +7371,7 @@
       "type": "business_rule",
       "title": "Потребности направления Аналитики",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -5914,6 +7510,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -5922,7 +7560,7 @@
       "type": "business_rule",
       "title": "Правила клиентов только информируют",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -6061,6 +7699,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6069,7 +7749,7 @@
       "type": "business_rule",
       "title": "Корпоративный формат CV",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -6208,6 +7888,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6216,7 +7938,7 @@
       "type": "business_rule",
       "title": "Разные workflow потребностей и сотрудников",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -6348,6 +8070,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6356,7 +8120,7 @@
       "type": "business_rule",
       "title": "НДС для расчёта статистики ставок",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -6495,6 +8259,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6503,7 +8309,7 @@
       "type": "business_rule",
       "title": "Статус, а не резолюция",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -6642,6 +8448,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6650,7 +8498,7 @@
       "type": "use_case",
       "title": "Подобрать кандидата и назначить на потребность",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "",
       "stability": "Unknown",
@@ -6804,6 +8652,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6812,7 +8702,7 @@
       "type": "use_case",
       "title": "Сменить статус потребности",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "",
       "stability": "Unknown",
@@ -6974,6 +8864,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -6982,7 +8914,7 @@
       "type": "use_case",
       "title": "Добавить файл сотрудника в разделе «Резюме»",
       "version": "2.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "",
       "stability": "Unknown",
@@ -7126,6 +9058,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7134,7 +9108,7 @@
       "type": "use_case",
       "title": "Сделать CV по шаблону клиента",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "",
       "stability": "Unknown",
@@ -7288,6 +9262,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7296,7 +9312,7 @@
       "type": "use_case",
       "title": "Войти в приложение и авторизоваться в Jira",
       "version": "2.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "",
       "stability": "Unknown",
@@ -7440,6 +9456,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7448,7 +9506,7 @@
       "type": "use_case",
       "title": "Управлять доступом пользователей и настройками LLM",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "",
       "stability": "Unknown",
@@ -7587,6 +9645,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7595,7 +9695,7 @@
       "type": "business_process",
       "title": "Подбор и назначение аналитика на потребность (to-be)",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "",
       "stability": "Unknown",
@@ -7727,6 +9827,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7808,7 +9950,7 @@
       "type": "functional",
       "title": "Структура приложения: разделы",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -7940,6 +10082,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -7948,7 +10132,7 @@
       "type": "functional",
       "title": "Фильтры раздела «Резюме»",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8087,6 +10271,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8095,7 +10321,7 @@
       "type": "functional",
       "title": "Дополнительная заметка о сотруднике",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8234,6 +10460,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8242,7 +10510,7 @@
       "type": "functional",
       "title": "Таблица потребностей и кнопка синхронизации",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8386,6 +10654,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8394,7 +10704,7 @@
       "type": "functional",
       "title": "Фильтр потребностей по группам статусов",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8538,6 +10848,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8546,7 +10898,7 @@
       "type": "functional",
       "title": "Сопоставление потребности с кандидатами",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8695,6 +11047,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8703,7 +11097,7 @@
       "type": "functional",
       "title": "Просмотр CV в окне",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8842,6 +11236,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8850,7 +11286,7 @@
       "type": "functional",
       "title": "Логотип и фирменный вид интерфейса",
       "version": "1.1",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Could",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -8990,6 +11426,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -8998,7 +11476,7 @@
       "type": "functional",
       "title": "Замена основного CV с архивом прежних версий",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -9137,6 +11615,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -9145,7 +11665,7 @@
       "type": "functional",
       "title": "Скачивание и удаление файлов сотрудника",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "Should",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
@@ -9284,6 +11804,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10780,7 +13342,7 @@
       "type": "component",
       "title": "Вход в приложение и создание сессии Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10809,6 +13371,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10817,7 +13421,7 @@
       "type": "component",
       "title": "Фоновый инкрементальный опрос потребностей Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10846,6 +13450,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10854,7 +13500,7 @@
       "type": "component",
       "title": "Открытие эпика клиента: правила и потребности",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10883,6 +13529,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10891,7 +13579,7 @@
       "type": "component",
       "title": "Назначение кандидата на потребность в Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10920,6 +13608,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10928,7 +13658,7 @@
       "type": "component",
       "title": "Смена статуса потребности в Jira",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10957,6 +13687,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -10965,7 +13737,7 @@
       "type": "component",
       "title": "Истёкшая сессия Jira и повторный ввод пароля",
       "version": "1.0",
-      "status": "approved",
+      "status": "under_change",
       "priority": "",
       "owner": "",
       "stability": "Unknown",
@@ -10994,6 +13766,48 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "under_change",
+          "reason": "CR CR-011 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-012 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-013 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-014 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-27",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-015 approved by Константин Шакуров"
+        },
+        {
+          "date": "2026-10-29",
+          "action": "status_changed",
+          "from": "under_change",
+          "to": "under_change",
+          "reason": "CR CR-016 approved by Константин Шакуров"
         }
       ]
     },
@@ -11402,6 +14216,1212 @@
         "rationale": "Принято предложение аналитика: три уточнения текста фиксируют фактическое поведение MVP. По NFR-009 владелец выбрал вариант «лимит на вызов» (текущая реализация) вместо бюджета на операцию, поэтому изменений кода нет. Оценка формулы (2.0, Defer) занижена Low-выгодой: пункты нужны, чтобы Dev/QA и новые аналитики не опирались на неточный текст. Impact/Schedule Risk = High автоматические и завышены.",
         "modification_notes": "NFR-009: оставить лимит 10 с на один вызов Jira (как реализовано), без бюджета на всю операцию; уточнить формулировку: «вызов» вместо «операция», указать, что «Назначить» состоит из нескольких вызовов и суммарное время не ограничивается этим требованием. FR-028: зафиксировать, что сотрудники читаются полной выгрузкой раз в час (issuetype = Epic), окно 6 месяцев относится только к потребностям. FR-026: добавить, что комментарий перехода отправляется всегда (update.comment.add; обязателен для «Кандидатов нет»), идентификаторы переходов не фиксируются и определяются по целевому статусу в ответе Jira. Код не меняется.",
         "decision_date": "2026-10-26"
+      }
+    },
+    {
+      "id": "CR-011",
+      "type": "change_request",
+      "title": "Вход: браузер должен сохранять и подставлять логин и пароль",
+      "description": "Обратная связь РО/коллег: приложение «не сохраняет логин и пароль», приходится вводить заново. Гипотеза причины: форма входа очищает поле пароля до отправки и отправляет данные через fetch без перехода, поэтому менеджер паролей браузера не предлагает сохранить учётные данные. Требование: форма входа должна быть распознаваема менеджером паролей (стандартная схема username/current-password, пароль не очищается до завершения запроса, при успешном входе браузер может предложить сохранить). Приложение само пароль не хранит (NFR-006 не меняется). Вторая возможная причина — срок сессии 8 ч; решение по «Запомнить меня»/продлению сессии принимает владелец после уточнения.",
+      "initiator": "РО и коллеги (обратная связь этапа 2), через владельца продукта",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "post_release",
+      "regulatory": false,
+      "target_req_ids": [
+        "UC-005"
+      ],
+      "related_cr_ids": [],
+      "status": "approved",
+      "opened_date": "2026-10-27",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "FR-024",
+          "FR-025",
+          "BP-001",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "NFR-006",
+          "UC-001",
+          "UC-002",
+          "UC-003",
+          "UC-004",
+          "UC-006",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "FR-031",
+          "COMP-SEQ-JiraAssignCandidate",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-002",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "FR-012",
+          "FR-017",
+          "FR-021",
+          "FR-030",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "BR-008",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "FR-038",
+          "BR-001",
+          "BR-007",
+          "NFR-007",
+          "UC-005"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "FR-024",
+            "FR-025",
+            "BP-001",
+            "NFR-006",
+            "UC-001",
+            "UC-002",
+            "UC-003",
+            "UC-004",
+            "UC-006",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "FR-031",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-002",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "FR-012",
+            "FR-017",
+            "FR-021",
+            "FR-030",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "BR-008",
+            "NFR-008",
+            "FR-038",
+            "BR-001",
+            "BR-007",
+            "NFR-007"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired",
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraIncrementalSync"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "UC-005"
+        ],
+        "analysis_date": "2026-10-27"
+      },
+      "score": {
+        "benefit": "Medium",
+        "benefit_n": 2,
+        "cost": "Low",
+        "cost_n": 1,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 4.0,
+        "formula_verdict": "🟡 Modify",
+        "ba_notes": "Правка формы входа на фронтенде (autocomplete, не очищать пароль до ответа). Impact/Schedule Risk High автоматические и завышены (BFS по графу, реально затронута только страница входа). Причина не подтверждена: возможно дело в сроке сессии 8 ч, ждём уточнения владельца. NFR-006 не меняется.",
+        "scored_date": "2026-10-27"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Обратная связь РО: повторный ввод логина и пароля мешает ежедневной работе. Правка только формы входа на фронтенде; формула (4.0, Modify) занижена автоматическими Impact/Schedule Risk = High при реальном объёме в одну страницу. Приложение пароль не хранит, NFR-006 не меняется. Решение по сроку сессии (8 ч) не принято, при необходимости отдельный CR.",
+        "modification_notes": "",
+        "decision_date": "2026-10-27"
+      }
+    },
+    {
+      "id": "CR-012",
+      "type": "change_request",
+      "title": "Сотрудники: мультивыбор статусов и фильтр по РО",
+      "description": "Обратная связь РО. 1) Фильтр по статусу в разделе «Сотрудники»: выбор нескольких статусов одновременно, снятие одного или нескольких выбранных. 2) Новый фильтр по РО (руководитель отдела): выпадающий список из значений поля Jira «Руководитель отдела» (customfield_14401, в JQL cf[14401]; поле типа user) карточки сотрудника, значение «Все» по умолчанию. Требуется добавить поле в синхронизацию сотрудников (EMPLOYEE_FIELDS), колонку в cv.employee, параметр фильтра в API и список РО. Фильтры комбинируются по И с существующими (поиск, технология, показ уволенных).",
+      "initiator": "РО и коллеги (обратная связь этапа 2), через владельца продукта",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "post_release",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-002",
+        "FR-028"
+      ],
+      "related_cr_ids": [],
+      "status": "approved",
+      "opened_date": "2026-10-27",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "UC-003",
+          "BR-008",
+          "UC-001",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "BP-001",
+          "FR-020",
+          "FR-035",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-034",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-029",
+          "FR-031",
+          "COMP-SEQ-JiraAssignCandidate",
+          "BR-007",
+          "NFR-007",
+          "UC-002",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "BR-010",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "FR-038",
+          "FR-017",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-012",
+          "FR-024",
+          "FR-025",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "NFR-006",
+          "FR-002",
+          "FR-028"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-003",
+            "BR-008",
+            "UC-001",
+            "NFR-008",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "BP-001",
+            "FR-020",
+            "FR-035",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-034",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-029",
+            "FR-031",
+            "BR-007",
+            "NFR-007",
+            "UC-002",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "BR-010",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "FR-038",
+            "FR-017",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-012",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "NFR-006"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraIncrementalSync",
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-002",
+          "FR-028"
+        ],
+        "analysis_date": "2026-10-27"
+      },
+      "score": {
+        "benefit": "Medium",
+        "benefit_n": 2,
+        "cost": "Medium",
+        "cost_n": 2,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 2.5,
+        "formula_verdict": "⏳ Defer",
+        "ba_notes": "Две правки в разделе «Сотрудники»: мультивыбор статусов (фронтенд + параметр API) и фильтр по РО (новое поле customfield_14401 в синхронизацию, колонка cv.employee, список РО, миграция). Impact/Schedule Risk High автоматические и завышены. Изменение UI: нужен UX-вариант и апрув владельца. Запрошено напрямую РО, ценность подтверждена пользователями.",
+        "scored_date": "2026-10-27"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Запрос РО: мультивыбор статусов и фильтр по РО (customfield_14401) ускоряют отбор сотрудников. Формула (2.5, Defer) занижена автоматическими Impact/Schedule Risk = High при реальном объёме в один раздел. Ценность подтверждена пользователями. Изменение UI проходит через UX и апрув владельца.",
+        "modification_notes": "",
+        "decision_date": "2026-10-27"
+      }
+    },
+    {
+      "id": "CR-013",
+      "type": "change_request",
+      "title": "Редизайн шапки приложения (логотип regoose, геометрия, выравнивание)",
+      "description": "Требование владельца: обновить шапку по референсу. Логотип: синий гусь + надпись «regoose» (Nunito Sans 400, 27-29 px, #F5F7FA, строчные, line-height 1, по центру иконки), без фона и теней. Высота шапки 66-68 px; логотип, вкладки, имя, бейдж «Админ» и выход на одной горизонтальной оси (flex, align-items:center), без margin-top/transform-компенсаций. Типографика: меню 16-18 px/400, имя 16 px/400, бейдж 12-13 px/500-600. Фон ~#202A35, активная вкладка со светлым фоном и скруглёнными верхними углами. Бейдж «Админ» только по фактической роли. Меню пользователя (Профиль, Роли и права, Выйти) со скрина-референса: уточнить, входит ли в объём. Маршруты, авторизация, выход не меняются. Приёмка: 6 критериев из ТЗ. Изменение UI идёт по ui_workflow: Arch, UX (решение), апрув владельца, Dev, QA.",
+      "initiator": "Владелец продукта",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "post_release",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-031",
+        "FR-038"
+      ],
+      "related_cr_ids": [],
+      "status": "approved",
+      "opened_date": "2026-10-27",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "UC-001",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "BP-001",
+          "COMP-SEQ-JiraAssignCandidate",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "BR-008",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "UC-002",
+          "UC-003",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "FR-002",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "FR-012",
+          "FR-017",
+          "FR-024",
+          "FR-025",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "BR-007",
+          "NFR-007",
+          "NFR-006",
+          "FR-031",
+          "FR-038"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-001",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "BP-001",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "BR-008",
+            "NFR-008",
+            "UC-002",
+            "UC-003",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "FR-002",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "FR-012",
+            "FR-017",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "BR-007",
+            "NFR-007",
+            "NFR-006"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraIncrementalSync",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-031",
+          "FR-038"
+        ],
+        "analysis_date": "2026-10-27"
+      },
+      "score": {
+        "benefit": "Low",
+        "benefit_n": 1,
+        "cost": "Medium",
+        "cost_n": 2,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 0.5,
+        "formula_verdict": "❌ Reject",
+        "ba_notes": "Косметический редизайн по решению владельца (бренд regoose, выравнивание по вертикали), функциональность не меняется. Формула занижает: решение о фирменном стиле принадлежит владельцу. Меню пользователя со скрина (Профиль, Роли и права) в ТЗ не описано, нужно подтвердить объём. Путь: Arch, UX, апрув, Dev, QA.",
+        "scored_date": "2026-10-27"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Решение владельца о фирменном стиле шапки (логотип regoose, геометрия, вертикальное выравнивание); функциональность не меняется. Формула (0.5, Reject) занижена Low-выгодой и автоматическими Impact/Schedule Risk = High, не учитывает решение владельца по бренду. Реализация по ui_workflow: Arch, UX (решение), апрув владельца, Dev, QA. Объём выпадающего меню пользователя (Профиль, Роли и права) не подтверждён, уточняется отдельно.",
+        "modification_notes": "",
+        "decision_date": "2026-10-27"
+      }
+    },
+    {
+      "id": "CR-014",
+      "type": "change_request",
+      "title": "Резюме: мгновенные фильтры, чипы статусов, фильтр по РО",
+      "description": "Расширение CR-012 на раздел «Резюме» по макету KON-134 (v5, утверждён владельцем 27.10.2026). 1) Статус сотрудника: вместо выпадающего списка чипы-мультивыбор полосой под заголовком страницы (как на «Сотрудниках»), в пустом результате кнопка «Все статусы». 2) Новый выпадающий фильтр РО (Все / имена по алфавиту / Без РО), данные customfield_14401. 3) Фильтры «Поиск», «РО», «Технологии», «Уволенные» и чипы применяются мгновенно; кнопка «Применить» удалена; остаётся «Сбросить» (активна при применённом фильтре поиск/РО/технологии/уволенные, не сбрасывает чипы статусов). 4) Поиск по смыслу (LLM): область ограничена всеми фильтрами; запуск отдельно кнопкой «Найти»; поле в одну строку, в одном ряду с выбором LLM. Backend: статус в поиске станет списком, добавляется параметр РО, смысловой поиск получает те же параметры. Фильтр по технологии на «Сотрудниках» не добавляется (уточнение к CR-012: упоминание технологии там было ошибкой формулировки). Тело решения: design/KON-134/decision.md.",
+      "initiator": "Владелец продукта (обратная связь РО)",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "post_release",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-032",
+        "FR-036"
+      ],
+      "related_cr_ids": [
+        "CR-012"
+      ],
+      "status": "approved",
+      "opened_date": "2026-10-27",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "UC-003",
+          "UC-001",
+          "FR-002",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "BP-001",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "FR-031",
+          "COMP-SEQ-JiraAssignCandidate",
+          "BR-008",
+          "BR-007",
+          "NFR-007",
+          "UC-002",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "FR-038",
+          "FR-017",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-012",
+          "FR-024",
+          "FR-025",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "NFR-006",
+          "FR-032",
+          "FR-036"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-003",
+            "UC-001",
+            "FR-002",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "BP-001",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "FR-031",
+            "BR-008",
+            "BR-007",
+            "NFR-007",
+            "UC-002",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "NFR-008",
+            "FR-038",
+            "FR-017",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-012",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "NFR-006"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraIncrementalSync",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-032",
+          "FR-036"
+        ],
+        "analysis_date": "2026-10-27"
+      },
+      "score": {
+        "benefit": "Medium",
+        "benefit_n": 2,
+        "cost": "Medium",
+        "cost_n": 2,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 2.5,
+        "formula_verdict": "⏳ Defer",
+        "ba_notes": "Макет утверждён владельцем 27.10.2026 (KON-134 v5). Объём: фронтенд раздела «Резюме» + backend (статус списком, параметр РО, смысловой поиск с теми же параметрами). Impact/Schedule Risk High автоматические и завышены. FR-036 указан целью по ошибке: смысловой поиск «Резюме» относится к FR-032, при обновлении требований правится только FR-032. Зависит от Dev-43 (проба 14401) и Dev-44 (поле РО).",
+        "scored_date": "2026-10-27"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Расширение CR-012 на раздел «Резюме» по утверждённому макету KON-134 (v5): чипы статусов, фильтр РО, мгновенные фильтры, кнопка «Сбросить». Формула (2.5, Defer) занижена автоматическими Impact/Schedule Risk = High. Целью по ошибке указан FR-036, фактически правится FR-032. Фильтр по технологии на «Сотрудниках» не добавляется.",
+        "modification_notes": "",
+        "decision_date": "2026-10-27"
+      }
+    },
+    {
+      "id": "CR-015",
+      "type": "change_request",
+      "title": "Светлая тема: мягкая палитра (вариант 4 «Белый мягкий») и уточнение CR-013",
+      "description": "Решение владельца 27.10.2026 по макету KON-142: в светлой теме вместо серого фона мягкий молочный белый (--bg #fdfcf9, вариант 4), --ok #17724f, текст плашки Jira --warn #9a6412, мягкие границы; тёмная тема не меняется. Одновременно уточняется CR-013 (шапка), утверждённая в макете KON-135: высота 64 px вместо 56 (меняет KON-92), меню пользователя отсутствует, логотип из двух ассетов (голова 34 px и надпись), чип «Админ» #3D94FF с белыми текстом и щитом, активная вкладка тёмная в тёмной теме и светлая в светлой; шрифт Nunito Sans в интерфейс не подключается. Требования: FR-038 (фирменный вид интерфейса), FR-031 (структура/шапка).",
+      "initiator": "Владелец продукта",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "post_release",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-038",
+        "FR-031"
+      ],
+      "related_cr_ids": [
+        "CR-013"
+      ],
+      "status": "approved",
+      "opened_date": "2026-10-27",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "UC-001",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "BP-001",
+          "COMP-SEQ-JiraAssignCandidate",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "BR-008",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "UC-002",
+          "UC-003",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "FR-002",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "FR-012",
+          "FR-017",
+          "FR-024",
+          "FR-025",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "BR-007",
+          "NFR-007",
+          "NFR-006",
+          "FR-038",
+          "FR-031"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-001",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "BP-001",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "BR-008",
+            "NFR-008",
+            "UC-002",
+            "UC-003",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "FR-002",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "FR-012",
+            "FR-017",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "BR-007",
+            "NFR-007",
+            "NFR-006"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraIncrementalSync",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-038",
+          "FR-031"
+        ],
+        "analysis_date": "2026-10-27"
+      },
+      "score": {
+        "benefit": "Low",
+        "benefit_n": 1,
+        "cost": "Low",
+        "cost_n": 1,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 2.0,
+        "formula_verdict": "⏳ Defer",
+        "ba_notes": "Макеты KON-142 и KON-135 утверждены владельцем 27.10.2026. Правка токенов светлой темы и вёрстки шапки (высота 64 px вместо 56 меняет KON-92), функциональность не меняется. Impact/Schedule Risk High автоматические и завышены. Фиксирует уточнения CR-013: высота 64, без меню, логотип из двух ассетов.",
+        "scored_date": "2026-10-27"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Мягкая палитра светлой темы (вариант 4 «Белый мягкий», KON-142) и уточнения шапки (KON-135): высота 64 px вместо 56, без меню пользователя, логотип из двух ассетов, чип «Админ». Функциональность не меняется. Формула (2.0, Defer) занижена Low-выгодой и автоматическими Impact/Schedule Risk = High. Уточняет CR-013.",
+        "modification_notes": "",
+        "decision_date": "2026-10-27"
+      }
+    },
+    {
+      "id": "CR-016",
+      "type": "change_request",
+      "title": "Палитра светлой темы А2 + цветные статус-чипы и заливка строк (замена CR-015)",
+      "description": "Решение владельца 29.10.2026 (design/KON-149/decision.md, approved): вариант А2 + пастельные статус-чипы + заливка наведённой/выбранной строки; вторичные кнопки (--secondary) в новый акцент #2368b8; индиго не берём. Заменяет design/KON-142 (вариант 4 «Белый мягкий», superseded) и палитру из CR-015 (Approved). Задача KON-144 (Pre.Dev-48) отменена владельцем. Новое относительно CR-015: (1) токены светлой темы (--bg #f7f8fa, --panel-2 #eef1f5, --border #dde3ea, --text #1e293b, --muted #5a6a7f, --accent #2368b8, --primary #2470c8, --nav #202b36, --warn #8f5c10); (2) цветные статусы: токены --chip-*-bg/fg, классы .status--ok/info/err/warn, карта статус->тип в lib/statusTone.ts; (3) состояния строк: --row-hover, --row-sel, класс is-selected с левой полосой 3 px; (4) --secondary. Тёмная тема, шапка 64 px, структура не меняются. ОТКРЫТЫЙ ВОПРОС (не решение): привязка статусов к цветам (таблица п.3 decision.md) — предложение UX, владельцем явно не подтверждена; правка — смена строки в statusTone.ts без нового макета.",
+      "initiator": "Константин (владелец), через UX KON-149",
+      "cr_type": "change_existing",
+      "formality": "standard",
+      "urgency": "Normal",
+      "project_phase": "development",
+      "regulatory": false,
+      "target_req_ids": [
+        "FR-038",
+        "FR-031"
+      ],
+      "related_cr_ids": [
+        "CR-015",
+        "CR-013"
+      ],
+      "status": "approved",
+      "opened_date": "2026-10-29",
+      "impact_analysis": {
+        "affected_count": 67,
+        "affected_ids": [
+          "UC-001",
+          "FR-001",
+          "FR-005",
+          "FR-006",
+          "FR-007",
+          "FR-008",
+          "FR-009",
+          "FR-010",
+          "FR-014",
+          "FR-015",
+          "FR-016",
+          "FR-018",
+          "FR-019",
+          "FR-020",
+          "FR-034",
+          "FR-035",
+          "FR-036",
+          "FR-037",
+          "FR-023",
+          "FR-028",
+          "FR-029",
+          "BP-001",
+          "COMP-SEQ-JiraAssignCandidate",
+          "BR-003",
+          "BR-005",
+          "NFR-010",
+          "NFR-009",
+          "BR-010",
+          "BR-006",
+          "COMP-SEQ-JiraEpicRules",
+          "BR-002",
+          "BR-009",
+          "BR-008",
+          "NFR-008",
+          "COMP-SEQ-JiraIncrementalSync",
+          "UC-002",
+          "UC-003",
+          "UC-004",
+          "UC-005",
+          "UC-006",
+          "FR-002",
+          "FR-011",
+          "FR-013",
+          "FR-026",
+          "COMP-SEQ-JiraChangeStatus",
+          "FR-003",
+          "FR-004",
+          "FR-022",
+          "FR-027",
+          "FR-032",
+          "FR-033",
+          "FR-039",
+          "FR-040",
+          "FR-012",
+          "FR-017",
+          "FR-024",
+          "FR-025",
+          "COMP-SEQ-JiraLoginSession",
+          "COMP-SEQ-JiraSessionExpired",
+          "FR-021",
+          "FR-030",
+          "BR-001",
+          "BR-007",
+          "NFR-007",
+          "NFR-006",
+          "FR-038",
+          "FR-031"
+        ],
+        "impact_auto": "High",
+        "impact_score": 3,
+        "schedule_auto": "High",
+        "schedule_score": 3,
+        "by_relation": {
+          "derives": [
+            "UC-001",
+            "FR-001",
+            "FR-005",
+            "FR-006",
+            "FR-007",
+            "FR-008",
+            "FR-009",
+            "FR-010",
+            "FR-014",
+            "FR-015",
+            "FR-016",
+            "FR-018",
+            "FR-019",
+            "FR-020",
+            "FR-034",
+            "FR-035",
+            "FR-036",
+            "FR-037",
+            "FR-023",
+            "FR-028",
+            "FR-029",
+            "BP-001",
+            "BR-003",
+            "BR-005",
+            "NFR-010",
+            "NFR-009",
+            "BR-010",
+            "BR-006",
+            "BR-002",
+            "BR-009",
+            "BR-008",
+            "NFR-008",
+            "UC-002",
+            "UC-003",
+            "UC-004",
+            "UC-005",
+            "UC-006",
+            "FR-002",
+            "FR-011",
+            "FR-013",
+            "FR-026",
+            "FR-003",
+            "FR-004",
+            "FR-022",
+            "FR-027",
+            "FR-032",
+            "FR-033",
+            "FR-039",
+            "FR-040",
+            "FR-012",
+            "FR-017",
+            "FR-024",
+            "FR-025",
+            "FR-021",
+            "FR-030",
+            "BR-001",
+            "BR-007",
+            "NFR-007",
+            "NFR-006"
+          ],
+          "satisfies": [
+            "COMP-SEQ-JiraAssignCandidate",
+            "COMP-SEQ-JiraEpicRules",
+            "COMP-SEQ-JiraIncrementalSync",
+            "COMP-SEQ-JiraChangeStatus",
+            "COMP-SEQ-JiraLoginSession",
+            "COMP-SEQ-JiraSessionExpired"
+          ]
+        },
+        "volatile_req_ids": [
+          "FR-008",
+          "FR-011",
+          "FR-026"
+        ],
+        "priority_conflicts": [],
+        "no_br_trace": [
+          "FR-038",
+          "FR-031"
+        ],
+        "analysis_date": "2026-10-29"
+      },
+      "score": {
+        "benefit": "Medium",
+        "benefit_n": 2,
+        "cost": "Low",
+        "cost_n": 1,
+        "urgency": "Normal",
+        "urgency_n": 1,
+        "impact_auto": "High",
+        "impact_n": 3,
+        "schedule_auto": "High",
+        "schedule_n": 3,
+        "total_score": 4.0,
+        "formula_verdict": "🟡 Modify",
+        "ba_notes": "Оси Impact/Schedule=High получены от BFS через derives от FR-031 (корень структуры приложения) и завышены: реально изменение чисто визуальное (CSS-токены, statusTone.ts, классы .status--*, is-selected), функциональное поведение и данные не меняются, тёмная тема не затронута. Затронуты по сути FR-038 и FR-031; частично UI-места статусов (FR-020, FR-002, FR-034/036). Benefit Medium (читаемость статусов, единый вид), Cost Low (правка styles.css + небольшая функция + тесты). Замещает CR-015 и design/KON-142; KON-144 отменена. Открытый вопрос: привязка статусов к цветам не подтверждена владельцем.",
+        "scored_date": "2026-10-29"
+      },
+      "decision": {
+        "verdict": "Approved",
+        "decided_by": "Константин Шакуров",
+        "rationale": "Решение владельца 29.10.2026 (в чате, передано ведущей сессией): Approved с оговоркой. Дизайн утверждён в design/KON-149/decision.md (вариант А2 + пастельные статус-чипы + заливка hover/selected, вторичные кнопки в новый акцент, индиго не берём). CR-016 замещает CR-015 (палитра вариант 4, KON-142 superseded); CR-015 считать замещённым CR-016. KON-144 (Pre.Dev-48) отменена владельцем. ОГОВОРКА: привязка статусов к цветам (п. 3 decision.md) остаётся предложением UX до подтверждения владельцем; правка — одна строка в lib/statusTone.ts, без повторного макета. Замечание аналитика: Impact/Schedule=High (67 узлов) получены обходом derives от FR-031, реальный объём — визуальные правки (styles.css, statusTone.ts, классы статусов, is-selected); у FR-038/FR-031 нет трассировки к BR (как и в CR-015).",
+        "modification_notes": "",
+        "decision_date": "2026-10-29"
       }
     }
   ],
@@ -12280,6 +16300,83 @@
       "relation": "modifies",
       "rationale": "CR CR-010 modifies FR-026",
       "added_date": "2026-10-26"
+    },
+    {
+      "from": "CR-011",
+      "to": "UC-005",
+      "relation": "modifies",
+      "rationale": "CR CR-011 modifies UC-005",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-012",
+      "to": "FR-002",
+      "relation": "modifies",
+      "rationale": "CR CR-012 modifies FR-002",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-012",
+      "to": "FR-028",
+      "relation": "modifies",
+      "rationale": "CR CR-012 modifies FR-028",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-013",
+      "to": "FR-031",
+      "relation": "modifies",
+      "rationale": "CR CR-013 modifies FR-031",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-013",
+      "to": "FR-038",
+      "relation": "modifies",
+      "rationale": "CR CR-013 modifies FR-038",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-014",
+      "to": "FR-032",
+      "relation": "modifies",
+      "rationale": "CR CR-014 modifies FR-032",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-014",
+      "to": "FR-036",
+      "relation": "modifies",
+      "rationale": "CR CR-014 modifies FR-036",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-015",
+      "to": "FR-038",
+      "relation": "modifies",
+      "rationale": "CR CR-015 modifies FR-038",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-015",
+      "to": "FR-031",
+      "relation": "modifies",
+      "rationale": "CR CR-015 modifies FR-031",
+      "added_date": "2026-10-27"
+    },
+    {
+      "from": "CR-016",
+      "to": "FR-038",
+      "relation": "modifies",
+      "rationale": "CR CR-016 modifies FR-038",
+      "added_date": "2026-10-29"
+    },
+    {
+      "from": "CR-016",
+      "to": "FR-031",
+      "relation": "modifies",
+      "rationale": "CR CR-016 modifies FR-031",
+      "added_date": "2026-10-29"
     }
   ],
   "history": [
@@ -16418,6 +20515,498 @@
       "reason": "CR-010 (26.10.2026): добавлены правила — комментарий перехода отправляется всегда (update.comment.add), идентификаторы переходов не фиксируются, переход определяется по целевому статусу в ответе Jira (фактическое поведение, проба KON-30).",
       "note": "",
       "date": "2026-10-26"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_opened",
+      "cr_id": "CR-011",
+      "initiator": "РО и коллеги (обратная связь этапа 2), через владельца продукта"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_opened",
+      "cr_id": "CR-012",
+      "initiator": "РО и коллеги (обратная связь этапа 2), через владельца продукта"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_opened",
+      "cr_id": "CR-013",
+      "initiator": "Владелец продукта"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_resolved",
+      "cr_id": "CR-011",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "BR-003",
+        "FR-008",
+        "BR-002",
+        "FR-007",
+        "FR-013",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-017",
+        "BR-005",
+        "UC-004",
+        "FR-010",
+        "UC-005",
+        "NFR-009",
+        "FR-018",
+        "FR-021",
+        "FR-031",
+        "UC-001",
+        "FR-028",
+        "FR-038",
+        "FR-005",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-036",
+        "FR-012",
+        "FR-023",
+        "FR-039",
+        "NFR-010",
+        "FR-030",
+        "FR-019",
+        "FR-035",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-022",
+        "FR-024",
+        "UC-006",
+        "FR-004",
+        "FR-033",
+        "FR-040",
+        "NFR-006",
+        "BR-001",
+        "NFR-007",
+        "FR-025",
+        "BR-009",
+        "FR-014",
+        "FR-003",
+        "BR-008",
+        "FR-026",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-027",
+        "FR-006",
+        "BP-001",
+        "FR-015",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-006",
+        "NFR-008",
+        "UC-003",
+        "BR-010",
+        "FR-011",
+        "FR-029",
+        "FR-020",
+        "FR-002",
+        "UC-002",
+        "BR-007",
+        "FR-037",
+        "FR-016",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-034",
+        "FR-001",
+        "FR-009",
+        "FR-032"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_resolved",
+      "cr_id": "CR-012",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "BR-003",
+        "FR-008",
+        "BR-002",
+        "FR-007",
+        "FR-013",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-017",
+        "BR-005",
+        "UC-004",
+        "FR-010",
+        "UC-005",
+        "NFR-009",
+        "FR-018",
+        "FR-021",
+        "FR-031",
+        "UC-001",
+        "FR-028",
+        "FR-038",
+        "FR-005",
+        "FR-036",
+        "NFR-010",
+        "FR-012",
+        "FR-039",
+        "FR-023",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-030",
+        "FR-019",
+        "FR-035",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-022",
+        "FR-024",
+        "FR-004",
+        "UC-006",
+        "FR-033",
+        "FR-040",
+        "NFR-007",
+        "BR-001",
+        "NFR-006",
+        "FR-025",
+        "BR-009",
+        "FR-014",
+        "FR-003",
+        "BR-008",
+        "FR-026",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-027",
+        "FR-006",
+        "BP-001",
+        "FR-015",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-006",
+        "NFR-008",
+        "UC-003",
+        "BR-010",
+        "FR-011",
+        "FR-029",
+        "FR-020",
+        "BR-007",
+        "UC-002",
+        "FR-002",
+        "FR-037",
+        "FR-016",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-034",
+        "FR-001",
+        "FR-009",
+        "FR-032"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_resolved",
+      "cr_id": "CR-013",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "BR-003",
+        "FR-008",
+        "BR-002",
+        "FR-007",
+        "FR-013",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-017",
+        "BR-005",
+        "UC-004",
+        "FR-010",
+        "UC-005",
+        "NFR-009",
+        "FR-018",
+        "FR-021",
+        "FR-031",
+        "UC-001",
+        "FR-028",
+        "FR-038",
+        "FR-005",
+        "FR-036",
+        "NFR-010",
+        "FR-012",
+        "FR-023",
+        "FR-039",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-030",
+        "FR-019",
+        "FR-035",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-022",
+        "FR-024",
+        "UC-006",
+        "FR-004",
+        "FR-033",
+        "FR-040",
+        "BR-001",
+        "NFR-007",
+        "NFR-006",
+        "FR-025",
+        "BR-009",
+        "FR-014",
+        "BR-008",
+        "FR-003",
+        "FR-026",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-027",
+        "FR-006",
+        "FR-015",
+        "BP-001",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-006",
+        "NFR-008",
+        "UC-003",
+        "BR-010",
+        "FR-011",
+        "FR-029",
+        "FR-020",
+        "FR-002",
+        "UC-002",
+        "BR-007",
+        "FR-037",
+        "FR-016",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-034",
+        "FR-001",
+        "FR-009",
+        "FR-032"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_opened",
+      "cr_id": "CR-014",
+      "initiator": "Владелец продукта (обратная связь РО)"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_opened",
+      "cr_id": "CR-015",
+      "initiator": "Владелец продукта"
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_resolved",
+      "cr_id": "CR-014",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "NFR-009",
+        "COMP-SEQ-JiraChangeStatus",
+        "BR-005",
+        "UC-006",
+        "FR-006",
+        "FR-001",
+        "NFR-010",
+        "BR-001",
+        "FR-022",
+        "FR-034",
+        "FR-036",
+        "FR-038",
+        "UC-004",
+        "FR-005",
+        "UC-003",
+        "FR-039",
+        "BP-001",
+        "BR-008",
+        "COMP-SEQ-JiraIncrementalSync",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-014",
+        "BR-007",
+        "FR-030",
+        "UC-001",
+        "FR-027",
+        "FR-010",
+        "FR-013",
+        "FR-033",
+        "UC-005",
+        "BR-010",
+        "FR-019",
+        "BR-006",
+        "FR-011",
+        "FR-016",
+        "BR-002",
+        "FR-004",
+        "FR-007",
+        "NFR-008",
+        "FR-018",
+        "FR-002",
+        "FR-009",
+        "FR-020",
+        "FR-035",
+        "FR-028",
+        "FR-037",
+        "FR-025",
+        "FR-040",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-023",
+        "NFR-007",
+        "UC-002",
+        "FR-024",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-021",
+        "FR-003",
+        "NFR-006",
+        "FR-032",
+        "FR-008",
+        "FR-029",
+        "BR-003",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-009",
+        "FR-015",
+        "FR-031",
+        "FR-012",
+        "FR-026",
+        "FR-017"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "action": "cr_resolved",
+      "cr_id": "CR-015",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "NFR-009",
+        "COMP-SEQ-JiraChangeStatus",
+        "BR-005",
+        "UC-006",
+        "FR-006",
+        "FR-001",
+        "NFR-010",
+        "BR-001",
+        "FR-034",
+        "FR-036",
+        "FR-022",
+        "FR-038",
+        "UC-004",
+        "FR-005",
+        "BP-001",
+        "UC-003",
+        "COMP-SEQ-JiraIncrementalSync",
+        "BR-008",
+        "FR-039",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-014",
+        "BR-007",
+        "FR-030",
+        "UC-001",
+        "FR-013",
+        "FR-010",
+        "FR-027",
+        "FR-033",
+        "BR-010",
+        "UC-005",
+        "FR-019",
+        "BR-006",
+        "FR-011",
+        "FR-016",
+        "BR-002",
+        "FR-004",
+        "FR-007",
+        "NFR-008",
+        "FR-018",
+        "FR-002",
+        "FR-009",
+        "FR-020",
+        "FR-035",
+        "FR-028",
+        "FR-037",
+        "FR-025",
+        "FR-040",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-023",
+        "NFR-007",
+        "UC-002",
+        "FR-024",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-021",
+        "FR-003",
+        "NFR-006",
+        "FR-032",
+        "FR-008",
+        "FR-029",
+        "BR-003",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-009",
+        "FR-015",
+        "FR-031",
+        "FR-012",
+        "FR-026",
+        "FR-017"
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "action": "cr_opened",
+      "cr_id": "CR-016",
+      "initiator": "Константин (владелец), через UX KON-149"
+    },
+    {
+      "date": "2026-10-29",
+      "action": "cr_resolved",
+      "cr_id": "CR-016",
+      "decision": "Approved",
+      "decided_by": "Константин Шакуров",
+      "updated_requirements": [
+        "FR-027",
+        "FR-024",
+        "FR-035",
+        "BR-003",
+        "FR-026",
+        "BR-008",
+        "FR-009",
+        "FR-039",
+        "BR-006",
+        "FR-037",
+        "UC-004",
+        "FR-011",
+        "FR-014",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-031",
+        "FR-006",
+        "FR-034",
+        "NFR-009",
+        "BR-010",
+        "FR-012",
+        "NFR-006",
+        "FR-013",
+        "COMP-SEQ-JiraAssignCandidate",
+        "UC-005",
+        "FR-040",
+        "FR-008",
+        "BR-001",
+        "FR-016",
+        "UC-001",
+        "FR-019",
+        "BR-009",
+        "FR-020",
+        "FR-033",
+        "COMP-SEQ-JiraLoginSession",
+        "FR-003",
+        "BP-001",
+        "NFR-010",
+        "BR-002",
+        "FR-038",
+        "FR-021",
+        "FR-032",
+        "FR-029",
+        "NFR-007",
+        "FR-010",
+        "FR-028",
+        "UC-002",
+        "FR-007",
+        "FR-025",
+        "FR-015",
+        "COMP-SEQ-JiraIncrementalSync",
+        "UC-006",
+        "NFR-008",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-002",
+        "FR-018",
+        "FR-001",
+        "FR-036",
+        "FR-004",
+        "BR-007",
+        "BR-005",
+        "COMP-SEQ-JiraEpicRules",
+        "UC-003",
+        "FR-022",
+        "FR-005",
+        "FR-030",
+        "FR-017",
+        "FR-023"
+      ]
     }
   ]
 }

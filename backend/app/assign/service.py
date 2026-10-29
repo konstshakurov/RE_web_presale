@@ -14,7 +14,11 @@ FR-029 (отказ Jira - текст как есть, введённое не т
 * повторное назначение: побеждает последний (FR-010); переход «Кандидат назначен» не
   выполняется, если потребность уже в этом статусе, - тогда пишутся поля, файлы и комментарий;
 * при сбое посреди назначения ответ несёт ``completed`` - выполненные шаги; повтор с ними не
-  дублирует вложения и комментарии;
+  дублирует вложения и комментарии; запись, оборванная по таймауту (NFR-009), могла дойти до Jira
+  позже, поэтому перед повтором первого невыполненного шага вложения/комментария потребность
+  перечитывается (``attachment``, ``comment``): вложение, уже лежащее в Jira с тем же именем и
+  размером, и комментарий с тем же текстом считаются доставленными - шаг помечается
+  выполненным и не отправляется снова (KON-120);
 * ставка вносится при назначении и пишется отдельным вызовом ScriptRunner (``JiraPort.set_rate``,
   проба KON-99, CR-008) после успешного назначения - только если «Кто предлагает ставку» =
   «Производство»; при «Клиент» не отправляется. Сбой записи ставки - частичный успех: назначение
@@ -83,6 +87,8 @@ STEP_COMMENT = "comment"
 STEP_RATE = "rate"
 PROPOSER_PRODUCTION = "от производства"
 STEP_ATTACH = "attach:"  # + id файла
+F_ATTACHMENT = "attachment"
+F_COMMENT = "comment"
 
 
 # коды истёкшей сессии Jira: не частичный успех, а запрос пароля (роутер даёт 409)
@@ -168,6 +174,10 @@ class NeedCache(Protocol):
 
 def _norm(s: str) -> str:
     return " ".join((s or "").lower().split())
+
+
+def _norm_body(s: Any) -> str:
+    return " ".join(str(s or "").split())
 
 
 def _kind(spec: TransitionField) -> str:
@@ -462,9 +472,26 @@ class AssignService:
         done = list(inp.completed)
         warnings: list[str] = []
 
-        def step(name: str, fn) -> None:
+        # Повтор после сбоя (completed не пуст): первый невыполненный шаг мог быть оборван по
+        # таймауту уже после доставки. Сверяемся с Jira один раз и только для него - следующие
+        # шаги ещё не отправлялись (KON-120).
+        probe = {"pending": bool(done)}
+
+        def delivered(name: str, matches) -> bool:
+            if not probe["pending"]:
+                return False
+            probe["pending"] = False
+            return matches(self._read_delivered(token, need_key, name, done))
+
+        def step(name: str, fn, was_delivered=None) -> None:
             if name in done:
                 return
+            if was_delivered is not None and was_delivered():
+                log.info("шаг %s уже доставлен в Jira, повтор не отправляется: %s",
+                         name.split(":")[0], need_key)
+                done.append(name)
+                return
+            probe["pending"] = False  # первый невыполненный шаг отправляется - дальше не сверяем
             self._jira_call(fn, step=name, completed=done)
             done.append(name)
 
@@ -473,14 +500,18 @@ class AssignService:
         for fid, fname, content, mime in files:
             step(STEP_ATTACH + str(fid),
                  lambda fname=fname, content=content, mime=mime:
-                 self._jira.attach_file(token, need_key, fname, content, mime))
+                 self._jira.attach_file(token, need_key, fname, content, mime),
+                 lambda fid=fid, fname=fname, content=content: delivered(
+                     STEP_ATTACH + str(fid),
+                     lambda d: (fname, len(content)) in d["attachments"]))
         text = (inp.comment or "").strip()
         if t is not None:
             text = text or "Кандидат назначен через re_web_presale"  # комментарий перехода всегда
             step(STEP_TRANSITION, lambda: self._transition_assigned(
                 token, need_key, t.id, in_transition, text, warnings))
         elif text and STEP_TRANSITION not in done:  # комментарий уже ушёл с переходом
-            step(STEP_COMMENT, lambda: self._jira.add_comment(token, need_key, text))
+            step(STEP_COMMENT, lambda: self._jira.add_comment(token, need_key, text),
+                 lambda: delivered(STEP_COMMENT, lambda d: _norm_body(text) in d["comments"]))
         rate_pending = False
         if rate is not None:
             # назначение уже выполнено и не откатывается: сбой ставки - частичный успех (FR-029);
@@ -503,6 +534,23 @@ class AssignService:
         new_status, refreshed = self._refresh(token, need_key)
         return OpResult(need_key, new_status, refreshed, tuple(done), tuple(warnings),
                         rate_pending)
+
+    def _read_delivered(self, token: str, key: str, step_name: str, done: list[str]) -> dict[str, Any]:
+        """Вложения (имя, размер) и тексты комментариев, уже лежащие в потребности (KON-120).
+
+        Отказ чтения - обычный отказ Jira с ``completed``: слать запись вслепую после таймаута
+        значит рисковать дублем, оператор повторит позже.
+        """
+        issue = self._jira_call(
+            lambda: self._jira.get_issue(token, key, fields=[F_ATTACHMENT, F_COMMENT]),
+            step=step_name, completed=done)
+        f = (issue or {}).get("fields") or {}
+        attachments = {(str(a.get("filename") or ""), int(a.get("size") or 0))
+                       for a in (f.get(F_ATTACHMENT) or []) if isinstance(a, dict)}
+        raw = f.get(F_COMMENT)
+        items = raw.get("comments") if isinstance(raw, dict) else raw
+        comments = {_norm_body(c.get("body")) for c in (items or []) if isinstance(c, dict)}
+        return {"attachments": attachments, "comments": comments}
 
     # --- переход 21 и обход правила «Нужно предоставить CV» (CR-006) ---
 

@@ -66,6 +66,8 @@ class FakeJira:
         self.calls: list[tuple] = []
         self.fail: dict[str, Exception] = {}
         self.reread_fails = False
+        self.remote_files: list[tuple[str, int]] = []   # уже лежат в Jira (имя, размер)
+        self.remote_comments: list[str] = []
         self.tokens: set[str] = set()
         self.tr_errors: list[Exception | None] = []   # по вызову do_transition; None - успех
         self.set_errors: dict[str, Exception] = {}    # ключ - значение 11506, на котором падает PUT
@@ -78,6 +80,12 @@ class FakeJira:
 
     def get_issue(self, token, key, fields=None):
         self._do("get_issue", token, key)
+        if fields == ["attachment", "comment"]:  # сверка доставки перед повтором (KON-120)
+            self.calls.pop()
+            self.calls.append(("probe_delivered",))
+            return {"key": key, "fields": {
+                "attachment": [{"filename": n, "size": z} for n, z in self.remote_files],
+                "comment": {"comments": [{"body": b} for b in self.remote_comments]}}}
         if fields == ["customfield_11506"]:
             self.calls.pop()
             self.calls.append(("get_need_cv_rule",))
@@ -838,3 +846,112 @@ def test_support_retry_does_not_duplicate_attach_and_resends_field():
     assert j.names().count("attach_file") == 1
     trs = [c for c in j.calls if c[0] == "do_transition"]
     assert len(trs) == 2 and all(c[2]["customfield_11602"] == {"id": "11503"} for c in trs)
+
+
+# --- KON-120: повтор после таймаута не дублирует вложение и комментарий ---
+
+TIMEOUT = JiraIntegrationError("Превышен лимит на вызов Jira", code=CODE_JIRA_UNAVAILABLE,
+                               status=503, retryable=True)
+
+
+def test_retry_after_attach_timeout_delivered_does_not_duplicate():
+    j = FakeJira()
+    j.fail["attach_file"] = TIMEOUT
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP))
+    assert e.value.completed == ["fields"] and e.value.step == "attach:1"
+    j.fail.clear()
+    j.remote_files = [("f1.docx", len(b"data1"))]  # запись дошла позже таймаута
+    j.calls.clear()
+    r = s.assign(USER, KEY, AssignInput(EMP, completed=tuple(e.value.completed)))
+    assert "attach_file" not in j.names() and j.names().count("probe_delivered") == 1
+    assert "attach:1" in r.steps and "do_transition" in j.names()
+
+
+def test_retry_after_attach_timeout_not_delivered_sends_file():
+    j = FakeJira()
+    j.fail["attach_file"] = TIMEOUT
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP, extra_file_ids=(2,)))
+    j.fail.clear()
+    j.remote_files = [("f1.docx", 999)]  # то же имя, другой размер - не наше вложение
+    j.calls.clear()
+    s.assign(USER, KEY, AssignInput(EMP, extra_file_ids=(2,), completed=tuple(e.value.completed)))
+    assert [c[1] for c in j.calls if c[0] == "attach_file"] == ["f1.docx", "f2.docx"]
+    assert j.names().count("probe_delivered") == 1  # сверка только первого невыполненного шага
+
+
+def test_retry_probes_only_first_pending_step_second_file_sent_even_if_same_name_exists():
+    j = FakeJira()
+    j.remote_files = [("f2.docx", len(b"data2"))]  # старое вложение; шаг attach:2 не отправлялся
+    s = svc(j)
+    s.assign(USER, KEY, AssignInput(EMP, extra_file_ids=(2,), completed=("fields", "attach:1")))
+    assert [c[1] for c in j.calls if c[0] == "attach_file"] == []  # он и есть первый невыполненный
+    j2 = FakeJira()
+    j2.remote_files = [("f2.docx", len(b"data2"))]
+    svc(j2).assign(USER, KEY, AssignInput(EMP, extra_file_ids=(2,), completed=("fields",)))
+    # первым невыполненным был attach:1 (его нет в Jira) - f2 после него не сверяется и уходит
+    assert [c[1] for c in j2.calls if c[0] == "attach_file"] == ["f1.docx", "f2.docx"]
+
+
+def test_first_attempt_has_no_extra_jira_read():
+    j = FakeJira()
+    svc(j).assign(USER, KEY, AssignInput(EMP, comment="к"))
+    assert "probe_delivered" not in j.names()
+
+
+def test_retry_after_comment_timeout_delivered_does_not_duplicate():
+    j = FakeJira(status="Кандидат назначен", transitions=[T_SEARCH])
+    j.fail["add_comment"] = TIMEOUT
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP, comment="замена  кандидата"))
+    assert e.value.step == "comment" and e.value.code == CODE_JIRA_UNAVAILABLE
+    j.fail.clear()
+    j.remote_comments = ["замена кандидата"]
+    j.calls.clear()
+    r = s.assign(USER, KEY, AssignInput(EMP, comment="замена  кандидата",
+                                        completed=tuple(e.value.completed)))
+    assert "add_comment" not in j.names() and r.steps[-1] == "comment"
+
+
+def test_retry_after_comment_timeout_not_delivered_sends_comment():
+    j = FakeJira(status="Кандидат назначен", transitions=[T_SEARCH])
+    j.fail["add_comment"] = TIMEOUT
+    s = svc(j)
+    with pytest.raises(AssignError) as e:
+        s.assign(USER, KEY, AssignInput(EMP, comment="замена"))
+    j.fail.clear()
+    j.remote_comments = ["другой текст"]
+    j.calls.clear()
+    s.assign(USER, KEY, AssignInput(EMP, comment="замена", completed=tuple(e.value.completed)))
+    assert [c[1] for c in j.calls if c[0] == "add_comment"] == ["замена"]
+
+
+def test_retry_after_transition_timeout_delivered_does_not_duplicate_transition_comment():
+    # переход дошёл вместе с комментарием; потребность уже «Кандидат назначен» -> отдельный
+    # комментарий не пишется
+    j = FakeJira(status="Кандидат назначен", transitions=[T_SEARCH])
+    j.remote_comments = ["к"]
+    r = svc(j).assign(USER, KEY, AssignInput(EMP, comment="к",
+                                             completed=("fields", "attach:1")))
+    assert "add_comment" not in j.names() and "comment" in r.steps
+
+
+def test_probe_failure_is_reported_with_completed_and_nothing_is_sent():
+    j = FakeJira()
+    j.fail["probe_delivered"] = JiraIntegrationError("down", code=CODE_JIRA_UNAVAILABLE, status=503)
+    j.calls.clear()
+    orig = j.get_issue
+
+    def get_issue(token, key, fields=None):
+        if fields == ["attachment", "comment"]:
+            raise j.fail["probe_delivered"]
+        return orig(token, key, fields)
+    j.get_issue = get_issue
+    with pytest.raises(AssignError) as e:
+        svc(j).assign(USER, KEY, AssignInput(EMP, completed=("fields",)))
+    assert e.value.code == CODE_JIRA_UNAVAILABLE and e.value.completed == ["fields"]
+    assert "attach_file" not in j.names()

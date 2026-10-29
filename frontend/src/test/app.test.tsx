@@ -43,8 +43,8 @@ describe("защищённые маршруты", () => {
     fetchMock.mockResolvedValue(json(401, { detail: "Требуется вход" }));
     renderAt("/employees");
     expect(await screen.findByRole("heading", { name: "Вход" })).toBeInTheDocument();
-    expect(screen.getAllByAltText("regoose")).toHaveLength(1);
-    expect(screen.getAllByRole("img")).toHaveLength(1);
+    expect(screen.getAllByRole("link", { name: "regoose" })).toHaveLength(1);
+    expect(document.querySelectorAll(".topbar__brand img")).toHaveLength(2);
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.queryByText(/Сессия истекла/)).not.toBeInTheDocument();
   });

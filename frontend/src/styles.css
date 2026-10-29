@@ -13,20 +13,30 @@
     color-scheme: light;
   }
 }
-html { scroll-padding-top: 56px; }
+html { scroll-padding-top: 64px; }
 body { margin: 0; font-family: system-ui, sans-serif; color: var(--text); background: var(--bg); }
 a { color: var(--accent); }
-.topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: flex-end; gap: 20px; padding: 0 24px; height: 56px; background: var(--nav); color: #fff; }
-.topbar__logo { display: block; align-self: flex-end; margin-bottom: 8.2px; height: 41px; width: auto; }
-.topbar__nav { display: flex; align-self: flex-end; gap: 2px; flex: 1; }
-.topbar__nav a { color: var(--nav-text); text-decoration: none; padding: 12px 16px; margin-top: 8px; border-radius: 6px 6px 0 0; }
+.topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 20px; padding: 0 24px; height: 64px; background: var(--nav); color: #fff; }
+.topbar, .topbar *, .topbar *::before, .topbar *::after { box-sizing: border-box; }
+.topbar__brand { --logo-h: 34px; align-self: stretch; display: flex; align-items: flex-end; flex: none; gap: calc(var(--logo-h) * 11.42 / 48); text-decoration: none; }
+.topbar__head { align-self: center; display: block; height: var(--logo-h); width: auto; }
+.topbar__wordbox { display: flex; align-items: center; height: calc(64px - 8px); padding-bottom: 8px; font-size: 16px; line-height: 1.2; color: #fff; }
+.topbar__wordline { display: block; }
+.topbar__wordslot { position: relative; display: inline-block; height: 0; width: calc(var(--logo-h) * 99.82 / 48); vertical-align: baseline; }
+.topbar__word { position: absolute; left: 0; bottom: calc(var(--logo-h) * -5.76 / 48); display: block; height: calc(var(--logo-h) * 21.5 / 48); width: auto; }
+.topbar__brand:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.topbar__nav { display: flex; align-self: stretch; align-items: flex-end; gap: 2px; flex: 1 0 auto; }
+.topbar__nav a { display: flex; align-items: center; height: calc(64px - 8px); padding: 0 16px 8px; border-radius: 8px 8px 0 0; color: var(--nav-text); text-decoration: none; font-size: 16px; font-weight: 400; line-height: 1.2; white-space: nowrap; }
 .topbar__nav a:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-.topbar__nav a.active { background: var(--bg); color: var(--text); font-weight: 600; }
-.topbar__user { display: flex; align-items: center; gap: 8px; align-self: flex-end; padding-bottom: 12px; min-width: 0; }
-.topbar__name { color: #fff; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.topbar__out { flex: none; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; margin: -8px 0; background: transparent; border: 0; border-radius: 4px; color: rgba(255, 255, 255, 0.75); cursor: pointer; }
+.topbar__nav a.active { background: var(--bg); color: var(--text); }
+.topbar__nav a:focus-visible, .topbar__out:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.topbar__user { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 0 1 auto; }
+.topbar__name { color: #fff; max-width: 280px; min-width: 0; font-size: 16px; font-weight: 400; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar__badge { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px 0 6px; border-radius: 11px; background: #3D94FF; color: #fff; font-size: 12px; font-weight: 600; line-height: 1; }
+.topbar__badge svg { flex: none; }
+.topbar__out { flex: none; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: transparent; border: 0; border-radius: 4px; color: rgba(255, 255, 255, 0.75); cursor: pointer; }
 .topbar__out:hover { color: #fff; }
-.topbar__out:focus-visible { outline: 2px solid #fff; outline-offset: 0; color: #fff; }
+@media (max-width: 1100px) { .topbar { gap: 12px; } .topbar__nav a { padding: 0 12px 8px; } .topbar__user { gap: 8px; } }
 .content { padding: 24px; }
 .login { display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 48px auto; background: var(--panel); padding: 24px; border-radius: 6px; }
 .login h1 { text-align: center; margin: 0 0 8px; }

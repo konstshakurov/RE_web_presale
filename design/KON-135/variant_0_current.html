@@ -1,0 +1,100 @@
+<!doctype html><html lang="ru" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KON-135 как сейчас (KON-78/KON-92)</title><style>
+:root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;--border:#323f4b;--accent:#3e8ef7;--nav:#0f1b33;--nav-accent:#3e8ef7;--nav-text:#cbd2d9;--nav-border:#52606d;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f6f8;--panel:#fff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;--border:#cbd2d9;--accent:#1b66c9;--nav:#1f2933;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;color:var(--text);background:var(--bg)}
+.harness{background:#000;color:#ddd;font:12px system-ui;padding:6px 12px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.harness a{color:#9cf}.harness b{color:#fff}
+.nohar .harness{display:none}
+.content{padding:24px}
+h1{margin:16px 0 8px}
+.muted{color:var(--muted)}
+.meas{font:12px/1.5 monospace;background:var(--panel);border:1px solid var(--border);padding:8px 12px;margin:16px 0;white-space:pre-wrap}
+.nomeas .meas{display:none}
+
+.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:20px;padding:0 24px;height:var(--h,64px);background:var(--nav);color:#fff}
+.topbar__brand{align-self:stretch;display:flex;align-items:flex-end;flex:none;gap:calc(var(--logo-h,34px)*11.42/48);text-decoration:none}
+.topbar__head{align-self:center;display:block;height:var(--logo-h,34px);width:auto}
+.topbar__wordbox{display:flex;align-items:center;height:calc(var(--h,64px) - 8px);padding-bottom:8px;font-size:16px;line-height:1.2;color:#fff}
+.topbar__wordline{display:block}
+.topbar__wordslot{position:relative;display:inline-block;height:0;width:calc(var(--logo-h,34px)*99.82/48);vertical-align:baseline}
+.topbar__word{position:absolute;left:0;bottom:calc(var(--logo-h,34px)*-5.76/48);display:block;height:calc(var(--logo-h,34px)*21.5/48);width:auto}
+.topbar__logo{display:block;flex:none;height:40px;width:auto}
+.topbar__nav{display:flex;flex:1 0 auto;gap:2px}
+.topbar__nav a{display:flex;align-items:center;color:var(--nav-text);text-decoration:none;font-size:16px;font-weight:400;white-space:nowrap;line-height:1.2}
+.topbar__nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.topbar__nav a.active{background:var(--bg);color:var(--text)}
+.topbar__nav a:focus-visible,.topbar__out:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+.topbar__user{display:flex;align-items:center;gap:10px;min-width:0;flex:0 1 auto}
+.topbar__name{max-width:280px;font-size:16px;font-weight:400;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+.topbar__badge{flex:none;display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:11px;background:#3D94FF;color:#fff;font-size:12px;font-weight:600;line-height:1}
+.topbar__badge svg{flex:none}
+.topbar__out{flex:none;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:0;border-radius:4px;color:rgba(255,255,255,.75);cursor:pointer}
+.topbar__out:hover{color:#fff}
+@media (max-width:1100px){.topbar{gap:12px}.topbar__nav a{font-size:16px}.topbar__user{gap:8px}}
+
+/* Как сейчас (frontend/src/styles.css): align-items:flex-end + margin-top/margin-bottom/padding-bottom компенсации */
+.topbar{align-items:flex-end}
+.topbar__logo{align-self:flex-end;margin-bottom:8.2px;height:41px}
+.topbar__nav{align-self:flex-end}
+.topbar__nav a{padding:12px 16px;margin-top:8px;border-radius:6px 6px 0 0}
+.topbar__nav a.active{font-weight:600}
+.topbar__user{align-self:flex-end;padding-bottom:12px}
+.topbar__out{margin:-8px 0}
+.topbar__badge{display:none}
+</style></head><body>
+<div class="harness"><b>KON-135 как сейчас (KON-78/KON-92)</b>
+<span>тема: <a href="?theme=dark">тёмная</a> <a href="?theme=light">светлая</a></span>
+<span>роль: <a href="#" data-p="role=admin">Админ</a> <a href="#" data-p="role=user">Пользователь</a></span>
+<span>вкладка: <a href="#" data-p="tab=needs">Потребности</a> <a href="#" data-p="tab=employees">Сотрудники</a> <a href="#" data-p="tab=resumes">Резюме</a> <a href="#" data-p="tab=settings">Настройки</a></span>
+<span>имя: <a href="#" data-p="name=short">короткое</a> <a href="#" data-p="name=long">очень длинное</a></span>
+<span>высота: <a href="#" data-p="h=56">56</a> <a href="#" data-p="h=60">60</a> <a href="#" data-p="h=64">64</a> <a href="#" data-p="lh=32">лого 32</a> <a href="#" data-p="lh=34">34</a> <a href="#" data-p="lh=36">36</a></span> <span><a href="#" data-p="guide=1">ось-линия</a> <a href="#" data-p="meas=1">измерения</a></span></div>
+<header class="topbar" id="tb">
+<img class="topbar__logo" src="logo.png" alt="regoose" id="m-logo">
+<nav class="topbar__nav" aria-label="Разделы" id="nav"></nav>
+<div class="topbar__user"><span class="topbar__name" id="m-name" title=""></span><span class="topbar__badge" id="m-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Админ</span>
+<button type="button" class="topbar__out" id="m-out" aria-label="Выйти" title="Выйти"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button></div>
+</header>
+<main class="content"><h1 id="h1"></h1><p class="muted">Содержимое страницы (вымышленное). Активная вкладка сливается с фоном страницы.</p><pre class="meas" id="meas"></pre></main>
+<script>
+var q=new URLSearchParams(location.search);
+var th=q.get('theme')||'dark';document.documentElement.dataset.theme=th;
+if(q.get('nohar'))document.body.classList.add('nohar');
+if(!q.get('meas'))document.body.classList.add('nomeas');
+if(q.get('h'))document.getElementById('tb').style.setProperty('--h',q.get('h')+'px');
+if(q.get('lh'))document.getElementById('tb').style.setProperty('--logo-h',q.get('lh')+'px');
+if(q.get('guide')){var g=document.createElement('div');g.style.cssText='position:absolute;left:0;right:0;top:calc(var(--h,64px)/2);height:1px;background:#ff2d55;pointer-events:none;z-index:9';document.getElementById('tb').appendChild(g)}
+var tab=q.get('tab')||'needs',role=q.get('role')||'admin',nm=q.get('name')||'short';
+var T=[['needs','Потребности'],['employees','Сотрудники'],['resumes','Резюме'],['settings','Настройки']];
+if(role!=='admin')T=T.filter(function(t){return t[0]!=='settings'});
+if(role!=='admin'&&tab==='settings')tab='needs';
+document.getElementById('nav').innerHTML=T.map(function(t){return '<a href="#" '+(t[0]===tab?'class="active" aria-current="page" ':'')+'data-id="'+t[0]+'"><span>'+t[1]+'</span></a>'}).join('');
+document.getElementById('h1').textContent=T.filter(function(t){return t[0]===tab})[0][1];
+var name=nm==='long'?'Константин Александрович Шакуров-Иванов-Петров':'Константин Шакуров';
+var n=document.getElementById('m-name');n.textContent=name;n.title=name+' · '+(role==='admin'?'администратор':'пользователь');
+if(role!=='admin')document.getElementById('m-badge').style.display='none';
+document.querySelectorAll('[data-p]').forEach(function(a){var p=new URLSearchParams(location.search);var kv=a.dataset.p.split('=');p.set(kv[0],kv[1]);a.href='?'+p.toString()});
+document.querySelectorAll('[href^="?theme"]').forEach(function(a){var p=new URLSearchParams(location.search);p.set('theme',a.getAttribute('href').split('=')[1]);a.href='?'+p.toString()});
+document.querySelectorAll('.topbar__nav a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault()})});
+// измерение вертикальных центров (px от верха шапки)
+function cy(el){var r=el.getBoundingClientRect(),t=document.getElementById('tb').getBoundingClientRect();return (r.top+r.height/2-t.top)}
+function meas(){
+ var tb=document.getElementById('tb').getBoundingClientRect();
+ var act=document.querySelector('.topbar__nav a.active span'), oth=document.querySelector('.topbar__nav a:not(.active) span');
+ var rows=[['высота шапки',tb.height],['голова логотипа',cy(document.getElementById('m-head')||document.getElementById('m-logo'))],['текст активной вкладки',cy(act)],['текст другой вкладки',cy(oth)],['имя',cy(document.getElementById('m-name'))],['иконка выхода',cy(document.getElementById('m-out'))]];
+ var b=document.getElementById('m-badge'); if(b.offsetParent)rows.splice(rows.length-1,0,['чип «Админ»',cy(b)]);
+ var aa=document.querySelector('.topbar__nav a.active').getBoundingClientRect(),tt=document.getElementById('tb').getBoundingClientRect();
+ rows.push(['вкладка: верх/низ (от верха шапки)',(aa.top-tt.top).toFixed(1)+' / '+(aa.bottom-tt.top).toFixed(1)]);
+ var cs=rows.filter(function(r,i){return i>0&&i<rows.length-1}).map(function(r){return r[1]});
+ var dev=Math.max.apply(null,cs)-Math.min.apply(null,cs);
+ var tabs=document.querySelectorAll('.topbar__nav a');var ws=[].map.call(tabs,function(a){return a.getBoundingClientRect().left}).join(',');
+ var out=rows.map(function(r){return r[0]+': '+(typeof r[1]==='number'?r[1].toFixed(1):r[1])}).join('\n')+'\nРазброс центров: '+dev.toFixed(1)+' px\nвысота головы: '+(document.getElementById('m-head')||document.getElementById('m-logo')).getBoundingClientRect().height.toFixed(1)+' px'+'\nширина окна: '+innerWidth+' px; горизонтальная прокрутка шапки: '+(document.getElementById('tb').scrollWidth>document.getElementById('tb').clientWidth?'ЕСТЬ':'нет');
+var tt2=document.getElementById('tb').getBoundingClientRect().top;
+ function base(el){var i=document.createElement('i');i.style.cssText='display:inline-block;width:0;height:0';el.appendChild(i);var y=i.getBoundingClientRect().bottom-tt2;el.removeChild(i);return y}
+ var wl=document.getElementById('m-wl');
+ if(wl){var im=document.getElementById('m-word').getBoundingClientRect();var bAsset=im.bottom-tt2-im.height*5.76/21.5;var bTab=base(act),bW=base(wl);
+  out+='\nбазовая линия вкладок: '+bTab.toFixed(2)+'\nбазовая линия надписи (по ассету): '+bAsset.toFixed(2)+'\nразница базовых линий: '+(bAsset-bTab).toFixed(2)+' px (строка-основа надписи: '+bW.toFixed(2)+')\nвысота надписи: '+im.height.toFixed(2)+' px';}
+ document.getElementById('meas').textContent=out;
+}
+window.addEventListener('load',meas);window.addEventListener('resize',meas);
+</script></body></html>

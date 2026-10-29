@@ -1,0 +1,220 @@
+<!doctype html><html lang="ru" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KON-134 вариант A: чипы-переключатели + РО в панели</title><style>
+:root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;--border:#323f4b;--accent:#3e8ef7;--nav:#0f1b33;--err:#ff8a80;--ok:#34c38f;--warn:#f5b041;--primary:#2870d4;--primary-hover:#235fc0;--nav-text:#cbd2d9;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f6f8;--panel:#fff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;--border:#cbd2d9;--accent:#1b66c9;--nav:#1f2933;--err:#b42318;--ok:#1a7f5a;--warn:#b7791f;--primary:#1f6fd6;--primary-hover:#1a5bb8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;color:var(--text);background:var(--bg)}
+a{color:var(--accent)}
+.harness{background:#000;color:#ddd;font:12px system-ui;padding:6px 12px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.harness a{color:#9cf}.harness b{color:#fff}
+.nohar .harness{display:none}
+.topbar{display:flex;align-items:center;gap:20px;padding:0 24px;height:56px;background:var(--nav);color:#fff}
+.topbar b{font-weight:600;letter-spacing:.3px}
+.topbar nav{display:flex;align-self:stretch;align-items:flex-end;gap:2px;flex:1}
+.topbar nav a{display:flex;align-items:center;height:48px;padding:0 16px 8px;border-radius:8px 8px 0 0;color:var(--nav-text);text-decoration:none}
+.topbar nav a.active{background:var(--bg);color:var(--text)}
+.content{padding:24px}
+.muted{color:var(--muted);margin:4px 0}
+.error{color:var(--err);margin:0}
+/* --- sync bar (как есть) --- */
+.sync{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;margin:0 0 4px}
+.sync h1{margin:0 0 12px;font-size:2em}
+.sync__r{display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--muted)}
+.btn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font:inherit;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.fld select:focus-visible,.toolbar input:focus-visible,.filter__item:focus-visible,.ms__btn:focus-visible,.switch input:focus-visible,.linkbtn:focus-visible,.chipx button:focus-visible,.ms__opt input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* --- фильтры --- */
+.filter{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.filter__item{background:transparent;color:var(--accent);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font:inherit;cursor:pointer}
+.filter__item[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter__item[aria-pressed=true]::before{content:"\2713\00a0"}
+.filter__count{opacity:.8;margin-left:4px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:8px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:13px;color:var(--muted)}
+.fld input,.fld select{height:36px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 10px;font:inherit}
+.fld input{width:220px}
+.fld select{width:230px;max-width:100%;text-overflow:ellipsis}
+.fld select:disabled{opacity:.6}
+.switchbox{height:36px;display:flex;align-items:center}
+label.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.switch input{appearance:none;-webkit-appearance:none;margin:0;flex:none;width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;background:var(--panel-2);border:1px solid var(--muted)}
+.switch input::before{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted)}
+.switch input:checked{background:var(--primary);border-color:var(--primary)}
+.switch input:checked::before{transform:translateX(16px);background:#fff}
+.tb__sp{flex:1}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:6px 4px;height:36px}
+.linkbtn:disabled{opacity:.5;cursor:default}
+.rohint{flex-basis:100%;margin:0;font-size:13px;color:var(--muted)}
+.rohint.err{color:var(--err)}
+.fsum{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:0 0 16px;font-size:14px;color:var(--muted);min-height:28px}
+.fsum b{color:var(--text);font-weight:600}
+.fsum .linkbtn{height:auto;padding:2px 4px}
+/* --- B: мультивыбор --- */
+.ms{position:relative}
+.ms__btn{display:flex;align-items:center;justify-content:space-between;gap:8px;height:36px;width:300px;max-width:100%;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 10px;font:inherit;cursor:pointer;text-align:left}
+.ms__val{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms__n{flex:none;background:var(--primary);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;font-weight:600;line-height:18px}
+.ms__car{flex:none;color:var(--muted)}
+.ms__pop{position:absolute;z-index:6;top:calc(100% + 4px);left:0;width:300px;max-width:92vw;background:var(--panel);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:6px 0}
+.ms__opt{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer}
+.ms__opt:hover{background:var(--panel-2)}
+.ms__opt input{margin:0;width:16px;height:16px;accent-color:var(--primary)}
+.ms__opt span:first-of-type{flex:1;min-width:0}
+.ms__opt .c{color:var(--muted);font-size:13px}
+.ms__foot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:6px;padding:6px 8px 0}
+.chipx-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 8px;padding:0}
+.chipx{display:inline-flex;align-items:center;gap:2px;background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:2px 4px 2px 12px}
+.chipx button{background:transparent;border:0;border-radius:50%;color:var(--muted);width:22px;height:22px;padding:0;font:inherit;line-height:1;cursor:pointer}
+.chipx button:hover{color:var(--text)}
+/* --- карточки --- */
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;display:flex;flex-direction:column;gap:6px;container-type:inline-size;min-width:0}
+.card__title{font-size:16px;margin:0;overflow-wrap:anywhere}
+.status{color:var(--ok);background:var(--panel-2);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.card__desc{color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* KON-124: три действия всегда в одну строку */
+.card__actions{display:flex;flex-wrap:nowrap;gap:0;align-items:center;margin-top:auto;margin-left:-8px}
+.act{display:inline-flex;flex:0 1 auto;min-width:0;align-items:center;gap:6px;padding:6px 8px;line-height:1.2;background:transparent;border:0;border-radius:4px;color:var(--muted);font:inherit;white-space:nowrap;cursor:pointer;text-decoration:none}
+.act:hover{color:var(--text)}
+.act svg{flex:none}
+.cur .card__actions{flex-wrap:wrap;gap:8px;margin-left:0}
+.cur .act{white-space:normal}
+@container (max-width:20em){.act{padding:6px 6px;gap:4px}}
+@container (max-width:17em){.act svg{display:none}}
+.empty{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:16px}
+.empty p{margin:0 0 8px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--muted);border-top-color:transparent;border-radius:50%;vertical-align:-2px;margin-right:6px}
+</style></head><body data-v="a" class="">
+<div class="harness"><b>KON-134 вариант A: чипы-переключатели + РО в панели</b>
+<span>тема: <a href="#" data-p="theme=dark">тёмная</a> <a href="#" data-p="theme=light">светлая</a></span>
+<span>список: <a href="#" data-p="state=ok">загружен</a> <a href="#" data-p="state=loading">загрузка</a> <a href="#" data-p="state=error">ошибка</a></span>
+<span>список РО: <a href="#" data-p="romode=ok">есть</a> <a href="#" data-p="romode=loading">загрузка</a> <a href="#" data-p="romode=fail">ошибка</a> <a href="#" data-p="romode=none">нет РО</a></span>
+<span>пример: <a href="#" data-p="st=Свободен|Коммерческий проект&ro=Павел Орлов">статусы + РО</a> <a href="#" data-p="ro=Александр Константинович Вознесенский-Заречный&st=Свободен">длинное имя РО</a> <a href="#" data-p="q=zzz&st=Свободен">пусто</a></span></div>
+<header class="topbar"><b>regoose</b><nav><a href="#">Потребности</a><a href="#" class="active">Сотрудники</a><a href="#">Резюме</a><a href="#">Настройки</a></nav><span>Константин Шакуров</span></header>
+<main class="content" id="app"></main>
+<script>
+var q=new URLSearchParams(location.search);
+document.documentElement.dataset.theme=q.get('theme')||'dark';
+if(q.get('nohar'))document.body.classList.add('nohar');
+var V=document.body.dataset.v; // a | b | cur
+var RO=['Евгения Синицына','Павел Орлов','Мария Кузнецова-Белозёрская','Александр Константинович Вознесенский-Заречный'];
+var ST=['Выход новичка','Программа обучения','Внутренний проект','Свободен','Коммерческий проект','Ожидает подключения','Скоро освобождается','Недоступен для подключения','Декрет'];
+var N=[
+['Абрамова Ирина Сергеевна','Коммерческий проект',0,'Планируется в ближайшие 3 месяца','Стаж 5 лет; Опыт: Госсектор, CRM, ETL',0],
+['Аверин Максим Аркадьевич','Свободен',1,'В ближайшие 3 месяца не планируется','Стаж 8 лет; Опыт: Финтех, E-commerce',1],
+['Агеева Дарья Андреевна','Коммерческий проект',1,'Планируется в ближайшие 3 месяца','Стаж 4 года; Опыт: Ритейл, Страхование',0],
+['Алексеев Денис Олегович','Свободен',1,'В ближайшие 3 месяца не планируется','Опыт: Kafka, Kubernetes, Docker, Keycloak (OAuth 2.0), Банковский сектор, логистика',2],
+['Андреева Тамара Витальевна','Скоро освобождается',1,'Планируется в ближайшие 3 месяца','Стаж 15 лет; Опыт: ИТ и разработка ПО, Энергетика',1],
+['Беленькая Маргарита Романовна','Коммерческий проект',0,'Планируется в ближайшие 3 месяца','Опыт: ОПК, Производство',0],
+['Блохин Владимир Игоревич','Коммерческий проект',1,'В ближайшие 3 месяца не планируется','Финтех (ДБО, Финансы и кредиты), EMS',1],
+['Буданова Ольга Николаевна','Свободен',1,'В ближайшие 3 месяца не планируется','Стаж 8 лет; Опыт: Производство, Финтех',2],
+['Букина Валерия Аркадьевна','Недоступен для подключения',0,'Планируется в ближайшие 3 месяца','Стаж 6 лет',3],
+['Власова Анна Борисовна','Внутренний проект',1,'Планируется в ближайшие 3 месяца','Государственный сектор (Госзаказ), Финтех',2],
+['Гаврилов Руслан Эдуардович','Программа обучения',1,'В ближайшие 3 месяца не планируется','Стаж 1 год',3],
+['Герасимова Елена Павловна','Выход новичка',1,'Не указаны','',4],
+['Дьячков Артём Леонидович','Декрет',0,'Не указаны','',4],
+['Ермолаева Светлана Дмитриевна','Свободен',1,'Планируется в ближайшие 3 месяца','Опыт: HR-Tech, Банковский сектор',3],
+['Жуков Георгий Вячеславович','Скоро освобождается',1,'В ближайшие 3 месяца не планируется','Опыт: Телеком',4],
+['Захарова-Мельникова Екатерина Константиновна-Иванова','Коммерческий проект',1,'Планируется в ближайшие 3 месяца','Очень длинное описание проверки переноса и ограничения высоты карточки: опыт в разработке и сопровождении интеграционных решений для банковского сектора, телекоммуникаций, ритейла и государственного сектора',2],
+['Уволенов Пётр Петрович','Уволен',0,'Не указаны','',0]
+];
+var state={st:(q.get('st')||'').split('|').filter(Boolean),ro:q.get('ro')||'',q:q.get('q')||'',fired:q.get('fired')==='1',open:q.get('open')==='1'};
+var mode=q.get('state')||'ok'; // ok|loading|error
+var romode=q.get('romode')||'ok'; // ok|loading|fail|none
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function base(){ // после РО и «Уволенные» (для счётчиков статусов)
+  return N.filter(function(e){return (state.fired||e[1]!=='Уволен')&&(!state.ro||(state.ro==='__none'?e[5]===4:RO[e[5]]===state.ro))})}
+function shown(){var qq=state.q.trim().toLowerCase();
+  return base().filter(function(e){return (!state.st.length||state.st.indexOf(e[1])>-1)&&(!qq||e[0].toLowerCase().indexOf(qq)>-1)})}
+function cnt(s){return base().filter(function(e){return e[1]===s}).length}
+function active(){return state.st.length||state.ro||state.q.trim()||state.fired}
+function setst(s){var i=state.st.indexOf(s);if(i>-1)state.st.splice(i,1);else state.st.push(s);render()}
+function reset(){state.st=[];state.ro='';state.q='';state.fired=false;render()}
+var ICON={user:'<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/>',doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
+function ico(n){return '<svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[n]+'</svg>'}
+function roField(){
+  var dis=romode!=='ok';var opts='';
+  if(romode==='loading')opts='<option>Загрузка…</option>';
+  else if(romode==='fail')opts='<option>Список недоступен</option>';
+  else if(romode==='none')opts='<option>Нет данных</option>';
+  else opts='<option value="">Все</option>'+RO.slice().sort(function(a,b){return a.localeCompare(b,'ru')}).map(function(r){return '<option'+(state.ro===r?' selected':'')+'>'+esc(r)+'</option>'}).join('')+'<option value="__none"'+(state.ro==='__none'?' selected':'')+'>Без РО</option>';
+  return '<label class="fld"><span>РО</span><select id="ro" '+(dis?'disabled ':'')+'aria-describedby="rohint" title="'+esc(state.ro==='__none'?'Без РО':(state.ro||'Руководитель отдела'))+'">'+opts+'</select></label>';
+}
+function rohint(){
+  if(romode==='fail')return '<p class="rohint err" id="rohint" role="alert">Не удалось загрузить список РО. Остальные фильтры работают. <button class="linkbtn" style="height:auto;padding:0 4px">Повторить</button></p>';
+  if(romode==='none')return '<p class="rohint" id="rohint">В карточках сотрудников не указан руководитель отдела — фильтр недоступен.</p>';
+  if(romode==='loading')return '<p class="rohint" id="rohint" role="status"><span class="spin"></span>Загружаем список РО…</p>';
+  return '<span id="rohint"></span>';
+}
+function summary(){
+  var n=shown().length;var TOTAL=N.filter(function(e){return state.fired||e[1]!=='Уволен'}).length;var parts=[];
+  if(state.st.length)parts.push('статус: <b>'+state.st.map(esc).join(', ')+'</b>');
+  if(state.ro)parts.push('РО: <b>'+(state.ro==='__none'?'Без РО':esc(state.ro))+'</b>');
+  if(state.q.trim())parts.push('поиск: <b>«'+esc(state.q.trim())+'»</b>');
+  if(state.fired)parts.push('<b>включая уволенных</b>');
+  var s='<span aria-live="polite">Показано <b>'+n+'</b> из '+TOTAL+'</span>';
+  if(parts.length)s+='<span>'+parts.join(' <span aria-hidden="true">·</span> ')+' <span class="muted" style="margin:0">(все условия сразу)</span></span><button type="button" class="linkbtn" id="reset">Сбросить фильтры</button>';
+  return '<p class="fsum">'+s+'</p>';
+}
+function statusBlock(){
+  var b=base();
+  if(V==='b'){
+    var lab=!state.st.length?'Все статусы':(state.st.length<=2?state.st.join(', '):state.st.length+' статуса');
+    var n=state.st.length?'<span class="ms__n">'+state.st.length+'</span>':'';
+    var pop='';
+    if(state.open){pop='<div class="ms__pop" role="group" aria-label="Статусы сотрудников">'+ST.map(function(s,i){return '<label class="ms__opt"><input type="checkbox" data-st="'+esc(s)+'" '+(state.st.indexOf(s)>-1?'checked':'')+'><span>'+esc(s)+'</span><span class="c">'+cnt(s)+'</span></label>'}).join('')+'<div class="ms__foot"><button type="button" class="linkbtn" data-clrst style="height:auto" '+(state.st.length?'':'disabled')+'>Снять все</button><button type="button" class="linkbtn" id="closepop" style="height:auto">Готово</button></div></div>'}
+    return '<div class="fld"><span id="stl">Статус</span><div class="ms"><button type="button" class="ms__btn" id="msb" aria-haspopup="true" aria-expanded="'+(state.open?'true':'false')+'" aria-labelledby="stl msv"><span class="ms__val" id="msv">'+esc(lab)+'</span>'+n+'<span class="ms__car" aria-hidden="true">▾</span></button>'+pop+'</div></div>';
+  }
+  return '';
+}
+function chipsRowA(){
+  var h='<button type="button" class="filter__item" aria-pressed="'+(!state.st.length)+'" id="all">Все <span class="filter__count">'+b2().length+'</span></button>';
+  h+=ST.map(function(s){return '<button type="button" class="filter__item" aria-pressed="'+(state.st.indexOf(s)>-1)+'" data-st="'+esc(s)+'">'+esc(s)+' <span class="filter__count">'+cnt(s)+'</span></button>'}).join('');
+  return '<nav class="filter" aria-label="Статусы сотрудников (можно выбрать несколько)">'+h+'</nav>';
+}
+function b2(){return base()}
+function chipsB(){
+  if(!state.st.length)return '';
+  return '<ul class="chipx-list" aria-label="Выбранные статусы">'+state.st.map(function(s){return '<li class="chipx">'+esc(s)+'<button type="button" data-rm="'+esc(s)+'" aria-label="Убрать статус: '+esc(s)+'">×</button></li>'}).join('')+'</ul>';
+}
+function cards(){
+  if(mode==='loading')return '<p class="muted" role="status"><span class="spin"></span>Загрузка…</p>';
+  if(mode==='error')return '<p class="error" role="alert">Не удалось загрузить сотрудников. Проверьте соединение и обновите страницу.</p>';
+  var s=shown();
+  if(!s.length){return active()?'<div class="empty"><p>По выбранным фильтрам сотрудников нет.</p><button type="button" class="btn" id="reset2">Сбросить фильтры</button></div>':'<div class="empty"><p>Нет данных</p></div>'}
+  return '<ul class="cards">'+s.map(function(e){return '<li class="card" aria-label="'+esc(e[0])+'"><h2 class="card__title"><a href="#">'+esc(e[0])+'</a></h2><div><span class="status">'+esc(e[1])+'</span> '+(e[2]?'':'<span class="muted">не назначается</span>')+'</div><div><strong>Отпуска:</strong> '+esc(e[3])+'</div>'+(e[4]?'<div class="card__desc">'+esc(e[4])+'</div>':'')+'<div class="card__actions"><button type="button" class="act" aria-label="Профиль: '+esc(e[0])+'">'+ico('user')+'<span>Профиль</span></button><button type="button" class="act" aria-label="Резюме: '+esc(e[0])+'">'+ico('doc')+'<span>Резюме</span></button><a href="#" class="act" aria-label="Файлы: '+esc(e[0])+'">'+ico('folder')+'<span>Файлы</span></a></div></li>'}).join('')+'</ul>';
+}
+function render(){
+  var bar='<div class="sync"><h1>Сотрудники</h1><div class="sync__r"><span>актуально на 22.10.2026, 15:30</span><button class="btn" type="button">Обновить</button></div></div>';
+  var tb='<div class="toolbar" role="search">';
+  tb+='<label class="fld"><span>Поиск</span><input type="search" id="q" placeholder="ФИО или ключ" maxlength="200" value="'+esc(state.q)+'"></label>';
+  if(V==='b')tb+=statusBlock();
+  tb+=roField();
+  tb+='<div class="switchbox"><label class="switch"><input type="checkbox" id="fired" '+(state.fired?'checked':'')+'><span>Уволенные</span></label></div>';
+  tb+=rohint();
+  tb+='</div>';
+  var html=bar+(V==='b'?'':chipsRowA())+tb+(V==='b'?chipsB():'')+summary()+cards();
+  document.getElementById('app').innerHTML=html;
+  bind();
+}
+function bind(){
+  var $=function(s){return document.querySelector(s)};
+  document.querySelectorAll('[data-st]').forEach(function(b){
+    if(b.type==='checkbox')b.addEventListener('change',function(){var s=b.dataset.st,i=state.st.indexOf(s);if(i>-1)state.st.splice(i,1);else state.st.push(s);var o=state.open;render();});
+    else b.addEventListener('click',function(){setst(b.dataset.st)})});
+  document.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){setst(b.dataset.rm)})});
+  var a=$('#all');if(a)a.addEventListener('click',function(){state.st=[];render()});
+  var r=$('#ro');if(r)r.addEventListener('change',function(){state.ro=r.value;render()});
+  var qq=$('#q');if(qq)qq.addEventListener('input',function(){state.q=qq.value;var p=qq.selectionStart;render();var n=$('#q');n.focus();n.setSelectionRange(p,p)});
+  var f=$('#fired');if(f)f.addEventListener('change',function(){state.fired=f.checked;render()});
+  ['#reset','#reset2'].forEach(function(s){var x=$(s);if(x)x.addEventListener('click',function(){state.open=false;reset()})});
+  var m=$('#msb');if(m)m.addEventListener('click',function(){state.open=!state.open;render();if(state.open){var c=document.querySelector('.ms__opt input');if(c)c.focus()}});
+  var cp=$('#closepop');if(cp)cp.addEventListener('click',function(){state.open=false;render();$('#msb').focus()});
+  var cl=$('[data-clrst]');if(cl)cl.addEventListener('click',function(){state.st=[];render()});
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.open){state.open=false;render();var m=document.getElementById('msb');if(m)m.focus()}});
+document.addEventListener('mousedown',function(e){if(state.open&&!e.target.closest('.ms')){state.open=false;render()}});
+// ссылки harness
+document.querySelectorAll('[data-p]').forEach(function(a){var p=new URLSearchParams(location.search);a.dataset.p.split('&').forEach(function(kv){var s=kv.split('=');p.set(s[0],s[1])});a.href='?'+p.toString()});
+render();
+</script></body></html>

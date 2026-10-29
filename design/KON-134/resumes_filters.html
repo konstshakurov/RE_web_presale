@@ -1,0 +1,167 @@
+<!doctype html><html lang="ru" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KON-134: «Резюме» - чипы статусов над блоком фильтров, мгновенное применение</title><style>
+:root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;--border:#323f4b;--accent:#3e8ef7;--nav:#0f1b33;--err:#ff8a80;--ok:#34c38f;--warn:#f5b041;--primary:#2870d4;--primary-hover:#235fc0;--nav-text:#cbd2d9;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f6f8;--panel:#fff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;--border:#cbd2d9;--accent:#1b66c9;--nav:#1f2933;--err:#b42318;--ok:#1a7f5a;--warn:#b7791f;--primary:#1f6fd6;--primary-hover:#1a5bb8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;color:var(--text);background:var(--bg)}
+a{color:var(--accent)}
+.harness{background:#000;color:#ddd;font:12px system-ui;padding:6px 12px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.harness a{color:#9cf}.harness b{color:#fff}
+.nohar .harness{display:none}
+.topbar{display:flex;align-items:center;gap:20px;padding:0 24px;height:56px;background:var(--nav);color:#fff}
+.topbar b{font-weight:600;letter-spacing:.3px}
+.topbar nav{display:flex;align-self:stretch;align-items:flex-end;gap:2px;flex:1}
+.topbar nav a{display:flex;align-items:center;height:48px;padding:0 16px 8px;border-radius:8px 8px 0 0;color:var(--nav-text);text-decoration:none}
+.topbar nav a.active{background:var(--bg);color:var(--text)}
+.content{padding:24px}
+.muted{color:var(--muted);margin:4px 0}
+.error{color:var(--err);margin:0}
+/* --- sync bar (как есть) --- */
+.sync{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;margin:0 0 4px}
+.sync h1{margin:0 0 12px;font-size:2em}
+.sync__r{display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--muted)}
+.btn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font:inherit;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.fld select:focus-visible,.toolbar input:focus-visible,.filter__item:focus-visible,.ms__btn:focus-visible,.switch input:focus-visible,.linkbtn:focus-visible,.chipx button:focus-visible,.ms__opt input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* --- фильтры --- */
+.filter{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.filter__item{background:transparent;color:var(--accent);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font:inherit;cursor:pointer}
+.filter__item[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter__item[aria-pressed=true]::before{content:"\2713\00a0"}
+.filter__count{opacity:.8;margin-left:4px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:8px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:13px;color:var(--muted)}
+.fld input,.fld select{height:36px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 10px;font:inherit}
+.fld input{width:220px}
+.fld select{width:230px;max-width:100%;text-overflow:ellipsis}
+.fld select:disabled{opacity:.6}
+.switchbox{height:36px;display:flex;align-items:center}
+label.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.switch input{appearance:none;-webkit-appearance:none;margin:0;flex:none;width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;background:var(--panel-2);border:1px solid var(--muted)}
+.switch input::before{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted)}
+.switch input:checked{background:var(--primary);border-color:var(--primary)}
+.switch input:checked::before{transform:translateX(16px);background:#fff}
+.tb__sp{flex:1}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:6px 4px;height:36px}
+.linkbtn:disabled{opacity:.5;cursor:default}
+.rohint{flex-basis:100%;margin:0;font-size:13px;color:var(--muted)}
+.rohint.err{color:var(--err)}
+.fsum{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:0 0 16px;font-size:14px;color:var(--muted);min-height:28px}
+.fsum b{color:var(--text);font-weight:600}
+.fsum .linkbtn{height:auto;padding:2px 4px}
+/* --- B: мультивыбор --- */
+.ms{position:relative}
+.ms__btn{display:flex;align-items:center;justify-content:space-between;gap:8px;height:36px;width:300px;max-width:100%;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 10px;font:inherit;cursor:pointer;text-align:left}
+.ms__val{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms__n{flex:none;background:var(--primary);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;font-weight:600;line-height:18px}
+.ms__car{flex:none;color:var(--muted)}
+.ms__pop{position:absolute;z-index:6;top:calc(100% + 4px);left:0;width:300px;max-width:92vw;background:var(--panel);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:6px 0}
+.ms__opt{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer}
+.ms__opt:hover{background:var(--panel-2)}
+.ms__opt input{margin:0;width:16px;height:16px;accent-color:var(--primary)}
+.ms__opt span:first-of-type{flex:1;min-width:0}
+.ms__opt .c{color:var(--muted);font-size:13px}
+.ms__foot{display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:6px;padding:6px 8px 0}
+.chipx-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0 0 8px;padding:0}
+.chipx{display:inline-flex;align-items:center;gap:2px;background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:2px 4px 2px 12px}
+.chipx button{background:transparent;border:0;border-radius:50%;color:var(--muted);width:22px;height:22px;padding:0;font:inherit;line-height:1;cursor:pointer}
+.chipx button:hover{color:var(--text)}
+/* --- карточки --- */
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;display:flex;flex-direction:column;gap:6px;container-type:inline-size;min-width:0}
+.card__title{font-size:16px;margin:0;overflow-wrap:anywhere}
+.status{color:var(--ok);background:var(--panel-2);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.card__desc{color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* KON-124: три действия всегда в одну строку */
+.card__actions{display:flex;flex-wrap:nowrap;gap:0;align-items:center;margin-top:auto;margin-left:-8px}
+.act{display:inline-flex;flex:0 1 auto;min-width:0;align-items:center;gap:6px;padding:6px 8px;line-height:1.2;background:transparent;border:0;border-radius:4px;color:var(--muted);font:inherit;white-space:nowrap;cursor:pointer;text-decoration:none}
+.act:hover{color:var(--text)}
+.act svg{flex:none}
+.cur .card__actions{flex-wrap:wrap;gap:8px;margin-left:0}
+.cur .act{white-space:normal}
+@container (max-width:20em){.act{padding:6px 6px;gap:4px}}
+@container (max-width:17em){.act svg{display:none}}
+.empty{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:16px}
+.empty p{margin:0 0 8px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--muted);border-top-color:transparent;border-radius:50%;vertical-align:-2px;margin-right:6px}
+
+.resume-panel{container-type:inline-size;margin-bottom:8px}
+.rf{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:flex;flex-direction:column;gap:10px}
+.field>label,.field .sp{display:flex;align-items:center;line-height:20px;min-height:20px;color:var(--text)}
+.rf__grid{display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(190px,1fr) minmax(240px,1.8fr) auto auto;gap:8px 16px;align-items:start}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field input:not([type=checkbox]),.field select{width:100%;height:36px;min-width:0;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font:inherit}
+.field select:disabled{opacity:.6}
+.field .ctl{display:flex;align-items:center;gap:8px;height:36px}
+.btn-reset{height:36px;padding:0 16px;font:inherit;border-radius:4px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);cursor:pointer}
+.btn-reset:hover:not(:disabled),.btn-reset.is-hover:not(:disabled){border-color:var(--accent);background:var(--panel)}
+.btn-reset:focus-visible,.btn-reset.is-focus{outline:2px solid var(--accent);outline-offset:2px}
+.btn-reset:disabled{opacity:.5;cursor:default}
+.tchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chipx{display:inline-flex;align-items:center;gap:2px;background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:2px 4px 2px 10px}
+.chipx button{background:transparent;border:0;border-radius:50%;color:var(--muted);width:22px;height:22px;padding:0;font:inherit;line-height:1;cursor:pointer}
+.sem{border-top:1px solid var(--border);padding-top:8px}
+.sem__h{display:flex;align-items:center;min-height:20px;margin-bottom:4px}
+.sa__row{display:flex;align-items:center;gap:8px;min-width:0}
+.sa__row input{display:block;flex:1 1 auto;min-width:0;height:36px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa__row input::placeholder{color:var(--muted)}
+.sa__row select{flex:none;width:240px;height:36px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 8px;font:inherit}
+.sa__row button{flex:none;height:36px;padding:0 16px;white-space:nowrap;border-radius:4px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font:inherit;cursor:pointer}
+.sa__row button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.sem__foot{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-top:4px}
+.counter{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+.scope{font-size:12px;color:var(--muted);margin:0}
+.scope b{font-weight:600;color:var(--text)}
+@container (max-width:1100px){.sa__row select{width:200px}.rf__grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rf__grid>.field:nth-child(4){grid-column:1;grid-row:2}.rf__grid>.field:nth-child(5){grid-column:3;grid-row:2;justify-self:end}}
+</style></head><body><div class="harness"><b>«Резюме» (v4): фильтры применяются сразу</b> <span><a href="?theme=dark">тёмная</a> <a href="?theme=light">светлая</a></span> <span>список РО: <a href="?romode=ok">есть</a> <a href="?romode=loading">загрузка</a> <a href="?romode=fail">ошибка</a> <a href="?romode=none">нет РО</a></span> <span>«Сбросить»: <a href="?">неактивна</a> <a href="?q=иван&ro=Павел%20Орлов&tech=1С|rest">активна</a> <a href="?q=иван&force=hover">hover</a> <a href="?q=иван&force=focus">focus</a></span> <span><a href="?empty=1&q=zzz&st=Декрет">пустой результат</a> <a href="?after=1&st=Свободен">после поиска («Пересчитать»)</a></span></div><header class="topbar"><b>regoose</b><nav><a href="#">Потребности</a><a href="#">Сотрудники</a><a href="#" class="active">Резюме</a><a href="#">Настройки</a></nav><span>Константин Шакуров</span></header><main class="content" id="app"></main><script>
+var q=new URLSearchParams(location.search);document.documentElement.dataset.theme=q.get('theme')||'dark';
+if(q.get('nohar'))document.body.classList.add('nohar');
+var ST=[['Выход новичка',1],['Программа обучения',1],['Внутренний проект',1],['Свободен',12],['Коммерческий проект',53],['Ожидает подключения',0],['Скоро освобождается',1],['Недоступен для подключения',6],['Декрет',0]];
+var sel=(q.get('st')||'').split('|').filter(Boolean);
+var RO=['Евгения Синицына','Павел Орлов','Мария Кузнецова-Белозёрская','Александр Константинович Вознесенский-Заречный'].sort(function(a,b){return a.localeCompare(b,'ru')});
+var ro=q.get('ro')||'',romode=q.get('romode')||'ok',srch=q.get('q')||'',fired=q.get('fired')==='1';
+var tech=(q.get('tech')||'').split('|').filter(Boolean);
+var force=q.get('force')||'',empty=q.get('empty')==='1';
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function anyApplied(){return !!(srch.trim()||ro||tech.length||fired)}
+function scope(){var p=[];
+ p.push('статусы: <b>'+(sel.length?sel.map(esc).join(', '):'все')+'</b>');
+ if(ro)p.push('РО: <b>'+(ro==='__none'?'Без РО':esc(ro))+'</b>');
+ if(srch.trim())p.push('поиск: <b>«'+esc(srch.trim())+'»</b>');
+ if(tech.length)p.push('технологии: <b>'+tech.map(esc).join(', ')+'</b>');
+ if(fired)p.push('<b>включая уволенных</b>');
+ return p.join(' <span aria-hidden="true">·</span> ')}
+function render(){
+ var h='<h1 style="margin:8px 0 12px">Резюме</h1>';
+ var tot=ST.reduce(function(a,s){return a+s[1]},0);
+ h+='<nav class="filter" aria-label="Статусы сотрудников (можно выбрать несколько)"><button type="button" class="filter__item" aria-pressed="'+(!sel.length)+'" id="all">Все <span class="filter__count">'+tot+'</span></button>'+ST.map(function(s){return '<button type="button" class="filter__item" aria-pressed="'+(sel.indexOf(s[0])>-1)+'" data-st="'+esc(s[0])+'">'+esc(s[0])+' <span class="filter__count">'+s[1]+'</span></button>'}).join('')+'</nav>';
+ h+='<div class="resume-panel"><form class="rf" role="search" onsubmit="return false"><div class="rf__grid">';
+ h+='<div class="field"><label for="q">Поиск</label><input id="q" placeholder="ФИО, ключ или имя файла" value="'+esc(srch)+'"></div>';
+ var dis=romode!=='ok',opts='';
+ if(romode==='loading')opts='<option>Загрузка…</option>';else if(romode==='fail')opts='<option>Список недоступен</option>';else if(romode==='none')opts='<option>Нет данных</option>';
+ else opts='<option value="">Все</option>'+RO.map(function(r){return '<option'+(ro===r?' selected':'')+'>'+esc(r)+'</option>'}).join('')+'<option value="__none"'+(ro==='__none'?' selected':'')+'>Без РО</option>';
+ h+='<div class="field"><label for="ro">РО</label><select id="ro" '+(dis?'disabled':'')+' title="'+esc(ro==='__none'?'Без РО':(ro||'Руководитель отдела'))+'">'+opts+'</select></div>';
+ h+='<div class="field"><label for="t">Технологии</label><input id="t" placeholder="Начните вводить, Enter — добавить"><div class="tchips">'+tech.map(function(t){return '<span class="chipx">'+esc(t)+'<button type="button" data-rt="'+esc(t)+'" aria-label="Убрать технологию: '+esc(t)+'">×</button></span>'}).join('')+'</div></div>';
+ h+='<div class="field"><span class="sp">&nbsp;</span><div class="ctl"><label class="switch"><input type="checkbox" id="fired" '+(fired?'checked':'')+'><span>Уволенные</span></label></div></div>';
+ h+='<div class="field"><span class="sp">&nbsp;</span><button type="button" id="reset" class="btn-reset'+(force==='hover'?' is-hover':'')+(force==='focus'?' is-focus':'')+'" '+(anyApplied()?'':'disabled')+'>Сбросить</button></div></div>';
+ if(romode==='fail')h+='<p class="rohint err" role="alert">Не удалось загрузить список РО. Остальные фильтры работают. <button type="button" class="linkbtn" style="height:auto;padding:0 4px">Повторить</button></p>';
+ if(romode==='none')h+='<p class="rohint">В карточках сотрудников не указан руководитель отдела — фильтр недоступен.</p>';
+ if(romode==='loading')h+='<p class="rohint" role="status"><span class="spin"></span>Загружаем список РО…</p>';
+ h+='<div class="sem"><div class="sem__h"><span id="sql">Поиск по смыслу (LLM)</span></div><div class="sa__row"><input type="text" aria-labelledby="sql" autocomplete="off" placeholder="Например: аналитик с опытом интеграций 1С и REST, работал в банковской сфере"><select aria-label="Модель"><option>LLM по умолчанию</option></select><button type="button" class="primary" aria-label="Найти по смыслу" title="Найти по смыслу">Найти</button>'+(q.get('after')==='1'?'<button type="button" title="Заново оценить, не используя сохранённые оценки">Пересчитать</button>':'')+'</div>';
+ h+='<div class="sem__foot"><p class="scope" aria-live="polite">Область поиска — все фильтры выше: '+scope()+'. Меняется сразу; поиск запускается кнопкой «Найти». Во внешнюю LLM уходит только обезличенный текст</p><span class="counter">0 / 500</span></div></div>';
+ h+='</form></div>';
+ if(empty)h+='<div class="empty" style="margin-top:12px"><p>По выбранным фильтрам резюме нет.</p><p class="muted" style="margin:0 0 8px">Измените фильтры, нажмите «Сбросить» (статусы не сбрасываются) или выберите «Все» в статусах.</p><button type="button" class="btn" id="allst">Все статусы</button></div>';
+ document.getElementById('app').innerHTML=h;
+ document.querySelectorAll('[data-st]').forEach(function(b){b.onclick=function(){var s=b.dataset.st,i=sel.indexOf(s);if(i>-1)sel.splice(i,1);else sel.push(s);render()}});
+ var a=document.getElementById('all');if(a)a.onclick=function(){sel=[];render()};
+ var a2=document.getElementById('allst');if(a2)a2.onclick=function(){sel=[];empty=false;render()};
+ var r=document.getElementById('ro');r.onchange=function(){ro=r.value;render()};
+ var qq=document.getElementById('q');qq.oninput=function(){srch=qq.value;var p=qq.selectionStart;render();var n=document.getElementById('q');n.focus();n.setSelectionRange(p,p)};
+ var t=document.getElementById('t');t.onkeydown=function(e){if(e.key==='Enter'&&t.value.trim()){e.preventDefault();tech.push(t.value.trim());render();document.getElementById('t').focus()}};
+ document.querySelectorAll('[data-rt]').forEach(function(b){b.onclick=function(){tech.splice(tech.indexOf(b.dataset.rt),1);render()}});
+ document.getElementById('fired').onchange=function(e){fired=e.target.checked;render()};
+ document.getElementById('reset').onclick=function(){srch='';ro='';tech=[];fired=false;render();document.getElementById('q').focus()};
+}
+render();
+</script></body></html>

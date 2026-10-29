@@ -60,7 +60,7 @@ export function DeptHeadHint({ state, list, onRetry, id = "dept-head" }: HintPro
     return (
       <p className="rohint err" id={hid} role="alert">
         Не удалось загрузить список РО. Остальные фильтры работают.{" "}
-        <button type="button" className="linkbtn" onClick={onRetry}>
+        <button type="button" className="linkbtn link" onClick={onRetry}>
           Повторить
         </button>
       </p>

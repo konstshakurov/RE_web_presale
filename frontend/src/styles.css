@@ -365,7 +365,7 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
   button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.note-dlg__danger):not(.note-dlg__clear):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button),
 .button:not(.primary) { background: transparent; color: var(--secondary); border: 1px solid var(--secondary); border-radius: 4px; }
 :is(.modal, .groups, .jira-banner, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__row, .ga, .sec__f, .group-card)
-  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.note-dlg__danger):not(.note-dlg__clear):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button):hover:not(:disabled),
+  button:not(.primary):not(.link):not(.act):not(.pm__x):not(.modal__x):not(.note-dlg__danger):not(.note-dlg__clear):not(.hint-btn):not(.pct):not(.primary-small):not(.tabs__item):not(.filter__item):not(.sort):not(.btn-secondary):not(.chip button):not(.reset-btn):hover:not(:disabled),
 .button:not(.primary):hover:not(:disabled) { background: var(--secondary-hover-bg); }
 :is(.modal, .groups, .toolbar, .pager, .datefilter, .candidates-block, .semantic, .llm-settings, .runstatus, .resumes, .resume-filters__actions, .search, .cv-search, .files, .card__actions, .sa__row, .ga, .sec__f, .group-card) button:disabled { opacity: 0.5; }
 

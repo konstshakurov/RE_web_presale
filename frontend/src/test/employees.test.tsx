@@ -606,7 +606,7 @@ describe("Резюме", () => {
       {
         employees: RWORLD,
         deptHeads: RHEADS,
-        extra: (u) => (u.includes("/resume/semantic-search") ? json({ status: "done", items: [], total: 0 }) : undefined),
+        extra: (u) => (u.includes("/resume/semantic-search") ? json({ status: "done", items: [], total: 0, tasks: [], errors: [] }) : undefined),
       },
       "/resumes",
     );

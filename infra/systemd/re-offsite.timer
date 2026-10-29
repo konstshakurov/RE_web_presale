@@ -1,0 +1,10 @@
+[Unit]
+Description=re_web_presale: выгрузка бэкапов во внешнее хранилище в 03:30 (после дампа)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+Unit=re-offsite.service
+
+[Install]
+WantedBy=timers.target

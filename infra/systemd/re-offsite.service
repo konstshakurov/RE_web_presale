@@ -1,0 +1,12 @@
+[Unit]
+Description=re_web_presale: выгрузка бэкапов во внешнее хранилище через rclone, необязательная (KON-49)
+After=docker.service re-backup.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=user
+Group=user
+EnvironmentFile=-/opt/re_web_presale/ops.env
+TimeoutStartSec=4h
+ExecStart=/bin/bash /opt/re_web_presale/app/scripts/offsite_sync.sh

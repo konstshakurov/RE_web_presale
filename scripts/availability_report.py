@@ -1,17 +1,20 @@
 """Отчёт доступности /health: будни 9:00-18:00 по местному времени ВМ (A7), шаг 1 минута.
 
 Доступность = минуты с успешной проверкой / все минуты окна. Минуты без записи считаются
-недоступными (монитор или ВМ не работали). Праздничные дни не исключаются (допущение).
+недоступными (монитор или ВМ не работали). Нерабочие праздничные дни исключаются по файлу --holidays
+(формат: YYYY-MM-DD в строке, # - комментарий). Работающие субботы не учитываются: окно только пн-пт.
 """
 import argparse
 import calendar
 import json
+import re
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--month", required=True, help="YYYY-MM")
 ap.add_argument("--log", required=True, help="health-YYYYMM.jsonl")
+ap.add_argument("--holidays", default="", help="файл нерабочих праздничных дней, YYYY-MM-DD")
 ap.add_argument("--target", type=float, default=99.0)
 a = ap.parse_args()
 sys.stdout.reconfigure(encoding="utf-8")
@@ -31,10 +34,27 @@ try:
 except FileNotFoundError:
     pass
 
-window = []
+holidays, hol_note = set(), ""
+if a.holidays:
+    try:
+        with open(a.holidays, encoding="utf-8") as f:
+            for line in f:
+                mt = re.match(r"\s*(\d{4})-(\d{2})-(\d{2})", line)
+                if mt:
+                    holidays.add(date(*map(int, mt.groups())))
+        if not any(h.year == y for h in holidays):
+            hol_note = f"в файле праздников нет дат за {y} год: праздники не исключены, список нужно заполнить"
+    except (OSError, ValueError) as e:
+        hol_note = f"файл праздников не прочитан ({type(e).__name__}): праздники не исключены"
+else:
+    hol_note = "файл праздников не задан (HOLIDAYS_FILE): праздники не исключены"
+
+window, skipped = [], []
 for d in range(1, calendar.monthrange(y, m)[1] + 1):
     day = datetime(y, m, d)
-    if day.weekday() < 5:
+    if day.weekday() < 5 and day.date() in holidays:
+        skipped.append(day.date())
+    elif day.weekday() < 5:
         window += [day + timedelta(hours=9, minutes=i) for i in range(540)]
 ok = sum(1 for t in window if slots.get(t) is True)
 bad = sum(1 for t in window if slots.get(t) is False)
@@ -55,7 +75,12 @@ if cur:
     incidents.append(cur)
 
 print(f"# Отчёт доступности re_web_presale за {a.month}\n")
-print("Окно: пн-пт 09:00-18:00 местного времени ВМ, проверка `/health` раз в минуту.\n")
+print("Окно: пн-пт 09:00-18:00 местного времени ВМ, проверка `/health` раз в минуту; "
+      "работающие субботы не учитываются.\n")
+if skipped:
+    print("Исключено праздничных будней: " + str(len(skipped)) + " (" + ", ".join(f"{d:%d.%m}" for d in skipped) + ")\n")
+if hol_note:
+    print(f"> Внимание: {hol_note}.\n")
 print(f"- Минут в окне: {len(window)}")
 print(f"- Успешных: {ok}; неуспешных: {bad}; без данных: {nodata} (считаются недоступными)")
 verdict = "выполнено" if pct >= a.target else "НЕ выполнено"

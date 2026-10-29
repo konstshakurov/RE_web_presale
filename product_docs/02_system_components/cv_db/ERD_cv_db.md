@@ -14,7 +14,7 @@ erDiagram
     match_run ||--o{ match_batch : "need_key"
     search_run ||--o{ search_batch : "requested_by, query_hash"
 
-    employee { text jira_key PK "full_name, status, assignable, jira_login, vacation_plan, extra_experience, note" }
+    employee { text jira_key PK "full_name, status, assignable, jira_login, vacation_plan, extra_experience, dept_head_login, dept_head_display_name, dept_head_active, note" }
     employee_file { bigint id PK "employee_key FK, kind, is_archived, archived_at, extracted_text" }
     employee_file_content { bigint file_id PK "content bytea" }
     employee_file_skill { bigint file_id PK "tag PK" }

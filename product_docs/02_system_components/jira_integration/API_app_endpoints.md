@@ -10,7 +10,8 @@
 | `POST /auth/jira-relogin` | сессия + CSRF | повторный ввод пароля при истёкшей сессии Jira (пароль не сохраняется; отказ Jira → `jira_status` в ответе, а не ошибка HTTP) | FR-025, FR-029 |
 | `GET /auth/me` | сессия | профиль, роль, `jira_status` (`ok / not_checked / needs_reauthorization / …`) | FR-029 |
 | `GET /sync/needs`, `GET /sync/needs/groups` | сессия | потребности из кэша (фильтры, страницы, группы статусов) + штамп `sync` | FR-001, 034, 035, 020 |
-| `GET /sync/employees` | сессия | сотрудники из кэша + штамп | FR-002, 032 |
+| `GET /sync/employees` | сессия | сотрудники из кэша + штамп; фильтры: `status` (повторяемый, ИЛИ), `dept_head` (логин или `__none__` = «Без РО»), поиск, «уволенные» (по И) | FR-002, 032 |
+| `GET /sync/employees/dept-heads` | сессия | РО для фильтра (логин, имя); без неактивных и скрытых | FR-002, 032 |
 | `GET /sync/status` | сессия | штампы обеих областей: `state`, `stale`, `last_success_at`, `paused`, `message` | FR-028, NFR-008 |
 | `POST /sync/refresh` | `require_jira_ok` | немедленный инкрементальный опрос токеном пользователя; `scope = needs \| employees` | FR-028, FR-034 |
 | `GET /sync/epics/{epic_key}?refresh=` | сессия | эпик, правила клиента, число потребностей; кэш 1 час; при отказе Jira и наличии кэша — кэш с `stale=true` и `error` | FR-015 |

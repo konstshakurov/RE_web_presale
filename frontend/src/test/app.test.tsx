@@ -217,6 +217,21 @@ describe("токены стилей (KON-81, D1)", () => {
   });
 });
 
+describe("рамка карточки входа (KON-154)", () => {
+  let css = "";
+  beforeAll(async () => {
+    const fs = "node:fs";
+    const { readFileSync } = (await import(/* @vite-ignore */ fs)) as { readFileSync: (p: string, e: string) => string };
+    css = readFileSync("src/styles.css", "utf-8");
+  });
+
+  it("у .login задана рамка 1px var(--border)", () => {
+    const rule = css.match(/^\.login \{([^}]*)\}/m);
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toContain("border: 1px solid var(--border)");
+  });
+});
+
 describe("палитра А2 и чипы статусов (KON-150)", () => {
   let css = "";
   beforeAll(async () => {

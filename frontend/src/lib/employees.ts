@@ -78,11 +78,15 @@ export function matchesResume(
   emp: EmployeeOut,
   files: FileOut[],
   query: string,
-  status: string,
+  status: string | string[],
   showFired = false,
+  deptHead = "",
 ): boolean {
   if (!showFired && emp.status === FIRED_STATUS) return false;
-  if (status && emp.status !== status) return false;
+  const statuses = Array.isArray(status) ? status : status ? [status] : [];
+  if (statuses.length > 0 && !statuses.includes(emp.status)) return false; // статусы между собой ИЛИ
+  // РО: логин либо «__none__» (Без РО); константа в employeeFilters.ts, здесь без импорта (циклическая зависимость)
+  if (deptHead === "__none__" ? !!emp.dept_head_login : deptHead && emp.dept_head_login !== deptHead) return false;
   const q = query.trim().toLowerCase();
   if (!q) return true;
   return (

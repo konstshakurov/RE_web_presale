@@ -354,6 +354,9 @@ export interface SearchParams {
   provider_id?: number | null;
   force?: boolean;
   status?: string | null;
+  statuses?: string[]; // чипы статусов, между собой ИЛИ (CR-014)
+  dept_head?: string | null; // логин РО или «__none__» (Без РО)
+  include_dismissed?: boolean; // «Уволенные»; backend уволенных в поиск по смыслу не включает
   technology?: string[];
   match?: "all" | "any";
   q?: string | null;

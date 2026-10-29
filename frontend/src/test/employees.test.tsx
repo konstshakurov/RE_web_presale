@@ -504,60 +504,124 @@ describe("Резюме", () => {
     expect(await within(dlg).findByRole("alert")).toHaveTextContent("Содержимое файла не соответствует");
   });
 
-  it("фильтры: «Применить» по статусу и поиску, «Сбросить»", async () => {
-    setup({ employees: [emp(), emp({ jira_key: "EMP-2", full_name: "Иванов Иван", status: "Декрет" })] }, "/resumes");
-    await screen.findByText("Тестов Тест");
-    await userEvent.selectOptions(screen.getByLabelText("Статус сотрудника"), "Декрет");
-    expect(screen.getByText("Тестов Тест")).toBeInTheDocument(); // до «Применить» не меняется
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
-    expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
-    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Сбросить" }));
-    expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
-    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "иванов{enter}");
-    expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
+  const RHEADS = [
+    { login: "orlov", display_name: "Павел Орлов" },
+    { login: "anna", display_name: "Анна Яблокова" },
+  ];
+  const RWORLD = [
+    emp({ jira_key: "E-1", full_name: "Алексеев А", status: "Свободен", dept_head_login: "orlov" }),
+    emp({ jira_key: "E-2", full_name: "Борисов Б", status: "Декрет", dept_head_login: "orlov" }),
+    emp({ jira_key: "E-3", full_name: "Васильев В", status: "Свободен", dept_head_login: "anna" }),
+    emp({ jira_key: "E-4", full_name: "Григорьев Г", status: "Внутренний проект", dept_head_login: null }),
+    emp({ jira_key: "E-5", full_name: "Дмитриев Д", status: "Уволен", dept_head_login: null }),
+  ];
+  const rchip = (name: RegExp) => within(screen.getByRole("navigation", { name: /Статусы сотрудников/ })).getByRole("button", { name });
+  const shown = (name: string) => screen.queryByText(name);
+
+  it("«Резюме»: чипы статусов над блоком фильтров, без списка статусов и «Применить»; мультивыбор мгновенный (ИЛИ)", async () => {
+    setup({ employees: RWORLD, deptHeads: RHEADS }, "/resumes");
+    await screen.findByText("Алексеев А");
+    expect(screen.queryByLabelText("Статус сотрудника")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Применить" })).not.toBeInTheDocument();
+    const nav = screen.getByRole("navigation", { name: "Статусы сотрудников (можно выбрать несколько)" });
+    expect(nav.compareDocumentPosition(screen.getByRole("search")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(rchip(/^Все 4/)).toHaveAttribute("aria-pressed", "true"); // уволенный не входит
+    await userEvent.click(rchip(/^Декрет/));
+    expect(shown("Алексеев А")).not.toBeInTheDocument();
+    expect(shown("Борисов Б")).toBeInTheDocument();
+    await userEvent.click(rchip(/^Внутренний проект/));
+    expect(shown("Борисов Б")).toBeInTheDocument();
+    expect(shown("Григорьев Г")).toBeInTheDocument();
+    expect(shown("Васильев В")).not.toBeInTheDocument();
+    await userEvent.click(rchip(/^Все/));
+    expect(shown("Васильев В")).toBeInTheDocument();
   });
 
-  it("статус «Уволен» убран из списка статусов; тумблер показывает уволенных вместе с поиском и статусом, «Сбросить» выключает", async () => {
+  it("«Резюме»: РО - «Все», по алфавиту, «Без РО»; счётчики чипов учитывают РО; по И с чипами", async () => {
+    setup({ employees: RWORLD, deptHeads: RHEADS }, "/resumes");
+    await screen.findByText("Алексеев А");
+    const ro = screen.getByLabelText("РО");
+    expect(within(ro).getAllByRole("option").map((o) => o.textContent)).toEqual(["Все", "Анна Яблокова", "Павел Орлов", "Без РО"]);
+    await userEvent.selectOptions(ro, "orlov");
+    expect(shown("Васильев В")).not.toBeInTheDocument();
+    expect(shown("Алексеев А")).toBeInTheDocument();
+    expect(rchip(/^Все 2/)).toBeInTheDocument();
+    await userEvent.click(rchip(/^Декрет/));
+    expect(shown("Алексеев А")).not.toBeInTheDocument();
+    expect(shown("Борисов Б")).toBeInTheDocument();
+    await userEvent.selectOptions(ro, "__none__");
+    expect(screen.getByText("По выбранным фильтрам резюме нет.")).toBeInTheDocument();
+  });
+
+  it("«Резюме»: поиск применяется с задержкой, «Уволенные» - сразу", async () => {
+    setup({ employees: RWORLD, deptHeads: RHEADS }, "/resumes");
+    await screen.findByText("Алексеев А");
+    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "борис");
+    expect(shown("Алексеев А")).toBeInTheDocument(); // до задержки список прежний
+    expect(await screen.findByText("Борисов Б")).toBeInTheDocument();
+    await waitFor(() => expect(shown("Алексеев А")).not.toBeInTheDocument());
+    await userEvent.clear(screen.getByPlaceholderText("ФИО, ключ или имя файла"));
+    await userEvent.click(screen.getByRole("switch", { name: "Уволенные" }));
+    expect(await screen.findByText("Дмитриев Д")).toBeInTheDocument();
+    expect(rchip(/^Все 5/)).toBeInTheDocument();
+  });
+
+  it("«Резюме»: «Сбросить» неактивна без фильтров блока, чипы её не включают; сбрасывает всё кроме чипов, фокус в «Поиск»", async () => {
+    setup({ employees: RWORLD, deptHeads: RHEADS }, "/resumes");
+    await screen.findByText("Алексеев А");
+    const reset = screen.getByRole("button", { name: "Сбросить" });
+    expect(reset).toBeDisabled();
+    await userEvent.click(rchip(/^Декрет/));
+    expect(reset).toBeDisabled();
+    await userEvent.selectOptions(screen.getByLabelText("РО"), "orlov");
+    expect(reset).toBeEnabled();
+    await userEvent.click(screen.getByRole("switch", { name: "Уволенные" }));
+    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "б");
+    await userEvent.click(reset);
+    expect(screen.getByLabelText("РО")).toHaveValue("");
+    expect(screen.getByRole("switch", { name: "Уволенные" })).not.toBeChecked();
+    expect(screen.getByPlaceholderText("ФИО, ключ или имя файла")).toHaveValue("");
+    expect(screen.getByPlaceholderText("ФИО, ключ или имя файла")).toHaveFocus();
+    expect(reset).toBeDisabled();
+    expect(rchip(/^Декрет/)).toHaveAttribute("aria-pressed", "true"); // чипы остались
+    expect(shown("Борисов Б")).toBeInTheDocument();
+    expect(shown("Васильев В")).not.toBeInTheDocument();
+  });
+
+  it("«Резюме»: пустой результат - текст и «Все статусы»; ошибка списка РО не блокирует остальное", async () => {
+    setup({ employees: RWORLD, deptHeads: "fail" }, "/resumes");
+    await screen.findByText("Алексеев А");
+    expect(screen.getByLabelText("РО")).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("Не удалось загрузить список РО. Остальные фильтры работают.");
+    await userEvent.click(rchip(/^Декрет/));
+    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "васильев");
+    expect(await screen.findByText("По выбранным фильтрам резюме нет.")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Все статусы" }));
+    expect(await screen.findByText("Васильев В")).toBeInTheDocument();
+    expect(rchip(/^Все/)).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("«Резюме»: поиск по смыслу получает область из всех фильтров только при «Найти»", async () => {
     setup(
       {
-        employees: [
-          emp(),
-          emp({ jira_key: "EMP-2", full_name: "Иванов Иван", status: "Декрет" }),
-          emp({ jira_key: "EMP-3", full_name: "Иванов Пётр", status: "Уволен" }),
-        ],
+        employees: RWORLD,
+        deptHeads: RHEADS,
+        extra: (u) => (u.includes("/resume/semantic-search") ? json({ status: "done", items: [], total: 0 }) : undefined),
       },
       "/resumes",
     );
-    await screen.findByText("Тестов Тест");
-    const select = screen.getByLabelText("Статус сотрудника");
-    expect(within(select).queryByRole("option", { name: "Уволен" })).not.toBeInTheDocument();
-    expect(within(select).getByRole("option", { name: "Декрет" })).toBeInTheDocument();
-    // по умолчанию уволенные скрыты
-    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
-    const toggle = screen.getByRole("switch", { name: "Уволенные" });
-    expect(toggle).not.toBeChecked();
-    await userEvent.click(toggle);
-    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument(); // до «Применить» не меняется
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
-    expect(screen.getByText("Иванов Пётр")).toBeInTheDocument();
-    expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
-    // вместе с поиском
-    await userEvent.type(screen.getByPlaceholderText("ФИО, ключ или имя файла"), "иванов");
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
-    expect(screen.getByText("Иванов Пётр")).toBeInTheDocument();
-    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
-    expect(screen.queryByText("Тестов Тест")).not.toBeInTheDocument();
-    // вместе со статусом
-    await userEvent.selectOptions(select, "Декрет");
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
-    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
-    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
-    // сброс выключает тумблер
-    await userEvent.click(screen.getByRole("button", { name: "Сбросить" }));
-    expect(screen.getByRole("switch", { name: "Уволенные" })).not.toBeChecked();
-    expect(screen.queryByText("Иванов Пётр")).not.toBeInTheDocument();
-    expect(screen.getByText("Тестов Тест")).toBeInTheDocument();
+    await screen.findByText("Алексеев А");
+    await userEvent.click(rchip(/^Свободен/));
+    await userEvent.click(rchip(/^Декрет/));
+    await userEvent.selectOptions(screen.getByLabelText("РО"), "orlov");
+    expect(document.getElementById("semantic-q-hint")).toHaveTextContent("статусы: Свободен, Декрет · РО: Павел Орлов");
+    expect(calls.filter((c) => c.url.includes("/resume/semantic-search") && c.init?.method === "POST")).toHaveLength(0);
+    await userEvent.type(screen.getByLabelText("Поиск по смыслу (LLM)"), "аналитик 1С");
+    await userEvent.click(screen.getByRole("button", { name: "Найти по смыслу" }));
+    await waitFor(() => expect(calls.some((c) => c.init?.method === "POST" && c.url.includes("/resume/semantic-search"))).toBe(true));
+    const post = calls.find((c) => c.init?.method === "POST" && c.url.includes("/resume/semantic-search"))!;
+    const body = JSON.parse(String(post.init!.body));
+    expect(body).toMatchObject({ statuses: ["Свободен", "Декрет"], dept_head: "orlov", include_dismissed: false, technology: [] });
   });
 
   it("переход из «Сотрудников»: ?q= подставляется в поиск", async () => {

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 
 import { ApiError, api } from "../../api/client";
 import type { SearchItem, SearchParams, SearchState } from "../../api/types";
@@ -17,7 +17,10 @@ import { HintLabel } from "../HintButton";
 import MatchingInfo from "./MatchingInfo";
 
 export interface SearchFilters {
-  status?: string | null;
+  statuses?: string[];
+  deptHead?: string | null; // логин РО или «__none__»
+  deptHeadLabel?: string; // для подсказки области
+  showFired?: boolean;
   technology: string[];
   match: "all" | "any";
   q?: string | null;
@@ -96,6 +99,12 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
 
   usePolling(isRunning(data?.status), reload);
 
+  const scope: ReactNode[] = [];
+  if (filters.statuses?.length) scope.push(<span key="st">статусы: <b>{filters.statuses.join(", ")}</b></span>);
+  if (filters.deptHead) scope.push(<span key="ro">РО: <b>{filters.deptHeadLabel || filters.deptHead}</b></span>);
+  if (filters.q) scope.push(<span key="q">поиск: <b>«{filters.q}»</b></span>);
+  if (filters.technology.length) scope.push(<span key="t">технологии: <b>{filters.technology.join(", ")}</b></span>);
+
   const tooShort = draft.trim().length < QUERY_MIN;
 
   function onSubmit(e: FormEvent) {
@@ -104,7 +113,9 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
     const p: SearchParams = {
       query: draft.trim().slice(0, QUERY_MAX),
       provider_id: providerId,
-      status: filters.status || null,
+      statuses: filters.statuses ?? [],
+      dept_head: filters.deptHead || null,
+      include_dismissed: filters.showFired ?? false,
       technology: filters.technology,
       match: filters.match,
       q: filters.q || null,
@@ -177,8 +188,15 @@ export default function SemanticSearch({ filters }: { filters: SearchFilters }) 
         </div>
         <div className="foot">
           <p className="hint" id="semantic-q-hint">
-            Область поиска ограничивают фильтры «Поиск», «Статус сотрудника» и «Технологии». Во внешнюю LLM уходит
-            только обезличенный текст
+            Область поиска — все фильтры выше
+            {scope.length > 0 && ": "}
+            {scope.map((s, i) => (
+              <Fragment key={i}>
+                {i > 0 && <span aria-hidden="true"> · </span>}
+                {s}
+              </Fragment>
+            ))}
+            . Меняется сразу; поиск запускается кнопкой «Найти». Во внешнюю LLM уходит только обезличенный текст
           </p>
           <span className={draft.length > 0 && draft.length < QUERY_MIN ? "counter counter--bad" : "counter"}>
             {draft.length} / {QUERY_MAX}

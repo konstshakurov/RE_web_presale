@@ -149,3 +149,19 @@ describe("groupFiles и formatSize", () => {
     expect(formatSize(3 * 1024 * 1024)).toBe("3,0 МБ");
   });
 });
+
+describe("matchesResume: статусы списком и РО (CR-014)", () => {
+  const e1 = emp({ status: "Свободен", dept_head_login: "orlov" });
+  it("статусы между собой ИЛИ, пустой список - все", () => {
+    expect(matchesResume(e1, [], "", ["Декрет", "Свободен"])).toBe(true);
+    expect(matchesResume(e1, [], "", ["Декрет"])).toBe(false);
+    expect(matchesResume(e1, [], "", [])).toBe(true);
+  });
+  it("РО: логин, «Без РО», пусто - все; вместе со статусом по И", () => {
+    expect(matchesResume(e1, [], "", [], false, "orlov")).toBe(true);
+    expect(matchesResume(e1, [], "", [], false, "anna")).toBe(false);
+    expect(matchesResume(e1, [], "", [], false, "__none__")).toBe(false);
+    expect(matchesResume(emp({ dept_head_login: null }), [], "", [], false, "__none__")).toBe(true);
+    expect(matchesResume(e1, [], "", ["Декрет"], false, "orlov")).toBe(false);
+  });
+});

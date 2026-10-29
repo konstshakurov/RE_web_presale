@@ -8,6 +8,7 @@ interface SelectProps {
   list: DeptHead[];
   state: DeptHeadsState;
   id?: string;
+  field?: boolean; // разметка панели «Резюме» (.field), иначе «Сотрудники» (.fld)
 }
 
 interface HintProps {
@@ -19,13 +20,14 @@ interface HintProps {
 
 // Поле «РО» (design/KON-134): «Все», имена по алфавиту, «Без РО» последним.
 // Подсказка под панелью (загрузка / ошибка / нет РО) - <DeptHeadHint> с тем же id.
-export default function DeptHeadSelect({ value, onChange, list, state, id = "dept-head" }: SelectProps) {
+export default function DeptHeadSelect({ value, onChange, list, state, id = "dept-head", field = false }: SelectProps) {
   const none = state === "ready" && list.length === 0;
   const disabled = state !== "ready" || none;
   const stub = state === "loading" ? "Загрузка…" : state === "error" ? "Список недоступен" : "Нет данных";
+  const Wrap = field ? "div" : "label";
   return (
-    <label className="fld">
-      <span>РО</span>
+    <Wrap className={field ? "field" : "fld"}>
+      {field ? <label htmlFor={id}>РО</label> : <span>РО</span>}
       <select
         id={id}
         value={disabled ? "" : value}
@@ -48,7 +50,7 @@ export default function DeptHeadSelect({ value, onChange, list, state, id = "dep
           </>
         )}
       </select>
-    </label>
+    </Wrap>
   );
 }
 

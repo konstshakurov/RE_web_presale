@@ -628,14 +628,13 @@ describe("Резюме: поиск по смыслу и технологии", (
     expect(screen.getByRole("button", { name: "Убрать rest" })).toBeInTheDocument();
     // при 2+ технологиях виден переключатель «Все выбранные» (по умолчанию включён)
     expect(screen.getByRole("switch", { name: "Все выбранные" })).toBeChecked();
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
     await waitFor(() => {
       const last = calls.filter((c) => c.url.includes("/resume/employees?")).pop()!;
       expect(last.url).toContain("technology=1c");
       expect(last.url).toContain("technology=rest");
       expect(last.url).toContain("match=all");
     });
-    expect(await screen.findByText("1c, rest")).toBeInTheDocument();
+    expect(await within(await screen.findByRole("table")).findByText("1c, rest")).toBeInTheDocument();
   });
 
   it("«Все выбранные» выключен: match=any; поиск по смыслу: счётчик N / 500, «Найти» от 3 знаков", async () => {
@@ -648,7 +647,6 @@ describe("Резюме: поиск по смыслу и технологии", (
     await userEvent.type(input, "1c{Enter}");
     await userEvent.type(input, "rest{Enter}");
     await userEvent.click(screen.getByRole("switch", { name: "Все выбранные" }));
-    await userEvent.click(screen.getByRole("button", { name: "Применить" }));
     await waitFor(() => {
       const last = calls.filter((c) => c.url.includes("/resume/employees?")).pop()!;
       expect(last.url).toContain("match=any");

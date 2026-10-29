@@ -130,6 +130,9 @@ function searchBody(p: SearchParams) {
     provider_id: p.provider_id ?? null,
     force: p.force ?? false,
     status: p.status || null,
+    statuses: p.statuses ?? [],
+    dept_head: p.dept_head || null,
+    include_dismissed: p.include_dismissed ?? false,
     technology: p.technology ?? [],
     match: p.match ?? "all",
     q: p.q || null,
@@ -140,7 +143,10 @@ function searchBody(p: SearchParams) {
 function searchQuery(p: SearchParams, offset: number): string {
   const u = new URLSearchParams();
   u.set("query", p.query);
-  if (p.status) u.set("status", p.status);
+  if (p.status) u.append("status", p.status);
+  (p.statuses ?? []).forEach((s) => u.append("status", s));
+  if (p.dept_head) u.set("dept_head", p.dept_head);
+  if (p.include_dismissed !== undefined) u.set("include_dismissed", String(p.include_dismissed));
   (p.technology ?? []).forEach((t) => u.append("technology", t));
   u.set("match", p.match ?? "all");
   if (p.q) u.set("q", p.q);

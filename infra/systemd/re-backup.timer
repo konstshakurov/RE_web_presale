@@ -1,0 +1,10 @@
+[Unit]
+Description=re_web_presale: ежедневный бэкап БД в 02:30
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+Unit=re-backup.service
+
+[Install]
+WantedBy=timers.target

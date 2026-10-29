@@ -1,0 +1,10 @@
+[Unit]
+Description=re_web_presale: месячный отчёт доступности (1-го числа в 09:10)
+
+[Timer]
+OnCalendar=*-*-01 09:10:00
+Persistent=true
+Unit=re-availability-report.service
+
+[Install]
+WantedBy=timers.target

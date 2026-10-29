@@ -1,0 +1,10 @@
+[Unit]
+Description=re_web_presale: еженедельная проверка восстановления (вс 04:00)
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00
+Persistent=true
+Unit=re-restore-check.service
+
+[Install]
+WantedBy=timers.target

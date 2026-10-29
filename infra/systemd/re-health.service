@@ -1,0 +1,9 @@
+[Unit]
+Description=re_web_presale: проверка /health и контейнеров (KON-49)
+
+[Service]
+Type=oneshot
+User=user
+Group=user
+EnvironmentFile=-/opt/re_web_presale/ops.env
+ExecStart=/bin/bash /opt/re_web_presale/app/scripts/monitor_health.sh

@@ -1,0 +1,11 @@
+[Unit]
+Description=re_web_presale: проверка восстановления последнего бэкапа во временную БД (KON-49)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=user
+Group=user
+EnvironmentFile=-/opt/re_web_presale/ops.env
+ExecStart=/bin/bash /opt/re_web_presale/app/scripts/restore_check.sh

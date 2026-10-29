@@ -1,0 +1,9 @@
+[Unit]
+Description=re_web_presale: отчёт доступности за прошлый месяц, будни 9:00-18:00 (KON-49)
+
+[Service]
+Type=oneshot
+User=user
+Group=user
+EnvironmentFile=-/opt/re_web_presale/ops.env
+ExecStart=/bin/bash /opt/re_web_presale/app/scripts/availability_report.sh

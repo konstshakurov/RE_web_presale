@@ -1,0 +1,10 @@
+[Unit]
+Description=re_web_presale: проверка /health раз в минуту
+
+[Timer]
+OnCalendar=minutely
+AccuracySec=1s
+Unit=re-health.service
+
+[Install]
+WantedBy=timers.target

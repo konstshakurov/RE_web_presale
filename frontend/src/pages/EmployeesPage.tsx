@@ -19,6 +19,7 @@ import {
   totalForSummary,
   type EmployeeFilters,
 } from "../lib/employeeFilters";
+import { statusClass } from "../lib/statusTone";
 import { useDeptHeads } from "../lib/useDeptHeads";
 import { useEmployees } from "../lib/useEmployees";
 
@@ -145,7 +146,7 @@ export default function EmployeesPage() {
                   )}
                 </h2>
                 <div>
-                  <span className="status">{e.status}</span>{" "}
+                  <span className={statusClass(e.status)}>{e.status}</span>{" "}
                   {!e.assignable && <span className="muted">не назначается</span>}
                 </div>
                 <div className="card__row">

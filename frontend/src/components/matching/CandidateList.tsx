@@ -1,5 +1,6 @@
 import { formatDateTime } from "../../lib/needs";
 import { percentTone } from "../../lib/matching";
+import { statusClass } from "../../lib/statusTone";
 
 // Общий вид строки кандидата для сопоставления (FR-036) и поиска по смыслу (FR-032).
 export interface CandidateRow {
@@ -64,7 +65,7 @@ export default function CandidateList({ rows, onResume, assign = true, onAssign 
             <td>
               {r.name}
               <div className="muted">{r.key}</div>
-              <span className="status">{r.status}</span>
+              <span className={statusClass(r.status)}>{r.status}</span>
               {r.stale && (
                 <span className="badge badge--stale" title="Потребность, заметка или модель изменились">
                   устарело

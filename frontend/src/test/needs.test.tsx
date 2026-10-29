@@ -373,6 +373,21 @@ describe("Потребности", () => {
     expect(screen.queryByText("Пустое правило")).not.toBeInTheDocument();
   });
 
+  it("раскрытая строка получает is-selected, после «Скрыть правила» - снимается; статус - цветной чип (KON-150)", async () => {
+    route((u) => {
+      if (u.includes("/sync/needs?")) return json(page([need()]));
+      if (u.includes("/client-rules")) return json({ epic_key: "E-1", stale: false, needs_total: 1, rules: [] });
+    });
+    renderNeeds();
+    await screen.findByRole("cell", { name: "1" });
+    const row = screen.getAllByRole("row")[1];
+    expect(row).not.toHaveClass("is-selected");
+    await userEvent.click(screen.getByRole("button", { name: "Правила клиента" }));
+    expect(screen.getAllByRole("row")[1]).toHaveClass("is-selected");
+    await userEvent.click(screen.getByRole("button", { name: "Скрыть правила" }));
+    expect(screen.getAllByRole("row")[1]).not.toHaveClass("is-selected");
+  });
+
   it("401 приложения - конец сессии: переход на вход, без сообщения об ошибке", async () => {
     route((u) => {
       if (u.includes("/sync/needs?")) return json(page([need()]));

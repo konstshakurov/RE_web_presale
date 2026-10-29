@@ -207,13 +207,47 @@ describe("токены стилей (KON-81, D1)", () => {
 
   it("--primary и --primary-hover заданы в обеих темах", () => {
     expect(css).toMatch(/--primary: #2870d4; --primary-hover: #235fc0;/);
-    expect(css).toMatch(/--primary: #1f6fd6; --primary-hover: #1a5bb8;/);
+    expect(css).toMatch(/--primary: #2470c8; --primary-hover: #1e5fad;/);
   });
 
-  it("--accent: светлая #1b66c9 (текст >=4.5:1, KON-86), тёмная #3e8ef7 без изменений", () => {
+  it("--accent: светлая #2368b8 (KON-150), тёмная #3e8ef7 без изменений", () => {
     expect(css).toMatch(/--accent: #3e8ef7;/);
-    expect(css).toMatch(/--accent: #1b66c9;/);
+    expect(css).toMatch(/--accent: #2368b8;/);
     expect(css).not.toMatch(/--accent: #1f6fd6;/);
+  });
+});
+
+describe("палитра А2 и чипы статусов (KON-150)", () => {
+  let css = "";
+  beforeAll(async () => {
+    const fs = "node:fs";
+    const { readFileSync } = (await import(/* @vite-ignore */ fs)) as { readFileSync: (p: string, e: string) => string };
+    css = readFileSync("src/styles.css", "utf-8");
+  });
+
+  it("токены светлой темы по decision.md п. 1, нет прежних литералов", () => {
+    const light = css.slice(css.indexOf("prefers-color-scheme: light"), css.indexOf("html {"));
+    for (const v of ["--bg: #f7f8fa", "--panel-2: #eef1f5", "--border: #dde3ea", "--text: #1e293b", "--muted: #5a6a7f", "--nav: #202b36", "--warn: #8f5c10"])
+      expect(light).toContain(v);
+    expect(css).not.toMatch(/#fdfcf9|#f5f3ee|#e4e0d7/);
+    expect(css).toContain("--secondary: #2368b8; --secondary-hover-bg: rgba(35, 104, 184, 0.08)");
+    expect(light).toContain("--ok: #17724f");
+    expect(css.slice(0, css.indexOf("@media (prefers-color-scheme: light)"))).toContain("--ok: #34c38f");
+    expect(css).toContain(".hit--active { background: var(--warn); color: #000; }");
+    expect(css).toContain("@media (prefers-color-scheme: light) { .hit--active { color: #fff; } }");
+    expect(css).toContain(':root[data-theme="light"] .hit--active { color: #fff; }');
+  });
+
+  it("чип-токены и заливка строк: светлые значения, в тёмной = прежний вид", () => {
+    const dark = css.slice(0, css.indexOf("@media (prefers-color-scheme: light)"));
+    for (const t of ["ok", "info", "err", "warn", "neu"])
+      expect(dark).toContain(`--chip-${t}-bg: var(--panel-2); --chip-${t}-fg: var(--ok)`);
+    expect(dark).toContain("--row-hover: var(--panel-2); --row-sel: var(--panel-2)");
+    expect(css).toContain("--chip-ok-bg: #dcf4e7; --chip-ok-fg: #12633f");
+    expect(css).toContain("--row-hover: #f1f4f9; --row-sel: #e9eefc");
+    expect(css).toContain(".needs tbody tr.is-selected { background: var(--row-sel); box-shadow: inset 3px 0 0 var(--primary); }");
+    expect(css).toContain(".needs tbody tr:hover { background: var(--row-hover); }");
+    for (const m of ["ok", "info", "err", "warn"]) expect(css).toContain(`.status--${m} {`);
   });
 });
 

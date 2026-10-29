@@ -3,13 +3,19 @@
   --bg: #12171d; --panel: #1b222b; --panel-2: #232c37; --text: #e4e7eb; --muted: #9aa5b1;
   --border: #323f4b; --accent: #3e8ef7; --nav: #0f1b33; --err: #ff8a80; --ok: #34c38f; --warn: #f5b041;
   --primary: #2870d4; --primary-hover: #235fc0; --nav-accent: #3e8ef7; --nav-text: #cbd2d9; --nav-border: #52606d;
+  --chip-ok-bg: var(--panel-2); --chip-ok-fg: var(--ok); --chip-info-bg: var(--panel-2); --chip-info-fg: var(--ok);
+  --chip-err-bg: var(--panel-2); --chip-err-fg: var(--ok); --chip-warn-bg: var(--panel-2); --chip-warn-fg: var(--ok);
+  --chip-neu-bg: var(--panel-2); --chip-neu-fg: var(--ok); --row-hover: var(--panel-2); --row-sel: var(--panel-2);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #f4f6f8; --panel: #fff; --panel-2: #eef1f4; --text: #1f2933; --muted: #616e7c;
-    --border: #cbd2d9; --accent: #1b66c9; --nav: #1f2933; --err: #b42318; --ok: #1a7f5a; --warn: #b7791f;
-    --primary: #1f6fd6; --primary-hover: #1a5bb8; --nav-accent: #3e8ef7; --nav-text: #cbd2d9; --nav-border: #52606d;
+    --bg: #f7f8fa; --panel: #fff; --panel-2: #eef1f5; --text: #1e293b; --muted: #5a6a7f;
+    --border: #dde3ea; --accent: #2368b8; --nav: #202b36; --err: #b42318; --ok: #17724f; --warn: #8f5c10;
+    --primary: #2470c8; --primary-hover: #1e5fad; --nav-accent: #3e8ef7; --nav-text: #cbd2d9; --nav-border: #52606d;
+    --chip-ok-bg: #dcf4e7; --chip-ok-fg: #12633f; --chip-info-bg: #e0ebfb; --chip-info-fg: #1c4f9e;
+    --chip-err-bg: #fce3e8; --chip-err-fg: #9d1f38; --chip-warn-bg: #fdefcf; --chip-warn-fg: #764a00;
+    --chip-neu-bg: #eaedf2; --chip-neu-fg: #44546a; --row-hover: #f1f4f9; --row-sel: #e9eefc;
     color-scheme: light;
   }
 }
@@ -77,7 +83,15 @@ a { color: var(--accent); }
 .datefilter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .needs td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; }
 .needs__details td { background: var(--panel-2); }
-.status { color: var(--ok); background: var(--panel-2); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+.status { color: var(--chip-neu-fg); background: var(--chip-neu-bg); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+.status--ok { background: var(--chip-ok-bg); color: var(--chip-ok-fg); }
+.status--info { background: var(--chip-info-bg); color: var(--chip-info-fg); }
+.status--err { background: var(--chip-err-bg); color: var(--chip-err-fg); }
+.status--warn { background: var(--chip-warn-bg); color: var(--chip-warn-fg); }
+.needs tbody tr:hover { background: var(--row-hover); }
+.needs tbody tr.is-selected { background: var(--row-sel); box-shadow: inset 3px 0 0 var(--primary); }
+.needs tbody tr.is-selected > td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+.needs tbody tr.is-selected.needs__details td { background: var(--row-sel); }
 .rate__vat { display: block; color: var(--muted); }
 .acts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; }
 .link.link--inline { display: inline; }
@@ -221,6 +235,8 @@ a { color: var(--accent); }
 .cv-text { white-space: pre-wrap; word-break: break-word; font-family: inherit; background: var(--panel-2); border-radius: 4px; padding: 12px; margin: 0; }
 .hit { background: #f5b04166; color: inherit; }
 .hit--active { background: var(--warn); color: #000; }
+@media (prefers-color-scheme: light) { .hit--active { color: #fff; } }
+:root[data-theme="light"] .hit--active { color: #fff; }
 .modal .button { text-decoration: none; }
 .profile { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 8px 16px; margin: 0; }
 .profile dt { font-weight: 600; }
@@ -333,8 +349,8 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
 
 /* Правка 7 (KON-89): токены secondary, блок «Обновить», единое правило нейтральных кнопок */
 :root, :root[data-theme="dark"] { --secondary: #5aa0fa; --secondary-hover-bg: rgba(90, 160, 250, 0.08); }
-@media (prefers-color-scheme: light) { :root { --secondary: #1a62c4; --secondary-hover-bg: rgba(26, 98, 196, 0.08); } }
-:root[data-theme="light"] { --secondary: #1a62c4; --secondary-hover-bg: rgba(26, 98, 196, 0.08); }
+@media (prefers-color-scheme: light) { :root { --secondary: #2368b8; --secondary-hover-bg: rgba(35, 104, 184, 0.08); } }
+:root[data-theme="light"] { --secondary: #2368b8; --secondary-hover-bg: rgba(35, 104, 184, 0.08); }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; margin: 0 0 4px; }
 .page-head h1 { flex: none; margin: 21px 0 12px; }
 .head-sync { display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px 12px; flex-wrap: nowrap; margin: 0 0 12px auto; flex: 1 1 420px; min-width: 0; }

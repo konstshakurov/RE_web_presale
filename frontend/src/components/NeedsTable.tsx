@@ -3,6 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { NeedOut, NeedSort, SortOrder } from "../api/types";
 import { candidatesLabel } from "../lib/matching";
+import { statusClass } from "../lib/statusTone";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
 import { HintLabel } from "./HintButton";
@@ -85,7 +86,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
           const expanded = open === n.jira_key;
           return (
             <Fragment key={n.jira_key}>
-              <tr>
+              <tr className={expanded ? "is-selected" : undefined}>
                 <td>
                   {n.jira_url ? (
                     <a href={n.jira_url} target="_blank" rel="noreferrer">
@@ -98,7 +99,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                 <td>{n.author || "—"}</td>
                 <td>{n.title}</td>
                 <td>
-                  <span className="status">{n.status}</span>
+                  <span className={statusClass(n.status)}>{n.status}</span>
                   <StatusActions
                     need={n}
                     onChanged={() => {
@@ -162,7 +163,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                 <td>{formatDateTime(n.jira_created_at) || "—"}</td>
               </tr>
               {expanded && n.epic_key && (
-                <tr className="needs__details">
+                <tr className="needs__details is-selected">
                   <td colSpan={9}>
                     <ClientRules epicKey={n.epic_key} />
                   </td>

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ApiError, api } from "../api/client";
 import type { EmployeeOut, EmployeeProfileData, FileOut, NeedOut } from "../api/types";
 import { formatSize } from "../lib/employees";
+import { statusClass } from "../lib/statusTone";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ActIcon from "./ActIcon";
 import Modal from "./Modal";
@@ -84,7 +85,7 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
       onClose={onClose}
       meta={
         <>
-          <span className="status">{e.status}</span>{" "}
+          <span className={statusClass(e.status)}>{e.status}</span>{" "}
           <span className="muted">{e.assignable ? "доступен для назначения" : "на потребность не назначается"}</span>
         </>
       }
@@ -155,7 +156,7 @@ export default function EmployeeProfile({ employee: e, onClose, onViewCv }: Prop
                     ) : (
                       n.jira_key
                     )}{" "}
-                    {n.title} <span className="status">{n.status}</span>{" "}
+                    {n.title} <span className={statusClass(n.status)}>{n.status}</span>{" "}
                     <span className="muted">
                       {rate.main}
                       {rate.vat ? ` ${rate.vat}` : ""}, {formatDateTime(n.jira_created_at)}

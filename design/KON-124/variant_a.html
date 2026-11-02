@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KON-124 — вариант A: тексты «Потребности» + кнопки карточки в одну строку</title>
+<style>
+  :root{
+    --bg:#12171d; --panel:#1b222b; --panel-2:#232c37; --text:#e4e7eb; --muted:#9aa5b1;
+    --border:#323f4b; --accent:#3e8ef7; --ok:#34c38f;
+  }
+  [data-theme="light"]{
+    --bg:#f4f6f8; --panel:#ffffff; --panel-2:#eef1f4; --text:#1f2933; --muted:#616e7c;
+    --border:#cbd2d9; --accent:#1f6fd6; --ok:#1a7f5a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,sans-serif;padding:24px}
+  .note{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .switch{position:fixed;top:12px;right:16px;font:13px system-ui;padding:6px 10px;
+    border:1px solid var(--border);border-radius:4px;background:var(--panel);color:var(--text);cursor:pointer}
+
+  /* --- список «Потребности»: строка таблицы (фрагмент) --- */
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:6px}
+  th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--border);font-size:14px}
+  th{background:var(--panel-2);color:var(--muted);font-weight:600;font-size:12px}
+  a{color:var(--accent);text-decoration:none;cursor:pointer}
+  .status{color:var(--ok)}
+  /* (KON-124/2) «Ставка»: сокращение «от произв.», nowrap + ellipsis на узкой колонке */
+  .rate{white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+  .rate-title{color:var(--muted);white-space:nowrap}
+  /* (KON-124/1) «Правила клиента» → «Правила» + title */
+  /* (KON-124/3) «Скрыть кандидатов» → «Скрыть»; «N кандидатов» без изменений */
+
+  /* --- карточка сотрудника: кнопки в одну строку --- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;
+        min-width:280px} /* реальный minmax(300px,1fr) может сжиматься до ~280px */
+  .card__title{font-size:16px;font-weight:600;margin:0 0 6px}
+  .card__meta{color:var(--muted);font-size:13px;margin:4px 0}
+  .chip{display:inline-block;background:var(--ok);color:#fff;border-radius:12px;padding:2px 10px;font-size:13px}
+  /* (KON-124/4) действия: одна строка всегда; при дефиците ширины сжимаются отступы,
+     подписи остаются целиком (полный текст трёх кнопок + иконки < 260px < min карточки) */
+  .actions{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(4px,2vw,10px);margin-top:12px}
+  .actions a{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;min-width:0;overflow:hidden}
+  .actions svg{flex:none;opacity:.75}
+
+  .demo-gap{height:24px}
+  .compare{display:grid;gap:16px}
+  .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px}
+  .bad{color:var(--warn,#f5b041)}
+</style>
+</head>
+<body>
+<script>
+  // #w1024 — имитация окно 1024 при ширине макета 1280 (масштаб 0.8, zoom)
+  const m = location.hash.match(/w(\d+)/);
+  if (m) document.body.style.zoom = (parseInt(m[1], 10) / 1280);
+</script>
+<button class="switch" onclick="const r=document.documentElement; r.dataset.theme = r.dataset.theme==='light'?'dark':'light'; this.textContent = r.dataset.theme==='light'?'Тема: светлая → тёмная':'Тема: тёмная → светлая'">Тема: тёмная → светлая</button>
+
+<p class="note">Прототип KON-124 / вариант A. Слева — «как сейчас» (маркированные тексты), справа — то же место после правок. Переключатель темы — вверху справа. Ширина окна = проверка «не переносится» на 1280 / 1024.</p>
+
+<div class="label">Список «Потребности» — строка таблицы</div>
+<table>
+  <tr>
+    <th>Ключ</th><th>Название</th><th>Статус</th><th>Клиент</th><th>Ставка</th><th>Кандидаты</th>
+  </tr>
+  <tr>
+    <td><a>5938</a></td>
+    <td>Аналитик Банк Компаньон Системный аналитик, Бизнес аналитик Middle +, Senior Full time Анна Власова</td>
+    <td><span class="status">Кандидат назначен</span></td>
+    <td>SA-4160<br><a title="Правила клиента">Правила</a></td>
+    <td><strong class="rate-title">3 750 RUB</strong><br><span class="rate" title="от производства">от произв.</span></td>
+    <td>
+      <a title="Скрыть 2 кандидатов">Скрыть</a> <a title="Показать кандидатов">2 кандидата</a>
+    </td>
+  </tr>
+  <tr>
+    <td><a>5939</a></td>
+    <td>Аналитик Системный аналитик Middle +, Senior Full time Алексеем Евсеев</td>
+    <td><span class="status">Кандидат назначен</span></td>
+    <td>SA-2277<br><a title="Правила клиента">Правила</a></td>
+    <td><strong class="rate-title">не указана</strong><br><span class="rate" title="от производства">от произв.</span></td>
+    <td><a class="primary-small">Сопоставить</a></td>
+  </tr>
+</table>
+
+<div class="demo-gap"></div>
+
+<div class="label">Список «Сотрудники» — карточка (кнопки всегда в одной строке)</div>
+<div class="grid">
+  <div class="card">
+    <p class="card__title">Аблязова Ирина Сергеевна</p>
+    <span class="chip">Коммерческий проект</span><div class="card__meta">не назначается</div>
+    <div class="card__meta"><strong>Отпуска:</strong> планируется в ближайшие 3 месяца</div>
+    <div class="actions">
+      <a title="Профиль"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M3 14c.6-2.8 2.6-4 5-4s4.4 1.2 5 4"/></svg>Профиль</a>
+      <a title="Резюме"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2" width="8" height="12" rx="1"/><path d="M6 5h4M6 8h4M6 11h2.5"/></svg>Резюме</a>
+      <a title="Файлы"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5V3.5C2 2.7 2.7 2 3.5 2h2L7 4h5.5C13.3 4 14 4.7 14 5.5V11c0 .8-.7 1.5-1.5 1.5h-9C2.7 12.5 2 11.8 2 11V5z"/></svg>Файлы</a>
+    </div>
+  </div>
+  <div class="card" style="min-width:280px;background:var(--panel-2)">
+    <p class="card__title" style="color:var(--muted)">Здесь светлая тема той же карточки</p>
+    <div class="card__meta">кнопка-переключатель темы вверху — проверка обеих тем</div>
+    <div class="actions" style="opacity:.5">
+      <a>Профиль</a><a>Резюме</a><a>Файлы</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

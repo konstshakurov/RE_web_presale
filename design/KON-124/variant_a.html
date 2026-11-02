@@ -24,6 +24,9 @@
   th{background:var(--panel-2);color:var(--muted);font-weight:600;font-size:12px}
   a{color:var(--accent);text-decoration:none;cursor:pointer}
   .status{color:var(--ok)}
+  /* «Сопоставить» - кнопка как в реальном UI (.primary-small), KON-124 её не меняет */
+  .primary-small{background:var(--primary-btn,#2870d4);color:#fff;border:0;border-radius:4px;padding:4px 10px;cursor:pointer;font:inherit}
+  [data-theme="light"] .primary-small{background:#2470c8}
   /* (KON-124/2) «Ставка»: сокращение «от произв.», nowrap + ellipsis на узкой колонке */
   .rate{white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
   .rate-title{color:var(--muted);white-space:nowrap}
@@ -80,7 +83,7 @@
     <td><span class="status">Кандидат назначен</span></td>
     <td>SA-2277<br><a title="Правила клиента">Правила</a></td>
     <td><strong class="rate-title">не указана</strong><br><span class="rate" title="от производства">от произв.</span></td>
-    <td><a class="primary-small">Сопоставить</a></td>
+    <td><button type="button" class="primary-small">Сопоставить</button></td>
   </tr>
 </table>
 

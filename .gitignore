@@ -74,3 +74,4 @@ qa/testdata/cv/
 # QA: результаты нагрузки locust
 tests_load/result_*
 qa/e2e/artifacts/test-results/
+.opencode/

@@ -28,8 +28,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$repo = Split-Path -Parent $PSScriptRoot | Split-Path -Parent
+$repo = Split-Path -Parent $PSScriptRoot   # ...\RE_web_presale
 Set-Location $repo
+& git rev-parse --is-inside-work-tree *> $null
+if ($LASTEXITCODE -ne 0) { Write-Host "!! $repo не git-репозиторий" -ForegroundColor Red; exit 1 }
 
 function Step($msg) { Write-Host (">> " + $msg) -ForegroundColor Cyan }
 function Stop-D($msg) { Write-Host ("!! " + $msg) -ForegroundColor Red; exit 1 }

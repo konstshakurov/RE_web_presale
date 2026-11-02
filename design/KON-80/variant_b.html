@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KON-80 — вариант B: одно окно</title>
+<style>
+  :root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;
+    --border:#323f4b;--accent:#3e8ef7;--err:#ff8a80;--warn:#f5b041;--primary-btn:#2870d4;}
+  [data-theme="light"]{--bg:#f4f6f8;--panel:#ffffff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;
+    --border:#cbd2d9;--accent:#1f6fd6;--err:#b42318;--warn:#b7791f;--primary-btn:#2470c8;}
+  *{box-sizing:border-box} body{margin:0;background:rgba(0,0,0,.45);font:14px/1.5 system-ui,sans-serif;color:var(--text);padding:32px 0}
+  .switch{position:fixed;top:12px;right:16px;font:13px system-ui;padding:6px 10px;border:1px solid var(--border);
+    border-radius:4px;background:var(--panel);color:var(--text);cursor:pointer;z-index:9}
+  .st{position:fixed;top:12px;left:16px;z-index:9;display:flex;gap:8px}
+  .st button{font:13px system-ui;padding:6px 10px;border:1px solid var(--border);border-radius:4px;
+    background:var(--panel);color:var(--text);cursor:pointer}
+  .st button[aria-pressed="true"]{border-color:var(--primary-btn);color:var(--primary-btn)}
+  .hidden{display:none!important}
+  .backdrop{display:flex;justify-content:center;align-items:flex-start}
+  .modal{width:min(960px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:6px;
+    max-height:90vh;display:flex;flex-direction:column}
+  .modal__head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .modal__head h3{margin:0;font-size:16px}
+  .modal__ctx{color:var(--muted);font-size:13px}
+  .modal__x{margin-left:auto;background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer}
+  .modal__body{padding:16px;overflow:auto}
+  .modal__foot{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border)}
+  .btn{font:inherit;padding:8px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text)}
+  .btn.primary{background:var(--primary-btn);border-color:var(--primary-btn);color:#fff}
+  .btn.primary:disabled{opacity:.5;cursor:default}
+  .file-row{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:6px;
+    background:var(--panel-2);padding:10px 12px;margin-bottom:8px}
+  .file-row .name{font-weight:600}
+  .file-row .meta{color:var(--muted);font-size:13px}
+  .file-row .chk{margin-left:auto;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .row{display:flex;align-items:center;gap:10px;margin-top:10px}
+  select{font:inherit;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:7px 9px}
+  .spin{width:14px;height:14px;border:2px solid var(--muted);border-top-color:transparent;border-radius:50%;
+    display:inline-block;animation:s .9s linear infinite;margin-right:8px;vertical-align:-2px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .box{border:1px solid var(--err);color:var(--err);border-radius:6px;padding:10px 12px;margin:10px 0}
+  .box.warn{border-color:var(--warn);color:var(--warn)}
+  .hr{border-top:1px solid var(--border);margin:14px -16px;padding:0 16px}
+  .result{display:grid;grid-template-columns:1fr 300px;gap:14px}
+  .cvprev{background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:12px;
+    max-height:420px;overflow:auto;font-size:13px;white-space:pre-wrap}
+  .side ul{margin:6px 0 12px;padding-left:18px}
+  .side li{margin-bottom:6px;font-size:13px}
+  .letter textarea{width:100%;min-height:110px;font:inherit;background:var(--panel-2);color:var(--text);
+    border:1px solid var(--border);border-radius:4px;padding:8px}
+  .chkline{margin-top:8px;font-size:13px}
+  .footnote{font-size:12px;color:var(--muted)}
+  h4{margin:14px 0 6px;font-size:14px}
+</style>
+</head>
+<body>
+<script>
+  const m = location.hash.match(/w(\d+)/);
+  if (m) document.body.style.zoom = (parseInt(m[1],10)/1280);
+</script>
+<button class="switch" onclick="const r=document.documentElement; r.dataset.theme = r.dataset.theme==='light'?'dark':'light'; this.textContent = r.dataset.theme==='light'?'Тема: тёмная → светлая':'Тема: тёмная → светлая'">Тема: тёмная → светлая</button>
+<div class="st">
+  <button onclick="document.getElementById('st-in').classList.remove('hidden');document.getElementById('st-run').classList.add('hidden');document.getElementById('st-res').classList.add('hidden')" aria-pressed="true">Форма</button>
+  <button onclick="document.getElementById('st-in').classList.add('hidden');document.getElementById('st-run').classList.remove('hidden');document.getElementById('st-res').classList.add('hidden')">Генерация</button>
+  <button onclick="document.getElementById('st-in').classList.add('hidden');document.getElementById('st-run').classList.add('hidden');document.getElementById('st-res').classList.remove('hidden')">Форма + результат</button>
+</div>
+
+<div class="backdrop">
+  <div class="modal modal--wide" role="dialog" aria-label="CV по шаблону клиента">
+    <div class="modal__head">
+      <div>
+        <h3>CV по шаблону клиента</h3>
+        <div class="modal__ctx">Потребность ANALYTICS-5938 · Клиент SA-4160 · Сотрудник Власова Анна Борисовна</div>
+      </div>
+      <button class="modal__x" aria-label="Закрыть">×</button>
+    </div>
+
+    <div class="modal__body">
+      <div id="st-in">
+        <div class="box warn" role="alert">
+          Для пары «Власова А. Б. + SA-4160» уже есть CV по шаблону от 18.09.2026.
+          Новый результат добавится в историю, прежний останется. Продолжить?
+          <button class="btn primary" style="margin-left:8px;padding:5px 10px">Продолжить</button>
+          <button class="btn" style="padding:5px 10px">Отмена</button>
+        </div>
+
+        <h4>Входы</h4>
+        <div class="file-row">
+          <div>
+            <div class="name">Шаблон_Клиент_SA-4160.docx</div>
+            <div class="meta">Файл клиента · SA-4160 · 512 КБ, загружен 20.03.2026</div>
+          </div>
+          <label class="chk"><input type="checkbox" id="f1" checked>Использую как шаблон</label>
+        </div>
+        <div class="file-row">
+          <div>
+            <div class="name">CV_Власова_Анна.docx</div>
+            <div class="meta">Основной CV сотрудника · обновлён 02.11.2026</div>
+          </div>
+          <label class="chk"><input type="checkbox" id="f2" checked>Подтверждаю вход</label>
+        </div>
+
+        <div class="row">
+          <span class="footnote">Модель:</span>
+          <select>
+            <option>qwen/qwen3.6-35b-a3b (последняя: 22.10)</option>
+            <option>qwen/qwen2.5-32b</option>
+            <option>llmgateway/def_avg</option>
+          </select>
+        </div>
+
+        <!-- результат вставляется ниже (после готовности) -->
+      </div>
+
+      <div id="st-run" class="hidden">
+        <div class="prog" role="status" style="color:var(--muted);align-items:center;display:flex;gap:8px;font-size:13px">
+          <span class="spin"></span>
+          <span><b style="color:var(--text)">Генерация…</b> шаг 2 из 3 (чтение Основного CV)</span>
+        </div>
+        <p class="footnote">Закрыть окно во время генерации нельзя. Обычно занимает 1–3 минуты.</p>
+      </div>
+
+      <div id="st-res" class="hidden">
+        <div class="box" role="alert">
+          Шлюз LLM ответил ошибкой: 502 llm_529 (таймаут провайдера). Выбор сохранён.
+          <button class="btn" style="padding:5px 10px;margin-left:8px">Повторить</button>
+        </div>
+        <div class="result">
+          <div class="cvprev" aria-label="Предпросмотр CV">АНА БОРИСОВНА ВЛАСОВА
+Аналитик (БА/СА) · Стаж 15 лет
+Опыт: Государственный сектор (Госзаказ), финтех, ИТ и Разработка ПО, Энергетика
+
+Проект: Сопоставление потребностей и кандидатов (2025)
+- Собирал требования...
+- Интеграции: Jira, LDAP...</div>
+          <div class="side">
+            <div><strong>Рекомендации по адаптации</strong></div>
+            <ul>
+              <li>Подчеркнуть опыт банковского домена (требование #2 клиента)</li>
+              <li>Убрать VR-строку: не релевантна роли</li>
+              <li>Добавить аспект ведения БЗ (Confluence) — есть в требованиях клиента</li>
+            </ul>
+            <div><strong>Сопроводительное письмо</strong></div>
+            <div class="letter">
+              <textarea>Здравствуйте! Презентую кандидата…</textarea>
+              <label class="chkline"><input type="checkbox" id="ap">Я проверил(а) письмо, публикую как есть</label>
+              <button class="btn primary" style="margin-top:8px" disabled id="pub">Опубликовать письмо в Jira</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <p class="footnote">Результат сохраняется с типом «CV по шаблону клиента» и клиентом SA-4160. Публикация письма — только после апрува.</p>
+    </div>
+
+    <div class="modal__foot">
+      <span style="flex:1"></span>
+      <button class="btn">Отмена</button>
+      <button class="btn primary">Сгенерировать</button>
+    </div>
+  </div>
+</div>
+<script>
+  const ck = document.getElementById('ap'), pg = document.getElementById('pub');
+  ck && ck.addEventListener('change', () => pg.disabled = !ck.checked);
+</script>
+</body>
+</html>

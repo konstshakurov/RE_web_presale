@@ -1,0 +1,55 @@
+@startuml
+title SEQ-3. Открытие эпика клиента: правила и потребности (FR-015)
+actor "Пользователь" as U
+participant "Frontend (SPA)" as FE
+participant "Backend api" as API
+participant "SyncService" as SS
+database "app_db" as DB
+participant "JiraAdapter" as JA
+participant "Jira 8.13" as JIRA
+
+activate U
+U -> FE : Открыть эпик потребности
+activate FE
+FE -> API : Получить эпик GET /sync/epics/{epic_key}
+activate API
+API -> SS : get_epic [epic_key, логин]
+activate SS
+SS -> DB : Прочитать эпик из кэша
+activate DB
+DB --> SS : Строка эпика или пусто
+deactivate DB
+alt Кэш моложе 1 часа и нет refresh
+  SS --> API : EpicView из кэша
+else Кэша нет или он устарел
+  SS -> JA : Прочитать эпик get_epic [токен, epic_key]
+  activate JA
+  JA -> JIRA : Получить эпик GET /rest/agile/1.0/epic/{key}
+  activate JIRA
+  JIRA --> JA : name, summary
+  deactivate JIRA
+  JA -> JIRA : Получить правила клиента GET /rest/api/2/issue/{key} [fields=summary, customfield_12000 и др.]
+  activate JIRA
+  JIRA --> JA : Поля правил клиента
+  deactivate JIRA
+  loop Страницы по 100
+    JA -> JIRA : Получить детей эпика GET /rest/agile/1.0/epic/{key}/issue
+    activate JIRA
+    JIRA --> JA : Потребности эпика
+    deactivate JIRA
+  end
+  JA --> SS : Эпик, правила, дети эпика или отказ Jira
+  deactivate JA
+  SS -> DB : Сохранить эпик, правила и потребности аналитики
+  activate DB
+  DB --> SS : Сохранено
+  deactivate DB
+  SS --> API : EpicView; при отказе Jira и наличии кэша кэш с stale = true и error, без кэша код и текст Jira
+end
+deactivate SS
+API --> FE : 200 эпик, правила, needs_total (или 403, 409, 502, 503)
+deactivate API
+FE --> U : Правила и условия клиента
+deactivate FE
+deactivate U
+@enduml

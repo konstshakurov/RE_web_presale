@@ -4,6 +4,9 @@ import type {
   AssignBody,
   CvLimits,
   CvText,
+  CvTplContext,
+  CvTplGenerateOut,
+  CvTplSaved,
   Dictionary,
   TechTerms,
   DeptHead,
@@ -28,6 +31,7 @@ import type {
   ProviderOut,
   ProviderPatch,
   ProviderPublic,
+  PublishLetterBody,
   RateBenchmark,
   RefreshResult,
   ResumeItem,
@@ -218,6 +222,36 @@ export const api = {
     ),
   saveNote: (key: string, note: string) =>
     request<NoteOut>("PUT", `/cv/employees/${encodeURIComponent(key)}/note`, { note }),
+  // CV по шаблону клиента (FR-017, KON-80): генерация через шлюз LLM, файл-результат, письмо
+  cvtplContext: (needKey: string, employeeKey: string) =>
+    request<CvTplContext>(
+      "GET",
+      `/cvtpl/context?need_key=${encodeURIComponent(needKey)}&employee_key=${encodeURIComponent(employeeKey)}`,
+    ),
+  cvtplGenerate: (
+    template: File,
+    p: { needKey: string; employeeKey: string; mainCvFileId: number | null; providerId: number | null },
+  ) => {
+    const q = new URLSearchParams();
+    q.set("need_key", p.needKey);
+    q.set("employee_key", p.employeeKey);
+    q.set("template_name", template.name);
+    if (p.mainCvFileId !== null) q.set("main_cv_file_id", String(p.mainCvFileId));
+    if (p.providerId !== null) q.set("provider_id", String(p.providerId));
+    return request<CvTplGenerateOut>(
+      "POST",
+      `/cvtpl/generate?${q.toString()}`,
+      template, // файл уходит байтами как есть (как в upload, KON-36)
+    );
+  },
+  cvtplSave: (taskId: string, p: { need_key: string; employee_key: string }) =>
+    request<CvTplSaved>("POST", `/cvtpl/task/${encodeURIComponent(taskId)}/save`, p),
+  cvtplPublish: (taskId: string, body: PublishLetterBody) =>
+    request<{ published: true }>(
+      "POST",
+      `/cvtpl/task/${encodeURIComponent(taskId)}/publish-letter`,
+      body,
+    ),
   deleteFile: (id: number) => request<void>("DELETE", `/cv/files/${id}`),
   restoreFile: (id: number) => request<EmployeeFiles>("POST", `/cv/files/${id}/restore`),
   fileText: (id: number) => request<CvText>("GET", `/cv/files/${id}/text`),
@@ -248,6 +282,9 @@ export const api = {
       { prompt },
     ),
   retryTask: (taskId: string) => request<LlmTask>("POST", `/llm/tasks/${encodeURIComponent(taskId)}/retry`),
+  llmTask: (taskId: string) => request<LlmTask>("GET", `/llm/tasks/${encodeURIComponent(taskId)}`),
+  confirmLlmTask: (taskId: string) =>
+    request<LlmTask>("POST", `/llm/tasks/${encodeURIComponent(taskId)}/confirm`),
   publicProviders: () => request<ProviderPublic[]>("GET", "/llm/providers"),
   // «Резюме»: поиск по смыслу, технологии, профиль (FR-032, FR-003)
   searchState: (p: SearchParams, offset = 0) =>

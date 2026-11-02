@@ -50,12 +50,13 @@ export function benchmarkText(bench: RateBenchmark | null, rate?: NeedOut["rate"
 export const RATE_REQUIRED_TEXT = "Укажите ставку: в потребности «Кто предлагает ставку» = «от производства».";
 export const RATE_FORMAT_TEXT = "Введите ставку числом, например 3 800";
 
-// Резюме для назначения: Основное CV (по умолчанию) и Доп. CV; файлы - Доп. CV и Материалы (FR-008).
+// Резюме для назначения (FR-008): Основное CV (по умолчанию), Доп. CV и результаты
+// «CV по шаблону клиента» (FR-017: выбирается вместо Основного CV); файлы - Доп. CV и Материалы.
 export function resumeOptions(files: FileOut[]): { main: FileOut | undefined; extras: FileOut[]; attachable: FileOut[] } {
   const live = files.filter((f) => !f.is_archived);
   return {
     main: live.find((f) => f.kind === "main_cv"),
-    extras: live.filter((f) => f.kind === "extra_cv"),
+    extras: live.filter((f) => f.kind === "extra_cv" || f.kind === "client_template_cv"),
     attachable: live.filter((f) => f.kind === "extra_cv" || f.kind === "materials"),
   };
 }

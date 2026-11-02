@@ -164,10 +164,10 @@ describe("lib/assign", () => {
     expect(statusButtons("Отказ по кандидату")).toEqual([]);
     expect(statusButtons("Интервью состоялось")).toEqual([]);
   });
-  it("файлы: основное CV, доп. CV; вложения без основного", () => {
+  it("файлы: основное CV, доп. CV, CV по шаблону (FR-017 - выбирается во «Резюме»); вложения без основного", () => {
     const r = resumeOptions([file(1, "main_cv", "a", "t"), file(2, "extra_cv", "b", "t"), file(3, "materials", "c", "t"), file(4, "client_template_cv", "d", "t")]);
     expect(r.main?.id).toBe(1);
-    expect(r.extras.map((f) => f.id)).toEqual([2]);
+    expect(r.extras.map((f) => f.id)).toEqual([2, 4]);
     expect(r.attachable.map((f) => f.id)).toEqual([2, 3]);
   });
   it("ограничитель параллельности", async () => {

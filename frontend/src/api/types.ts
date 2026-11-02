@@ -404,6 +404,58 @@ export interface LlmTask {
   attempts: number;
   error_code?: string | null;
   error_message?: string | null;
+  result?: string | null; // текст ответа LLM после обратной подстановки (только владелец задачи)
+}
+
+// CV по шаблону клиента (FR-017, KON-80)
+export interface CvTplFileInfo {
+  id: number;
+  kind: FileKind;
+  file_name: string;
+  client_epic_key: string | null;
+  is_archived: boolean;
+  uploaded_at: string | null;
+  extraction_status: string;
+}
+
+export interface CvTplRepeat {
+  file_id: number;
+  file_name: string;
+  uploaded_at: string | null;
+}
+
+export interface CvTplContext {
+  need_key: string;
+  need_title: string;
+  client_epic_key: string | null;
+  client_name?: string | null;
+  main_cv: CvTplFileInfo | null;
+  repeat: CvTplRepeat | null;
+  saved: CvTplFileInfo[];
+}
+
+export interface CvTplGenerateOut {
+  task_id: string;
+  status: string;
+  requires_confirmation: boolean;
+}
+
+export interface CvTplResult {
+  cv: string;
+  recommendations: string[];
+  letter: string;
+}
+
+export interface CvTplSaved {
+  file_id: number;
+  file_name: string;
+  client_epic_key: string | null;
+}
+
+export interface PublishLetterBody {
+  need_key: string;
+  letter: string;
+  confirmed: boolean;
 }
 
 export interface ProviderPublic {

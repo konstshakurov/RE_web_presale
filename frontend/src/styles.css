@@ -219,6 +219,21 @@ a { color: var(--accent); }
 .modal__grp { display: flex; gap: 8px; flex-wrap: wrap; }
 .modal .act, .modal a.act { background: transparent; border: 0; color: var(--muted); padding: 6px 8px; }
 .modal .act:hover, .modal .act:focus-visible { color: var(--text); }
+/* CV по шаблону клиента (KON-80): строки подтверждения файлов, результат 2 колонки */
+.cvtpl__file { border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); padding: 10px 12px; margin: 8px 0; display: grid; gap: 8px; }
+.cvtpl__picked { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cvtpl__picked .name { font-weight: 600; overflow-wrap: anywhere; }
+.cvtpl__picked .meta, .cvtpl__shim .meta { color: var(--muted); font-size: 13px; }
+.cvtpl__chk { display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; }
+.cvtpl__chk input[type="file"] { max-width: 380px; }
+.cvtpl__row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.cvtpl__progress { display: flex; align-items: center; gap: 8px; padding: 20px 0; color: var(--muted); }
+.cvtpl__result { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; }
+.cvtpl__prev { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; max-height: 60vh; overflow: auto; white-space: pre-wrap; font-size: 13px; min-width: 0; }
+.cvtpl__side { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.cvtpl__side h4 { margin: 6px 0 4px; font-size: 14px; }
+.cvtpl__side textarea { width: 100%; min-height: 110px; font: inherit; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px; resize: vertical; }
+.cvtpl__side .btn.primary { justify-self: start; }
 .modal--profile .profile { grid-template-columns: 150px minmax(0, 1fr); }
 .modal .profile dt, .modal .profile dd, .modal .cv-sections, .modal .cv-sections > *, .modal .files__list li, .modal .matching-info li { min-width: 0; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
 .modal .pre, .modal .cv-text { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }

@@ -19,6 +19,7 @@ import { formatDateTime, formatRate } from "../lib/needs";
 import { useJiraOp } from "../lib/useJiraOp";
 import JiraFailure from "./JiraFailure";
 import Modal from "./Modal";
+import CvTemplateDialog from "./CvTemplateDialog";
 
 interface Props {
   needKey: string;
@@ -61,6 +62,7 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
   const [assigned, setAssigned] = useState(false); // назначение выполнено: повтор пишет только ставку, остальные поля заблокированы
   const [bench, setBench] = useState<RateBenchmark | null>(null); // ориентир (FR-019); ошибка/пусто - скрыт
   const [extra, setExtra] = useState<number[]>([]);
+  const [tplOpen, setTplOpen] = useState(false); // CV по шаблону клиента (FR-017, KON-80)
   const done = useRef<string[]>([]); // шаги, уже выполненные прошлой попыткой: повтор не дублирует вложения
 
   useEffect(() => {
@@ -73,6 +75,16 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
       alive = false;
     };
   }, [employeeKey]);
+
+  // Оснастка: после сохранения CV по шаблону файлы перечитаются, файл выбирается в «Резюме» (FR-017)
+  function reloadFiles(preselectId?: number) {
+    api.employeeFiles(employeeKey)
+      .then((r) => {
+        setFiles(r.files);
+        if (preselectId) setResumeId(String(preselectId));
+      })
+      .catch(() => undefined);
+  }
 
   // Ориентир нужен только там, где ставка вводится (CR-008): «от производства». Ошибка запроса окно не ломает.
   const benchWanted = !!need && rateRequired(need);
@@ -272,6 +284,15 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              className="btn"
+              disabled={assigned}
+              onClick={() => setTplOpen(true)}
+              aria-haspopup="dialog"
+            >
+              CV по шаблону клиента…
+            </button>
           </div>
           <div className={rateError ? "field field--err" : "field"}>
             <label htmlFor="assign-rate">

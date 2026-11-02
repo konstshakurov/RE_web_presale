@@ -206,9 +206,9 @@ async def publish_letter(
     except CvTplError as err:
         raise _http_error(err) from None
     jira = _jira(request)
-    token = request.app.state.jira_session.get_user_jira_token(ctx.login)
+    sealed = request.app.state.jira_session.get_user_jira_token(ctx.login)
     try:
-        await run_in_threadpool(jira.add_comment, token, body.need_key, body.letter.strip() or letter)
+        await run_in_threadpool(jira.add_comment, sealed, body.need_key, body.letter.strip() or letter)
     except AssignError as err:
         raise _jira_error(err) from None
     except Exception as exc:  # noqa: BLE001 - транспорт/таймаут Jira: 503 как в assign

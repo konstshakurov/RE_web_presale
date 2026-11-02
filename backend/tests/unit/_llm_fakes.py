@@ -233,9 +233,10 @@ class FakeClient:
         self._error = error
         self._delay = delay
 
-    def complete(self, *, url, api_key, model, system, prompt, timeout_sec):
+    def complete(self, *, url, api_key, model, system, prompt, timeout_sec, session_id=None):
         self.calls.append(dict(url=url, api_key=api_key, model=model, system=system,
-                               prompt=prompt, timeout_sec=timeout_sec))
+                               prompt=prompt, timeout_sec=timeout_sec,
+                               session_id=session_id))
         if self._delay:
             time.sleep(self._delay)
         if self._error is not None:

@@ -135,8 +135,10 @@ class CvRepo:
     def add_file(
         self, *, employee_key: str, kind: str, file_name: str, mime_type: str, content: bytes,
         uploaded_by: str, extracted_text: str | None, extraction_status: str,
+        client_epic_key: str | None = None,
     ) -> int:
-        """Новый файл. Для main_cv - замена с архивом 3 версий (cv.replace_main_cv, FR-039)."""
+        """Новый файл. Для main_cv - замена с архивом 3 версий (cv.replace_main_cv, FR-039).
+        ``client_epic_key`` - только для ``client_template_cv`` (FR-017)."""
         with self._pool.connection() as conn, conn.transaction():
             if kind == "main_cv":
                 return conn.execute(
@@ -145,10 +147,12 @@ class CvRepo:
                      extracted_text, extraction_status),
                 ).fetchone()[0]
             file_id = conn.execute(
-                "INSERT INTO cv.employee_file (employee_key, kind, file_name, mime_type, "
-                "size_bytes, sha256, extracted_text, extraction_status, uploaded_by) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (employee_key, kind, file_name, mime_type, len(content),
+                "INSERT INTO cv.employee_file (employee_key, kind, client_epic_key, file_name, "
+                "mime_type, size_bytes, sha256, extracted_text, extraction_status, uploaded_by) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                (employee_key, kind,
+                 client_epic_key if kind == "client_template_cv" else None,
+                 file_name, mime_type, len(content),
                  hashlib.sha256(content).digest(), extracted_text, extraction_status,
                  uploaded_by),
             ).fetchone()[0]

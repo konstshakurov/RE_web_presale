@@ -404,7 +404,7 @@ class LlmGateway:
                                     "У провайдера не задан API-ключ (Настройки LLM)")
             return
         try:
-            content = self._call(provider, key, payload)
+            content = self._call(provider, key, payload, session_id=task.id)
         except LlmTimeoutError as exc:
             self._repo.finish_error(task.id, TIMEOUT, exc.code, exc.message)
             return
@@ -423,13 +423,15 @@ class LlmGateway:
             return self._env_key.reveal()  # LLM_API_KEY: ключ внутренней Qwen из env
         return None
 
-    def _call(self, provider: ProviderRow, key: str | None, payload: dict) -> str:
+    def _call(self, provider: ProviderRow, key: str | None, payload: dict,
+              session_id: str | None = None) -> str:
         """Вызов с жёстким сроком: таймаут провайдера - предел и для зависшего ответа."""
         timeout = float(provider.timeout_sec)
         ex = ThreadPoolExecutor(max_workers=1, thread_name_prefix="llm-call")
         fut = ex.submit(
             self._client.complete, url=provider.url, api_key=key, model=provider.model,
             system=payload.get("system"), prompt=payload["prompt"], timeout_sec=timeout,
+            session_id=session_id,
         )
         try:
             return fut.result(timeout=timeout)

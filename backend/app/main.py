@@ -18,6 +18,9 @@ from .config import load_settings
 from .cv.limits import CvLimits
 from .cv.repo import CvRepo
 from .cv.router import router as cv_router
+from .cvtpl.repo import AppNeedSource
+from .cvtpl.router import router as cvtpl_router
+from .cvtpl.service import CvTplService
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .llm_gateway.factory import build_llm
 from .llm_gateway.router import router as llm_router
@@ -64,6 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # без LDAP_URL приложение стартует, но /auth/login отвечает 503
     app.state.ldap = Ldap3Adapter.from_settings(settings) if settings.ldap_url else None
     jira_adapter = _build_jira_adapter(settings)
+    app.state.jira = jira_adapter  # комментарий CV по шаблону (KON-80)
     app.state.jira_session = JiraSessionService(
         JiraClientSessionAdapter(jira_adapter) if jira_adapter else DisabledJiraSession(),
         SecretStore(repo, settings.enc_key_bytes(), settings.enc_key_id),
@@ -86,6 +90,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.llm_dictionary = llm.dictionary
     # сопоставление и навыки CV (KON-38): задачи ставятся через шлюз, результат собирает worker
     app.state.matching = build_matching(pool, cv_pool, llm.gateway)
+    # CV по шаблону клиента (FR-017, KON-80): контекст, генерация через шлюз, файл результата
+    app.state.cvtpl = CvTplService(
+        llm.gateway, app.state.cv, AppNeedSource(pool),
+        limit_mb=(CvLimits(pool, settings.cv_max_file_mb).max_mb()))
     try:
         yield
     finally:
@@ -105,6 +113,7 @@ app.include_router(status_groups_router)
 app.include_router(sync_router)
 app.include_router(rate_benchmark_router)
 app.include_router(cv_router)
+app.include_router(cvtpl_router)
 app.include_router(llm_router)
 app.include_router(matching_router)
 app.include_router(assign_router)

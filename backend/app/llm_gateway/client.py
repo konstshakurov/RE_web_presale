@@ -30,7 +30,7 @@ class LlmTimeoutError(LlmCallError):
 class ChatClient(Protocol):
     def complete(
         self, *, url: str, api_key: str | None, model: str, system: str | None,
-        prompt: str, timeout_sec: float,
+        prompt: str, timeout_sec: float, session_id: str | None = None,
     ) -> str: ...
 
 
@@ -40,13 +40,17 @@ class OpenAiCompatClient:
 
     def complete(
         self, *, url: str, api_key: str | None, model: str, system: str | None,
-        prompt: str, timeout_sec: float,
+        prompt: str, timeout_sec: float, session_id: str | None = None,
     ) -> str:
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "User-Agent": "re-web-presale/1.0"}
+        if session_id:
+            # OpenCode Go требует x-opencode-session: без него gateway отвечает 400
+            # (проверено 02.11.2026 на /inference/go/openai/v1/chat/completions)
+            headers["x-opencode-session"] = session_id
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
         endpoint = url.rstrip("/") + "/chat/completions"

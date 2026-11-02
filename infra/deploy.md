@@ -13,6 +13,43 @@
 - ufw: только 22/tcp и 443/tcp.
 - `.env` на ВМ: необязательная `DEPT_HEAD_HIDDEN_LOGINS` — логины РО через запятую (нижний регистр), скрываемые в списке «РО»; значение хранится только в `.env`. После выкладки cv V012 применить миграции (`db/migrations/apply.sh up cv_db`).
 
+## 0b. Автодеплой одним вызовом (KON-123)
+
+Один вызов с машины владельца: проверки → доставка → деплой на ВМ → health → свereка.
+
+```powershell
+# [PowerShell] из корня репозитория (ключ id_ed25519_vm_re, фразу вводит владелец или ssh-agent):
+.\scripts\deploy.ps1
+# быстрее (не по правилам приёмки — только для повторов до приёмки):
+.\scripts\deploy.ps1 -SkipBackendTests -SkipFrontendBuild -SkipSecretsCheck
+```
+
+Что произойдёт:
+
+1. **Локальные проверки до выкладки** (красная — деплой отменён ДО отправки на ВМ):
+   чистое дерево, `HEAD` в `main` и запушен, `pytest backend/tests/unit`,
+   `npm run build` (frontend), `scripts/check_secrets.sh`.
+2. **Доставка:** `git archive HEAD` (список путей — §1 ниже) + `scripts/deploy.sh`
+   → `/tmp/` на ВМ по scp.
+3. **На ВМ (`scripts/deploy.sh`)**: flock (параллельный запуск отклоняется) →
+   та же версия = короткое замыкание (повтор безопасен) → распаковка во
+   временную папку → проверка отсутствия CRLF → сохранение предыдущей версии
+   в `app.prev.<время>` (хранятся последние 3) → при изменении `db/migrations/`:
+   дамп БД скриптом KON-49 + `db/migrations/apply.sh` → `docker compose build/up`
+   боевого оверлея → ожидание `/health == {"status":"ok"}` и healthy всех
+   сервисов до 300 с → **авто-откат на `app.prev` при любой красной проверке**
+   (тома НЕ удаляются) → журнал и `DEPLOYED_VERSION`.
+
+Посмотреть журнал деплоя:
+
+```bash
+# [ВМ]
+tail -50 /opt/re_web_presale/deploy.log
+cat /opt/re_web_presale/DEPLOYED_VERSION
+```
+
+Откат вручную — §2 ниже, автоматический выполняет сам `deploy.sh`.
+
 ## 1. Повторный деплой (обновление версии)
 
 **[PowerShell]**
@@ -29,6 +66,7 @@ git rev-parse HEAD
 # 3. Соберите архив из ЗАФИКСИРОВАННОЙ версии (git archive берёт только закоммиченные файлы:
 #    без node_modules, __pycache__, .env*, output/, input/, design/, qa/ и т.п.).
 #    Не используйте tar по рабочей папке: он тянет frontend/node_modules и падает на длинных путях.
+#    Замечание (KON-123): замените этот и следующие шаги пункта 1 на .\scripts\deploy.ps1 (§0b).
 git archive --format=tar.gz -o re_web_presale_deploy.tar.gz HEAD `
   backend frontend src db infra scripts `
   docker-compose.yml docker-compose.prod.yml docker-compose.migrations.yml `

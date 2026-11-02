@@ -1,0 +1,12 @@
+# GitHub / repo file line endings (KON-123):
+# скрипты и конфиги обязаны попадать на ВМ в LF (см. infra/deploy.md, риск CRLF).
+*.sh        text eol=lf
+*.py        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.conf      text eol=lf
+Dockerfile* text eol=lf
+.dockerignore text eol=lf
+*.env.example text eol=lf
+* text=auto

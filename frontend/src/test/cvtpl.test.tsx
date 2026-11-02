@@ -45,7 +45,7 @@ let publishResponse: () => Response | Promise<Response>;
 let saveResponse: () => Response | Promise<Response>;
 let fetchMock: ReturnType<typeof vi.fn>;
 
-function setup(over: Partial<typeof CTX> = {}) {
+function setup(over: Partial<Record<keyof typeof CTX, unknown>> = {}) {
   calls.length = 0;
   llmTaskResponses = [doneTask(RESULT)];
   generateResponse = () => json({ task_id: "t-1", status: "queued", requires_confirmation: false });
@@ -170,12 +170,13 @@ describe("CV по шаблону (KON-80)", () => {
 
   it("повтор по паре (BR-007): баннер показан и не блокирует генерацию", async () => {
     setup({
+      ...CTX,
       repeat: { file_id: 55, file_name: "CV стар.docx", uploaded_at: "2026-09-18T00:00:00" },
       saved: [{
         id: 55, kind: "client_template_cv", file_name: "CV стар.docx", client_epic_key: "SA-4160",
         is_archived: false, uploaded_at: "2026-09-18T00:00:00", extraction_status: "ok",
       }],
-    });
+    } as unknown as typeof CTX);
     await screen.findByText(/уже есть CV по шаблону/);
     await confirmInputs();
     expect((screen.getByRole("button", { name: "Сгенерировать" }) as HTMLButtonElement).disabled).toBe(false);

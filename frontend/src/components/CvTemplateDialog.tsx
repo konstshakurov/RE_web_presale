@@ -14,7 +14,7 @@ interface Props {
   onSaved: (fileId: number) => void; // файл сохранён: родитель перечитывает файлы и может выбрать его
 }
 
-type Step = "files" | "generating" | "result";
+type Step = "files" | "confirm" | "generating" | "result";
 const LS_PROVIDER_KEY = "cvtpl.providerId";
 const FINAL = new Set(["done", "failed", "timeout", "cancelled"]);
 
@@ -401,7 +401,12 @@ export default function CvTemplateDialog({ needKey, employeeKey, employeeName, o
               what="в публикации письма"
               pwd={op.pwd}
               loginError={op.loginError}
-              onEnter={() => void op.reauth().then((r) => r && publish())}
+              onEnter={() => {
+                void op.reauth().then((r) => {
+                  if (r) return publish();
+                  return undefined;
+                });
+              }}
             />
             {savedFile && (
               <p className="footnote">

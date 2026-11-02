@@ -139,18 +139,38 @@ elif [ ! -d "$BASE/$PREV" ]; then
 fi
 if [ "$DB_CHANGED" = "1" ]; then
   journal "MIGRATE обнаружены изменения db/migrations"
-  if [ -f "$BASE/scripts/backup_db.sh" ]; then
-    if ! bash "$BASE/scripts/backup_db.sh" >>"$LOG" 2>&1; then
-      journal "MIGRATE дамп перед миграцией не удался (не прерываю: есть дневной бэкап)"
+  # дамп перед миграцией - механизм KON-49; скрипты живут в app/scripts (ExecStart systemd)
+  if [ -f "$APP/scripts/backup_db.sh" ]; then
+    if (
+      cd "$APP"
+      if [ -f "$BASE/ops.env" ]; then set -a; . "$BASE/ops.env"; set +a; fi
+      bash scripts/backup_db.sh
+    ) >>"$LOG" 2>&1; then
+      journal "MIGRATE дамп перед миграцией выполнен"
+    else
+      journal "MIGRATE дамп перед миграцией не удался (продолжаю: есть дневной бэкап)"
     fi
   else
-    journal "MIGRATE backup_db.sh не найден на ВМ — дамп пропущен (опираюсь на дневные бэкапы)"
+    journal "MIGRATE backup_db.sh не найден (app/scripts) — дамп пропущен (опираюсь на дневные бэкапы)"
   fi
-  if ! ( cd "$APP" && bash db/migrations/apply.sh ) >>"$LOG" 2>&1; then
+  # apply.sh требует аргументы: apply.sh up|down app_db|cv_db [N]; psql - внутри контейнера db
+  DB_CT=$(docker compose --env-file "$BASE/.env" -f "$APP/docker-compose.yml" -f "$OVERLAY" ps -q db)
+  if [ -z "$DB_CT" ]; then
     rollback
-    fail "MIGRATE db/migrations/apply.sh упал — восстановлена предыдущая версия" 5
+    fail "MIGRATE контейнер db не найден (compose ps -q db пуст)" 5
   fi
-  journal "MIGRATE применены"
+  export PSQL="docker exec -i $DB_CT psql -U postgres"
+  if ! ( cd "$APP"
+         bash db/migrations/apply.sh up app_db ) >>"$LOG" 2>&1; then
+    rollback
+    fail "MIGRATE apply.sh up app_db упал — восстановлена предыдущая версия" 5
+  fi
+  if ! ( cd "$APP"
+         bash db/migrations/apply.sh up cv_db ) >>"$LOG" 2>&1; then
+    rollback
+    fail "MIGRATE apply.sh up cv_db упал — восстановлена предыдущая версия" 5
+  fi
+  journal "MIGRATE применены (app_db, cv_db)"
 fi
 
 # --- сборка и запуск ---

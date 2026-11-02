@@ -117,7 +117,7 @@ Remove-Item $archive -ErrorAction SilentlyContinue
 # --- 6. финальная сверка ---
 Step "сверка DEPLOYED_VERSION"
 $remote = & ssh @sshBase "cat /opt/re_web_presale/DEPLOYED_VERSION"
-if ($remote -ne $local) { Stop-D "DEPLOYED_VERSION ($remote) не совпал с ожиданием ($local)" }
+if ($remote -ne $short) { Stop-D "DEPLOYED_VERSION ($remote) не совпал с ожиданием ($short)" }
 Write-Host ""
 Write-Host ("=== деплой ок: {0} -> {1} ===" -f $VmHost, $remote) -ForegroundColor Green
 Write-Host "журнал: ssh $VmUser@$VmHost tail -20 /opt/re_web_presale/deploy.log"

@@ -93,7 +93,9 @@ a { color: var(--accent); }
 .needs tbody tr.is-selected > td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
 .needs tbody tr.is-selected.needs__details td { background: var(--row-sel); }
 .rate__vat { display: block; color: var(--muted); }
-.acts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; }
+.rate__proposer { display: block; color: var(--muted); white-space: nowrap; max-width: 96px; overflow: hidden; text-overflow: ellipsis; }
+.acts { display: flex; flex-wrap: nowrap; gap: 6px; margin-top: 6px; }
+.acts .act { padding: 6px 4px; }
 .link.link--inline { display: inline; }
 .link.link--inline:hover { text-decoration: underline; }
 .box { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; background: var(--panel-2); margin-bottom: 14px; }

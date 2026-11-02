@@ -367,7 +367,7 @@ describe("Потребности", () => {
     });
     renderNeeds();
     await screen.findByRole("cell", { name: "1" });
-    await userEvent.click(screen.getByRole("button", { name: "Правила клиента" }));
+    await userEvent.click(screen.getByRole("button", { name: "Правила" }));
     expect(await screen.findByText("Формат резюме")).toBeInTheDocument();
     expect(screen.getByText("Корпоративный")).toBeInTheDocument();
     expect(screen.queryByText("Пустое правило")).not.toBeInTheDocument();
@@ -382,7 +382,7 @@ describe("Потребности", () => {
     await screen.findByRole("cell", { name: "1" });
     const row = screen.getAllByRole("row")[1];
     expect(row).not.toHaveClass("is-selected");
-    await userEvent.click(screen.getByRole("button", { name: "Правила клиента" }));
+    await userEvent.click(screen.getByRole("button", { name: "Правила" }));
     expect(screen.getAllByRole("row")[1]).toHaveClass("is-selected");
     await userEvent.click(screen.getByRole("button", { name: "Скрыть правила" }));
     expect(screen.getAllByRole("row")[1]).not.toHaveClass("is-selected");

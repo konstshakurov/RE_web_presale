@@ -114,10 +114,11 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                     <button
                       type="button"
                       className="link"
+                      title="Правила клиента"
                       aria-expanded={expanded}
                       onClick={() => setOpen(expanded ? null : n.jira_key)}
                     >
-                      {expanded ? "Скрыть правила" : "Правила клиента"}
+                      {expanded ? "Скрыть правила" : "Правила"}
                     </button>
                   )}
                 </td>
@@ -125,20 +126,26 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                 <td className="rate">
                   <strong>{rate.main}</strong>
                   {rate.vat && <span className="rate__vat">{rate.vat}</span>}
-                  {rate.proposer && <div className="muted">{rate.proposer}</div>}
+                  {rate.proposer && (
+                    <div className="muted rate__proposer" title={rate.proposer}>
+                      {rate.proposer === "от производства" ? "от произв." : rate.proposer}
+                    </div>
+                  )}
                 </td>
                 <td>
                   {cand?.key === n.jira_key ? (
                     <button
                       type="button"
                       className="link"
+                      title="Скрыть кандидатов"
+                      aria-label="Скрыть кандидатов"
                       aria-expanded
                       onClick={() => {
                         setCand(null);
                         setRefresh((x) => x + 1);
                       }}
                     >
-                      Скрыть кандидатов
+                      Скрыть
                     </button>
                   ) : counts[n.jira_key] !== undefined ? (
                     <button

@@ -17,7 +17,6 @@ from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext, authenticated, authenticated_csrf
 from ..assign.service import AssignError
-from ..cv.limits import CvLimits
 from ..cv.repo import CvRepo
 from ..jira_session.service import require_jira_ok
 from .repo import EpicNames
@@ -220,23 +219,22 @@ async def publish_letter(
 
 async def _read_template_bytes(request: Request) -> bytes:
     """Тело запроса = байты файла шаблона с потолком лимита (FR-022/ADR-009: app_setting.max_file_mb)."""
-    mb = CvLimits(request.app.state.pool).max_mb()
+    mb = request.app.state.cv_limits.max_mb()
     too_big = HTTPException(status_code=413, detail={
         "state": "too_big", "code": "template_too_big",
         "message": f"Файл шаблона больше {mb} МБ"})
     cap = mb * 1024 * 1024
     declared = request.headers.get("content-length")
-    if declared and int(declared) > cap:
-        raise too_big
     if not declared:
         raise HTTPException(status_code=422, detail={
             "state": "invalid", "code": "empty_file",
             "message": "Файл шаблона не передан (требуется octet-stream тело)"})
-    chunks, size = [], 0
-    async with request.stream() as stream:
-        async for chunk in stream.aiter_bytes(1024 * 1024):
-            size += len(chunk)
-            if size > cap:
-                raise too_big
-            chunks.append(chunk)
-    return b"".join(chunks)
+    if int(declared) > cap:
+        raise too_big
+    body = await request.body()
+    if len(body) > cap:
+        raise too_big
+    if not body:
+        raise HTTPException(status_code=422, detail={
+            "state": "invalid", "code": "empty_file", "message": "Файл шаблона пустой"})
+    return body

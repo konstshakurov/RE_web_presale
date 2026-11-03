@@ -80,6 +80,7 @@ compose() {
 
 rollback() {
   journal "ROLLBACK начинаю откат на $PREV"
+  compose logs --tail=120 api worker >>"$LOG" 2>&1 || true   # логи упавших контейнеров в журнал
   compose down >/dev/null 2>&1 || true        # тома НЕ удаляются (без -v)
   rm -rf "$APP"
   mv "$BASE/$PREV" "$APP"

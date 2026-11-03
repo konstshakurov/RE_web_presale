@@ -67,6 +67,8 @@ git rev-parse HEAD
 #    без node_modules, __pycache__, .env*, output/, input/, design/, qa/ и т.п.).
 #    Не используйте tar по рабочей папке: он тянет frontend/node_modules и падает на длинных путях.
 #    Замечание (KON-123): замените этот и следующие шаги пункта 1 на .\scripts\deploy.ps1 (§0b).
+#    Лог: при сбое up/health deploy.sh сам пишет в /opt/re_web_presale/deploy.log
+#    последние 120 строк логов api и worker перед откатом.
 git archive --format=tar.gz -o re_web_presale_deploy.tar.gz HEAD `
   backend frontend src db infra scripts `
   docker-compose.yml docker-compose.prod.yml docker-compose.migrations.yml `

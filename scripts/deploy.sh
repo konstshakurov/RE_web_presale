@@ -89,9 +89,9 @@ rollback() {
   else
     rm -f "$VERSION_FILE"
   fi
-  if compose up -d --build >/dev/null 2>&1; then
-    journal "ROLLBACK-ok предыдущая версия поднята ($PREV)"
-  else
+    if compose up -d >>"$LOG" 2>&1; then
+      journal "ROLLBACK-ok предыдущая версия поднята ($PREV)"
+    else
     journal "ROLLBACK-FAIL не удалось поднять предыдущую версию — смотреть docker compose ps / logs"
   fi
 }
@@ -174,11 +174,8 @@ if [ "$DB_CHANGED" = "1" ]; then
   journal "MIGRATE применены (app_db, cv_db)"
 fi
 
-# --- сборка и запуск ---
-if ! compose build >>"$LOG" 2>&1; then
-  rollback
-  fail "BUILD docker compose build упал — восстановлена предыдущая версия" 6
-fi
+# --- запуск (образы собираются на машине владельца и доставляются docker save/load;
+# сборка на ВМ не выполняется: внешний registry Docker Hub у ВМ нестабилен, KON-123) ---
 if ! compose up -d >>"$LOG" 2>&1; then
   rollback
   fail "UP docker compose up -d упал — восстановлена предыдущая версия" 7

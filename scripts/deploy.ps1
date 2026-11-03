@@ -98,23 +98,42 @@ $sizeMb = [math]::Round((Get-Item $archive).Length / 1MB, 2)
 Step "архив: $archive ($sizeMb MB)"
 if ($sizeMb -gt 20) { Stop-D "архив подозрительно большой ($sizeMb MB) - проверь список путей" }
 
-# --- 4. доставка на ВМ ---
-Step "scp архива и deploy.sh на ВМ"
+# --- 4. локальная сборка образов (registry Docker Hub у ВМ нестабилен: сборка на ВМ убрана, KON-123) ---
+Step "локальная сборка образов (docker compose build api web worker)"
+& docker compose build api web worker
+if ($LASTEXITCODE -ne 0) { Stop-D "локальная сборка образов упала — деплой отменён" }
+
+$imgTar = Join-Path $env:TEMP "re_images_$short.tar.gz"
+Step "docker save + gzip -> $imgTar"
+if (Test-Path $imgTar) { Remove-Item $imgTar -Force }
+& bash -c "docker save re_web_presale-api re_web_presale-web re_web_presale-worker | gzip > '$imgTar'"
+if ($LASTEXITCODE -ne 0 -or -not (Test-Path $imgTar)) { Stop-D "docker save не удался" }
+$imgMb = [math]::Round((Get-Item $imgTar).Length / 1MB, 1)
+Step "образы упакованы: $imgMb MB"
+
+# --- 5. доставка на ВМ ---
+Step "scp архива кода, образов и deploy.sh на ВМ"
 $scpBase = @("-i", $KeyPath, "-o", "BatchMode=yes")
 & scp @scpBase $archive "${VmUser}@${VmHost}:/tmp/re_web_presale_deploy.tar.gz"
 if ($LASTEXITCODE -ne 0) { Stop-D "scp архива не удался" }
+& scp @scpBase $imgTar "${VmUser}@${VmHost}:/tmp/re_images.tar.gz"
+if ($LASTEXITCODE -ne 0) { Stop-D "scp образов не удался" }
 & scp @scpBase "$repo\scripts\deploy.sh" "${VmUser}@${VmHost}:/tmp/re_deploy.sh"
 if ($LASTEXITCODE -ne 0) { Stop-D "scp deploy.sh не удался" }
 
-# --- 5. деплой на ВМ (deploy.sh: миграции/build/up/health/rollback/журнал) ---
+Step "docker load образов на ВМ"
+& ssh @sshBase "docker load -i /tmp/re_images.tar.gz"
+if ($LASTEXITCODE -ne 0) { Stop-D "docker load на ВМ не удался" }
+Remove-Item $imgTar, $archive -ErrorAction SilentlyContinue
+
+# --- 6. деплой на ВМ (deploy.sh: миграции/up/health/rollback/журнал; сборки на ВМ нет) ---
 Step "запуск /tmp/re_deploy.sh $short на ВМ"
 & ssh @sshBase "bash /tmp/re_deploy.sh $short /tmp/re_web_presale_deploy.tar.gz"
 if ($LASTEXITCODE -ne 0) {
   Stop-D "деплой на ВМ не удался (код $LASTEXITCODE). Журнал: ssh $VmUser@$VmHost tail -50 /opt/re_web_presale/deploy.log"
 }
-Remove-Item $archive -ErrorAction SilentlyContinue
 
-# --- 6. финальная сверка ---
+# --- 7. финальная сверка ---
 Step "сверка DEPLOYED_VERSION"
 $remote = & ssh @sshBase "cat /opt/re_web_presale/DEPLOYED_VERSION"
 if ($remote -ne $short) { Stop-D "DEPLOYED_VERSION ($remote) не совпал с ожиданием ($short)" }

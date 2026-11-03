@@ -218,7 +218,8 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
   const parsedRate = parseRate(rate);
 
   return (
-    <Modal title={title} wide size="profile" footer={footer} onClose={sending ? undefined : onClose}>
+    <>
+      <Modal title={title} wide size="profile" footer={footer} onClose={sending ? undefined : onClose}>
       {sending && <Progress files={[selectedResume, ...attach]} done={done.current} withRate={required && !!parsedRate} />}
 
       {stage === "confirm" && (
@@ -341,13 +342,23 @@ export default function AssignDialog({ needKey, need, employeeKey, employeeName,
                 {f.file_name} <span className="muted">{f.kind_title}</span>
               </label>
             ))}
-            <button type="button" className="btn-secondary" disabled title="Диалог появится в задаче KON-80">
-              CV по шаблону клиента…
-            </button>
           </fieldset>
         </div>
       )}
     </Modal>
+      {tplOpen && (
+        <CvTemplateDialog
+          needKey={needKey}
+          employeeKey={employeeKey}
+          employeeName={employeeName}
+          onClose={() => setTplOpen(false)}
+          onSaved={(fileId) => {
+            setTplOpen(false);
+            reloadFiles(fileId);
+          }}
+        />
+      )}
+    </>
   );
 }
 

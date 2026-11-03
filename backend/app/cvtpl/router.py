@@ -11,8 +11,7 @@ from __future__ import annotations
 import re
 from typing import Annotated
 
-from fastapi import (APIRouter, Depends, Form, HTTPException, Query, Request,
-                     UploadFile)
+from fastapi import (APIRouter, Depends, HTTPException, Query, Request)
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
@@ -111,28 +110,29 @@ def context(
     return data
 
 
+# Задача шлюза LLM: загруженный шаблон + Основное CV (FR-017). Файл шаблона идёт
+# байтами в теле запроса (как загрузка CV, KON-36) - multipart не требуется.
+_TEMPLATE_Q = Query(min_length=3, max_length=255, description="Имя файла шаблона (для формата и имени результата)")
+
+
 @router.post("/cvtpl/generate", status_code=201)
 async def generate(
     request: Request,
-    need_key: Annotated[str, Form()],
-    employee_key: Annotated[str, Form()],
-    template_name: Annotated[str, Form(min_length=3, max_length=255)],
-    main_cv_file_id: Annotated[int | None, Form()] = None,
-    provider_id: Annotated[int | None, Form()] = None,
-    template_file: UploadFile | None = None,
+    need_key: Annotated[str, Query(min_length=3, max_length=64)],
+    employee_key: Annotated[str, Query(min_length=3, max_length=64)],
+    template_name: Annotated[str, _TEMPLATE_Q],
+    main_cv_file_id: Annotated[int | None, Query()] = None,
+    provider_id: Annotated[int | None, Query()] = None,
     ctx: SessionContext = Depends(authenticated_csrf),
 ) -> dict:
     """Поставить задачу шлюза LLM: загруженный шаблон + Основное CV (FR-017).
+    Файл шаблона - октет-стрим в теле (Content-Type: application/octet-stream).
     Внешний провайдер: ``requires_confirmation`` - подтвердить отправку через
     ``POST /llm/tasks/{id}/confirm`` (FR-023; текст уходит обезличенным)."""
     _need_key_check(need_key)
-    if template_file is None:
-        raise HTTPException(status_code=422, detail={
-            "state": "invalid", "code": "empty_file",
-            "message": "Файл шаблона не передан"})
     _employee_exists(request, employee_key)
     svc = _service(request)
-    content = await _read_template(request, template_file)
+    content = await _read_template_bytes(request)
     try:
         task = await run_in_threadpool(
             svc.start, ctx.login, need_key, employee_key,
@@ -218,17 +218,25 @@ async def publish_letter(
     return {"published": True, "need_key": body.need_key}
 
 
-async def _read_template(request: Request, template_file: UploadFile) -> bytes:
-    """Содержимое шаблона с потолком лимита файла (FR-022/ADR-009: app_setting.max_file_mb)."""
+async def _read_template_bytes(request: Request) -> bytes:
+    """Тело запроса = байты файла шаблона с потолком лимита (FR-022/ADR-009: app_setting.max_file_mb)."""
     mb = CvLimits(request.app.state.pool).max_mb()
     too_big = HTTPException(status_code=413, detail={
         "state": "too_big", "code": "template_too_big",
         "message": f"Файл шаблона больше {mb} МБ"})
-    chunks, size, cap = [], 0, mb * 1024 * 1024
-    await template_file.seek(0)
-    while chunk := await template_file.read(1024 * 1024):
-        size += len(chunk)
-        if size > cap:
-            raise too_big
-        chunks.append(chunk)
+    cap = mb * 1024 * 1024
+    declared = request.headers.get("content-length")
+    if declared and int(declared) > cap:
+        raise too_big
+    if not declared:
+        raise HTTPException(status_code=422, detail={
+            "state": "invalid", "code": "empty_file",
+            "message": "Файл шаблона не передан (требуется octet-stream тело)"})
+    chunks, size = [], 0
+    async with request.stream() as stream:
+        async for chunk in stream.aiter_bytes(1024 * 1024):
+            size += len(chunk)
+            if size > cap:
+                raise too_big
+            chunks.append(chunk)
     return b"".join(chunks)

@@ -145,65 +145,6 @@
         "title": "AssignIn",
         "type": "object"
       },
-      "Body_generate_cvtpl_generate_post": {
-        "properties": {
-          "employee_key": {
-            "title": "Employee Key",
-            "type": "string"
-          },
-          "main_cv_file_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Main Cv File Id"
-          },
-          "need_key": {
-            "title": "Need Key",
-            "type": "string"
-          },
-          "provider_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider Id"
-          },
-          "template_file": {
-            "anyOf": [
-              {
-                "contentMediaType": "application/octet-stream",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Template File"
-          },
-          "template_name": {
-            "maxLength": 255,
-            "minLength": 3,
-            "title": "Template Name",
-            "type": "string"
-          }
-        },
-        "required": [
-          "need_key",
-          "employee_key",
-          "template_name"
-        ],
-        "title": "Body_generate_cvtpl_generate_post",
-        "type": "object"
-      },
       "CreateGroupRequest": {
         "properties": {
           "name": {
@@ -6215,18 +6156,77 @@
     },
     "/cvtpl/generate": {
       "post": {
-        "description": "Поставить задачу шлюза LLM: загруженный шаблон + Основное CV (FR-017).\nВнешний провайдер: ``requires_confirmation`` - подтвердить отправку через\n``POST /llm/tasks/{id}/confirm`` (FR-023; текст уходит обезличенным).",
+        "description": "Поставить задачу шлюза LLM: загруженный шаблон + Основное CV (FR-017).\nФайл шаблона - октет-стрим в теле (Content-Type: application/octet-stream).\nВнешний провайдер: ``requires_confirmation`` - подтвердить отправку через\n``POST /llm/tasks/{id}/confirm`` (FR-023; текст уходит обезличенным).",
         "operationId": "generate_cvtpl_generate_post",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_generate_cvtpl_generate_post"
-              }
+        "parameters": [
+          {
+            "in": "query",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 3,
+              "title": "Need Key",
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "query",
+            "name": "employee_key",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 3,
+              "title": "Employee Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Имя файла шаблона (для формата и имени результата)",
+            "in": "query",
+            "name": "template_name",
+            "required": true,
+            "schema": {
+              "description": "Имя файла шаблона (для формата и имени результата)",
+              "maxLength": 255,
+              "minLength": 3,
+              "title": "Template Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "main_cv_file_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Main Cv File Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "provider_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider Id"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "content": {

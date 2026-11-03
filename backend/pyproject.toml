@@ -4,6 +4,13 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]
+# E501 выключен: репозиторий исторически с длинными строками (однострочные стили/SQL в
+# тестах), массовый reformat не планируется; форматирование не является критерием линта.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# B023 в qa-нагрузочных тестах: замыкания на barrier/results в потоках - намеренные.
+"tests/qa/*" = ["B023"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Security"]

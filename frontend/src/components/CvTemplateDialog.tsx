@@ -268,6 +268,7 @@ export default function CvTemplateDialog({ needKey, employeeKey, employeeName, o
       }
     >
       {err && <p className="box box--err" role="alert">{err}</p>}
+      {ctxError && <p className="box box--err" role="alert">{ctxError}</p>}
       {!ctx && !ctxError && <p className="muted">Загрузка…</p>}
 
       {step === "files" && ctx && (

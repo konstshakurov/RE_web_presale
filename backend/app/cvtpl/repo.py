@@ -12,7 +12,7 @@ from .service import NeedInfo
 if TYPE_CHECKING:
     from psycopg_pool import ConnectionPool
 
-_EPIC_COLUMNS = "SELECT key, name FROM app.jira_epic WHERE key = %s"
+_EPIC_COLUMNS = "SELECT name FROM app.jira_epic WHERE epic_key = %s"
 
 
 class AppNeedSource:
@@ -45,14 +45,14 @@ class EpicNames:
             return None
         with self._pool.connection() as conn:
             row = conn.execute(_EPIC_COLUMNS, (epic_key,)).fetchone()
-        return row[1] if row else epic_key
+        return row[0] if row else epic_key
 
     def names_of(self, keys: list[str]) -> dict[str, str | None]:
         if not keys:
             return {}
         with self._pool.connection() as conn:
             rows = conn.execute(
-                "SELECT key, name FROM app.jira_epic WHERE key = ANY(%s)", (keys,)
+                "SELECT epic_key, name FROM app.jira_epic WHERE epic_key = ANY(%s)", (keys,)
             ).fetchall()
         found = {r[0]: r[1] for r in rows}
         return {k: found.get(k, k) for k in keys}

@@ -18,9 +18,8 @@ from .config import load_settings
 from .cv.limits import CvLimits
 from .cv.repo import CvRepo
 from .cv.router import router as cv_router
-from .cvtpl.repo import AppNeedSource
+from .cvtpl.repo import build_cvtpl
 from .cvtpl.router import router as cvtpl_router
-from .cvtpl.service import CvTplService
 from .jira_session import DisabledJiraSession, JiraClientSessionAdapter, JiraSessionService
 from .llm_gateway.factory import build_llm
 from .llm_gateway.router import router as llm_router
@@ -91,9 +90,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # сопоставление и навыки CV (KON-38): задачи ставятся через шлюз, результат собирает worker
     app.state.matching = build_matching(pool, cv_pool, llm.gateway)
     # CV по шаблону клиента (FR-017, KON-80): контекст, генерация через шлюз, файл результата
-    app.state.cvtpl = CvTplService(
-        llm.gateway, app.state.cv, AppNeedSource(pool),
-        limit_mb=(CvLimits(pool, settings.cv_max_file_mb).max_mb()))
+    app.state.cvtpl = build_cvtpl(
+        llm.gateway, app.state.cv, pool,
+        limit_mb=CvLimits(pool, settings.cv_max_file_mb).max_mb())
     try:
         yield
     finally:

@@ -14,8 +14,9 @@ from typing import Any, Protocol
 
 from ..cv.extract import ExtractError, extract_text
 from ..cv.repo import CvRepo, FileRow
+from .docx_editor import apply_blocks_to_template
 from .docxgen import build_docx
-from .prompts import CV_TEMPLATE_SYSTEM, build_prompt, parse_result
+from .prompts import CV_TEMPLATE_SYSTEM, blocks_to_text, build_prompt, parse_result
 
 PURPOSE = "cv_template"
 #: Формат шаблона клиента (как у CV, FR-022): только DOC/DOCX
@@ -47,6 +48,15 @@ class Gateway(Protocol):
     def get(self, owner_login: str, task_id: str): ...
 
 
+class TemplateStore(Protocol):
+    """Хранилище файла-шаблона между шагами generate -> save (миграция app_db V009)."""
+
+    def put(self, task_id: str, owner_login: str, file_name: str, content: bytes) -> None: ...
+    def get(self, task_id: str, owner_login: str) -> bytes | None: ...
+    def delete(self, task_id: str) -> None: ...
+    def purge_older_than(self, days: int) -> None: ...
+
+
 class NeedSource(Protocol):
     def find_need(self, key: str) -> NeedInfo | None: ...
 
@@ -61,11 +71,15 @@ def _file_meta(f: FileRow) -> dict:
 
 
 class CvTplService:
-    def __init__(self, gateway: Gateway, cv: CvRepo, needs: NeedSource, *, limit_mb: int) -> None:
+    def __init__(
+        self, gateway: Gateway, cv: CvRepo, needs: NeedSource, *, limit_mb: int,
+        templates: TemplateStore | None = None,
+    ) -> None:
         self._gw = gateway
         self._cv = cv
         self._needs = needs
         self._limit = max(1, limit_mb)
+        self._templates = templates
 
     # --- контекст диалога (шаг 1): Основное CV и сохранённые результаты (повтор, BR-007) ---
 
@@ -115,7 +129,10 @@ class CvTplService:
         template_text = self._text("шаблон клиента", template_name, template_content)
         _, cv_bytes = self._cv.get_content(main.id) or (None, b"")
         cv_text = self._text("основного CV", main.file_name, cv_bytes or b"")
-        return self._gw.submit(
+        if self._templates is not None:
+            # ленивая чистка: шаблоны старше 7 дней (задачи уже завершены/потеряны)
+            self._templates.purge_older_than(7)
+        task = self._gw.submit(
             owner_login, PURPOSE,
             build_prompt(
                 template_text=template_text, cv_text=cv_text,
@@ -124,6 +141,10 @@ class CvTplService:
             ref=f"{need_key}:{employee_key}",
             terms=None,
         )
+        if self._templates is not None:
+            # файл-шаблон нужен на шаге save: результат встраивается в его разметку
+            self._templates.put(task.id, owner_login, template_name, template_content)
+        return task
 
     # --- сохранение результата (шаг 3): файл в карточке сотрудника ---
 
@@ -134,13 +155,23 @@ class CvTplService:
             raise CvTplError("need_no_client", "У потребности не указан клиент (эпик)")
         result = self._result(owner_login, task_id)
         name = self._file_name(employee_key, need)
-        content = build_docx(result["cv"])
+        template_bytes = (self._templates.get(task_id, owner_login)
+                          if self._templates is not None else None)
+        cv_text = blocks_to_text(result.get("cv_blocks"), result.get("cv") or "")
+        if template_bytes:
+            # документ = шаблон с вставленным контентом: стили, шрифты, цвета,
+            # заголовки, таблицы и колонтитулы остаются родными (FR-017)
+            content = apply_blocks_to_template(template_bytes, result.get("cv_blocks") or [])
+        else:
+            content = build_docx(cv_text)
         file_id = self._cv.add_file(
             employee_key=employee_key, kind="client_template_cv", file_name=name,
             mime_type=DOCX_MIME, content=content, uploaded_by=owner_login,
-            extracted_text=result["cv"], extraction_status="ok",
+            extracted_text=cv_text, extraction_status="ok",
             client_epic_key=need.epic_key,
         )
+        if self._templates is not None:
+            self._templates.delete(task_id)  # шаблон одноразовый: использован при сохранении
         return {"file_id": file_id, "file_name": name, "client_epic_key": need.epic_key}
 
     # --- письмо: чтение из результата; публикацию выполняет router (Jira-адаптер сессии) ---

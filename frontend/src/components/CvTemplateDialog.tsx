@@ -41,13 +41,13 @@ function fmtDate(iso: string | null): string {
 }
 
 function parseResult(raw: string | null | undefined): CvTplResult {
-  // Основной сценарий: JSON-объект cv/recommendations/letter (system-промпт шлюза).
+  // Основной сценарий: JSON-объект cv_blocks/recommendations/letter (system-промпт шлюза).
   // Fallback: модель ответила не-Jason - показываем весь текст как CV (письмо пустое).
   const head = (raw ?? "").indexOf("{");
   if (head >= 0) {
     try {
       const out = JSON.parse((raw ?? "").slice(head)) as CvTplResult | null;
-      if (out && typeof out.cv === "string" && out.cv.trim() &&
+      if (out && (Array.isArray(out.cv_blocks) || typeof out.cv === "string") &&
           Array.isArray(out.recommendations) && typeof out.letter === "string") {
         return out;
       }
@@ -56,6 +56,19 @@ function parseResult(raw: string | null | undefined): CvTplResult {
     }
   }
   return { cv: (raw ?? "").trim(), recommendations: [], letter: "" };
+}
+
+function previewText(result: CvTplResult): string {
+  // Блоки -> читаемый текст: заголовки/абзацы как есть, таблица навыков построчно
+  if (Array.isArray(result.cv_blocks)) {
+    const lines: string[] = [];
+    for (const b of result.cv_blocks) {
+      if (b.type === "heading" || b.type === "para") lines.push(b.text ?? "");
+      else if (b.type === "skills") (b.rows ?? []).forEach((r) => lines.push(r.join(" — ")));
+    }
+    if (lines.some((l) => l.trim())) return lines.join("\n");
+  }
+  return result.cv ?? "";
 }
 
 // Диалог «CV по шаблону клиента» (FR-017; вариант A, design/KON-80/decision.md):
@@ -375,7 +388,7 @@ export default function CvTemplateDialog({ needKey, employeeKey, employeeName, o
 
       {step === "result" && result && (
         <div className="cvtpl__result">
-          <div className="cvtpl__prev" aria-label="Предпросмотр CV">{result.cv}</div>
+          <div className="cvtpl__prev" aria-label="Предпросмотр CV">{previewText(result)}</div>
           <div className="cvtpl__side">
             <h4>Рекомендации по адаптации</h4>
             <ul>

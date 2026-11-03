@@ -441,7 +441,8 @@ export interface CvTplGenerateOut {
 }
 
 export interface CvTplResult {
-  cv: string;
+  cv_blocks?: Array<{ type: string; text?: string; rows?: string[][] }>;
+  cv?: string;
   recommendations: string[];
   letter: string;
 }

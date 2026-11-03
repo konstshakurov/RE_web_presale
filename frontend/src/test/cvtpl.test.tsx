@@ -26,7 +26,10 @@ const CTX = {
 };
 
 const RESULT = JSON.stringify({
-  cv: "АНА ВЛАСОВА\nАналитик…",
+  cv_blocks: [
+    { type: "heading", text: "Резюме кандидата" },
+    { type: "para", text: "АНА ВЛАСОВА\nАналитик…" },
+  ],
   recommendations: ["Подчеркнуть банковский домен"],
   letter: "Здравствуйте! Презентую кандидата…",
 });

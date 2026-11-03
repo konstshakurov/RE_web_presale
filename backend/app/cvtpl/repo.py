@@ -56,3 +56,43 @@ class EpicNames:
             ).fetchall()
         found = {r[0]: r[1] for r in rows}
         return {k: found.get(k, k) for k in keys}
+
+
+class CvTplTemplateStore:
+    """Хранилище шаблонов в app_db (V009): put/get/delete/purge (роль app_rw)."""
+
+    def __init__(self, app_pool: ConnectionPool) -> None:
+        self._pool = app_pool
+
+    def put(self, task_id: str, owner_login: str, file_name: str, content: bytes) -> None:
+        with self._pool.connection() as conn:
+            conn.execute(
+                "INSERT INTO app.cvtpl_template (task_id, owner_login, file_name, content) "
+                "VALUES (%s::uuid, %s, %s, %s) ON CONFLICT (task_id) DO UPDATE "
+                "SET owner_login = EXCLUDED.owner_login, file_name = EXCLUDED.file_name, "
+                "content = EXCLUDED.content, created_at = now()",
+                (task_id, owner_login, file_name, content))
+
+    def get(self, task_id: str, owner_login: str) -> bytes | None:
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "SELECT content FROM app.cvtpl_template WHERE task_id = %s::uuid "
+                "AND owner_login = %s", (task_id, owner_login)).fetchone()
+        return bytes(row[0]) if row else None
+
+    def delete(self, task_id: str) -> None:
+        with self._pool.connection() as conn:
+            conn.execute(
+                "DELETE FROM app.cvtpl_template WHERE task_id = %s::uuid", (task_id,))
+
+    def purge_older_than(self, days: int) -> None:
+        with self._pool.connection() as conn:
+            conn.execute(
+                "DELETE FROM app.cvtpl_template "
+                "WHERE created_at < now() - make_interval(days => %s)", (days,))
+
+
+def build_cvtpl(gateway, cv_repo, app_pool, *, limit_mb: int) -> CvTplService:
+    return CvTplService(
+        gateway, cv_repo, AppNeedSource(app_pool), limit_mb=limit_mb,
+        templates=CvTplTemplateStore(app_pool))

@@ -41,22 +41,21 @@ function fmtDate(iso: string | null): string {
 }
 
 function parseResult(raw: string | null | undefined): CvTplResult {
-  // Ответ шлюза - JSON-объект cv/recommendations/letter (промпт собирает backend)
+  // Основной сценарий: JSON-объект cv/recommendations/letter (system-промпт шлюза).
+  // Fallback: модель ответила не-Jason - показываем весь текст как CV (письмо пустое).
   const head = (raw ?? "").indexOf("{");
-  let data: unknown = null;
   if (head >= 0) {
     try {
-      data = JSON.parse((raw ?? "").slice(head));
+      const out = JSON.parse((raw ?? "").slice(head)) as CvTplResult | null;
+      if (out && typeof out.cv === "string" && out.cv.trim() &&
+          Array.isArray(out.recommendations) && typeof out.letter === "string") {
+        return out;
+      }
     } catch {
-      data = null;
+      /* fallback ниже */
     }
   }
-  const out = data as CvTplResult | null;
-  if (!out || typeof out.cv !== "string" || !out.cv.trim() ||
-      !Array.isArray(out.recommendations) || typeof out.letter !== "string" || !out.letter.trim()) {
-    throw new Error("Ответ LLM не разобрать (нет раздела CV или письма). Повторите запрос.");
-  }
-  return out;
+  return { cv: (raw ?? "").trim(), recommendations: [], letter: "" };
 }
 
 // Диалог «CV по шаблону клиента» (FR-017; вариант A, design/KON-80/decision.md):
@@ -393,8 +392,12 @@ export default function CvTemplateDialog({ needKey, employeeKey, employeeName, o
               />
               Я проверил(а) письмо, публикую как есть
             </label>
-            <button type="button" className="btn primary" disabled={!letterConfirmed || published}
-              onClick={publish}>
+            <button
+              type="button"
+              className="btn primary"
+              disabled={!letterConfirmed || published || !letter.trim()}
+              onClick={publish}
+            >
               {published ? "Опубликовано" : "Опубликовать письмо в Jira"}
             </button>
             <JiraFailure

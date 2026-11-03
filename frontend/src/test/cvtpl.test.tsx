@@ -217,15 +217,17 @@ describe("CV по шаблону (KON-80)", () => {
     expect(calls.find((c) => c.url.includes("/confirm"))).toBeTruthy();
   });
 
-  it("ошибка разбора ответа LLM - понятное сообщение (п. 7)", async () => {
+  it("не-JSON ответ LLM: показан как CV, письма нет - публикация недоступна", async () => {
     setup();
     await screen.findByText("Входы");
-    llmTaskResponses = [doneTask("мусор без JSON")];
+    llmTaskResponses = [doneTask("Вот готовый CV без Jason-обёртки")];
     await confirmInputs();
     await userEvent.click(screen.getByRole("button", { name: "Сгенерировать" }));
     await waitFor(
-      () => expect(screen.getAllByText(exists("Ответ LLM не разобрать")).length).toBeGreaterThan(0),
+      () => expect(screen.getAllByText(exists("Вот готовый CV")).length).toBeGreaterThan(0),
       { timeout: 5000 },
     );
+    expect((screen.getByRole("button", { name: "Опубликовать письмо в Jira" }) as HTMLButtonElement).disabled)
+      .toBe(true);
   });
 });

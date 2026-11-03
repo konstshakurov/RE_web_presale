@@ -15,7 +15,7 @@ from typing import Any, Protocol
 from ..cv.extract import ExtractError, extract_text
 from ..cv.repo import CvRepo, FileRow
 from .docxgen import build_docx
-from .prompts import build_prompt, parse_result
+from .prompts import CV_TEMPLATE_SYSTEM, build_prompt, parse_result
 
 PURPOSE = "cv_template"
 #: Формат шаблона клиента (как у CV, FR-022): только DOC/DOCX
@@ -120,7 +120,8 @@ class CvTplService:
             build_prompt(
                 template_text=template_text, cv_text=cv_text,
                 need_title=need.title, client_label=need.epic_key),
-            system=None, provider_id=provider_id, ref=f"{need_key}:{employee_key}",
+            system=CV_TEMPLATE_SYSTEM, provider_id=provider_id,
+            ref=f"{need_key}:{employee_key}",
             terms=None,
         )
 

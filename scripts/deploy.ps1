@@ -103,10 +103,10 @@ Step "локальная сборка образов (docker compose build api w
 & docker compose build api web worker
 if ($LASTEXITCODE -ne 0) { Stop-D "локальная сборка образов упала — деплой отменён" }
 
-$imgTar = Join-Path $env:TEMP "re_images_$short.tar.gz"
-Step "docker save + gzip -> $imgTar"
+$imgTar = Join-Path $env:TEMP "re_images_$short.tar"
+Step "docker save -> $imgTar"
 if (Test-Path $imgTar) { Remove-Item $imgTar -Force }
-& bash -c "docker save re_web_presale-api re_web_presale-web re_web_presale-worker | gzip > '$imgTar'"
+& docker save -o $imgTar re_web_presale-api re_web_presale-web re_web_presale-worker
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path $imgTar)) { Stop-D "docker save не удался" }
 $imgMb = [math]::Round((Get-Item $imgTar).Length / 1MB, 1)
 Step "образы упакованы: $imgMb MB"
@@ -116,13 +116,13 @@ Step "scp архива кода, образов и deploy.sh на ВМ"
 $scpBase = @("-i", $KeyPath, "-o", "BatchMode=yes")
 & scp @scpBase $archive "${VmUser}@${VmHost}:/tmp/re_web_presale_deploy.tar.gz"
 if ($LASTEXITCODE -ne 0) { Stop-D "scp архива не удался" }
-& scp @scpBase $imgTar "${VmUser}@${VmHost}:/tmp/re_images.tar.gz"
+& scp @scpBase $imgTar "${VmUser}@${VmHost}:/tmp/re_images.tar"
 if ($LASTEXITCODE -ne 0) { Stop-D "scp образов не удался" }
 & scp @scpBase "$repo\scripts\deploy.sh" "${VmUser}@${VmHost}:/tmp/re_deploy.sh"
 if ($LASTEXITCODE -ne 0) { Stop-D "scp deploy.sh не удался" }
 
 Step "docker load образов на ВМ"
-& ssh @sshBase "docker load -i /tmp/re_images.tar.gz"
+& ssh @sshBase "docker load -i /tmp/re_images.tar"
 if ($LASTEXITCODE -ne 0) { Stop-D "docker load на ВМ не удался" }
 Remove-Item $imgTar, $archive -ErrorAction SilentlyContinue
 

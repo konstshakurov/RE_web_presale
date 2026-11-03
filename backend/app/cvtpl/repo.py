@@ -90,9 +90,3 @@ class CvTplTemplateStore:
             conn.execute(
                 "DELETE FROM app.cvtpl_template "
                 "WHERE created_at < now() - make_interval(days => %s)", (days,))
-
-
-def build_cvtpl(gateway, cv_repo, app_pool, *, limit_mb: int) -> CvTplService:
-    return CvTplService(
-        gateway, cv_repo, AppNeedSource(app_pool), limit_mb=limit_mb,
-        templates=CvTplTemplateStore(app_pool))

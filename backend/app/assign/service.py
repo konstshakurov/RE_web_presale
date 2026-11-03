@@ -506,7 +506,9 @@ class AssignService:
                      lambda d: (fname, len(content)) in d["attachments"]))
         text = (inp.comment or "").strip()
         if t is not None:
-            text = text or "Кандидат назначен через re_web_presale"  # комментарий перехода всегда
+            # CR-017 (владелец, 03.11.2026): авто-комментарий «Кандидат назначен через
+            # re_web_presale» не добавляется; переход с комментарием только если
+            # пользователь сам написал текст
             step(STEP_TRANSITION, lambda: self._transition_assigned(
                 token, need_key, t.id, in_transition, text, warnings))
         elif text and STEP_TRANSITION not in done:  # комментарий уже ушёл с переходом

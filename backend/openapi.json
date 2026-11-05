@@ -2841,6 +2841,93 @@
         "title": "ResumeStatusCount",
         "type": "object"
       },
+      "RosSettingsIn": {
+        "description": "Вкладка сохраняется целиком: все 7 параметров обязательны (фронт шлёт всё).",
+        "properties": {
+          "billable_hours": {
+            "title": "Billable Hours",
+            "type": "number"
+          },
+          "fot_limit": {
+            "title": "Fot Limit",
+            "type": "number"
+          },
+          "indirect_cost": {
+            "title": "Indirect Cost",
+            "type": "number"
+          },
+          "insurance_after": {
+            "title": "Insurance After",
+            "type": "number"
+          },
+          "insurance_before": {
+            "title": "Insurance Before",
+            "type": "number"
+          },
+          "profit_tax_rate": {
+            "title": "Profit Tax Rate",
+            "type": "number"
+          },
+          "vat_rate": {
+            "title": "Vat Rate",
+            "type": "number"
+          }
+        },
+        "required": [
+          "billable_hours",
+          "indirect_cost",
+          "profit_tax_rate",
+          "vat_rate",
+          "insurance_before",
+          "insurance_after",
+          "fot_limit"
+        ],
+        "title": "RosSettingsIn",
+        "type": "object"
+      },
+      "RosSettingsOut": {
+        "properties": {
+          "billable_hours": {
+            "title": "Billable Hours",
+            "type": "number"
+          },
+          "fot_limit": {
+            "title": "Fot Limit",
+            "type": "number"
+          },
+          "indirect_cost": {
+            "title": "Indirect Cost",
+            "type": "number"
+          },
+          "insurance_after": {
+            "title": "Insurance After",
+            "type": "number"
+          },
+          "insurance_before": {
+            "title": "Insurance Before",
+            "type": "number"
+          },
+          "profit_tax_rate": {
+            "title": "Profit Tax Rate",
+            "type": "number"
+          },
+          "vat_rate": {
+            "title": "Vat Rate",
+            "type": "number"
+          }
+        },
+        "required": [
+          "billable_hours",
+          "indirect_cost",
+          "profit_tax_rate",
+          "vat_rate",
+          "insurance_before",
+          "insurance_after",
+          "fot_limit"
+        ],
+        "title": "RosSettingsOut",
+        "type": "object"
+      },
       "RuleOut": {
         "properties": {
           "id": {
@@ -4948,6 +5035,78 @@
         "tags": [
           "matching"
         ]
+      }
+    },
+    "/admin/ros/settings": {
+      "get": {
+        "description": "Чтение параметров модели ROS (FR-041) - нужно для расчёта, доступно любому пользователю.",
+        "operationId": "get_ros_settings_admin_ros_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RosSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Ros Settings"
+      },
+      "put": {
+        "description": "Сохранение параметров (любой админ); общие для всех, читаются при каждом открытии окна.",
+        "operationId": "put_ros_settings_admin_ros_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RosSettingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RosSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "Значение вне разрешённых границ"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Put Ros Settings"
       }
     },
     "/admin/status-groups": {

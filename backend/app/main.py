@@ -29,6 +29,8 @@ from .llm_gateway.router import router as llm_router
 from .logging_setup import configure_logging
 from .matching import build_matching
 from .matching.router import router as matching_router
+from .ros import AppRosSettings
+from .ros import router as ros_router
 from .secrets import SecretStore
 from .status_groups.repo import StatusGroupRepo
 from .status_groups.router import router as status_groups_router
@@ -92,6 +94,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.llm_dictionary = llm.dictionary
     # сопоставление и навыки CV (KON-38): задачи ставятся через шлюз, результат собирает worker
     app.state.matching = build_matching(pool, cv_pool, llm.gateway)
+    # параметры модели ROS (FR-041, Dev-53): чтение при каждом открытии окна ROS, запись - админ
+    app.state.ros = AppRosSettings(pool)
     # CV по шаблону клиента (FR-017, KON-80): контекст, генерация через шлюз, файл результата
     app.state.cvtpl = CvTplService(
         llm.gateway, app.state.cv, AppNeedSource(pool),
@@ -125,6 +129,7 @@ app.include_router(cvtpl_router)
 app.include_router(llm_router)
 app.include_router(matching_router)
 app.include_router(assign_router)
+app.include_router(ros_router)
 
 
 @app.get("/health")

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KON-160 — Тезисы правил клиента: вариант A (двухколоночный блок)</title>
+<style>
+  :root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;
+    --border:#323f4b;--accent:#3e8ef7;--ok:#34c38f;--err:#ff8a80;--primary-btn:#2870d4;}
+  [data-theme="light"]{--bg:#f4f6f8;--panel:#ffffff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;
+    --border:#cbd2d9;--accent:#1f6fd6;--ok:#1a7f5a;--err:#b42318;--primary-btn:#2470c8;}
+  *{box-sizing:border-box} body{margin:0;background:rgba(0,0,0,.45);font:14px/1.5 system-ui,sans-serif;color:var(--text);padding:32px 0}
+  .switch{position:fixed;top:12px;right:16px;font:13px system-ui;padding:6px 10px;border:1px solid var(--border);
+    border-radius:4px;background:var(--panel);color:var(--text);cursor:pointer;z-index:9}
+  .backdrop{display:flex;justify-content:center}
+  .modal{width:min(960px,94vw);background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:20px 24px}
+  .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:28px}
+  h3{margin:0 0 12px;font-size:16px}
+  .muted{color:var(--muted);font-size:12px;margin:8px 0 0}
+  dl{margin:0}
+  .rules__row{display:flex;gap:14px;padding:4px 0}
+  .rules dt{font-weight:600;min-width:180px}
+  .rules dd{margin:0;white-space:pre-wrap}
+  /* Тезисы (KON-160) */
+  .theses{margin-top:6px;border-top:1px solid var(--border);padding-top:10px}
+  .theses h4{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+  .badge{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--accent);color:var(--accent)}
+  .badge--stale{border-color:var(--err);color:var(--err)}
+  .theses ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .theses li{padding:8px 12px;background:var(--panel-2);border:1px solid var(--border);border-radius:6px}
+  .theses li.conflict{border-color:var(--err)}
+  .theses__text{margin:0;font-size:13.5px;line-height:1.45}
+  .theses__src{color:var(--muted);font-size:12px;margin-top:4px}
+  .theses__src a{color:var(--accent);text-decoration:none}
+  .theses__src a:hover{text-decoration:underline}
+  .theses__note{color:var(--muted);font-size:12px;margin:10px 0 0;display:flex;justify-content:space-between}
+  .theses__llm{color:var(--muted);font-size:11px}
+</style>
+</head>
+<body>
+<button class="switch" onclick="const r=document.documentElement; r.dataset.theme = r.dataset.theme==='light'?'dark':'light'; this.textContent = r.dataset.theme==='light'?'Тема: тёмная → светлая':'Тема: тёмная → светлая'">Тема: тёмная → светлая</button>
+<div class="backdrop">
+  <div class="modal">
+    <h3>Раскрытая строка потребности · ANALYTICS-5938 · клиент «Банк Компаньон» (SA-4160)</h3>
+    <div class="grid">
+      <div class="rules">
+        <p class="muted" style="margin-top:0">Правила из полей карточки эпика (FR-015)</p>
+        <dl>
+          <div class="rules__row"><dt>Есть NDA</dt><dd>Да</dd></div>
+          <div class="rules__row"><dt>CV</dt><dd>Отправлять с фотографией</dd></div>
+          <div class="rules__row"><dt>Тип работы</dt><dd>Только удалённо</dd></div>
+          <div class="rules__row"><dt>Технологии</dt><dd>Python, PostgreSQL</dd></div>
+        </dl>
+        <p class="muted">получено из Jira: 05.11.2026 09:00</p>
+      </div>
+      <div class="theses">
+        <h4>Правила из комментариев эпика
+          <span class="badge">5 тезисов</span>
+        </h4>
+        <ul>
+          <li>
+            <p class="theses__text">CV отправлять только с фотографией, майл — отдельно от письма</p>
+            <p class="theses__src">Источник: <a href="#">Иванов Иван, 02.11.2026</a> · <a href="#">Клиентоса А.Б., 01.11.2026</a></p>
+          </li>
+          <li class="conflict">
+            <p class="theses__text">NDA подписан: условия не распространяются на субподрядных кандидатов</p>
+            <p class="theses__src"><span class="badge badge--stale">противоречит полевым правилам</span></p>
+            <p class="theses__src">Источник: <a href="#">Иванов Иван, 29.10.2026</a></p>
+          </li>
+          <li>
+            <p class="theses__text">Кандидату обязателен банковский домен от 2 лет</p>
+            <p class="theses__src">Источник: <a href="#">Клиентоса А.Б., 20.10.2026</a></p>
+          </li>
+        </ul>
+        <p class="theses__note"><span class="theses__llm">Сгенерировано LLM (Qwen (внутренняя)) · 05.11.2026 09:05 · проверяйте по источникам</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

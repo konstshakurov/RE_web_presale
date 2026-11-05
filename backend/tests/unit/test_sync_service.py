@@ -273,7 +273,8 @@ def test_epic_opened_loads_rules_and_children_via_agile_api(env):
     assert view.name == "Клиент Альфа"
     assert view.rules == [{"id": "customfield_14205", "name": "NDA", "value": "Есть NDA"}]
     assert not view.stale and view.needs_total == 2  # у второго связь дал Agile API
-    assert [c[0] for c in jira.calls] == ["epic", "issue", "children"]
+    # comments: догонка комментариев эпика при перечитывании (KON-160, п. 1)
+    assert [c[0] for c in jira.calls] == ["epic", "issue", "children", "comments"]
 
 
 def test_epic_ttl_one_hour_uses_cache_then_refreshes(env):
@@ -284,9 +285,9 @@ def test_epic_ttl_one_hour_uses_cache_then_refreshes(env):
     assert not service.get_epic("SA-10", "ivan").stale and len(jira.calls) == n
     clock["now"] = T0 + timedelta(minutes=61)
     service.get_epic("SA-10", "ivan")
-    assert len(jira.calls) == n + 3
+    assert len(jira.calls) == n + 4  # epic/issue/children + комментарии (догонка, KON-160)
     service.get_epic("SA-10", "ivan", force=True)
-    assert len(jira.calls) == n + 6
+    assert len(jira.calls) == n + 8
 
 
 def test_epic_jira_refusal_serves_cache_with_mark(env):

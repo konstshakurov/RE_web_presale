@@ -1,4 +1,5 @@
-"""Планировщик worker: потребности каждые 5 мин, сотрудники раз в час (ADR-004).
+"""Планировщик worker: потребности каждые 5 мин, сотрудники раз в час, эпик-комментарии
+раз в сутки (ADR-004, KON-160).
 
 Задачи идут в одном фоновом потоке по очереди, а основной цикл продолжает обновлять пульс
 для healthcheck compose, даже если опрос Jira долгий. Без активных пользователей опрос
@@ -12,7 +13,7 @@ import time
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 
-from .repo import SCOPE_EMPLOYEES, SCOPE_NEEDS
+from .repo import SCOPE_EMPLOYEES, SCOPE_EPIC_COMMENTS, SCOPE_NEEDS
 from .service import SyncResult, SyncService
 
 log = logging.getLogger(__name__)
@@ -28,10 +29,13 @@ class Scheduler:
         self._clock = clock
         self._interval = {
             SCOPE_NEEDS: s.needs_interval_sec, SCOPE_EMPLOYEES: s.employees_interval_sec,
+            SCOPE_EPIC_COMMENTS: s.epic_comments_interval_sec,
         }
         self._pause = s.pause_recheck_sec
         # первый опрос сразу при старте
-        self._next: dict[str, float] = {SCOPE_NEEDS: 0.0, SCOPE_EMPLOYEES: 0.0}
+        self._next: dict[str, float] = {
+            SCOPE_NEEDS: 0.0, SCOPE_EMPLOYEES: 0.0, SCOPE_EPIC_COMMENTS: 0.0,
+        }
         self._running: dict[str, Future] = {}
         self._executor = executor or ThreadPoolExecutor(max_workers=1, thread_name_prefix="sync")
 

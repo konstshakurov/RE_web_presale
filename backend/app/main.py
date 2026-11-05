@@ -14,6 +14,8 @@ from .auth import Ldap3Adapter
 from .auth import router as auth_router
 from .auth.admin import router as admin_router
 from .bootstrap import seed_admins
+from .client_rules.factory import build_client_rules
+from .client_rules.router import router as client_rules_router
 from .config import load_settings
 from .cv.limits import CvLimits
 from .cv.repo import CvRepo
@@ -95,6 +97,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         llm.gateway, app.state.cv, AppNeedSource(pool),
         limit_mb=CvLimits(pool, settings.cv_max_file_mb).max_mb(),
         templates=CvTplTemplateStore(pool))
+    # тезисы правил клиента из комментариев эпика (KON-160): кэш по хешу, ленивый пересчёт
+    app.state.client_rules = build_client_rules(
+        pool, llm.gateway, sync_repo=app.state.sync.repo,
+        jira_base_url=settings.jira_base_url)
     try:
         yield
     finally:
@@ -113,6 +119,7 @@ app.include_router(admin_router)
 app.include_router(status_groups_router)
 app.include_router(sync_router)
 app.include_router(rate_benchmark_router)
+app.include_router(client_rules_router)
 app.include_router(cv_router)
 app.include_router(cvtpl_router)
 app.include_router(llm_router)

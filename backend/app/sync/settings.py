@@ -12,6 +12,7 @@ class SyncSettings:
     employees_interval_sec: float = 3600.0  # сотрудники: 1 час
     pause_recheck_sec: float = 15.0  # опрос приостановлен: как скоро заметить новый вход
     epic_ttl_sec: float = 3600.0  # эпики и правила клиента: 1 час
+    epic_comments_interval_sec: float = 86400.0  # комментарии эпиков: раз в сутки (KON-160)
     initial_load_days: int = 183  # первичная загрузка: 6 месяцев
     overlap_sec: float = 60.0  # пересечение окна опроса (ADR-004)
     jira_utc_offset_hours: float = 4.0  # ДОПУЩЕНИЕ: JQL-время читается в поясе Jira (+04:00)
@@ -55,6 +56,8 @@ def load_sync_settings(env: Mapping[str, str] | None = None) -> SyncSettings:
         employees_interval_sec=_num(e, "SYNC_EMPLOYEES_INTERVAL_SEC", d.employees_interval_sec),
         pause_recheck_sec=_num(e, "SYNC_PAUSE_RECHECK_SEC", d.pause_recheck_sec),
         epic_ttl_sec=_num(e, "SYNC_EPIC_TTL_SEC", d.epic_ttl_sec),
+        epic_comments_interval_sec=_num(
+            e, "SYNC_EPIC_COMMENTS_INTERVAL_SEC", d.epic_comments_interval_sec),
         initial_load_days=int(_num(e, "SYNC_INITIAL_LOAD_DAYS", d.initial_load_days)),
         overlap_sec=_num(e, "SYNC_OVERLAP_SEC", d.overlap_sec),
         jira_utc_offset_hours=offset,

@@ -34,6 +34,8 @@ import type {
   PublishLetterBody,
   RateBenchmark,
   RefreshResult,
+  RegenerateIn,
+  RegenerateOut,
   ResumeItem,
   RunOut,
   RunTask,
@@ -45,6 +47,7 @@ import type {
   SyncErrorBody,
   SyncScope,
   Technology,
+  ThesesOut,
   UploadResult,
 } from "./types";
 
@@ -327,4 +330,16 @@ export const api = {
     request<OpResult>("POST", `/needs/${encodeURIComponent(key)}/status`, body),
   assign: (key: string, body: AssignBody) => request<OpResult>("POST", `/needs/${encodeURIComponent(key)}/assign`, body),
   epic: (key: string) => request<EpicOut>("GET", `/sync/epics/${encodeURIComponent(key)}`),
+  // Тезисы правил клиента из комментариев эпика (KON-160); 202 - «Обновляется…»
+  clientRuleTheses: (needKey: string) =>
+    request<ThesesOut>(
+      "GET", `/needs/${encodeURIComponent(needKey)}/client-rules/theses`,
+      undefined, { redirectOn401: false },
+    ),
+  clientRuleRegenerate: (needKey: string, providerId?: number) =>
+    request<RegenerateOut>(
+      "POST", `/needs/${encodeURIComponent(needKey)}/client-rules/regenerate`,
+      { provider_id: providerId ?? null } satisfies RegenerateIn,
+      { redirectOn401: false },
+    ),
 };

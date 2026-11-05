@@ -17,12 +17,15 @@ if TYPE_CHECKING:
 
 SCOPE_NEEDS = "needs"
 SCOPE_EMPLOYEES = "employees"
+SCOPE_EPIC_COMMENTS = "epic_comments"  # комментарии эпиков клиентов - раз в сутки (KON-160)
 
 #: Ключи advisory-lock: один опрос потребностей/сотрудников одновременно (worker и «Обновить»).
 #: Значение фильтра РО «Без РО»: dept_head_login IS NULL.
 NO_DEPT_HEAD = "__none__"
 DISMISSED_STATUS = "Уволен"
-LOCK_KEYS = {SCOPE_NEEDS: 3501, SCOPE_EMPLOYEES: 3502}
+LOCK_KEYS = {
+    SCOPE_NEEDS: 3501, SCOPE_EMPLOYEES: 3502, SCOPE_EPIC_COMMENTS: 3503,
+}
 
 
 @dataclass(frozen=True)
@@ -96,7 +99,10 @@ _NEED_UPSERT = (
     "WHERE app.jira_need.jira_updated_at <= EXCLUDED.jira_updated_at"
 )
 
-_STATE_TABLES = {SCOPE_NEEDS: "app.sync_state", SCOPE_EMPLOYEES: "cv.sync_state"}
+_STATE_TABLES = {
+    SCOPE_NEEDS: "app.sync_state", SCOPE_EMPLOYEES: "cv.sync_state",
+    SCOPE_EPIC_COMMENTS: "app.sync_state",
+}
 
 
 def _need_where(f: NeedFilter) -> tuple[str, list[Any]]:
@@ -413,15 +419,31 @@ class SyncRepo:
         ]
 
     def epic_comments_hash(self, epic_key: str) -> str | None:
+        """Хеш набора комментариев: меняется и при правке текста, не только при добавлении."""
         import hashlib
 
         with self._app.connection() as conn:
-            row = conn.execute(
-                "SELECT count(*), COALESCE(max(updated_at)::text, '') FROM app.epic_comment "
-                "WHERE epic_key = %s", (epic_key,)).fetchone()
-        if not row[0]:
+            rows = conn.execute(
+                "SELECT comment_id, updated_at, body FROM app.epic_comment "
+                "WHERE epic_key = %s ORDER BY comment_id", (epic_key,)).fetchall()
+        if not rows:
             return None
-        return hashlib.sha256(f"{row[0]}:{row[1]}".encode()).hexdigest()
+        joined = "|".join(
+            f"{r[0]}:{r[1].isoformat() if r[1] else ''}:{len(r[2] or '')}" for r in rows)
+        return hashlib.sha256(joined.encode()).hexdigest()
+
+    def epic_key_for_need(self, need_key: str) -> str | None:
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "SELECT epic_key FROM app.jira_need WHERE jira_key = %s", (need_key,)
+            ).fetchone()
+        return row[0] if row else None
+
+    def need_exists(self, need_key: str) -> bool:
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "SELECT 1 FROM app.jira_need WHERE jira_key = %s", (need_key,)).fetchone()
+        return row is not None
 
     def epic_theses(self, epic_key: str) -> dict | None:
         with self._app.connection() as conn:

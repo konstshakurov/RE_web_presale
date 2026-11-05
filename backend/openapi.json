@@ -2545,6 +2545,53 @@
         "title": "RefreshResult",
         "type": "object"
       },
+      "RegenerateIn": {
+        "properties": {
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Провайдер LLM; пусто - по умолчанию (внутренняя Qwen)",
+            "title": "Provider Id"
+          }
+        },
+        "title": "RegenerateIn",
+        "type": "object"
+      },
+      "RegenerateOut": {
+        "properties": {
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "requires_confirmation": {
+            "description": "true - внешний провайдер: подтвердить отправку в «Задачах LLM» (FR-023)",
+            "title": "Requires Confirmation",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status",
+          "requires_confirmation",
+          "provider"
+        ],
+        "title": "RegenerateOut",
+        "type": "object"
+      },
       "ResultOut": {
         "properties": {
           "need_key": {
@@ -3562,6 +3609,42 @@
         "title": "SkillsOut",
         "type": "object"
       },
+      "SourceOut": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "id": {
+            "description": "id комментария Jira (для ссылки)",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "SourceOut",
+        "type": "object"
+      },
       "StatusCount": {
         "properties": {
           "count": {
@@ -3814,7 +3897,8 @@
           "scope": {
             "enum": [
               "needs",
-              "employees"
+              "employees",
+              "epic_comments"
             ],
             "title": "Scope",
             "type": "string"
@@ -3988,6 +4072,100 @@
           "employees"
         ],
         "title": "TechnologyOut",
+        "type": "object"
+      },
+      "ThesesOut": {
+        "description": "Тезисы правил клиента; статус отражает свежесть кэша (hash комментариев).",
+        "properties": {
+          "epic_key": {
+            "title": "Epic Key",
+            "type": "string"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "need_key": {
+            "title": "Need Key",
+            "type": "string"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "status": {
+            "description": "ok | regenerating (202) | empty (комментариев нет)",
+            "title": "Status",
+            "type": "string"
+          },
+          "task_submitted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "regenerating: поставлена ли задача пересчёта в этот запрос",
+            "title": "Task Submitted"
+          },
+          "theses": {
+            "items": {
+              "$ref": "#/components/schemas/ThesisOut"
+            },
+            "title": "Theses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "need_key",
+          "epic_key",
+          "theses"
+        ],
+        "title": "ThesesOut",
+        "type": "object"
+      },
+      "ThesisOut": {
+        "properties": {
+          "contradicts_rules": {
+            "default": false,
+            "description": "true - тезис противоречит полевому правилу клиента (KON-160, п. 4)",
+            "title": "Contradicts Rules",
+            "type": "boolean"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SourceOut"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "ThesisOut",
         "type": "object"
       },
       "UploadResult": {
@@ -7397,6 +7575,134 @@
         ]
       }
     },
+    "/needs/{need_key}/client-rules/regenerate": {
+      "post": {
+        "description": "Ручной пересчёт тезисов (владелец, KON-160 п. 3). Задача от логина админа: внешний\nпровайдер потребует подтверждения отправки в «Задачах LLM» (FR-023).",
+        "operationId": "regenerate_needs__need_key__client_rules_regenerate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "title": "Need Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RegenerateIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegenerateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "description": "Потребность без клиента / у эпика нет комментариев"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Regenerate",
+        "tags": [
+          "client-rules"
+        ]
+      }
+    },
+    "/needs/{need_key}/client-rules/theses": {
+      "get": {
+        "operationId": "get_theses_needs__need_key__client_rules_theses_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_key",
+            "required": true,
+            "schema": {
+              "title": "Need Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThesesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThesesOut"
+                }
+              }
+            },
+            "description": "Тезисы считаются - «Обновляется…»"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "summary": "Get Theses",
+        "tags": [
+          "client-rules"
+        ]
+      }
+    },
     "/needs/{need_key}/match": {
       "get": {
         "description": "Состояние и сохранённый результат (повторный просмотр без вызова LLM).",
@@ -8881,7 +9187,7 @@
     },
     "/sync/status": {
       "get": {
-        "description": "Штампы обеих областей (для шапки интерфейса).",
+        "description": "Штампы областей (для шапки интерфейса).",
         "operationId": "sync_status_sync_status_get",
         "responses": {
           "200": {

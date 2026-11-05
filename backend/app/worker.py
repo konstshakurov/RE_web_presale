@@ -12,6 +12,8 @@ import pathlib
 import signal
 
 from .app_repo import create_pool
+from .client_rules.factory import build_client_rules
+from .client_rules.factory import task_handler as rules_task_handler
 from .config import load_settings
 from .llm_gateway import LlmRunner
 from .llm_gateway.factory import build_llm
@@ -22,6 +24,16 @@ from .sync.scheduler import Scheduler, run_forever
 from .sync.settings import load_sync_settings
 
 log = logging.getLogger(__name__)
+
+
+def _combined(handlers):
+    """Цепочка обработчиков on_finished (matching + client_rules): сбой одного - не сбой всех."""
+    if len(handlers) == 1:
+        return handlers[0]
+    def run(task):
+        for h in handlers:
+            h(task)
+    return run
 
 
 def main() -> None:
@@ -37,9 +49,16 @@ def main() -> None:
     llm = build_llm(settings, pool, cv_pool, with_ner=False)
     # результат сопоставления и навыков забирается сразу после задачи (KON-38)
     matching = build_matching(pool, cv_pool, llm.gateway)
+    # тезисы правил клиента из комментариев эпика (KON-160): сбор результата после задачи
+    rules = build_client_rules(
+        pool, llm.gateway, sync_repo=service.repo, jira_base_url=settings.jira_base_url)
+    handlers = []
+    if matching is not None:
+        handlers.append(task_handler(matching))
+    handlers.append(rules_task_handler(rules))
     llm_runner = LlmRunner(
         llm.gateway, ttl_days=settings.llm_task_ttl_days,
-        on_finished=task_handler(matching) if matching is not None else None)
+        on_finished=_combined(handlers))
     llm_runner.start()
     stop = {"flag": False}
     signal.signal(signal.SIGTERM, lambda *_: stop.update(flag=True))

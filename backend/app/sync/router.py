@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from ..auth.deps import SessionContext, authenticated
 from ..jira_session.service import require_jira_ok
-from .repo import NO_DEPT_HEAD, SCOPE_EMPLOYEES, SCOPE_NEEDS, NeedFilter
+from .repo import NO_DEPT_HEAD, SCOPE_EMPLOYEES, SCOPE_EPIC_COMMENTS, SCOPE_NEEDS, NeedFilter
 from .service import (
     STATE_NEEDS_REAUTH,
     STATE_NOT_ENABLED,
@@ -30,7 +30,7 @@ LIMIT_MAX = 500
 class SyncStamp(BaseModel):
     """Штамп «актуально на» и состояние опроса (FR-028, FR-029)."""
 
-    scope: Literal["needs", "employees"]
+    scope: Literal["needs", "employees", "epic_comments"]
     state: str = Field(
         description="ok | never_synced | paused (опрос приостановлен: нет активных "
         "пользователей) | "
@@ -338,9 +338,12 @@ def list_dept_heads(
 
 @router.get("/status", response_model=list[SyncStamp])
 def sync_status(request: Request, _: SessionContext = Depends(authenticated)) -> list[SyncStamp]:
-    """Штампы обеих областей (для шапки интерфейса)."""
+    """Штампы областей (для шапки интерфейса)."""
     service = _service(request)
-    return [_stamp(service.sync_info(SCOPE_NEEDS)), _stamp(service.sync_info(SCOPE_EMPLOYEES))]
+    return [
+        _stamp(service.sync_info(SCOPE_NEEDS)), _stamp(service.sync_info(SCOPE_EMPLOYEES)),
+        _stamp(service.sync_info(SCOPE_EPIC_COMMENTS)),
+    ]
 
 
 _REFRESH_ERRORS = {

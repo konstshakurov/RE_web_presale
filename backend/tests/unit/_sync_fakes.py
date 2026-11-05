@@ -31,6 +31,10 @@ class FakeSyncRepo:
         self.list_calls: list[dict] = []
         self.employee_calls: list[dict] = []
         self.dept_heads: list[dict] = []
+        self.stub_epics: set[str] = set()
+        self.epic_comments_store: dict[str, dict[str, dict]] = {}
+        self.theses: dict[str, dict] = {}
+        self.saved_theses: list[tuple] = []
 
     def set_poller(self, login: str, secret_updated_at: datetime = T0) -> None:
         self.pollers = [p for p in self.pollers if p.login != login]
@@ -116,6 +120,58 @@ class FakeSyncRepo:
         return sum(1 for n in self.needs.values()
                    if n.epic_key == key and (not key_prefix or n.jira_key.startswith(key_prefix)))
 
+    # --- комментарии эпиков и тезисы (KON-160) ---
+
+    def list_client_epics(self):
+        return sorted({*self.epics, *self.stub_epics})
+
+    def add_stub_epic(self, key):
+        self.stub_epics.add(key)
+
+    def upsert_epic_comments(self, epic_key, comments):
+        store = self.epic_comments_store.setdefault(epic_key, {})
+        for c in comments:
+            store[str(c.get("id") or "")] = {
+                "id": str(c.get("id") or ""), "author": c.get("author"),
+                "updated": c.get("updated"), "body": c.get("body") or "",
+            }
+        return len(comments)
+
+    def epic_comments(self, epic_key):
+        return [
+            {"id": k, "author": v["author"], "updated": v["updated"], "body": v["body"]}
+            for k, v in sorted(self.epic_comments_store.get(epic_key, {}).items())
+        ]
+
+    def epic_comments_hash(self, epic_key):
+        import hashlib
+
+        store = self.epic_comments_store.get(epic_key, {})
+        if not store:
+            return None
+        joined = "|".join(
+            f"{k}:{v['updated'] or ''}:{len(v['body'])}" for k, v in sorted(store.items()))
+        return hashlib.sha256(joined.encode()).hexdigest()
+
+    def epic_theses(self, epic_key):
+        return self.theses.get(epic_key)
+
+    def save_epic_theses(self, epic_key, comments_hash, theses, provider_name):
+        self.saved_theses.append((epic_key, comments_hash, theses, provider_name))
+        self.theses[epic_key] = {
+            "comments_hash": comments_hash, "theses": theses,
+            "generated_at": T0.isoformat(), "provider_name": provider_name,
+        }
+
+    def epic_key_for_need(self, need_key):
+        for n in self.needs.values():
+            if n.jira_key == need_key:
+                return n.epic_key
+        return None
+
+    def need_exists(self, need_key):
+        return any(n.jira_key == need_key for n in self.needs.values())
+
 
 FIXED_NOW = [T0]
 
@@ -130,6 +186,14 @@ class FakeJira:
         self.epic_issue = {"key": "SA-10", "fields": {"summary": "Эпик Альфа",
                                                        "customfield_14205": "Есть NDA"}}
         self.children: list[dict] = []
+        self.comments_by_key: dict[str, list[dict]] = {}
+
+    def add_comment(self, issue_key, cid, body, *, author="Клиентоса А.Б.",
+                    updated="2026-10-01T10:00:00.000+0400"):
+        self.comments_by_key.setdefault(issue_key, []).append({
+            "id": cid, "author": author, "body": body,
+            "created": updated, "updated": updated,
+        })
 
     def search_incremental(self, token, since, *, project=None, issuetype=None, fields=None,
                            max_pages=200):
@@ -153,6 +217,12 @@ class FakeJira:
         self.calls.append(("children", token, key))
         self.children_fields = tuple(fields or ())
         return list(self.children)
+
+    def get_comments(self, token, issue_key):
+        self.calls.append(("comments", token, issue_key))
+        if self.error:
+            raise self.error
+        return list(self.comments_by_key.get(issue_key, []))
 
 
 class FakeStore:

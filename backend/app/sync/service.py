@@ -28,7 +28,13 @@ from .mapping import (
     map_epic_rules,
     map_need,
 )
-from .repo import SCOPE_EMPLOYEES, SCOPE_NEEDS, EpicRow, SyncRepo
+from .repo import (
+    SCOPE_EMPLOYEES,
+    SCOPE_EPIC_COMMENTS,
+    SCOPE_NEEDS,
+    EpicRow,
+    SyncRepo,
+)
 from .settings import SyncSettings
 
 log = logging.getLogger(__name__)
@@ -187,6 +193,7 @@ class SyncService:
         """Состояние для UI: пометка при отказе Jira, «опрос приостановлен», штамп."""
         interval = (
             self._settings.needs_interval_sec if scope == SCOPE_NEEDS
+            else self._settings.epic_comments_interval_sec if scope == SCOPE_EPIC_COMMENTS
             else self._settings.employees_interval_sec
         )
         if scope == SCOPE_EMPLOYEES and not self._repo.has_cv:
@@ -228,6 +235,37 @@ class SyncService:
         base = min(st.last_sync_at, newest) if newest else st.last_sync_at
         return base - overlap
 
+    def _fetch_epic_comments(self, token: str, epic_keys: list[str]) -> SyncResult:
+        """Комментарии эпиков (KON-160): ночной проход по всем эпикам + догонка точечно."""
+        started = self._now()
+        synced = 0
+        for epic_key in epic_keys:
+            comments = self._jira.get_comments(token, epic_key)
+            if isinstance(comments, list):
+                synced += self._repo.upsert_epic_comments(epic_key, [
+                    c for c in comments if isinstance(c, dict)
+                ])
+        res = SyncResult(scope=SCOPE_EPIC_COMMENTS, ok=True, fetched=synced)
+        res.upserted = synced
+        self._repo.record_attempt_success(SCOPE_EPIC_COMMENTS, started)
+        return res
+
+    def _fetch_all_epic_comments(self, token: str) -> SyncResult:
+        """Ночной проход (KON-160): комментарии всех эпиков из кэша потребностей."""
+        keys = self._repo.list_client_epics()
+        log.info("ночной сбор комментариев эпиков", extra={"epics": len(keys)})
+        return self._fetch_epic_comments(token, keys)
+
+    def _catch_up_comments(self, token: str, epic_keys: set[str], source: str) -> None:
+        """Догонка комментариев «на_hot»: сбой не трогает опрос, который уже удался."""
+        if not epic_keys:
+            return
+        try:
+            self._fetch_epic_comments(token, sorted(epic_keys))
+        except Exception:  # noqa: BLE001 - комментарии вторичны, опрос не переуспевает
+            log.warning("догонка комментариев эпиков не выполнена",
+                        extra={"source": source, "epics": len(epic_keys)}, exc_info=True)
+
     def _fetch_needs(self, token: str) -> SyncResult:
         s = self._settings
         started = self._now()
@@ -242,6 +280,8 @@ class SyncService:
         res.rates_dropped = sum(1 for r in rows if r.rate_dropped)
         res.upserted = self._repo.upsert_needs(self._link_employees(rows))
         self._repo.record_attempt_success(SCOPE_NEEDS, started)
+        res.extra["epics_of_changed"] = {r.epic_key for r in rows if r.epic_key}
+        self._catch_up_comments(token, res.extra["epics_of_changed"], source="needs")
         return res
 
     def _fetch_employees(self, token: str) -> SyncResult:
@@ -301,6 +341,8 @@ class SyncService:
             self._repo.record_attempt_failure(scope, err.code, err.message)
             return SyncResult(scope=scope, code=err.code, message=err.message)
         fetch = self._fetch_needs if scope == SCOPE_NEEDS else self._fetch_employees
+        if scope == SCOPE_EPIC_COMMENTS:
+            fetch = self._fetch_all_epic_comments
         with self._repo.try_lock(scope) as got:
             if not got:
                 return SyncResult(scope=scope, code="busy", message="Синхронизация уже идёт")
@@ -411,6 +453,8 @@ class SyncService:
         rows = [r if r.epic_key == epic_key else replace(r, epic_key=epic_key) for r in rows]
         self._repo.save_epic(epic_key, str(name), summary, map_epic_rules(fields))
         self._repo.upsert_needs(self._link_employees(rows))
+        # комментарии эпика догоняем при перечитывании: «Правила» открыли - свежее пришли
+        self._catch_up_comments(token, {epic_key}, source="epic_view")
 
     def _epic_view(self, row: EpicRow, *, stale: bool, error: SyncError | None) -> EpicView:
         return EpicView(

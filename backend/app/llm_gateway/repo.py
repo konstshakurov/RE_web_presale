@@ -242,6 +242,16 @@ class LlmRepo:
             ).fetchall()
         return [_task(r) for r in rows]
 
+    def latest_task(self, purpose: str, ref: str) -> TaskRow | None:
+        """Последняя задача этого purpose и ref (независимо от владельца): модуль приложения
+        проверяет, не идёт ли уже такой расчёт (KON-160). Результат наружу не отдаётся."""
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                f"SELECT {_TASK} FROM app.llm_task WHERE purpose = %s AND ref = %s "
+                "ORDER BY created_at DESC LIMIT 1", (purpose, ref)
+            ).fetchone()
+        return _task(row) if row else None
+
     def confirm_task(self, task_id: str) -> bool:
         """awaiting_confirmation -> queued; False, если задача не ждёт подтверждения."""
         with self._pool.connection() as conn:

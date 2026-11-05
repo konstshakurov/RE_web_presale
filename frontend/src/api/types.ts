@@ -27,6 +27,8 @@ export interface LoginRequest {
 
 // Типы /sync по backend/openapi.json (SyncStamp, NeedOut, NeedsPage, NeedGroups, RefreshResult, EpicOut).
 export type SyncScope = "needs" | "employees";
+// epic_comments - штамп в /sync/status (уника нет ручного refresh, KON-160).
+
 
 export interface SyncStamp {
   scope: SyncScope;
@@ -147,6 +149,41 @@ export interface EpicOut {
   fetched_at?: string | null;
   needs_total: number;
   error?: SyncErrorBody | null;
+}
+
+// Типы /needs/{key}/client-rules по backend/openapi.json (KON-160).
+export interface ThesisSource {
+  id: string; // id комментария Jira (для ссылки)
+  author?: string | null;
+  date?: string | null;
+  url?: string | null; // прямая ссылка на комментарий в Jira (нужен JIRA_BASE_URL)
+}
+
+export interface ThesisOut {
+  text: string;
+  contradicts_rules: boolean; // тезис противоречит полевому правилу клиента
+  sources: ThesisSource[];
+}
+
+export interface ThesesOut {
+  status: "ok" | "regenerating" | "empty";
+  need_key: string;
+  epic_key: string;
+  theses: ThesisOut[];
+  generated_at?: string | null;
+  provider?: string | null;
+  task_submitted?: boolean | null; // regenerating: поставлена ли задача в этот запрос
+}
+
+export interface RegenerateIn {
+  provider_id?: number | null;
+}
+
+export interface RegenerateOut {
+  task_id: string;
+  status: string;
+  requires_confirmation: boolean;
+  provider: string;
 }
 
 // Типы /admin/users по backend/openapi.json (UserOut).

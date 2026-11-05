@@ -126,6 +126,17 @@ a { color: var(--accent); }
 .rules__row { display: flex; gap: 16px; padding: 4px 0; }
 .rules dt { font-weight: 600; min-width: 200px; }
 .rules dd { margin: 0; white-space: pre-wrap; }
+/* Тезисы правил из комментариев эпика (KON-160): список с источниками */
+.theses { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+.theses h4 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.theses ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.theses li { padding: 6px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+.theses li.theses__thesis--conflict { border-color: var(--err); }
+.theses__text { margin: 0; }
+.theses__src { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.theses__src a { color: var(--accent); }
+.theses__note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.theses__badge { margin-left: 8px; }
 .empty { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
 .pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .pager label { margin-left: auto; display: flex; gap: 8px; align-items: center; }

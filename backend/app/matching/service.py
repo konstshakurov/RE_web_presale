@@ -22,7 +22,6 @@ from datetime import datetime
 from typing import Protocol
 
 from ..llm_gateway import AnonymizationError, GatewayError
-from ..sync.mapping import NOT_ASSIGNABLE_STATUSES
 from ..sync.repo import DISMISSED_STATUS
 from .prompts import (
     MATCH_SYSTEM,

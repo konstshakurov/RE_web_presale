@@ -15,7 +15,7 @@ import time
 import pytest
 
 from ._fakes import JiraCtl, db, requires_fakes
-from ._stage1 import (cleanup_generated_needs, ensure_allow_list, percentile, prepare_cache)
+from ._stage1 import cleanup_generated_needs, ensure_allow_list, percentile, prepare_cache
 from ._stand import ROOT, Session, logged_in, requires_stand
 
 pytestmark = [requires_stand, requires_fakes]

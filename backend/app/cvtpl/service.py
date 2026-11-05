@@ -8,7 +8,6 @@
 """
 from __future__ import annotations
 
-import datetime as dt
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -92,7 +91,7 @@ class CvTplService:
             if f.kind == "client_template_cv" and not f.is_archived
             and (need.epic_key is None or f.client_epic_key == need.epic_key)
         ]
-        repeat: RepeatMetaView | None = None
+        repeat: dict | None = None
         if saved:
             r = saved[0]
             repeat = {
@@ -181,7 +180,7 @@ class CvTplService:
 
     # --- внутреннее ---
 
-    def _result(self, owner_login: str, task_id: str) -> TemplateResultDict:
+    def _result(self, owner_login: str, task_id: str) -> dict:
         task = self._gw.get(owner_login, task_id)
         if getattr(task, "purpose", "") != PURPOSE:
             raise CvTplError("task_not_found", "Задача не является CV по шаблону", status=404)
@@ -228,12 +227,8 @@ class CvTplService:
         """«CV <основа имени основного CV> <клиент>.docx» - опознаваемо и уникально в списке."""
         main = self._cv.current_main(employee_key)
         stem = (main.file_name.rpartition(".")[0] if main else employee_key).strip()
-        client = (need.epic_key or "").split(" ")[0] or need_key
+        client = (need.epic_key or "клиент").split(" ")[0]
         return f"CV {stem[:110]} {client}.docx"
 
-
-#: Удобный тип результата (кл/ключи см. prompts.parse_result)
-TemplateResultDict = dict
-RepeatMetaView = dict
 
 __all__ = ["CvTplError", "CvTplService", "PURPOSE"]

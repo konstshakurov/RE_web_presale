@@ -11,12 +11,12 @@ from __future__ import annotations
 import re
 from typing import Annotated
 
-from fastapi import (APIRouter, Depends, HTTPException, Query, Request)
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
-from ..auth.deps import SessionContext, authenticated, authenticated_csrf
 from ..assign.service import AssignError
+from ..auth.deps import SessionContext, authenticated, authenticated_csrf
 from ..cv.repo import CvRepo
 from ..jira_session.service import require_jira_ok
 from .repo import EpicNames

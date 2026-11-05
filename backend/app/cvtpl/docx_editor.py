@@ -63,7 +63,7 @@ def _clone(tbl: Document, rows: Sequence[Sequence[str]]) -> None:
     trs = tbl.findall(_w("tr"))
     if not trs:
         return
-    header, template_row = trs[0], trs[-1]
+    template_row = trs[-1]
     for tr in trs[1:]:
         tbl.remove(tr)
     for values in rows:

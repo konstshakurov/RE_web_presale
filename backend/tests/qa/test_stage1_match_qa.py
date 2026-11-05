@@ -11,8 +11,14 @@ import time
 import pytest
 
 from ._fakes import EXT_KEY, JiraCtl, LlmCtl, make_docx, requires_fakes, wait_until
-from ._stage1 import (cleanup_files, cleanup_llm, cleanup_matching, ensure_allow_list,
-                      make_external_provider, prepare_cache)
+from ._stage1 import (
+    cleanup_files,
+    cleanup_llm,
+    cleanup_matching,
+    ensure_allow_list,
+    make_external_provider,
+    prepare_cache,
+)
 from ._stand import Session, logged_in, requires_stand
 from .test_stage1_cv_qa import upload
 

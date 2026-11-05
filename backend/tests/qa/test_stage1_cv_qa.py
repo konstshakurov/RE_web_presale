@@ -148,7 +148,7 @@ def test_fr022_unknown_employee_and_csrf_and_session(user):
     assert r.status_code == 403
     anon = Session()
     assert anon.http.get("/cv/files").status_code == 401
-    assert anon.http.get(f"/cv/files/1/download").status_code == 401
+    assert anon.http.get("/cv/files/1/download").status_code == 401
 
 
 # --- FR-027: сбои извлечения не отменяют загрузку ----------------------------------------------

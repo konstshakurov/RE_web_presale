@@ -186,7 +186,7 @@ def test_reread_accepts_amount_returned_as_string(adapter_factory):
 def test_reread_without_option_ids_checks_amount_only(adapter_factory):
     """Если Jira не вернула id справочников в перечитывании, сверка идёт по сумме (текущее поведение)."""
     from ..conftest import response
-    from ..test_jira_integration import ISSUE_PATH, RATE_PATH, MYSELF_OK, login_routes, router
+    from ..test_jira_integration import ISSUE_PATH, MYSELF_OK, RATE_PATH, login_routes, router
     handler = router(default=MYSELF_OK, **{
         RATE_PATH: lambda: response(None, 200),
         ISSUE_PATH: lambda: response({"key": DEMAND_KEY, "fields": {"customfield_20809": 2700.0}}),

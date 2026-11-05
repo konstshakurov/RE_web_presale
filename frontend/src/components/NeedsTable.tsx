@@ -9,7 +9,9 @@ import ClientRules from "./ClientRules";
 import { HintLabel } from "./HintButton";
 import MatchingInfo from "./matching/MatchingInfo";
 import NeedCandidates from "./matching/NeedCandidates";
+import RosDialog from "./ros/RosDialog";
 import StatusActions from "./StatusActions";
+import { rosVisible } from "../lib/ros";
 
 export interface NeedsSort {
   sort: NeedSort;
@@ -60,8 +62,11 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
   }, [keysId, refresh]);
   // Блок «Кандидаты»: start - открыт кнопкой «Сопоставить» (сразу расчёт), view - только сохранённый результат
   const [cand, setCand] = useState<{ key: string; start: boolean } | null>(null);
+  // Окно «ROS специалиста» (FR-041, KON-161): ничего не сохраняет
+  const [rosNeed, setRosNeed] = useState<NeedOut | null>(null);
   return (
-    <table className="needs">
+    <>
+      <table className="needs">
       <thead>
         <tr>
           <th>Ключ</th>
@@ -166,6 +171,18 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                       Сопоставить
                     </button>
                   )}
+                  {/* ROS: контурная кнопка под «Сопоставить» (FR-039, placement KON-161) */}
+                  {rosVisible(n.status) && (
+                    <button
+                      type="button"
+                      className="ros-small"
+                      aria-label={`ROS ${n.jira_key}`}
+                      title="ROS специалиста"
+                      onClick={() => setRosNeed(n)}
+                    >
+                      ROS
+                    </button>
+                  )}
                 </td>
                 <td>{formatDateTime(n.jira_created_at) || "—"}</td>
               </tr>
@@ -197,6 +214,8 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
           );
         })}
       </tbody>
-    </table>
+      </table>
+      {rosNeed && <RosDialog need={rosNeed} onClose={() => setRosNeed(null)} />}
+    </>
   );
 }

@@ -36,6 +36,7 @@ import type {
   RefreshResult,
   RegenerateIn,
   RegenerateOut,
+  RosSettings,
   ResumeItem,
   RunOut,
   RunTask,
@@ -324,6 +325,8 @@ export const api = {
   matchSettings: () => request<MatchSettings>("GET", "/admin/matching/settings"),
   saveMatchSettings: (body: { deep_size: number; screen_batch: number }) =>
     request<MatchSettings>("PUT", "/admin/matching/settings", body),
+  // Параметры модели ROS (FR-039): чтение нужно для расчёта любым пользователем, запись - админ (Dev-53)
+  rosSettings: () => request<RosSettings>("GET", "/admin/ros/settings"),
   // Назначение и смена статуса (KON-43): запись в Jira токеном пользователя; пароль в этих запросах не передаётся
   statusActions: (key: string) => request<StatusActions>("GET", `/needs/${encodeURIComponent(key)}/status-actions`),
   changeStatus: (key: string, body: StatusChangeBody) =>

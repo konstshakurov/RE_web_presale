@@ -637,6 +637,18 @@ export interface AssignBody {
   completed: string[];
 }
 
+// Параметры модели ROS (FR-039, GET/PUT /admin/ros/settings, Dev-53):
+// чтение - всем работающим со списком «Потребности» (расчёт), запись - только админ.
+export interface RosSettings {
+  billable_hours: number; // billable-часов в месяц (165)
+  indirect_cost: number; // косвенные расходы на человека, руб./мес (53 000)
+  profit_tax_rate: number; //ставка налога на прибыль, % (5)
+  vat_rate: number; // ставка НДС, % (22); также для приведения «без НДС -> с НДС»
+  insurance_before: number; // страховые взносы до лимита, % (15,2)
+  insurance_after: number; // страховые взносы после лимита, % (7,8)
+  fot_limit: number; // лимит ФОТ, руб. (2 979 000)
+}
+
 export interface OpResult {
   need_key: string;
   status: string | null;

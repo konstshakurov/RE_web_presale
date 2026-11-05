@@ -60,7 +60,10 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      # свежая инициализация (первичная, пустой volume) в медленном dind CI может
+      # считаться дольше стартовых ~100 с; 60*5 = 300 с запас
+      retries: 60
+      start_period: 30s
     networks: [internal]
 
   api:

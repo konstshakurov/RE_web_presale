@@ -67,4 +67,9 @@ db-isolation:
     # пароль каждый раз новый, поэтому окружение полностью одноразовое (down -v)
     - docker compose down -v --remove-orphans || true
     - docker compose up -d --wait db
+    # диагностика: какие роли/БД реально созданы и что показал init (пароли не печатаются)
+    - docker compose exec -T db psql -U postgres -tAc "select datname from pg_database order by 1"
+    - docker compose exec -T db psql -U postgres -tAc "select rolname from pg_roles where rolname like '%rw%' order by 1"
+    - docker compose exec -T db sh -c 'echo APP_RW_PASSWORD=$([ -n "$APP_RW_PASSWORD" ] && echo set || echo MISSING); echo CV_RW_PASSWORD=$([ -n "$CV_RW_PASSWORD" ] && echo set || echo MISSING)'
+    - docker compose logs db 2>/dev/null | grep -iE "init|error|fatal|sourcing" | head -n 30 || true
     - bash scripts/check_db_isolation.sh

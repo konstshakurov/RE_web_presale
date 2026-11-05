@@ -8,6 +8,8 @@ backend:
   tags: [docker]
   script:
     - cd backend
+    # git нужен тесту NFR-006 (qa/nfr006_check.py вызывает git ls-files)
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git
     - pip install -r requirements-dev.txt
     - ruff check .
     - pytest

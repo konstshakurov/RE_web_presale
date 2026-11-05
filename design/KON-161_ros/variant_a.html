@@ -59,8 +59,9 @@
     </div>
     <div class="modal__body">
       <div class="field">
-        <label for="rate">Ставка для расчёта (задана клиентом, руб. с НДС за час)</label>
-        <input id="rate" readonly value="2 200">
+        <label for="rate">Ставка для расчёта (задана клиентом: «без НДС» 3 000 → «с НДС» 3 000 × 1,22 = 3 660)</label>
+        <input id="rate" readonly value="3 660">
+        <span class="footnote">Если ставка без НДС — автоматически приведена к «с НДС» (× 1,22).</span>
       </div>
       <div class="field">
         <label for="salary">ЗП кандидата, гросс (руб./мес)</label>
@@ -68,27 +69,17 @@
       </div>
       <div class="ross-val">
         <div class="val-card main">
-          <div class="cap">ROS до лимита ФОТ (первые 22 месяца)</div>
+          <div class="cap">ROS до лимита ФОТ (первые 13 месяцев)</div>
           <div class="num" id="ros1">24,80%</div>
           <div class="sub">прибыль 90 042 руб./мес после всех расходов и налога</div>
         </div>
         <div class="val-card">
-          <div class="cap">ROS после лимита ФОТ (с 23-го месяца)</div>
+          <div class="cap">ROS после лимита ФОТ (с 14-го месяца)</div>
           <div class="num">27,32%</div>
           <div class="sub">прибыль 99 181 руб./мес (ставка взносов 7,8%)</div>
         </div>
       </div>
-      <span class="month">Переход ставки взносов — на 22-м месяце (округление вниз) или 23-м (вверх).</span>
-      <details>
-        <summary>Детали расчёта (руб./мес)</summary>
-        <table class="table">
-          <tr><td>Выручка (165 ч × 2 200)</td><td>363 000</td></tr>
-          <tr><td>Страховые взносы до лимита (15,2%)</td><td>19 760</td></tr>
-          <tr><td>НДС</td><td>65 180</td></tr>
-          <tr><td>Косвенные расходы</td><td>53 000</td></tr>
-          <tr><td>Налог на прибыль (5%)</td><td>4 502</td></tr>
-        </table>
-      </details>
+      <span class="month">Переход ставки взносов — на 13-м месяце (округление вниз) или 14-м (округление вверх).</span>
     </div>
     <div class="modal__foot">
       <span class="footnote">ЗП и расчёт не сохраняются и нигде не фиксируются.</span>

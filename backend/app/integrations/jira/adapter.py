@@ -271,6 +271,27 @@ class JiraAdapter:
         with self._client(sealed_token) as client:
             return client.get_issue(issue_key, self._fields(fields, self.read_fields))
 
+    def get_comments(
+        self, sealed_token: str, issue_key: str,
+    ) -> List[Dict[str, Any]]:
+        """Комментарии задачи (KON-160): ``GET /rest/api/2/issue/{key}`` с ``fields=comment``.
+
+        Возвращает список плоских словарей (id, author, body, created, updated),
+        чтобы порт не зависел от типов ``jira_client``. Число комментариев эпика
+        мало (единицы-десятки), разбитие на страницы не требуется."""
+        with self._client(sealed_token) as client:
+            comments = client.get_comments(issue_key)
+            return [
+                {
+                    "id": c.id,
+                    "author": (c.author.display_name if c.author is not None else None),
+                    "body": c.body,
+                    "created": c.created,
+                    "updated": c.updated,
+                }
+                for c in comments
+            ]
+
     def get_epic(
         self,
         sealed_token: str,

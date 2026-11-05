@@ -235,6 +235,13 @@ class JiraPort(Protocol):
         """``GET /rest/api/2/issue/{key}`` с настраиваемым списком полей."""
         ...
 
+    def get_comments(
+        self, sealed_token: str, issue_key: str,
+    ) -> List[Dict[str, Any]]:
+        """``GET /rest/api/2/issue/{key}`` с ``fields=comment``: список словарей
+        (``id``, ``author``, ``body``, ``created``, ``updated``) в порядке публикации."""
+        ...
+
     def get_epic(
         self,
         sealed_token: str,

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KON-161 — Настройки: вкладка ROS</title>
+<style>
+  :root{--bg:#f4f6f8;--panel:#ffffff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;
+    --border:#cbd2d9;--accent:#1f6fd6;--err:#b42318;--primary-btn:#1f6fd6;}
+  [data-theme="dark"]{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;
+    --border:#323f4b;--accent:#3e8ef7;--err:#ff8a80;--primary-btn:#2870d4;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;padding:24px}
+  .tabbar{display:flex;gap:0;border-bottom:2px solid var(--panel-2);margin-bottom:20px}
+  .tabbar span{padding:10px 18px 8px;color:var(--muted);font-weight:600}
+  .tabbar span.active{color:var(--primary-btn);border-bottom:0 solid transparent;
+    box-shadow:inset 0 -2px 0 var(--primary-btn);color:var(--primary-btn);background:var(--panel)}
+  h1{font-size:26px;margin:8px 0 20px}
+  .box{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:20px;max-width:860px}
+  .grid{display:grid;grid-template-columns:minmax(320px,1fr) minmax(160px,auto);gap:10px 16px;align-items:center}
+  .grid label{font-size:14px}
+  .grid input{font:inherit;background:var(--panel-2);color:var(--text);border:2px solid var(--err);
+    border-radius:4px;padding:7px 10px;text-align:right;max-width:180px}
+  .grid .unit{color:var(--muted);font-size:12px}
+  .note{color:var(--muted);font-size:12px;margin:12px 0 0}
+  .btn{font:inherit;padding:8px 16px;border-radius:4px;cursor:pointer;border:1px solid var(--primary-btn);
+    background:var(--primary-btn);color:#fff;margin-top:16px}
+  .bd{border:2px solid var(--err);border-radius:4px}
+</style>
+</head>
+<body data-theme="light">
+  <h1>Настройки</h1>
+  <div class="tabbar">
+    <span>Доступ</span><span>Группы статусов</span><span>LLM</span><span>JQL</span><span>НДС</span><span>Лимит файла</span><span class="active">ROS</span>
+  </div>
+  <div class="box">
+    <div class="grid">
+      <label for="billable">Billable часов в месяц</label>
+      <input id="billable" class="bd" type="number" value="165">
+      <label for="indirect">Косвенные расходы на человека, руб./мес</label>
+      <input id="indirect" class="bd" type="number" value="53000">
+      <label for="tax">Ставка налога на прибыль, %</label>
+      <input id="tax" class="bd" type="number" step="0.01" value="5">
+      <label for="vat">Ставка НДС, %</label>
+      <input id="vat" class="bd" type="number" step="0.01" value="22">
+      <label for="contrib">Страховые взносы до лимита, %</label>
+      <input id="contrib" class="bd" type="number" step="0.01" value="15.2">
+      <label for="contrib2">Страховые взносы после лимита, %</label>
+      <input id="contrib2" class="bd" type="number" step="0.01" value="7.8">
+      <label for="limit">Лимит ФОТ, руб. (с этого ЗП ставка взносов снижается)</label>
+      <input id="limit" class="bd" type="number" value="2979000">
+    </div>
+    <p class="note">Значения по умолчанию — из эталонной модели ROS (ROS_model_v2.xlsx). Изменения применяются ко всем пользователям при следующем открытии окна «ROS специалиста».</p>
+    <button class="btn">Сохранить</button>
+  </div>
+</body>
+</html>

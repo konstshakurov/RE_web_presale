@@ -377,6 +377,85 @@ class SyncRepo:
                 (epic_key, key_prefix, key_prefix),
             ).fetchone()[0]
 
+    # --- комментарии эпиков и кэш LLM-тезисов (KON-160) ---
+
+    def list_client_epics(self) -> list[str]:
+        with self._app.connection() as conn:
+            rows = conn.execute("SELECT epic_key FROM app.jira_epic").fetchall()
+        return [r[0] for r in rows]
+
+    def upsert_epic_comments(
+        self, epic_key: str,
+        comments: list[dict[str, str | None]],
+    ) -> int:
+        """Перезаписать комментарий по comment_id (утерянные в Jira хранятся: история)."""
+        with self._app.connection() as conn, conn.transaction():
+            for c in comments:
+                conn.execute(
+                    "INSERT INTO app.epic_comment (epic_key, comment_id, author, updated_at, body) "
+                    "VALUES (%s, %s, %s, %s, %s) "
+                    "ON CONFLICT (epic_key, comment_id) DO UPDATE SET "
+                    "author = EXCLUDED.author, updated_at = EXCLUDED.updated_at, "
+                    "body = EXCLUDED.body, fetched_at = now()",
+                    (epic_key, str(c.get("id") or ""),
+                     c.get("author"), c.get("updated"), c.get("body") or ""))
+        return len(comments)
+
+    def epic_comments(self, epic_key: str) -> list[dict[str, str | None]]:
+        with self._app.connection() as conn:
+            rows = conn.execute(
+                "SELECT comment_id, author, updated_at, body FROM app.epic_comment "
+                "WHERE epic_key = %s", (epic_key,)).fetchall()
+        return [
+            {"id": r[0], "author": r[1], "updated": r[2].isoformat() if r[2] else None,
+             "body": r[3]}
+            for r in rows
+        ]
+
+    def epic_comments_hash(self, epic_key: str) -> str | None:
+        import hashlib
+
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "SELECT count(*), COALESCE(max(updated_at)::text, '') FROM app.epic_comment "
+                "WHERE epic_key = %s", (epic_key,)).fetchone()
+        if not row[0]:
+            return None
+        return hashlib.sha256(f"{row[0]}:{row[1]}".encode()).hexdigest()
+
+    def epic_theses(self, epic_key: str) -> dict | None:
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "SELECT comments_hash, theses_json, generated_at, provider_name "
+                "FROM app.epic_rules_cache WHERE epic_key = %s", (epic_key,)).fetchone()
+        if not row:
+            return None
+        theses = row[1]
+        if isinstance(theses, str):
+            theses = json.loads(theses)
+        return {
+            "comments_hash": row[0], "theses": theses,
+            "generated_at": row[2].isoformat() if row[2] else None,
+            "provider_name": row[3],
+        }
+
+    def save_epic_theses(
+        self, epic_key: str, comments_hash: str, theses: list[dict], provider_name: str,
+    ) -> None:
+        with self._app.connection() as conn:
+            conn.execute(
+                "INSERT INTO app.epic_rules_cache (epic_key, comments_hash, theses_json, "
+                "generated_at, provider_name) VALUES (%s, %s, %s::jsonb, now(), %s) "
+                "ON CONFLICT (epic_key) DO UPDATE SET comments_hash = EXCLUDED.comments_hash, "
+                "theses_json = EXCLUDED.theses_json, generated_at = now(), "
+                "provider_name = EXCLUDED.provider_name",
+                (epic_key, comments_hash, json.dumps(theses, ensure_ascii=False), provider_name))
+
+    #
+    def delete_epic_theses(self, epic_key: str) -> None:
+        with self._app.connection() as conn:
+            conn.execute("DELETE FROM app.epic_rules_cache WHERE epic_key = %s", (epic_key,))
+
     # --- сотрудники (cv_db) ---
 
     def employee_login_map(self) -> dict[str, str]:

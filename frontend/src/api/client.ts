@@ -327,6 +327,7 @@ export const api = {
     request<MatchSettings>("PUT", "/admin/matching/settings", body),
   // Параметры модели ROS (FR-039): чтение нужно для расчёта любым пользователем, запись - админ (Dev-53)
   rosSettings: () => request<RosSettings>("GET", "/admin/ros/settings"),
+  saveRosSettings: (body: RosSettings) => request<RosSettings>("PUT", "/admin/ros/settings", body),
   // Назначение и смена статуса (KON-43): запись в Jira токеном пользователя; пароль в этих запросах не передаётся
   statusActions: (key: string) => request<StatusActions>("GET", `/needs/${encodeURIComponent(key)}/status-actions`),
   changeStatus: (key: string, body: StatusChangeBody) =>

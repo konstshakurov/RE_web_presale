@@ -7,7 +7,7 @@ import App from "../App";
 import { calcRos, fmtPct, rosRate, rosVisible, ROS_DEFAULTS } from "../lib/ros";
 
 const STAMP = { scope: "needs", state: "ok", stale: false, paused: false, code: "", message: "", interval_sec: 300 };
-const ME = { login: "test.user", role: "user", jira_status: { state: "ok" }, sections: [], csrf_token: "FAKE_csrf" };
+let me = { login: "test.user", role: "user", jira_status: { state: "ok" }, sections: [], csrf_token: "FAKE_csrf" };
 
 // Эталонная модель ROS_model_v2 (FR-041); /admin/ros/settings может вернуть её же или ошибку
 const ROS = { ...ROS_DEFAULTS };
@@ -34,8 +34,10 @@ const json = (body: unknown, code = 200) =>
   new Response(JSON.stringify(body), { status: code, headers: { "Content-Type": "application/json" } });
 
 let rosSettings: (() => Response) | null;
+let admin = false;
 const serveRosSettings = () => {
   rosSettings = null;
+  admin = false;
 };
 type Call = { url: string; method: string; body: unknown };
 let calls: Call[];
@@ -47,12 +49,15 @@ function serve() {
     const method = init?.method ?? "GET";
     const body = typeof init?.body === "string" ? JSON.parse(init.body) : undefined;
     calls.push({ url, method, body });
-    if (url.endsWith("/auth/me")) return json(ME);
+    if (url.endsWith("/auth/me")) return json(me);
     if (url.includes("/needs/match-counts")) return json({ counts: {} });
     if (url.endsWith("/sync/needs/groups"))
       return json({ groups: [{ key: "all", id: null, name: "Все статусы", count: 1 }], statuses: [], sync: STAMP });
     if (url.includes("/sync/needs?")) return json({ items: [NEED()], total: 1, limit: 100, offset: 0, sync: STAMP });
-    if (url.endsWith("/admin/ros/settings")) return (rosSettings ?? (() => json(ROS)))();
+    if (url.endsWith("/admin/ros/settings")) {
+      if (method === "PUT") return admin ? json(body) : json({ detail: "Недостаточно прав" }, 403);
+      return (rosSettings ?? (() => json(ROS)))();
+    }
     return json({ detail: "не найдено" }, 404);
   });
 }
@@ -207,5 +212,49 @@ describe("Окно «ROS специалиста»", () => {
     renderNeeds();
     await screen.findByText("Аналитик 1С");
     expect(screen.queryByRole("button", { name: "ROS AN-5919" })).toBeNull();
+  });
+});
+
+describe("Настройки: вкладка «ROS» (Dev-53, FR-041)", () => {
+  function renderSettings() {
+    return render(
+      <MemoryRouter initialEntries={["/settings"]}>
+        <App />
+      </MemoryRouter>,
+    );
+  }
+
+  const puts = () => calls.filter((c) => c.method === "PUT" && c.url.endsWith("/admin/ros/settings"));
+
+  it("7 полей по умолчанию с эталона; админ сохраняет изменения (PUT всеми полями)", async () => {
+    me = { ...me, role: "admin" };
+    admin = true;
+    renderSettings();
+    await userEvent.click(await screen.findByRole("tab", { name: "ROS" }));
+    expect(await screen.findByLabelText(/Billable часов/)).toHaveValue(165);
+    expect(screen.getByLabelText(/Косвенные расходы/)).toHaveValue(53000);
+    expect(screen.getByLabelText(/налога на прибыль/)).toHaveValue(5);
+    expect(screen.getByLabelText(/Ставка НДС/)).toHaveValue(22);
+    expect(screen.getByLabelText(/взносы до лимита/)).toHaveValue(15.2);
+    expect(screen.getByLabelText(/взносы после лимита/)).toHaveValue(7.8);
+    expect(screen.getByLabelText(/Лимит ФОТ/)).toHaveValue(2979000);
+    await userEvent.clear(screen.getByLabelText(/Ставка НДС/));
+    await userEvent.type(screen.getByLabelText(/Ставка НДС/), "20");
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    await screen.findByText(/Сохранено: значения общие/);
+    expect(puts()).toHaveLength(1);
+    expect(puts()[0].body).toEqual({
+      billable_hours: 165, indirect_cost: 53000, profit_tax_rate: 5, vat_rate: 20,
+      insurance_before: 15.2, insurance_after: 7.8, fot_limit: 2979000,
+    });
+  });
+
+  it("не админ: сохранение отклоняется (403), текст ошибки под формой", async () => {
+    renderSettings();
+    await userEvent.click(await screen.findByRole("tab", { name: "ROS" }));
+    await screen.findByLabelText(/Billable часов/);
+    await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Недостаточно прав");
+    expect(puts()).toHaveLength(1);
   });
 });

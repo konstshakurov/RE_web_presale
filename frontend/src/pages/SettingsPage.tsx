@@ -2,10 +2,11 @@ import { useState } from "react";
 
 import AccessTab from "../components/settings/AccessTab";
 import LlmTab from "../components/settings/LlmTab";
+import RosTab from "../components/settings/RosTab";
 import StatusGroupsTab from "../components/settings/StatusGroupsTab";
 
-// Вкладки «Настроек» (FR-031). Реализованы «Доступ» (Dev-21), «Группы статусов» (Dev-22) и «LLM» (Dev-10);
-// остальные - заглушки до своих задач.
+// Вкладки «Настроек» (FR-031). Реализованы «Доступ» (Dev-21), «Группы статусов» (Dev-22),
+// «LLM» (Dev-10) и «ROS» (Dev-53, FR-041); остальные - заглушки до своих задач.
 const TABS = [
   { key: "access", title: "Доступ" },
   { key: "groups", title: "Группы статусов" },
@@ -13,6 +14,7 @@ const TABS = [
   { key: "jql", title: "JQL", stub: true },
   { key: "vat", title: "НДС", stub: true },
   { key: "files", title: "Лимит файла", stub: true },
+  { key: "ros", title: "ROS" },
 ] as const;
 
 export default function SettingsPage() {
@@ -38,6 +40,7 @@ export default function SettingsPage() {
         {tab === "access" && <AccessTab />}
         {tab === "groups" && <StatusGroupsTab />}
         {tab === "llm" && <LlmTab />}
+        {tab === "ros" && <RosTab />}
         {TABS.some((t) => t.key === tab && "stub" in t) && (
           <p className="muted">Раздел в разработке.</p>
         )}

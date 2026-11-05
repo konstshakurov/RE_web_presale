@@ -40,8 +40,9 @@ images:
   image: docker:27
   tags: [docker]
   services: [docker:27-dind]
+  # контекст backend - корень репозитория (Dockerfile тянет src/jira_client)
   script:
-    - docker build -t re_web_presale-backend ./backend
+    - docker build -f backend/Dockerfile -t re_web_presale-backend .
     - docker build -t re_web_presale-frontend ./frontend
 
 db-isolation:

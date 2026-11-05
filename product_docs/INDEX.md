@@ -1,6 +1,6 @@
 # INDEX — реестр живой документации re_web_presale
 
-Обновлён: 29.10.2026. Правила — `README.md`. Нарезка БФ — **предложение аналитика** (построена по 40 FR / 10 NFR / 9 BR / 6 UC); утверждает владелец.
+Обновлён: 05.11.2026. Правила — `README.md`. Нарезка БФ — **предложение аналитика** (построена по 40 FR / 10 NFR / 9 BR / 6 UC); утверждает владелец.
 Ссылки на требования — по ID (текст в слое 1: `output/data/re_web_presale/specs/`, граф — `…_traceability_repo.json`).
 
 ## Бизнес-функции
@@ -20,7 +20,7 @@
 | BF-09 | CV по шаблону клиента и адаптация | FR-012, 017; UC-004 | — | KON-80 | Версия 2 | [BF-09_cv_by_client_template](01_business_functions/BF-09_cv_by_client_template/README.md) |
 | BF-10 | Контроль качества CV и диалог с LLM | FR-006, 007, 014 | — | — | Версия 2 | [BF-10_cv_quality_and_dialog](01_business_functions/BF-10_cv_quality_and_dialog/README.md) |
 | BF-11 | История отправок сотрудника | FR-016 | — | — | Версия 2 | [BF-11_send_history](01_business_functions/BF-11_send_history/README.md) |
-| BF-12 | ROS: рентабельность кандидата | (нет, KON-121) | — | — | Версия 2 | [BF-12_ros_profitability](01_business_functions/BF-12_ros_profitability/README.md) |
+| BF-12 | ROS: рентабельность кандидата | FR-041; UC-ROS | `app_db` (параметры, Dev-53), frontend окно ROS | KON-161 (approved 05.11) | Версия 2 | [BF-12_ros_profitability](01_business_functions/BF-12_ros_profitability/README.md) |
 
 Сквозные: NFR-001, 003, 004, 005, 009 — относятся к платформе (`architecture/04_nfr_matrix.md`).
 

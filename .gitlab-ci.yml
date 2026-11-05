@@ -57,6 +57,10 @@ db-isolation:
         echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
         echo "APP_RW_PASSWORD=$(openssl rand -hex 16)"
         echo "CV_RW_PASSWORD=$(openssl rand -hex 16)"
+        # ldap-test объявляет эти переменные обязательными (docker compose.yml:140); значения
+        # тестовые, изолированный сервис в задаче не используется
+        echo "TEST_LDAP_DOMAIN=example.test"
+        echo "TEST_LDAP_ADMIN_PASSWORD=$(openssl rand -hex 16)"
         echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
       } > .env
     - docker compose up -d --wait db

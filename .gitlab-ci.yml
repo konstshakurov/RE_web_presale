@@ -63,5 +63,8 @@ db-isolation:
         echo "TEST_LDAP_ADMIN_PASSWORD=$(openssl rand -hex 16)"
         echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
       } > .env
+    # volume от прежнего прогона держит пароли ролей из первой инициализации - в CI
+    # пароль каждый раз новый, поэтому окружение полностью одноразовое (down -v)
+    - docker compose down -v --remove-orphans || true
     - docker compose up -d --wait db
     - bash scripts/check_db_isolation.sh

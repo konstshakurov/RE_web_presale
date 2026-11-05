@@ -66,5 +66,8 @@ db-isolation:
     # volume от прежнего прогона держит пароли ролей из первой инициализации - в CI
     # пароль каждый раз новый, поэтому окружение полностью одноразовое (down -v)
     - docker compose down -v --remove-orphans || true
-    - docker compose up -d --wait db
+    - docker compose up -d db
+    # надёжное ожидание вне healthcheck compose: свежая инициализация в dind может
+    # превысить retries healthcheck (у меня локально то же окружение проходит)
+    - docker compose exec -T db sh -c "for i in $(seq 1 90); do pg_isready -U postgres -d postgres >/dev/null 2>&1 && exit 0; sleep 2; done; exit 1"
     - bash scripts/check_db_isolation.sh

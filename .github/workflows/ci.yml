@@ -62,6 +62,7 @@ jobs:
             echo "APP_RW_PASSWORD=$(openssl rand -hex 16)"
             echo "CV_RW_PASSWORD=$(openssl rand -hex 16)"
             echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
+            echo "TEST_LDAP_DOMAIN=example.test"; echo "TEST_LDAP_ADMIN_PASSWORD=$(openssl rand -hex 16)"
           } > .env
           docker compose up -d --wait db
           bash scripts/check_db_isolation.sh

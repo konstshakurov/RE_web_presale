@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KON-161 — ROS: вариант B (таблица-калькулятор)</title>
+<style>
+  :root{--bg:#12171d;--panel:#1b222b;--panel-2:#232c37;--text:#e4e7eb;--muted:#9aa5b1;
+    --border:#323f4b;--accent:#3e8ef7;--ok:#34c38f;--primary-btn:#2870d4;}
+  [data-theme="light"]{--bg:#f4f6f8;--panel:#ffffff;--panel-2:#eef1f4;--text:#1f2933;--muted:#616e7c;
+    --border:#cbd2d9;--accent:#1f6fd6;--ok:#1a7f5a;--primary-btn:#2470c8;}
+  *{box-sizing:border-box} body{margin:0;background:rgba(0,0,0,.45);font:14px/1.5 system-ui,sans-serif;color:var(--text);padding:32px 0}
+  .switch{position:fixed;top:12px;right:16px;font:13px system-ui;padding:6px 10px;border:1px solid var(--border);
+    border-radius:4px;background:var(--panel);color:var(--text);cursor:pointer;z-index:9}
+  .backdrop{display:flex;justify-content:center;align-items:flex-start}
+  .modal{width:min(720px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:6px;
+    display:flex;flex-direction:column}
+  .modal__head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .modal__head h3{margin:0;font-size:16px}
+  .modal__ctx{color:var(--muted);font-size:13px}
+  .modal__x{margin-left:auto;background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer}
+  .modal__body{padding:16px;display:grid;gap:12px}
+  .field{display:grid;gap:4px}
+  .field label{font-size:13px;color:var(--muted)}
+  .field input{font:inherit;background:var(--panel-2);color:var(--text);border:1px solid var(--border);
+    border-radius:4px;padding:8px 10px;text-align:right}
+  input.user{margin-left:8px;border-color:var(--accent)}
+  .calc{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel-2);
+    border:1px solid var(--border);border-radius:6px;overflow:hidden}
+  .calc td{padding:8px 12px;border-top:1px solid var(--border)}
+  .calc td:last-child{text-align:right;font-weight:600;white-space:nowrap}
+  .calc td.rw{background:var(--panel)}
+  .calc input{width:140px}
+  .calc tr.total td{background:var(--panel);border-top:2px solid var(--border)}
+  .calc tr.total td:last-child{color:var(--ok);font-size:20px}
+  .calc tr.total-after td:last-child{color:var(--text);font-size:15px}
+  .gross td:last-child{display:flex;align-items:center;justify-content:flex-end}
+  .modal__foot{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border)}
+  .btn{font:inherit;padding:8px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text)}
+  .footnote{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<script>
+  const m = location.hash.match(/w(\d+)/);
+  if (m) document.body.style.zoom = (parseInt(m[1],10)/1280);
+</script>
+<button class="switch" onclick="const r=document.documentElement; r.dataset.theme = r.dataset.theme==='light'?'dark':'light'; this.textContent = r.dataset.theme==='light'?'Тема: тёмная → светлая':'Тема: тёмная → светлая'">Тема: тёмная → светлая</button>
+<div class="backdrop">
+  <div class="modal" role="dialog" aria-label="ROS специалиста">
+    <div class="modal__head">
+      <div>
+        <h3>ROS специалиста</h3>
+        <div class="modal__ctx">ANALYTICS-5938 · Клиент SA-4160</div>
+      </div>
+      <button class="modal__x" aria-label="Закрыть окно">×</button>
+    </div>
+    <div class="modal__body">
+      <table class="calc">
+        <tr class="gross"><td><label>Ставка для расчёта (задана клиентом), руб. с НДС/час</label></td><td>2 200</td></tr>
+        <tr class="gross"><td><label for="sal">ЗП кандидата, гросс, руб./мес</label></td><td><input id="sal" class="user" inputmode="numeric" value="130 000"></td></tr>
+        <tr><td>Billable-часов в месяц</td><td>165</td></tr>
+        <tr><td>Страховые взносы до лимита / после</td><td>15,2% / 7,8%</td></tr>
+        <tr><td>НДС</td><td>22%</td></tr>
+        <tr><td>Косвенные расходы на человека</td><td>53 000</td></tr>
+        <tr><td>Налог на прибыль при положительной прибыли</td><td>5%</td></tr>
+        <tr><td>Выручка (165 ч × ставка)</td><td>363 000</td></tr>
+        <tr><td>Прямые расходы (ЗП + взносы + НДС)</td><td>197 956</td></tr>
+        <tr><td>Прибыль до налога (− косвенные 53 000)</td><td>94 543</td></tr>
+        <tr><td>Налог на прибыль (5%)</td><td>4 727</td></tr>
+        <tr class="total"><td><strong>ROS до лимита ФОТ</strong> (первые 22 месяца)</td><td>24,80%</td></tr>
+        <tr class="total-after"><td>ROS после лимита ФОТ (с 23-го месяца)</td><td>27,32%</td></tr>
+        <tr><td class="footnote" colspan="2">Переход ставки взносов — на 22-м месяце (округление вниз) или 23-м (округление вверх) при ЗП 130 000.</td></tr>
+      </table>
+    </div>
+    <div class="modal__foot">
+      <span class="footnote">ЗП и расчёт не сохраняются и нигде не фиксируются.</span>
+      <span style="flex:1"></span>
+      <button class="btn">Отмена</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

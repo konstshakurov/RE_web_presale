@@ -15965,11 +15965,24 @@
       "type": "use_case",
       "title": "Расчёт рентабельности (ROS) при подключении кандидата",
       "version": "1.0",
-      "status": "draft",
+      "status": "approved",
       "priority": "Low",
       "owner": "",
       "stability": "Unknown",
-      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_ros_расчёт_рентабельности_(ros)_пр.md",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\uc_ros_расчёт_рентабельности_ros_пр.md",
+      "added": "2026-11-05",
+      "last_reviewed": "2026-11-05"
+    },
+    {
+      "id": "FR-041",
+      "type": "functional",
+      "title": "Расчёт рентабельности (ROS) при подключении кандидата на потребность",
+      "version": "1.0",
+      "status": "approved",
+      "priority": "Low",
+      "owner": "Константин Шакуров (РН Аналитики)",
+      "stability": "Unknown",
+      "source_artifact": "output\\data\\re_web_presale\\specs\\fr_041_расчёт_рентабельности_ros_пр.md",
       "added": "2026-11-05",
       "last_reviewed": "2026-11-05"
     }
@@ -21679,6 +21692,12 @@
     {
       "action": "requirement_added",
       "req_id": "UC-ROS",
+      "source": "7.1_spec",
+      "date": "2026-11-05"
+    },
+    {
+      "action": "requirement_added",
+      "req_id": "FR-041",
       "source": "7.1_spec",
       "date": "2026-11-05"
     }

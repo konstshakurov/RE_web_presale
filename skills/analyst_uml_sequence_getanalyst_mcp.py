@@ -21,15 +21,25 @@ projects/{project_id}/output/data/{project_id}_traceability_repo.json.
 
 import sys
 from pathlib import Path
+
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR.parent) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
-import json
 import os
 from datetime import date
+
 from mcp.server.fastmcp import FastMCP
-from skills.common import logger, data_path, normalize_project_id, specs_dir
+
+from skills.common import (
+    data_path,
+    guard_artifact_errors,
+    logger,
+    normalize_project_id,
+    read_json_artifact,
+    specs_dir,
+    write_json_artifact,
+)
 
 mcp = FastMCP("GetAnalyst_UML_Sequence")
 
@@ -49,8 +59,10 @@ def _repo_path(project_id: str) -> str:
 def _load_repo(project_id: str) -> dict:
     path = _repo_path(project_id)
     if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        # Raises CorruptArtifactError, converted to a ❌ line by guard_artifact_errors
+        # at the tool boundary. A bare json.load here made a damaged file a protocol
+        # error in every downstream tool.
+        return read_json_artifact(path, "репозиторий 5.1 (GetAnalyst UML Sequence)")
     return {
         "project": project_id,
         "formality_level": "Standard",
@@ -64,10 +76,8 @@ def _load_repo(project_id: str) -> dict:
 
 def _save_repo(repo: dict) -> None:
     path = _repo_path(repo["project"])
-    os.makedirs(os.path.dirname(path), exist_ok=True)
     repo["updated"] = str(date.today())
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(repo, f, ensure_ascii=False, indent=2)
+    write_json_artifact(path, repo)
     logger.info(f"Репозиторий 5.1 обновлён (GetAnalyst UML Sequence): {path}")
 
 
@@ -147,6 +157,7 @@ def _save_spec(content: str, project_id: str, filename: str) -> str:
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
+@guard_artifact_errors
 def register_sequence_diagram(
     project_id: str,
     component_id: str,

@@ -94,13 +94,13 @@ export default function RosTab() {
                   />
                 </label>
               ))}
-              <div className="modal__actions">
-                <button type="submit" className="primary" disabled={saving}>
-                  Сохранить
-                </button>
-              </div>
-              {note && <p className="muted">{note}</p>}
             </div>
+            <div className="ros-actions">
+              <button type="submit" className="primary" disabled={saving}>
+                Сохранить
+              </button>
+            </div>
+            {note && <p className="muted">{note}</p>}
           </>
         )}
       </form>

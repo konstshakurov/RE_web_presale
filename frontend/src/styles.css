@@ -476,6 +476,8 @@ button.hint-btn::after { content: ""; position: absolute; inset: -3px; }
 .ros__month { font-size: 13px; }
 .modal__foot .ros__note { margin-right: auto; }
 
-/* Vkladka ROS (Dev-53, reshenie vladelca 06.11): 2 kolonki, bez rastjagivanija na vsju shirinu */
-.ros-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; max-width: 660px; }
-.ros-grid .modal__actions { margin-top: 4px; }
+/* Vkladka ROS (Dev-53, reshenie vladelca 06.11): 2 kolonki, bez rastjagivanija na vsju shirinu;
+   otstup posle zagolovka - odna stroka; knopka Sohranit nizhe polej, vylev prava/-lev, height kak u drugih sinih knopok */
+.ros-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; max-width: 660px; margin-top: 14px; }
+.ros-actions { display: flex; justify-content: flex-start; margin-top: 16px; }
+.ros-actions .primary { height: 36px; padding: 0 16px; }

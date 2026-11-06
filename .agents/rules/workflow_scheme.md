@@ -42,10 +42,11 @@ flowchart TD
     G4 -->|"Pass"| FACT["6. Аналитик приводит страницы к факту: BF-NN в implemented, страница компонента обновлена, check_product_docs.py = 0"]
 
     FACT --> DONE[("Done в трекере (без апрува владельца не переносить)")]
-    DONE --> DEP["7. devops: merge в main / ops-ветка, push, GitLab pipeline"]
-
-    subgraph DEPLOY["8. Автодеплой — агент devops"]
-        DEP --> SH["deploy.sh на ВМ: flock, app.prev x3, миграции если менялись db/migrations (с дампом KON-49), compose build/up, ожидание /health 300 c"]
+    DONE --> DEP["7. devops / владелец: merge в main + push"]
+    JOB["Ops-1 (REW-32): CI db-isolation перезаписывает локальный .env — не должен"]
+    JOB -.- DONE
+    subgraph DEPLOY["8. Деплой — deploy.ps1 (один вызов владельца; ssh-ключ с фразой)"]
+        DEP --> SH["deploy.ps1: локальные проверки -> git archive -> scp на ВМ\n deploy.sh: flock, app.prev x3, миграции при изменении db/migrations (с дампом KON-49),\n compose build/up, ожидание /health 300 с, автооткат при сбое"]
         SH -->|"красно"| RB["Авто-откат на app.prev, владелец уведомлён"]
         SH -->|"зелено"| LIVE["DEPLOYED_VERSION, https://vm-re.simbirsoft/"]
     end

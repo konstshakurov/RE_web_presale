@@ -114,6 +114,8 @@ describe("lib/ros", () => {
     expect(r1).toMatchObject({ kind: "readonly", withVat: 3660, vatConverted: true });
     const r2 = rosRate({ amount: 2200, currency: "RUB", includes_vat: true, proposer: "от клиента", unit: null }, 22);
     expect(r2).toMatchObject({ kind: "readonly", withVat: 2200, vatConverted: false });
+    expect(rosRate({ amount: 3000, currency: "RUB", includes_vat: true, proposer: "от клиента", unit: "ч (час)" }, 22).kind).toBe("readonly");
+    expect(rosRate({ amount: 3000, currency: "RUB", includes_vat: true, proposer: "от клиента", unit: "ч" }, 22).kind).toBe("readonly");
     expect(rosRate({ amount: 3000, currency: "RUB", includes_vat: true, proposer: "от производства", unit: "час" }, 22).kind).toBe("manual");
     expect(rosRate({ amount: 50, currency: "USD", includes_vat: null, proposer: "от клиента", unit: "час" }, 22).kind).toBe("manual");
     expect(rosRate({ amount: 3000, currency: "RUB", includes_vat: true, proposer: "от клиента", unit: "день" }, 22).kind).toBe("manual");

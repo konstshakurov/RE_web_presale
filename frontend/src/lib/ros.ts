@@ -73,17 +73,24 @@ export interface RosRate {
   demandRate: string; // справочная подпись ставки потребности («3 000 RUB / час без НДС»)
 }
 
+// Час: «час», «ч», «ч (час)» (формат Jira), «часы»; пустая единица = час по умолчанию
+// (ставка потребности в рублях за час).
+const HOUR_UNIT_RE = /^(ч|часы|час|ч\(час\))$/;
+function unitIsHour(unit: string): boolean {
+  const n = unit.trim().toLowerCase().replace(/\s+/g, "");
+  return n === "" || HOUR_UNIT_RE.test(n);
+}
+
 export function rosRate(rate: NeedRate, vatRate: number): RosRate {
   const amount = rate.amount ?? null;
   const proposer = (rate.proposer ?? "").trim().toLowerCase();
   const currency = (rate.currency ?? "").trim().toUpperCase();
-  const unit = (rate.unit ?? "").trim().toLowerCase();
   const parts = [fmtNum(amount), rate.currency, rate.unit ? `/ ${rate.unit}` : "", vatLabel(rate.includes_vat)].filter(
     Boolean,
   );
   const demandRate = parts.join(" ");
   const clientDefined =
-    amount !== null && proposer !== "от производства" && currency === "RUB" && (unit === "" || unit === "час");
+    amount !== null && proposer !== "от производства" && currency === "RUB" && unitIsHour(rate.unit ?? "");
   if (!clientDefined) return { kind: "manual", withVat: null, vatConverted: false, demandRate };
   return {
     kind: "readonly",

@@ -35,7 +35,7 @@ ROOT = DOCS.parent
 STATUSES = ("idea", "planned", "in_dev", "implemented")
 COVERED_TYPES = ("FR", "NFR", "BR", "UC", "BP", "DD", "ERD")
 ID_RE = re.compile(r"\b([A-Z]{2,4})-(\d{3})\b")
-ROW_RE = re.compile(r"^\| ((?:FR|NFR|BR|UC|BP|DD|ERD)-\d{3}) \|")
+ROW_RE = re.compile(r"^\| ((?:FR|NFR|BR|UC|BP|DD|ERD)-(?:\d{3}|[A-Z]{3})) \|")
 
 
 def expand_compact(text: str) -> set[str]:

@@ -1,15 +1,15 @@
 # app_db — паспорт компонента (SRV)
 
-Статус страницы: `implemented`. Актуально на 26.10.2026 по миграциям `db/migrations/app_db/V001…V008`.
+Статус страницы: `implemented`. Актуально на 05.11.2026 по миграциям `db/migrations/app_db/V001…V010` + ключи ROS в `app_setting` (миграции не требуют).
 
 | Атрибут | Значение |
 |---|---|
-| Назначение | Пользователи и сессии приложения, шифрованные секреты, настройки, кэш Jira (потребности, эпики, состояние опроса), группы статусов, провайдеры и очередь задач LLM |
+| Назначение | Пользователи и сессии приложения, шифрованные секреты, настройки, кэш Jira (потребности, эпики, состояние опроса), группы статусов, провайдеры и очередь задач LLM, параметры модели ROS |
 | СУБД | PostgreSQL 16, база `app_db`, схема `app` (служебная `meta.schema_migration`) |
 | Роль приложения | `app_rw` (DML, не видит `cv_db`); миграции выполняются владельцем БД, не `app_rw` |
-| Код | `backend/app/app_repo/`, `backend/app/sync/repo.py`, `backend/app/secrets/store.py`, `backend/app/llm_gateway/repo.py`, `backend/app/status_groups/repo.py`, `backend/app/auth/` |
-| Бизнес-функции | BF-01, BF-03, BF-06 |
-| Требования | FR-015, 021, 028, 030, 035; NFR-004, 005, 006, 007, 008, 010; ERD-001, DD-001 (логическая модель — слой 1) |
+| Код | `backend/app/app_repo/`, `backend/app/sync/repo.py`, `backend/app/secrets/store.py`, `backend/app/llm_gateway/repo.py`, `backend/app/status_groups/repo.py`, `backend/app/auth/`, `backend/app/ros/` |
+| Бизнес-функции | BF-01, BF-03, BF-06, BF-12 |
+| Требования | FR-015, 021, 028, 030, 035; NFR-004, 005, 006, 007, 008, 010; ERD-001, DD-001 (логическая модель — слой 1); FR-041 (параметры ROS) |
 | Архитектурное решение | ADR-003 (две БД), ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-011 |
 | Первоисточник схемы | миграции в `db/migrations/app_db/` (эта страница объясняет, не дублирует DDL) |
 
@@ -21,7 +21,7 @@
 
 | Версия | Содержание | Задача |
 |---|---|---|
-| V001 | метаданные, пользователи, сессии, секреты, настройки, провайдеры LLM, группы статусов | KON-29 |
+| V001 | метаданные, пользователи, сессии, секреты, настройки (в т.ч. `app_setting`), провайдеры LLM, группы статусов | KON-29 |
 | V002 | кэш Jira: эпики, потребности, теги, состояние опроса | KON-29 |
 | V003 | права `app_rw` | KON-29 |
 | V004 | `app_user.display_name` (ФИО из LDAP) | KON-60 |
@@ -31,6 +31,17 @@
 | V008 | `llm_provider.model`, очередь `llm_task` | KON-37 |
 
 Порядок применения: `db/migrations/bootstrap/00_roles_and_databases.sql` (один раз, суперпользователь) → `db/migrations/apply.sh up app_db` (ведёт `meta.schema_migration`); откат — `*.down.sql`. Тестовые данные — `db/seed/`.
+
+## Настройки и параметры модели ROS (Dev-53, FR-041)
+
+Параметры модели ROS хранятся записями в `app.app_setting` (ключи `ros_billable_hours`,
+`ros_indirect_cost`, `ros_profit_tax_rate`, `ros_vat_rate`, `ros_insurance_before`,
+`ros_insurance_after`, `ros_fot_limit`). Новая миграция не потребовалась: ключи сеются кодом
+при первом сохранении (прецедент — `vat_percent`); значения по умолчанию при отсутствии записи —
+эталон ROS_model_v2 (165 ч, косвенные 53 000, налог 5%, НДС 22%, взносы 15,2%/7,8%, лимит ФОТ
+2 979 000). API: `GET /admin/ros/settings` (чтение — любому пользователю, нужно для расчёта),
+`PUT /admin/ros/settings` (роль `admin`, CSRF). Код — `backend/app/ros/`; границы значений —
+0..100 для ставок, billable 1..744, `fot_limit` 1..1e9, `indirect_cost` 0..1e7.
 
 ## Правила
 * Межбазовых FK нет — только мягкие ссылки по ключу (ADR-003): `jira_need.employee_key` → `cv.employee.jira_key`, `llm_task` ← `cv.*.task_id`, `cv.*.provider_id` → `llm_provider.id`.
@@ -46,3 +57,4 @@
 | Дата | Задача | Что изменилось |
 |---|---|---|
 | 2026-10-26 | KON-129 | страница создана из KON-29 и миграций V001–V008 |
+| 2026-11-05 | REW-30 (Dev-53) | раздел «Настройки и параметры модели ROS»: ключи `ros_*` в `app_setting`, API GET/PUT `/admin/ros/settings`; миграция не потребовалась |

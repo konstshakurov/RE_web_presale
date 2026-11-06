@@ -10,14 +10,15 @@ function errText(e: unknown): string {
 
 // Вкладка «ROS» в Настройках (FR-041, decision.md KON-161 п. 1.4): 7 параметров модели,
 // редактирует любой админ, значения общие для всех; эталон = ROS_model_v2 (спека FR-041).
-const FIELDS: { key: keyof RosSettings; label: string; min: number; max: number; unit?: string }[] = [
-  { key: "billable_hours", label: "Billable часов в месяц", min: 1, max: 744 },
-  { key: "indirect_cost", label: "Косвенные расходы на человека", min: 0, max: 10_000_000, unit: "руб./мес" },
-  { key: "profit_tax_rate", label: "Ставка налога на прибыль", min: 0, max: 100, unit: "%" },
-  { key: "vat_rate", label: "Ставка НДС", min: 0, max: 100, unit: "%" },
-  { key: "insurance_before", label: "Страховые взносы до лимита", min: 0, max: 100, unit: "%" },
-  { key: "insurance_after", label: "Страховые взносы после лимита", min: 0, max: 100, unit: "%" },
-  { key: "fot_limit", label: "Лимит ФОТ", min: 1, max: 1_000_000_000, unit: "руб." },
+// Подписи полей — решение владельца 06.11: коротко, не переносятся на вторую строку.
+const FIELDS: { key: keyof RosSettings; label: string; min: number; max: number }[] = [
+  { key: "billable_hours", label: "Billable ч/мес", min: 1, max: 744 },
+  { key: "indirect_cost", label: "Косвенные расходы, руб/мес", min: 0, max: 10_000_000 },
+  { key: "profit_tax_rate", label: "Налог на прибыль, %", min: 0, max: 100 },
+  { key: "vat_rate", label: "Ставка НДС, %", min: 0, max: 100 },
+  { key: "insurance_before", label: "Страх. взносы до лимита, %", min: 0, max: 100 },
+  { key: "insurance_after", label: "Страх. взносы после лимита, %", min: 0, max: 100 },
+  { key: "fot_limit", label: "Лимит ФОТ, руб", min: 1, max: 1_000_000_000 },
 ];
 
 export default function RosTab() {
@@ -68,11 +69,6 @@ export default function RosTab() {
           <h3>Модель ROS</h3>
           <span className="group-card__spacer" />
         </div>
-        <p className="muted">
-          Параметры расчёта рентабельности кандидата (кнопка «ROS» в списке потребностей). По умолчанию —
-          эталонная модель ROS_model_v2. Редактирует любой администратор; значения общие для всех
-          пользователей, окно ROS читает их при каждом открытии.
-        </p>
         {error && (
           <p className="error" role="alert">
             {error}
@@ -80,12 +76,11 @@ export default function RosTab() {
         )}
         {!values && !error && <p className="muted">Загрузка…</p>}
         {values && (
-          <div className="dictionary">
-            {FIELDS.map((f) => (
-              <label key={f.key} className="field">
-                <>
+          <>
+            <div className="ros-grid">
+              {FIELDS.map((f) => (
+                <label key={f.key} className="field">
                   {f.label}
-                  {f.unit && ` (${f.unit})`}
                   <input
                     type="number"
                     required
@@ -97,16 +92,16 @@ export default function RosTab() {
                       setValues((v) => (v ? { ...v, [f.key]: Number(e.target.value) } : v))
                     }
                   />
-                </>
-              </label>
-            ))}
-            <div className="modal__actions">
-              <button type="submit" className="primary" disabled={saving}>
-                Сохранить
-              </button>
+                </label>
+              ))}
+              <div className="modal__actions">
+                <button type="submit" className="primary" disabled={saving}>
+                  Сохранить
+                </button>
+              </div>
+              {note && <p className="muted">{note}</p>}
             </div>
-            {note && <p className="muted">{note}</p>}
-          </div>
+          </>
         )}
       </form>
     </div>

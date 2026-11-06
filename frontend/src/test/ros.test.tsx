@@ -233,9 +233,9 @@ describe("Настройки: вкладка «ROS» (Dev-53, FR-041)", () => {
     admin = true;
     renderSettings();
     await userEvent.click(await screen.findByRole("tab", { name: "ROS" }));
-    expect(await screen.findByLabelText(/Billable часов/)).toHaveValue(165);
+    expect(await screen.findByLabelText(/Billable ч\/мес/)).toHaveValue(165);
     expect(screen.getByLabelText(/Косвенные расходы/)).toHaveValue(53000);
-    expect(screen.getByLabelText(/налога на прибыль/)).toHaveValue(5);
+    expect(screen.getByLabelText(/Налог на прибыль/)).toHaveValue(5);
     expect(screen.getByLabelText(/Ставка НДС/)).toHaveValue(22);
     expect(screen.getByLabelText(/взносы до лимита/)).toHaveValue(15.2);
     expect(screen.getByLabelText(/взносы после лимита/)).toHaveValue(7.8);
@@ -254,7 +254,7 @@ describe("Настройки: вкладка «ROS» (Dev-53, FR-041)", () => {
   it("не админ: сохранение отклоняется (403), текст ошибки под формой", async () => {
     renderSettings();
     await userEvent.click(await screen.findByRole("tab", { name: "ROS" }));
-    await screen.findByLabelText(/Billable часов/);
+    await screen.findByLabelText(/Billable ч\/мес/);
     await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Недостаточно прав");
     expect(puts()).toHaveLength(1);

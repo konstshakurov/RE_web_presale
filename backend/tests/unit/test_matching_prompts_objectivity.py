@@ -26,25 +26,25 @@ def test_prompts_state_objectivity_rules():
 
 
 def test_no_experience_becomes_not_mentioned_c_v():
-    """«Нет опыта» / «Отсутствует опыт» -> «В CV не указан опыт» (правило 2)."""
+    """«Нет опыта» / «Отсутствует опыт» -> «Не указан опыт» (правило 2)."""
     r, _ = objectify_output("Отсутствует опыт работы с Redis", ())
-    assert r == "В CV не указан опыт работы с Redis"
+    assert r == "Не указан опыт работы с Redis"
     r, _ = objectify_output("Нет опыта работы с Redis", ())
-    assert r == "В CV не указан опыт работы с Redis"
+    assert r == "Не указан опыт работы с Redis"
     r, _ = objectify_output(
         "Сильный профиль. Отсутствует явный опыт управления командой аналитиков.", ()
     )
-    assert "В CV не указан опыт" in r
+    assert "Не указан опыт" in r
     assert "Отсутств" not in r
     assert "Нет опыта" not in r
 
 
 def test_no_mention_becomes_not_mentioned_c_v():
-    """«Нет упоминания» -> «В CV не указано упоминание» (правило 2)."""
+    """«Нет упоминания» -> «Не упомнут …» (правило 2 + краткость, владелец 09.11)."""
     r, _ = objectify_output("Нет упоминания опыта разбора инцидентов", ())
-    assert r == "В CV не указано упоминание опыта разбора инцидентов"
+    assert r == "Не упомнут опыта разбора инцидентов"
     _, g = objectify_output("ok", ("Нет упоминания опыта проектирования и работы с Redis",))
-    assert g == ("В CV не указано упоминание опыта проектирования и работы с Redis",)
+    assert g == ("Не упомнут опыта проектирования и работы с Redis",)
 
 
 def test_drop_selfmade_threshold_clause_keeps_useful_part():
@@ -72,7 +72,7 @@ def test_drop_selfmade_gap_item():
             "Не указан опыт участия в разборе инцидентов",
         ),
     )
-    assert g[0] == "В CV не указан опыт работы с инструментом Conductor или аналогами"
+    assert g[0] == "Не указан опыт работы с инструментом Conductor или аналогами"
     assert len(g) == 2  # пункт с модальностью удалён
     assert g[1] == "Не указан опыт участия в разборе инцидентов"  # уже объективная формулировка
 
@@ -85,15 +85,15 @@ def test_parse_match_applies_objectivity():
          "gaps": ["Отсутствует опыт работы с Redis"]},
     ])
     res = parse_match(raw, LABELS)
-    assert res["EMP-1"].rationale.endswith("В CV не указан опыт работы с Redis.")
-    assert res["EMP-1"].gaps == ("В CV не указан опыт работы с Redis",)
+    assert res["EMP-1"].rationale.endswith("Не указан опыт работы с Redis.")
+    assert res["EMP-1"].gaps == ("Не указан опыт работы с Redis",)
 
 
 def test_clean_output_for_already_compliant_text():
     """Правильный текст проходит без изменений (без лишних правок)."""
     r, g = objectify_output(
         "Профиль закрывает требования по BPMN, UML и REST; два пункта ограничены.",
-        ("В CV не указан опыт работы с Conductor",),
+        ("Не указан опыт работы с Conductor",),
     )
     assert r.startswith("Профиль закрывает")
-    assert g == ("В CV не указан опыт работы с Conductor",)
+    assert g == ("Не указан опыт работы с Conductor",)

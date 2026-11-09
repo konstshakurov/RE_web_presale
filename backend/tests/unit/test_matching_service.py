@@ -103,7 +103,7 @@ def test_match_async_result_sorted_with_rationale_and_paging():
     st = w.svc.get_state(NEED, limit=3, offset=0)
     assert st.status == "done" and st.total == 7 and st.candidates_total == 7
     assert [i.percent for i in st.items] == [90, 90, 89]   # по убыванию, ничья - по ФИО
-    assert st.items[0].rationale.startswith("обоснование")
+    assert st.items[0].rationale.startswith("Обоснование")
     assert st.calculated_at is not None and not st.stale
     rest = w.svc.get_state(NEED, limit=10, offset=3)       # «Показать ещё»
     assert len(rest.items) == 4 and rest.items[0].percent >= rest.items[-1].percent

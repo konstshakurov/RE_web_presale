@@ -61,8 +61,8 @@ def test_match_flow_over_http():
     item = got["items"][0]
     assert item["percent"] == 90 and item["rationale"] and item["full_name"] == "Сотрудник-01"
     assert item["gaps"] == [  # CR-019 правило 2: санитайзер
-        "В CV не указан опыт Kafka (K1)",  # «нет опыта» -> «в CV не указан опыт»
-        "нет домена банки",  # «нет» без слова «опыт» правилом 2 не охвачено — остаётся
+        "Не указан опыт Kafka (K1)",  # «нет опыта» -> «в CV не указан опыт»
+        "Домен банки не указан",  # первая буква — верхний регистр
     ]
     assert got["calculated_at"] and got["stale"] is False
     more = client.get(f"/needs/{NEED}/match", params={"limit": 10, "offset": 1}).json()
@@ -297,8 +297,8 @@ def test_semantic_search_flow_over_http():
     item = got["items"][0]
     assert item["source"] == "llm" and item["percent"] == 90 and item["rationale"]
     assert item["gaps"] == [  # CR-019 правило 2: санитайзер
-        "В CV не указан опыт Kafka (K1)",  # «нет опыта» -> «в CV не указан опыт»
-        "нет домена банки",  # «нет» без слова «опыт» правилом 2 не охвачено — остаётся
+        "Не указан опыт Kafka (K1)",  # «нет опыта» -> «в CV не указан опыт»
+        "Домен банки не указан",  # первая буква — верхний регистр
     ]
     assert item["full_name"] == "Сотрудник-01" and item["cv_file_id"]
     # без фильтра: сотрудник без совпадений по технологиям и тексту в выдачу не попадает

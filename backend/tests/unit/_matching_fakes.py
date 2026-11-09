@@ -429,7 +429,7 @@ def reply_for(prompt: str, percent=lambda n: 90 - n) -> str:
     labels = [ln[4:].strip() for ln in prompt.splitlines() if ln.startswith("### ")]
     return json.dumps([
         {"id": lb, "percent": percent(i), "rationale": f"обоснование {lb}",
-         "gaps": [] if percent(i) >= 100 else [f"нет опыта Kafka ({lb})", "нет домена банки"]}
+         "gaps": [] if percent(i) >= 100 else [f"не указан опыт Kafka ({lb})", "домен банки не указан"]}
         for i, lb in enumerate(labels)], ensure_ascii=False)
 
 

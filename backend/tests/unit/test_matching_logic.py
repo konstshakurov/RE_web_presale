@@ -110,7 +110,7 @@ def test_gaps_are_cleaned_and_limited():
     got = parse_match(json.dumps([{"id": "K1", "percent": 1, "gaps": items}]), LABELS)
     g = got["EMP-1"].gaps
     assert len(g) == 5 and len(g[0]) == 200
-    assert g[1] == "a b c d" and g[2] == "маркер" and g[3] == "Повтор"
+    assert g[1] == "A b c d" and g[2] == "Маркер" and g[3] == "Повтор"
 
 
 def test_match_prompts_ask_for_gaps():

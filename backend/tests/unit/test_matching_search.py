@@ -94,7 +94,7 @@ def test_search_runs_llm_and_ranks_by_percent():
     assert got.evaluated == 3 and got.total == 3 and got.model == "qwen-test"
     assert [i.percent for i in got.items] == [90, 89, 88]
     assert {i.source for i in got.items} == {"llm"}
-    assert got.items[0].rationale.startswith("обоснование")
+    assert got.items[0].rationale.startswith("Обоснование")
     assert got.candidates_total == 3 and got.calculated_at is not None and got.stale is False
 
 

@@ -799,14 +799,14 @@
       "id": "FR-005",
       "type": "functional",
       "title": "Рекомендация кандидата с % соответствия и обоснованием",
-      "version": "1.0",
+      "version": "1.1",
       "status": "approved",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\fr_005_рекомендация_кандидата_с_%_соо.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-02",
+      "last_reviewed": "2026-11-09",
       "success_criteria": {
         "baseline": "Время от открытия потребности до выбора кандидата: к замеру (выгрузка дат смены статусов из Jira)",
         "target": "До 1 минуты",
@@ -1011,6 +1011,13 @@
           "to": "approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-11-09",
+          "action": "status_changed",
+          "from": "approved",
+          "to": "approved",
+          "reason": "CR CR-019 approved by Константин Шакуров: правила объективности (v1.1); последний обзор"
         }
       ]
     },
@@ -11345,14 +11352,14 @@
       "id": "FR-036",
       "type": "functional",
       "title": "Сопоставление потребности с кандидатами (статус кандидата цветным чипом)",
-      "version": "1.1",
-      "status": "conditional_approved",
+      "version": "1.2",
+      "status": "approved",
       "priority": "Must",
       "owner": "Руководитель направления Аналитики",
       "stability": "Unknown",
       "source_artifact": "output\\data\\re_web_presale\\specs\\fr_036_сопоставление_потребности_с_ка.md",
       "added": "2026-10-02",
-      "last_reviewed": "2026-10-29",
+      "last_reviewed": "2026-11-09",
       "stakeholders": [
         {
           "name": "Евгения",
@@ -11545,6 +11552,15 @@
           "to": "conditional_approved",
           "stakeholder": "Константин Шакуров",
           "raci": "accountable"
+        },
+        {
+          "date": "2026-11-09",
+          "action": "approval_decision",
+          "from": "conditional_approved",
+          "to": "approved",
+          "stakeholder": "Константин Шакуров",
+          "raci": "accountable",
+          "reason": "CR CR-019 approved: правила объективности; тело спецификации обновлено (условие APKG-CR011-016-CLOSE закрыто)"
         }
       ]
     },

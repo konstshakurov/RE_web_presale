@@ -122,20 +122,7 @@ function ThesesSection({ data, error }: { data: ThesesOut | null; error: string 
       {data.theses.length > 0 && (
         <ul>
           {data.theses.map((t, i) => (
-            <li
-              key={`${i}:${t.text.slice(0, 40)}`}
-              className={t.contradicts_rules ? "theses__thesis--conflict" : ""}
-            >
-              <p className="theses__text">
-                {t.text}
-                {t.contradicts_rules && (
-                  <span className="badge badge--stale theses__badge" title="Противоречит полевому правилу клиента">
-                    противоречит полевым правилам
-                  </span>
-                )}
-              </p>
-              {t.sources.length > 0 && <SourcesLine sources={t.sources} />}
-            </li>
+            <ThesisItem key={`${i}:${t.text.slice(0, 40)}`} thesis={t} />
           ))}
         </ul>
       )}
@@ -146,6 +133,43 @@ function ThesesSection({ data, error }: { data: ThesesOut | null; error: string 
         по источникам.
       </p>
     </section>
+  );
+}
+
+// Вариант B (KON-160, решение владельца): источники скрыты, открываются по клику;
+// справа — бейдж с числом источников; конфликт полевым правилам — красная рамка.
+function ThesisItem({ thesis: t }: { thesis: { text: string; contradicts_rules: boolean; sources: { id: string; author?: string | null; date?: string | null; url?: string | null }[] } }) {
+  const [open, setOpen] = useState(false);
+  const n = t.sources.length;
+  const count = n === 0
+    ? ""
+    : n % 10 === 1 && n % 100 !== 11
+      ? `${n} источник`
+      : 2 <= n % 10 && n % 10 <= 4 && !(12 <= n % 100 && n % 100 <= 14)
+        ? `${n} источника`
+        : `${n} источников`;
+  return (
+    <li
+      className={`theses__thesis${t.contradicts_rules ? " theses__thesis--conflict" : ""}${open ? " theses__thesis--open" : ""}`}
+    >
+      <button
+        type="button"
+        className="theses__top"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="theses__text">
+          {t.text}
+          {t.contradicts_rules && (
+            <span className="badge theses__badge" title="Противоречит полевому правилу клиента">
+              противоречит полевым правилам
+            </span>
+          )}
+        </span>
+        {n > 0 && <span className="theses__count">{count}</span>}
+      </button>
+      {n > 0 && open && <SourcesLine sources={t.sources} />}
+    </li>
   );
 }
 

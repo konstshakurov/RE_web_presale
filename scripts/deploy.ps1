@@ -99,6 +99,43 @@ Step "архив: $archive ($sizeMb MB)"
 if ($sizeMb -gt 20) { Stop-D "архив подозрительно большой ($sizeMb MB) - проверь список путей" }
 
 # --- 4. локальная сборка образов (registry Docker Hub у ВМ нестабилен: сборка на ВМ убрана, KON-123) ---
+# База-образы тянутся заранее с ретраями: BuildKit начинает com build с resolve
+# source metadata у docker.io, и при его недоступности деплой падает на этом, а не
+# на сборке (10.11.2026: два подряд TLS handshake timeout на nginx-unprivileged).
+# Если образ есть локально, BuildKit registry не трогает — pre-pull делает сборку
+# устойчивой к флакующему Docker Hub.
+$dockerfiles = "$repo\backend\Dockerfile", "$repo\frontend\Dockerfile"
+$baseImages = @()
+foreach ($df in $dockerfiles) {
+  foreach ($line in (Get-Content $df)) {
+    if ($line -match '^FROM\s+([^\s]+)') {
+      $baseImages += $Matches[1]
+    }
+  }
+}
+$baseImages = $baseImages | Sort-Object -Unique
+Step "pre-pull базовых образов (с ретраями): $($baseImages -join ', ')"
+foreach ($img in $baseImages) {
+  & docker image inspect $img *> $null
+  if ($LASTEXITCODE -eq 0) {
+    Write-Host ("   локально есть: " + $img) -ForegroundColor Green
+    continue
+  }
+  $pulled = $false
+  for ($attempt = 1; $attempt -le 5; $attempt++) {
+    Step ("   docker pull (попытка {0}/5): {1}" -f $attempt, $img)
+    & docker pull $img
+    if ($LASTEXITCODE -eq 0) { $pulled = $true; break }
+    Start-Sleep -Seconds 10
+  }
+  if (-not $pulled) {
+    Stop-D ("Docker Hub недоступен: базовый образ $img не получен и его нет в локальном кэше.`n" +
+      "Сборка без сети невозможна. Повторите деплой позже, либо разово:`n" +
+      "- docker pull $img (после успеха — повторить .\scripts\deploy.ps1);`n" +
+      "- или добавьте registry-mirror в Docker Desktop (Settings > Docker Engine, например mirror.gcr.io).")
+  }
+}
+
 Step "локальная сборка образов (docker compose build api web worker)"
 & docker compose build api web worker
 if ($LASTEXITCODE -ne 0) { Stop-D "локальная сборка образов упала — деплой отменён" }

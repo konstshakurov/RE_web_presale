@@ -39,11 +39,11 @@ function setup() {
     const method = init?.method ?? "GET";
     requests.push({ url, method });
     if (url.includes("/sync/epics/")) return (epicPromise ?? json(EPIC)) as unknown as Response;
-    if (url.includes("/client-rules/theses")) return thesesMocks.shift()!();
+    if (url.includes("/needs/ANALYTICS-5978/client-rules/theses")) return thesesMocks.shift()!();
     return json({ detail: "не найдено" }, 404);
   });
   vi.stubGlobal("fetch", fetchMock);
-  return render(<ClientRules epicKey="SA-4160" />);
+  return render(<ClientRules epicKey="SA-4160" needKey="ANALYTICS-5978" />);
 }
 
 afterEach(() => {
@@ -87,6 +87,8 @@ describe("ClientRules (KON-160 тезисы)", () => {
     await waitFor(() => expect(screen.getByText("Обновляется…")).toBeTruthy());
     // только один GET theses: авто-поллинг начнётся позже (8 c), таймеры в тесте не ждём
     expect(requests.filter((r) => r.url.includes("/client-rules/theses")).length).toBeLessThanOrEqual(1);
+    // CR-фix: в тезисы передаётся ключ ПОТРЕБНОСТИ, а не эпика
+    expect(requests.map((r) => r.url)).toContain("/api/needs/ANALYTICS-5978/client-rules/theses");
   });
 
   it("409 (потребность без клиента) - понятное сообщение вместо ошибки", async () => {

@@ -189,7 +189,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
               {expanded && n.epic_key && (
                 <tr className="needs__details is-selected">
                   <td colSpan={9}>
-                    <ClientRules epicKey={n.epic_key} />
+                    <ClientRules epicKey={n.epic_key} needKey={n.jira_key} />
                   </td>
                 </tr>
               )}

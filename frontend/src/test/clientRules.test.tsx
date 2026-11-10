@@ -54,14 +54,24 @@ afterEach(() => {
 });
 
 describe("ClientRules (KON-160 тезисы)", () => {
-  it("показывает тезисы с источником-ссылкой и подписью LLM", async () => {
+  it("вариант B: тезис + бейдж источников; источники открываются по клику, подпись LLM", async () => {
+    const userEvent = (await import("@testing-library/user-event")).default;
+    userEvent.setup();
     thesesMocks = [() => json(THESIS_OK)];
     setup();
     await waitFor(() => expect(screen.getByText(/CV отправлять только с фотографией/)).toBeTruthy());
-    const link = screen.getByRole("link", { name: /Иванов Иван/ });
+    // скрытые источники: ссылка недоступна до раскрытия
+    expect(screen.queryByRole("link", { name: /Иванов Иван/ })).toBeNull();
+    expect(screen.getByText("1 источник")).toBeTruthy();
+    const open = screen.getByRole("button", { name: /CV отправлять только с фотографией/ });
+    await userEvent.click(open);
+    const link = await screen.findByRole("link", { name: /Иванов Иван/ });
     expect(link.getAttribute("href")).toContain("commentId=101");
     expect(screen.getByText(/Сгенерировано LLM/)).toBeTruthy();
     expect(screen.queryByText("Обновляется…")).toBeNull();
+    // повторный клик — источники скрыты
+    await userEvent.click(open);
+    expect(screen.queryByRole("link", { name: /Иванов Иван/ })).toBeNull();
   });
 
   it("пусто (нет комментариев) - нейтральная подпись", async () => {

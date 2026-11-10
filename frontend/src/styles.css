@@ -127,13 +127,18 @@ a { color: var(--accent); }
 .rules dt { font-weight: 600; min-width: 200px; }
 .rules dd { margin: 0; white-space: pre-wrap; }
 /* Тезисы правил из комментариев эпика (KON-160): список с источниками */
+/* Тезисы правил клиента (KON-160, вариант B): источники скрыты, открываются по клику */
 .theses { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 .theses h4 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
 .theses ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.theses li { padding: 6px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+.theses li { padding: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
 .theses li.theses__thesis--conflict { border-color: var(--err); }
+.theses li.theses__thesis--open { border-color: var(--accent); }
+.theses__top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; width: 100%; box-sizing: border-box; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 8px 12px; cursor: pointer; }
+.theses__top:hover { border-color: var(--accent); }
 .theses__text { margin: 0; }
-.theses__src { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.theses__count { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.theses__src { color: var(--muted); font-size: 12px; margin: 0 12px 0; padding: 6px 0 8px; border-top: 1px dashed var(--border); }
 .theses__src a { color: var(--accent); }
 .theses__note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .theses__badge { margin-left: 8px; }

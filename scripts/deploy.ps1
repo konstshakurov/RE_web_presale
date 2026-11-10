@@ -116,7 +116,9 @@ foreach ($df in $dockerfiles) {
 $baseImages = $baseImages | Sort-Object -Unique
 Step "pre-pull базовых образов (с ретраями): $($baseImages -join ', ')"
 foreach ($img in $baseImages) {
-  & docker image inspect $img *> $null
+  # проверка через cmd: с EAP=Stop перенаправление stderr docker.exe (*>) в
+  # PowerShell 5.1 кидает NativeCommandError и убивает скрипт на «No such image»
+  cmd /c "docker image inspect $img >NUL 2>&1"
   if ($LASTEXITCODE -eq 0) {
     Write-Host ("   локально есть: " + $img) -ForegroundColor Green
     continue

@@ -9,7 +9,7 @@ import { formatDateTime, refreshErrorText } from "../lib/needs";
 const REGEN_POLL_MS = 8000;
 const REGEN_MAX_TRIES = 10;
 
-export default function ClientRules({ epicKey }: { epicKey: string }) {
+export default function ClientRules({ epicKey, needKey }: { epicKey: string; needKey?: string }) {
   const [epic, setEpic] = useState<EpicOut | null>(null);
   const [theses, setTheses] = useState<ThesesOut | null>(null);
   const [error, setError] = useState("");
@@ -38,7 +38,7 @@ export default function ClientRules({ epicKey }: { epicKey: string }) {
     const load = () => {
       if (!alive) return;
       api
-        .clientRuleTheses(epicKey)
+        .clientRuleTheses(needKey ?? epicKey)
         .then((t) => {
           if (!alive) return;
           setTheses(t);

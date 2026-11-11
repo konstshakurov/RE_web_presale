@@ -123,12 +123,16 @@ a { color: var(--accent); }
 .link { background: none; border: 0; color: var(--accent); cursor: pointer; display: block; padding: 2px 0; }
 .rules h3 { margin: 0 0 8px; }
 .rules dl { margin: 0; }
-.rules__row { display: flex; gap: 16px; padding: 4px 0; }
-.rules dt { font-weight: 600; min-width: 200px; }
-.rules dd { margin: 0; white-space: pre-wrap; }
+.rules__layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.rules__fields, .rules__theses { min-width: 0; }
+.rules__caption { margin: 0 0 4px; }
+.rules__row { display: grid; grid-template-columns: minmax(120px, 180px) minmax(0, 1fr); gap: 14px; padding: 4px 0; }
+.rules dt { font-weight: 600; min-width: 0; }
+.rules dd { margin: 0; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rules__fetched { margin-top: 8px; }
 /* Тезисы правил из комментариев эпика (KON-160): список с источниками */
 /* Тезисы правил клиента (KON-160, вариант B): источники скрыты, открываются по клику */
-.theses { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+.theses { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 10px; }
 .theses h4 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
 .theses ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .theses li { padding: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
@@ -142,6 +146,9 @@ a { color: var(--accent); }
 .theses__src a { color: var(--accent); }
 .theses__note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .theses__badge { margin-left: 8px; }
+@media (max-width: 760px) {
+  .rules__layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
 .empty { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
 .pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .pager label { margin-left: auto; display: flex; gap: 8px; align-items: center; }

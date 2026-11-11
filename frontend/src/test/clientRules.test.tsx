@@ -58,8 +58,11 @@ describe("ClientRules (KON-160 тезисы)", () => {
     const userEvent = (await import("@testing-library/user-event")).default;
     userEvent.setup();
     thesesMocks = [() => json(THESIS_OK)];
-    setup();
+    const { container } = setup();
     await waitFor(() => expect(screen.getByText(/CV отправлять только с фотографией/)).toBeTruthy());
+    const layout = container.querySelector(".rules__layout");
+    expect(layout?.children[0]).toHaveClass("rules__fields");
+    expect(layout?.children[1]).toHaveClass("rules__theses");
     // скрытые источники: ссылка недоступна до раскрытия
     expect(screen.queryByRole("link", { name: /Иванов Иван/ })).toBeNull();
     expect(screen.getByText("1 источник")).toBeTruthy();
@@ -79,6 +82,16 @@ describe("ClientRules (KON-160 тезисы)", () => {
     setup();
     await waitFor(() => expect(screen.getByText(/клиент ещё не писал в эпик/)).toBeTruthy());
     expect(screen.queryByText(/Сгенерировано LLM/)).toBeNull();
+  });
+
+  it("правила полей и тезисы остаются в двух колонках при отсутствии полевых правил", async () => {
+    epicPromise = Promise.resolve(json({ ...EPIC, rules: null }));
+    thesesMocks = [() => json({ ...THESIS_OK, status: "empty", theses: [] })];
+    const { container } = setup();
+    await waitFor(() => expect(screen.getByText("Правила клиента не заполнены")).toBeTruthy());
+    const layout = container.querySelector(".rules__layout");
+    expect(layout?.children).toHaveLength(2);
+    expect(layout?.children[1]).toHaveClass("rules__theses");
   });
 
   it("regenerating: показывается «Обновляется…», кэш не дёргает LLM повторно", async () => {

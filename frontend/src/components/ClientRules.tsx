@@ -66,26 +66,35 @@ export default function ClientRules({ epicKey, needKey }: { epicKey: string; nee
 
   if (error) return <p className="error">{error}</p>;
   if (!epic) return <p className="muted">Загрузка правил клиента…</p>;
-  const rules = epic.rules.filter((r) => r.value && r.value.trim() !== "");
+  const rules = (epic.rules ?? []).filter((r) => r.value && r.value.trim() !== "");
   return (
     <div className="rules">
       <h3>Правила клиента: {epic.name}</h3>
       {epic.stale && <span className="badge badge--stale">данные могут отставать от Jira</span>}
       {epic.error?.message && <p className="error">{epic.error.message}</p>}
-      {rules.length === 0 ? (
-        <p className="muted">Правила клиента не заполнены</p>
-      ) : (
-        <dl>
-          {rules.map((r) => (
-            <div key={r.id} className="rules__row">
-              <dt>{r.name}</dt>
-              <dd>{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {epic.fetched_at && <p className="muted">получено из Jira: {formatDateTime(epic.fetched_at)}</p>}
-      <ThesesSection data={theses} error={thesesError} />
+      <div className="rules__layout">
+        <section className="rules__fields" aria-label="Правила из полей карточки эпика">
+          <p className="muted rules__caption">Правила из полей карточки эпика (FR-015)</p>
+          {rules.length === 0 ? (
+            <p className="muted">Правила клиента не заполнены</p>
+          ) : (
+            <dl>
+              {rules.map((r) => (
+                <div key={r.id} className="rules__row">
+                  <dt>{r.name}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {epic.fetched_at && (
+            <p className="muted rules__fetched">получено из Jira: {formatDateTime(epic.fetched_at)}</p>
+          )}
+        </section>
+        <div className="rules__theses">
+          <ThesesSection data={theses} error={thesesError} />
+        </div>
+      </div>
     </div>
   );
 }

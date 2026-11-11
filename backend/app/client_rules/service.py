@@ -2,7 +2,7 @@
 
 Комментарии эпика уже в кэше (worker, app.epic_comment). Тезисы пересчитываются LLM только
 когда изменился хеш комментариев (типично 1 раз в 1-2 мес на клиента). Задача шлюза
-``purpose="epic_rules"`` ставится от системного владельца; для внешнего провайдера
+``purpose="epic_rules"`` ставится от имени открывшего потребность пользователя; для внешнего провайдера
 обезличивание делает шлюз (FR-023), но такая задача ждёт подтверждения - «Обновить» вручную
 может только админ (POST regenerate от своего логина: подтверждение отправки - его).
 
@@ -20,7 +20,6 @@ from .prompts import EPIC_RULES_SYSTEM, build_prompt, parse_result
 log = logging.getLogger(__name__)
 
 PURPOSE = "epic_rules"
-SYSTEM_OWNER = "system"  # задачи пересчёта по расписанию/открытию; peek читает без владельца
 
 ST_OK = "ok"
 ST_REGENERATING = "regenerating"
@@ -76,10 +75,11 @@ class ClientRulesService:
 
     # --- чтение (GET theses) ---
 
-    def get(self, need_key: str) -> dict[str, Any]:
+    def get(self, need_key: str, owner_login: str) -> dict[str, Any]:
         """Тезисы для раскрытой строки потребности. Кэш по хешу: устарел - «Обновляется…»
-        (202): задача пересчёта ставится здесь лениво (системный владелец; внешний провайдер
-        не подтверждается системно - тогда ждёт ручного «Обновить» админом)."""
+        (202): задача пересчёта ставится здесь лениво от имени текущего пользователя. Это
+        сохраняет владельца в app.llm_task (FK на app.app_user) и позволяет этому же
+        пользователю подтвердить отправку, если провайдер внешний."""
         self._need(need_key)
         epic_key = self._repo.epic_key_for_need(need_key)
         if not epic_key:
@@ -99,7 +99,7 @@ class ClientRulesService:
                 "theses": self._with_sources(epic_key, visited=cached["theses"]),
                 "generated_at": cached["generated_at"], "provider": cached["provider_name"],
             }
-        submitted = self._ensure_task(epic_key, current)
+        submitted = self._ensure_task(epic_key, current, owner_login)
         stale = cached["theses"] if cached is not None else []
         return {
             "status": ST_REGENERATING, "epic_key": epic_key, "need_key": need_key,
@@ -139,7 +139,9 @@ class ClientRulesService:
 
     # --- постановка и ручной пересчёт ---
 
-    def _ensure_task(self, epic_key: str, comments_hash: str) -> str | None:
+    def _ensure_task(
+        self, epic_key: str, comments_hash: str, owner_login: str,
+    ) -> bool | None:
         """Задача пересчёта: пропускаем, если такая уже висит/стоит. ref хранит хеш
         комментариев, от которого считается результат: "epic_key:hash"."""
         ref = _ref(epic_key, comments_hash)
@@ -159,7 +161,7 @@ class ClientRulesService:
                             extra={"epic_key": epic_key, "task_id": row.id})
                 return None
         task = self._gw.submit(
-            SYSTEM_OWNER, PURPOSE, self._prompt(epic_key), system=EPIC_RULES_SYSTEM,
+            owner_login, PURPOSE, self._prompt(epic_key), system=EPIC_RULES_SYSTEM,
             provider_id=None, ref=ref, terms=None,
         )
         if task.requires_confirmation:
@@ -168,7 +170,7 @@ class ClientRulesService:
         else:
             log.info("задача пересчёта тезисов поставлена",
                      extra={"epic_key": epic_key, "task_id": task.id})
-        return task.id
+        return True
 
     def regenerate(self, need_key: str, owner_login: str, provider_id: int | None) -> dict:
         """Ручное «Обновить» (только админ): задача от логина админа; для внешнего провайдера

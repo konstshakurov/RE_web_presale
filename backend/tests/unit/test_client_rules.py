@@ -9,7 +9,8 @@ import uuid
 from dataclasses import dataclass
 from dataclasses import replace as dc_replace
 
-from app.client_rules.prompts import EPIC_RULES_SYSTEM, parse_result
+from app.client_rules.prompts import EPIC_RULES_SYSTEM, build_prompt, parse_result
+from app.client_rules.router import ThesesOut
 from app.client_rules.service import (
     ST_EMPTY,
     ST_OK,
@@ -144,6 +145,12 @@ def test_parse_result_garbage_returns_empty():
     assert parse_result("[{text без кавычек}]") == []
 
 
+def test_build_prompt_handles_epic_without_field_rules():
+    prompt = build_prompt("Клиент без правил", None, [{"id": "101", "body": "Нужен аналитик"}])
+    assert "Правила из полей карточки:\n- (нет)" in prompt
+    assert "[101]" in prompt
+
+
 # --- GET theses ---
 
 def test_get_ok_from_cache_with_sources():
@@ -155,7 +162,7 @@ def test_get_ok_from_cache_with_sources():
     repo.save_epic_theses(EPIC, repo.epic_comments_hash(EPIC),
                           [{"text": "CV с фото", "contradicts_rules": False,
                             "sources": [{"id": "101"}]}], "Qwen (внутренняя)")
-    data = service.get(NEED)
+    data = service.get(NEED, "admin.login")
     assert data["status"] == ST_OK and data["epic_key"] == EPIC
     assert data["theses"][0]["sources"][0]["author"] == "Клиентоса А.Б."
     assert data["provider"] == "Qwen (внутренняя)" and data["generated_at"]
@@ -168,24 +175,40 @@ def test_get_regenerating_submits_task_once():
     seed_basic(repo)
     seed_comments(repo, FakeJira())
     repo.save_epic_theses(EPIC, "старый-хеш", [], "Qwen")
-    first = service.get(NEED)
+    first = service.get(NEED, "admin.login")
     assert first["status"] == ST_REGENERATING and first["task_submitted"]
+    assert ThesesOut(**first).task_submitted is True
     prompt = gateway.submitted[0]["prompt"]
     assert "CV только с фотографией" in prompt and "[101]" in prompt
     assert gateway.submitted[0]["system"] == EPIC_RULES_SYSTEM
-    assert gateway.submitted[0]["owner"] == "system"
+    assert gateway.submitted[0]["owner"] == "admin.login"
     assert f"{EPIC}:" in first["epic_key"] or first["epic_key"] == EPIC
     # повторное открытие блока: задача уже висит, новую не ставим
-    second = service.get(NEED)
+    second = service.get(NEED, "admin.login")
     assert second["task_submitted"] is None
     assert len(gateway.submitted) == 1
     assert llm_repo.latest_task("epic_rules", gateway.submitted[0]["ref"]) is not None
 
 
+def test_get_with_comments_and_no_field_rules_submits_owned_task():
+    from ._sync_fakes import FakeJira
+
+    service, repo, _, gateway = make_service()
+    repo.needs[NEED] = need_row()
+    repo.save_epic(EPIC, "Клиент без полевых правил", None, None)
+    seed_comments(repo, FakeJira())
+
+    data = service.get(NEED, "admin.login")
+
+    assert data["status"] == ST_REGENERATING
+    assert gateway.submitted[0]["owner"] == "admin.login"
+    assert "Правила из полей карточки:\n- (нет)" in gateway.submitted[0]["prompt"]
+
+
 def test_get_empty_when_no_comments():
     service, repo, _, _ = make_service()
     seed_basic(repo)
-    data = service.get(NEED)
+    data = service.get(NEED, "admin.login")
     assert data["status"] == ST_EMPTY and data["theses"] == []
 
 
@@ -193,7 +216,7 @@ def test_get_need_not_found():
     service, repo, _, _ = make_service()
     seed_basic(repo)
     try:
-        service.get("ANALYTICS-404")
+        service.get("ANALYTICS-404", "admin.login")
         raise AssertionError("должен был упасть")
     except ClientRulesError as e:
         assert e.status == 404
@@ -203,7 +226,7 @@ def test_get_need_without_client_409():
     service, repo, _, _ = make_service()
     repo.needs[NEED] = need_row(epic_key=None)
     try:
-        service.get(NEED)
+        service.get(NEED, "admin.login")
         raise AssertionError("должен был упасть")
     except ClientRulesError as e:
         assert e.status == 409
@@ -265,7 +288,7 @@ def test_regenerate_cancels_pending_and_submits_from_admin():
     service, repo, llm_repo, gateway = make_service()
     seed_basic(repo)
     seed_comments(repo, FakeJira())
-    _ = service.get(NEED)  # поставилась системная задача
+    _ = service.get(NEED, "admin.login")  # задача владельца реальной пользовательской сессии
     refs = {v.ref for v in gateway.views.values()}
     before = len(gateway.submitted)
     out = service.regenerate(NEED, "admin.login", provider_id=None)

@@ -22,9 +22,12 @@ EPIC_RULES_SYSTEM = (
 )
 
 
-def build_prompt(epic_name: str, rules: list[dict[str, str]], comments: list[dict]) -> str:
+def build_prompt(
+    epic_name: str, rules: list[dict[str, str]] | None, comments: list[dict],
+) -> str:
     """Текст запроса: правила полей + комментарии (as есть, но урезанные)."""
-    rule_lines = "\n".join(f"- {r.get('name')}: {r.get('value')}" for r in rules) or "- (нет)"
+    rule_lines = "\n".join(
+        f"- {r.get('name')}: {r.get('value')}" for r in (rules or [])) or "- (нет)"
     comment_lines = "\n".join(
         f"[{c.get('id')}] {c.get('author') or ''}: {_trim(str(c.get('body') or ''))}"
         for c in comments

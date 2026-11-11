@@ -71,7 +71,7 @@ def get_theses(
     need_key: str, request: Request, ctx: SessionContext = Depends(authenticated),
 ) -> ThesesOut:
     try:
-        data = _service(request).get(need_key)
+        data = _service(request).get(need_key, ctx.login)
     except ClientRulesError as err:
         raise _http_error(err) from None
     return ThesesOut(**data)

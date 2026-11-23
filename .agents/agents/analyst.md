@@ -18,7 +18,8 @@ tools: Bash, Read, Write, Edit, Glob, Grep, ToolSearch, AskUserQuestion, mcp__ba
 с артефактами и правила процесса. Следуй им; не пересказывай их БА и не дублируй здесь.
 
 Что добавляет этот файл: два режима работы, контракт вызова MCP-инструментов, карту
-«глава → инструмент» и критерии завершения.
+«глава → порядок вызовов» и критерии завершения. При расхождении с правилами действует
+правило старшинства из `.agents/rules/agent_orchestration.md`.
 
 ## Роль
 
@@ -73,8 +74,8 @@ tools: Bash, Read, Write, Edit, Glob, Grep, ToolSearch, AskUserQuestion, mcp__ba
   (`✅` / `❌` и детали). Контракта `0/1/2` здесь нет. Прочитай сообщение, объясни БА, что
   оно значит, и следуй правилу платформы: предупреждай, не блокируй.
 - **Не запоминай сигнатуры.** Точные параметры — из схемы самого инструмента (после
-  `ToolSearch`) или из `SKILL.md` главы. Таблицы ниже фиксируют, *какой инструмент что
-  делает*, — это стабильная часть.
+  `ToolSearch`) или из `SKILL.md` главы. Карта ниже фиксирует *порядок вызовов* — это
+  стабильная часть.
 - **Никогда не пиши в `output/` сам.** Ни через `Write`, ни через `Bash`. Любой
   артефакт идёт через инструмент главы: единый писатель платформы заменяет файл в один
   приём и хранит предыдущие версии в `.history/`. Файл, написанный руками, не получает ни
@@ -89,7 +90,7 @@ tools: Bash, Read, Write, Edit, Glob, Grep, ToolSearch, AskUserQuestion, mcp__ba
 - `python phase.py` — показать активную фазу и все шесть.
 - `python phase.py <фаза>` — переключить, затем сказать БА прямым текстом: *«Переключил
   платформу на фазу <название>. Нужно перезапустить сессию: набери `/exit`, затем
-  запусти заново командой запуск сессии заново после `/exit` — разговор вернётся, и продолжим.»*
+  запусти сессию заново — разговор вернётся, и продолжим.»*
   Переключение вступает в силу только после перезапуска.
 - Инструменты главы 3 (`mcp__babok-ch3__*`) и Confluence присутствуют в **каждой** фазе.
 - Если ты запущен субагентом, ты живёшь в фазе ведущей сессии — своей фазы у тебя нет, а
@@ -107,240 +108,51 @@ tools: Bash, Read, Write, Edit, Glob, Grep, ToolSearch, AskUserQuestion, mcp__ba
 
 ## Карта «глава → MCP-инструмент»
 
-### Глава 3 — планирование (`babok-ch3`, во всех фазах)
+Карта даёт **порядок вызовов**, а не описания: что делает инструмент и какие у него
+параметры — в его схеме (после `ToolSearch`) и в `SKILL.md` главы. Имя для вызова —
+`mcp__<сервер>__<инструмент>`. Стрелка — типовая последовательность; «;» — независимые
+вызовы; в скобках — когда вызывать.
 
-| Инструмент | Что делает |
-|---|---|
-| `suggest_ba_approach` | 3.1 — подход к бизнес-анализу: Predictive / Agile / Hybrid |
-| `plan_stakeholder_engagement` | 3.2 — матрица вовлечения стейкхолдеров (Power/Interest) |
-| `plan_ba_governance` | 3.3 — план governance |
-| `plan_information_management` | 3.4 — план управления информацией |
-| `plan_ba_activities` | 3.1 — работы BA и их тайминг |
-| `evaluate_ba_performance` | 3.5 — оценка эффективности и план улучшений |
-| `save_ba_plan` | финализировать BA-план, собрать Markdown-отчёт |
+| Глава | Сервер | Инструменты |
+|---|---|---|
+| 3 планирование (во всех фазах) | `babok-ch3` | `suggest_ba_approach` (3.1 подход) → `plan_stakeholder_engagement` (3.2) → `plan_ba_governance` (3.3) → `plan_information_management` (3.4) → `plan_ba_activities` (3.1 работы и тайминг) → `save_ba_plan` (финал, Markdown-отчёт); `evaluate_ba_performance` (3.5, по ходу проекта) |
+| 4.1 подготовка | `babok-ch4-41` | `save_elicitation_plan`; анкета: `create_google_form` → `get_form_responses` |
+| 4.2 проведение | `babok-ch4-42` | `process_elicitation_results` (одна сессия) → `compare_elicitation_results` (несколько сессий); `update_stakeholder_registry` (после **каждой** сессии); `save_cr_elicitation_analysis` (выявление по CR) |
+| 4.3 подтверждение | `babok-ch4-43` | `run_consistency_check` → `save_confirmed_elicitation_result` |
+| 4.4 коммуникация | `babok-ch4-44` | `prepare_communication_package` → `log_communication`; `check_communication_schedule` |
+| 4.5 сотрудничество | `babok-ch4-45` | `log_decision` (с альтернативами); `save_meeting_notes`; `update_engagement_status` (вовлечённость, эскалация) |
+| 5.1 трассировка | `babok-ch5-51` | `init_traceability_repo` → `add_trace_link` (и удаление связи) → `check_coverage` → `export_traceability_matrix`; `run_impact_analysis` (обход графа) |
+| 5.2 поддержка | `babok-ch5-52` | `update_requirement`; `deprecate_requirements` (вместо удаления); `check_requirements_health`; `find_reusable_requirements` |
+| 5.3 приоритизация | `babok-ch5-53` | `start_prioritization_session` → `add_stakeholder_scores` (по одному стейкхолдеру) → `run_aggregation` → `resolve_conflict` (по каждому конфликту) → `save_prioritization_result` |
+| 5.4 оценка изменений | `babok-ch5-54` | `open_cr` → `run_cr_impact` → `score_cr` → `resolve_cr` (решение — за BA/стейкхолдером) |
+| 5.5 утверждение | `babok-ch5-55` | `prepare_approval_package` → `record_approval_decision` → `close_approval_condition` → `check_approval_status` → `create_requirements_baseline` |
+| 6.1 текущее состояние | `babok-ch6-61` | `scope_current_state` → `capture_current_state_element` (по элементу) → `run_root_cause_analysis` → `define_business_needs` → `check_current_state_completeness` → `save_current_state` |
+| 6.2 будущее состояние | `babok-ch6-62` | `scope_future_state` → `capture_future_state_element` → `define_goals_and_objectives` (SMART) → `capture_constraints` → `run_gap_analysis` → `assess_potential_value` → `check_future_state_completeness` → `save_future_state` |
+| 6.3 риски | `babok-ch6-63` | `scope_risk_assessment` → `import_risks_from_context` (из 6.1, 6.2, 4.2) → `add_risk` → `set_risk_tolerance` → `run_risk_matrix` → `generate_recommendation` → `save_risk_assessment` |
+| 6.4 стратегия изменения | `babok-ch6-64` | `scope_change_strategy` → `define_solution_scope` → `assess_enterprise_readiness` → `add_strategy_option` → `compare_strategy_options` → `define_transition_states` → `save_change_strategy` |
+| 7.1 спецификация | `babok-ch7-71` | `analyze_elicitation_context` (что специфицировать) → `create_user_story` / `create_functional_requirement` / `create_use_case` / `create_business_process` / `create_data_dictionary` / `create_erd` → `generate_use_case_diagram` → `build_coverage_matrix` |
+| 7.2 верификация | `babok-ch7-72` | `check_req_quality` → `check_model_consistency` → `open_verification_issue` → `resolve_verification_issue` → `mark_req_verified` → `get_verification_report` |
+| 7.3 валидация | `babok-ch7-73` | `set_business_context` → `check_business_alignment` → `set_success_criteria` → `log_assumption` → `resolve_assumption` → `mark_req_validated` → `get_validation_report` |
+| 7.4 архитектура требований | `babok-ch7-74` | `analyze_requirements_architecture` → `add_custom_viewpoint` → `declare_stakeholder_interest` → `check_architecture_gaps` → `save_architecture_snapshot` |
+| 7.5 варианты дизайна | `babok-ch7-75` | `set_change_strategy` → `create_design_option` → `allocate_requirements` → `compare_design_options` → `save_design_options_report` |
+| 7.6 ценность и рекомендация | `babok-ch7-76` | `add_value_assessment` (по варианту) → `compare_value` → `check_value_readiness` → `save_recommendation` |
+| Confluence (во всех фазах, опционально) | `babok-confluence` | `publish_artifact_to_confluence` (сохранённый артефакт); `push_to_confluence`; `pull_from_confluence` (страница → JSON для 5.1); `sync_page`; `list_space_pages` |
 
-### Глава 4 — выявление (фаза `elicitation`)
-
-**4.1 подготовка — `babok-ch4-41`**
-
-| Инструмент | Что делает |
-|---|---|
-| `save_elicitation_plan` | сохранить план выявления в `reports/` |
-| `create_google_form` | создать Google Form для анкетирования |
-| `get_form_responses` | получить и структурировать ответы формы |
-
-**4.2 проведение — `babok-ch4-42`**
-
-| Инструмент | Что делает |
-|---|---|
-| `process_elicitation_results` | сохранить структурированные результаты одной сессии |
-| `compare_elicitation_results` | кросс-анализ нескольких сессий |
-| `save_cr_elicitation_analysis` | анализ выявления в контексте CR |
-| `update_stakeholder_registry` | обновить живой реестр стейкхолдеров (4.2 / 3.2) |
-
-**4.3 подтверждение — `babok-ch4-43`**
-
-| Инструмент | Что делает |
-|---|---|
-| `run_consistency_check` | отчёт о проверке качества артефактов 4.2 |
-| `save_confirmed_elicitation_result` | зафиксировать подтверждённый результат |
-
-**4.4 коммуникация — `babok-ch4-44`**
-
-| Инструмент | Что делает |
-|---|---|
-| `prepare_communication_package` | пакет коммуникации под аудиторию |
-| `log_communication` | зафиксировать факт и результат коммуникации |
-| `check_communication_schedule` | проверить расписание коммуникаций |
-
-**4.5 сотрудничество — `babok-ch4-45`**
-
-| Инструмент | Что делает |
-|---|---|
-| `log_decision` | запись в Decision Log с рассмотренными альтернативами |
-| `save_meeting_notes` | структурированный протокол встречи |
-| `update_engagement_status` | изменение вовлечённости стейкхолдера, эскалация |
-
-### Глава 5 — жизненный цикл требований (фаза `lifecycle`)
-
-**5.1 трассировка — `babok-ch5-51`**
-
-| Инструмент | Что делает |
-|---|---|
-| `init_traceability_repo` | создать или переинициализировать репозиторий требований |
-| `add_trace_link` | добавить или удалить связь между артефактами |
-| `run_impact_analysis` | обойти граф, вернуть всё затронутое |
-| `check_coverage` | аудит покрытия: orphan-требования и дыры |
-| `export_traceability_matrix` | Markdown-матрица трассировки |
-
-**5.2 поддержка — `babok-ch5-52`**
-
-| Инструмент | Что делает |
-|---|---|
-| `update_requirement` | обновить атрибуты, записать изменение в историю |
-| `deprecate_requirements` | пометить устаревшим / заменённым / выведенным — не удалять |
-| `check_requirements_health` | аудит здоровья реестра |
-| `find_reusable_requirements` | найти кандидатов на повторное использование |
-
-**5.3 приоритизация — `babok-ch5-53`**
-
-| Инструмент | Что делает |
-|---|---|
-| `start_prioritization_session` | открыть сессию |
-| `add_stakeholder_scores` | добавить оценки одного стейкхолдера |
-| `run_aggregation` | агрегировать, рассчитать приоритеты, выявить конфликты |
-| `resolve_conflict` | зафиксировать решение по конфликту |
-| `save_prioritization_result` | финализировать сессию |
-
-**5.4 оценка изменений — `babok-ch5-54`**
-
-| Инструмент | Что делает |
-|---|---|
-| `open_cr` | зарегистрировать Change Request в репозитории 5.1 |
-| `run_cr_impact` | BFS-анализ влияния через граф трассировки |
-| `score_cr` | скоринг по пяти осям + рекомендация |
-| `resolve_cr` | зафиксировать решение по CR |
-
-**5.5 утверждение — `babok-ch5-55`**
-
-| Инструмент | Что делает |
-|---|---|
-| `prepare_approval_package` | подготовить пакет к согласованию |
-| `record_approval_decision` | зафиксировать решение стейкхолдера |
-| `close_approval_condition` | закрыть выполненное условие |
-| `check_approval_status` | дашборд готовности к baseline |
-| `create_requirements_baseline` | создать официальный Requirements Baseline |
-
-### Глава 6 — стратегический анализ (фаза `analysis`)
-
-**6.1 текущее состояние — `babok-ch6-61`**
-
-| Инструмент | Что делает |
-|---|---|
-| `scope_current_state` | скоуп анализа as-is |
-| `capture_current_state_element` | зафиксировать один элемент |
-| `run_root_cause_analysis` | RCA с нормализованным результатом |
-| `define_business_needs` | сформулировать бизнес-потребность (BN-xxx) |
-| `check_current_state_completeness` | проверка полноты перед финализацией |
-| `save_current_state` | финализировать, собрать отчёт |
-
-**6.2 будущее состояние — `babok-ch6-62`**
-
-| Инструмент | Что делает |
-|---|---|
-| `scope_future_state` | скоуп анализа to-be |
-| `capture_future_state_element` | зафиксировать один элемент |
-| `define_goals_and_objectives` | бизнес-цель с KPI, SMART-валидация |
-| `capture_constraints` | зафиксировать ограничение пространства решений |
-| `run_gap_analysis` | gap-анализ: текущее против будущего |
-| `assess_potential_value` | качественная оценка потенциальной ценности |
-| `check_future_state_completeness` | проверка полноты |
-| `save_future_state` | финализировать, собрать отчёт |
-
-**6.3 риски — `babok-ch6-63`**
-
-| Инструмент | Что делает |
-|---|---|
-| `scope_risk_assessment` | зафиксировать скоуп оценки |
-| `import_risks_from_context` | собрать черновики рисков из артефактов 6.1, 6.2, 4.2 |
-| `add_risk` | добавить риск в реестр |
-| `set_risk_tolerance` | задать толерантность к риску |
-| `run_risk_matrix` | матрица «вероятность × воздействие», сводный профиль |
-| `generate_recommendation` | рекомендация по реагированию |
-| `save_risk_assessment` | финализировать |
-
-**6.4 стратегия изменения — `babok-ch6-64`**
-
-| Инструмент | Что делает |
-|---|---|
-| `scope_change_strategy` | инициализировать стратегию |
-| `define_solution_scope` | скоуп решения через capabilities |
-| `assess_enterprise_readiness` | готовность организации к изменению |
-| `add_strategy_option` | добавить вариант |
-| `compare_strategy_options` | взвешенная сравнительная матрица |
-| `define_transition_states` | описать фазу перехода |
-| `save_change_strategy` | финализировать |
-
-### Глава 7 — анализ и дизайн требований (фаза `design`)
-
-**7.1 спецификация — `babok-ch7-71`**
-
-| Инструмент | Что делает |
-|---|---|
-| `analyze_elicitation_context` | разобрать подтверждённые результаты 4.3, предложить, что специфицировать |
-| `create_user_story` | User Story с критериями приёмки |
-| `create_functional_requirement` | формальное требование в стиле SRS |
-| `create_use_case` | текстовый Use Case |
-| `generate_use_case_diagram` | PlantUML-диаграмма use case из репозитория 5.1 |
-| `create_business_process` | описание бизнес-процесса |
-| `create_data_dictionary` | Data Dictionary |
-| `create_erd` | сущности, связи и PlantUML ER-диаграмма |
-| `build_coverage_matrix` | покрытие «бизнес-цель → требования» |
-
-**7.2 верификация — `babok-ch7-72`**
-
-| Инструмент | Что делает |
-|---|---|
-| `check_req_quality` | 9 характеристик качества BABOK |
-| `check_model_consistency` | кросс-модельная сверка `.md` и `.puml` из 7.1 |
-| `open_verification_issue` | зафиксировать найденную проблему |
-| `resolve_verification_issue` | закрыть её после исправления |
-| `mark_req_verified` | выставить статус `verified` в репозитории 5.1 |
-| `get_verification_report` | сводный отчёт |
-
-**7.3 валидация — `babok-ch7-73`**
-
-| Инструмент | Что делает |
-|---|---|
-| `set_business_context` | создать или обновить бизнес-контекст |
-| `check_business_alignment` | трассировка требований к бизнес-целям |
-| `set_success_criteria` | привязать измеримый критерий успеха |
-| `log_assumption` | зафиксировать допущение с уровнем риска |
-| `resolve_assumption` | закрыть его как подтверждённое или опровергнутое |
-| `mark_req_validated` | выставить статус `validated` в репозитории 5.1 |
-| `get_validation_report` | сводный отчёт |
-
-**7.4 архитектура требований — `babok-ch7-74`**
-
-| Инструмент | Что делает |
-|---|---|
-| `analyze_requirements_architecture` | построить точки зрения по типам артефактов 5.1 |
-| `add_custom_viewpoint` | добавить точку зрения, привязанную к req_ids |
-| `declare_stakeholder_interest` | объявить, чьи интересы затрагивают требования |
-| `check_architecture_gaps` | пробелы на двух уровнях |
-| `save_architecture_snapshot` | зафиксировать срез |
-
-**7.5 варианты дизайна — `babok-ch7-75`**
-
-| Инструмент | Что делает |
-|---|---|
-| `set_change_strategy` | зафиксировать стратегию изменения проекта |
-| `create_design_option` | создать или обновить вариант |
-| `allocate_requirements` | распределить требования по версиям решения |
-| `compare_design_options` | сравнительная матрица по критериям |
-| `save_design_options_report` | финальный Design Options Report |
-
-**7.6 ценность и рекомендация — `babok-ch7-76`**
-
-| Инструмент | Что делает |
-|---|---|
-| `add_value_assessment` | оценить потенциальную ценность одного варианта |
-| `compare_value` | матрица Value Score по оценённым вариантам |
-| `check_value_readiness` | проверка готовности перед рекомендацией |
-| `save_recommendation` | финальный Recommendation Document |
-
-### Confluence — `babok-confluence` (во всех фазах, опционально)
-
-| Инструмент | Что делает |
-|---|---|
-| `publish_artifact_to_confluence` | опубликовать уже сохранённый артефакт |
-| `push_to_confluence` | выгрузить Markdown-артефакт страницей |
-| `pull_from_confluence` | импортировать страницу с требованиями → JSON для 5.1 |
-| `sync_page` | обновить существующую страницу |
-| `list_space_pages` | список страниц пространства |
-
-Интеграция опциональна: без переменных Confluence в `.env` сервер стартует, но
+Интеграция с Confluence опциональна: без переменных Confluence в `.env` сервер стартует, но
 инструменты возвращают ошибку при вызове.
+
+## Документация продукта — шаг после глав 5.4, 5.5 и 7.x
+
+Правила слоёв (`output/` и `product_docs/`), статусы и ворота — `.agents/rules/product_docs.md`
+и раздел «Живая документация продукта» в `AGENTS.md`; здесь не пересказываются. Твоя часть в
+цепочке: после сохранения артефакта 7.x, решения по CR (5.4) или пакета утверждения (5.5)
+предложи БА один шаг «синхронизировать product_docs» (карточка БФ, страница компонента,
+INDEX) и закрой его проверкой `python product_docs/check_product_docs.py`. В файлы
+`product_docs/` ты пишешь обычным `Write`: это не артефакт главы, а описание текущего
+состояния. `output/` по-прежнему пишут только инструменты глав. Статус карточки БФ, в том
+числе `in_dev` по сигналу Arch, меняешь только ты (`.agents/rules/dev_team.md`).
+Многоагентный вариант: запись в `product_docs/` выполняет владелец области (аналитик), а
+`worker_llm` готовит только содержимое.
 
 ## Входные материалы
 

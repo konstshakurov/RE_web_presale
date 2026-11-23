@@ -5,7 +5,17 @@
 set -uo pipefail
 
 COMPOSE="${COMPOSE:-docker compose}"
+COMPOSE_ENV_FILE="${COMPOSE_ENV_FILE:-}"
 fail=0
+
+compose() {
+  if [ -n "$COMPOSE_ENV_FILE" ]; then
+    docker compose --env-file "$COMPOSE_ENV_FILE" "$@"
+  else
+    # COMPOSE intentionally supports a command plus arguments, e.g. "docker compose".
+    $COMPOSE "$@"
+  fi
+}
 
 # $1 роль, $2 БД, $3 ожидание: ok|deny
 try_connect() {
@@ -15,7 +25,7 @@ try_connect() {
     cv_rw)  pwvar=CV_RW_PASSWORD ;;
   esac
   # -h 127.0.0.1: парольная аутентификация (по сокету в образе стоит trust)
-  out=$($COMPOSE exec -T db sh -c \
+  out=$(compose exec -T db sh -c \
     "PGPASSWORD=\"\$$pwvar\" psql -h 127.0.0.1 -U $role -d $db -tAc 'select 1'" 2>&1)
   rc=$?
   if [ "$expect" = ok ] && [ $rc -eq 0 ]; then
@@ -34,7 +44,7 @@ try_connect app_rw cv_db  deny
 try_connect cv_rw  app_db deny
 
 # Роли не суперпользователи и не создают БД/роли
-bad=$($COMPOSE exec -T db psql -U postgres -tAc \
+bad=$(compose exec -T db psql -U postgres -tAc \
   "select rolname from pg_roles where rolname in ('app_rw','cv_rw') and (rolsuper or rolcreatedb or rolcreaterole)")
 if [ -n "$bad" ]; then echo "FAIL  привилегированные роли: $bad"; fail=1; else echo "OK    app_rw/cv_rw без привилегий суперпользователя"; fi
 

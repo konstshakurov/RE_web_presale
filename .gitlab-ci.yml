@@ -53,6 +53,9 @@ db-isolation:
   before_script: [apk add --no-cache bash openssl docker-cli-compose]
   script:
     - |
+      set -eu
+      ci_env_file="$(mktemp)"
+      trap 'rm -f "$ci_env_file"' EXIT
       {
         echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
         echo "APP_RW_PASSWORD=$(openssl rand -hex 16)"
@@ -62,14 +65,14 @@ db-isolation:
         echo "TEST_LDAP_DOMAIN=example.test"
         echo "TEST_LDAP_ADMIN_PASSWORD=$(openssl rand -hex 16)"
         echo "APP_DB_URL=x"; echo "CV_DB_URL=x"; echo "APP_ENC_KEY=x"
-      } > .env
-    # volume от прежнего прогона держит пароли ролей из первой инициализации - в CI
-    # пароль каждый раз новый, поэтому окружение полностью одноразовое (down -v)
-    - docker compose down -v --remove-orphans || true
-    - docker compose up -d --wait db
-    # диагностика: какие роли/БД реально созданы и что показал init (пароли не печатаются)
-    - docker compose exec -T db psql -U postgres -tAc "select datname from pg_database order by 1"
-    - docker compose exec -T db psql -U postgres -tAc "select rolname from pg_roles where rolname like '%rw%' order by 1"
-    - docker compose exec -T db sh -c 'echo APP_RW_PASSWORD=$([ -n "$APP_RW_PASSWORD" ] && echo set || echo MISSING); echo CV_RW_PASSWORD=$([ -n "$CV_RW_PASSWORD" ] && echo set || echo MISSING)'
-    - docker compose logs db 2>/dev/null | grep -iE "init|error|fatal|sourcing" | head -n 30 || true
-    - bash scripts/check_db_isolation.sh
+      } > "$ci_env_file"
+      # volume от прежнего прогона держит пароли ролей из первой инициализации - в CI
+      # пароль каждый раз новый, поэтому окружение полностью одноразовое (down -v)
+      docker compose --env-file "$ci_env_file" down -v --remove-orphans || true
+      docker compose --env-file "$ci_env_file" up -d --wait db
+      # диагностика: какие роли/БД реально созданы и что показал init (пароли не печатаются)
+      docker compose --env-file "$ci_env_file" exec -T db psql -U postgres -tAc "select datname from pg_database order by 1"
+      docker compose --env-file "$ci_env_file" exec -T db psql -U postgres -tAc "select rolname from pg_roles where rolname like '%rw%' order by 1"
+      docker compose --env-file "$ci_env_file" exec -T db sh -c 'echo APP_RW_PASSWORD=$([ -n "$APP_RW_PASSWORD" ] && echo set || echo MISSING); echo CV_RW_PASSWORD=$([ -n "$CV_RW_PASSWORD" ] && echo set || echo MISSING)'
+      docker compose --env-file "$ci_env_file" logs db 2>/dev/null | grep -iE "init|error|fatal|sourcing" | head -n 30 || true
+      COMPOSE_ENV_FILE="$ci_env_file" bash scripts/check_db_isolation.sh

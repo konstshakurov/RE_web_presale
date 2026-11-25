@@ -223,6 +223,83 @@
         "title": "DictionaryBody",
         "type": "object"
       },
+      "DuplicateClassificationIn": {
+        "properties": {
+          "classification": {
+            "description": "similar = Похожая, duplicate = Дубль (CR-023)",
+            "enum": [
+              "similar",
+              "duplicate"
+            ],
+            "title": "Classification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "classification"
+        ],
+        "title": "DuplicateClassificationIn",
+        "type": "object"
+      },
+      "DuplicateOut": {
+        "description": "Связь-дубль потребности (FR-014 v1.1; вывод - design/KON-165/decision.md).",
+        "properties": {
+          "classification": {
+            "description": "Классификация пользователя (CR-023): similar = Похожая, duplicate = Дубль",
+            "enum": [
+              "similar",
+              "duplicate"
+            ],
+            "title": "Classification",
+            "type": "string"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Прямой контракт | Субподрядчик",
+            "title": "Contract Type"
+          },
+          "jira_key": {
+            "title": "Jira Key",
+            "type": "string"
+          },
+          "match_percent": {
+            "description": "Совпадение описаний, % (порог 15%, ISS-005)",
+            "title": "Match Percent",
+            "type": "integer"
+          },
+          "rate_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ставка цифрой; None - «—»",
+            "title": "Rate Amount"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jira_key",
+          "title",
+          "match_percent",
+          "classification"
+        ],
+        "title": "DuplicateOut",
+        "type": "object"
+      },
       "EmployeeFiles": {
         "properties": {
           "archive": {
@@ -1560,6 +1637,15 @@
               }
             ],
             "title": "Description"
+          },
+          "duplicates": {
+            "default": [],
+            "description": "Связи-дубли (FR-014): совпадение описаний >= 15% за 2 недели",
+            "items": {
+              "$ref": "#/components/schemas/DuplicateOut"
+            },
+            "title": "Duplicates",
+            "type": "array"
           },
           "employee_key": {
             "anyOf": [
@@ -9249,6 +9335,78 @@
           }
         ],
         "summary": "Need Groups",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/needs/{key}/duplicates/{dup_key}": {
+      "post": {
+        "description": "Классификация связи-дубля «Похожая / Дубль» (FR-014 v1.1, CR-023); сохраняется\nперсистентно и переживает пересинхронизацию. 404 - связи нет.",
+        "operationId": "set_duplicate_classification_sync_needs__key__duplicates__dup_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "dup_key",
+            "required": true,
+            "schema": {
+              "title": "Dup Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateClassificationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Duplicate Classification Sync Needs  Key  Duplicates  Dup Key  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "CsrfToken": []
+          }
+        ],
+        "summary": "Set Duplicate Classification",
         "tags": [
           "sync"
         ]

@@ -282,6 +282,10 @@ class SyncService:
         self._repo.record_attempt_success(SCOPE_NEEDS, started)
         res.extra["epics_of_changed"] = {r.epic_key for r in rows if r.epic_key}
         self._catch_up_comments(token, res.extra["epics_of_changed"], source="needs")
+        try:
+            res.extra["duplicates"] = self._repo.refresh_duplicates()
+        except Exception:  # noqa: BLE001 - дубли вторичны, опрос из-за них не падает
+            log.warning("расчёт дублей потребностей не выполнен", exc_info=True)
         return res
 
     def _fetch_employees(self, token: str) -> SyncResult:

@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useState } from "react";
 
 import { api } from "../api/client";
-import type { NeedOut, NeedSort, SortOrder } from "../api/types";
-import { candidatesLabel } from "../lib/matching";
+import type { DuplicateOut, NeedOut, NeedSort, SortOrder } from "../api/types";
+import { candidatesLabel, duplicatesLabel, duplicateTypeLabel } from "../lib/matching";
 import { statusClass } from "../lib/statusTone";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
@@ -23,6 +23,30 @@ interface Props {
   sort?: NeedsSort;
   onSort?: (sort: NeedSort) => void; // клик по заголовку «Создана»
   onChanged?: () => void; // статус изменён или кандидат назначен: страница перечитывает список
+}
+
+// Шеврон облачка (KON-165): на одной линии с текстом, поворот без анимации
+function Chevron() {
+  return (
+    <span className="chev" aria-hidden="true">
+      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor"
+        strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m3.5 6 4.5 4.5L12.5 6" />
+      </svg>
+    </span>
+  );
+}
+
+// Треугольник предупреждения (KON-165)
+function WarnIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3 2.5 20h19Z" />
+      <path d="M12 9.5v5" />
+      <path d="M12 17.4v.01" />
+    </svg>
+  );
 }
 
 function SortHeader({ field, label, sort, onSort }: { field: NeedSort; label: string } & Pick<Props, "sort" | "onSort">) {
@@ -64,6 +88,20 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
   const [cand, setCand] = useState<{ key: string; start: boolean } | null>(null);
   // Окно «ROS специалиста» (FR-041, KON-161): ничего не сохраняет
   const [rosNeed, setRosNeed] = useState<NeedOut | null>(null);
+  // Блок дублей (FR-014, KON-165): открыт для ключа потребности
+  const [dupOpen, setDupOpen] = useState<string | null>(null);
+  // Классификация «Похожая/Дубль» (CR-023): optimistic, при ошибке - откат
+  const [cls, setCls] = useState<Record<string, "similar" | "duplicate">>({});
+  const [clsOpen, setClsOpen] = useState<string | null>(null);
+  const classify = (needKey: string, d: DuplicateOut, value: "similar" | "duplicate") => {
+    const id = `${needKey}:${d.jira_key}`;
+    const prev = cls[id] ?? d.classification;
+    if (prev === value) return;
+    setCls((c) => ({ ...c, [id]: value }));
+    api.setDuplicateClassification(needKey, d.jira_key, value).catch(() => {
+      setCls((c) => ({ ...c, [id]: prev }));
+    });
+  };
   return (
     <>
       <table className="needs">
@@ -102,7 +140,25 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                   )}
                 </td>
                 <td>{n.author || "—"}</td>
-                <td>{n.title}</td>
+                <td>
+                  <span className="need-title">{n.title}</span>
+                  {(n.duplicates?.length ?? 0) > 0 && (
+                    /* Индикатор дублей (FR-014, KON-165): новая строка, статичное облачко */
+                    <span className="dup-line">
+                      <button
+                        type="button"
+                        className={dupOpen === n.jira_key ? "dup-pill is-open" : "dup-pill"}
+                        aria-expanded={dupOpen === n.jira_key}
+                        aria-label={`Дубли: ${duplicatesLabel(n.duplicates!.length)}, ${n.jira_key}`}
+                        onClick={() => setDupOpen(dupOpen === n.jira_key ? null : n.jira_key)}
+                      >
+                        <WarnIcon />
+                        {duplicatesLabel(n.duplicates!.length)}
+                        <Chevron />
+                      </button>
+                    </span>
+                  )}
+                </td>
                 <td>
                   <span className={statusClass(n.status)}>{n.status}</span>
                   <StatusActions
@@ -190,6 +246,60 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                 <tr className="needs__details is-selected">
                   <td colSpan={9}>
                     <ClientRules epicKey={n.epic_key} needKey={n.jira_key} />
+                  </td>
+                </tr>
+              )}
+              {dupOpen === n.jira_key && (n.duplicates?.length ?? 0) > 0 && (
+                /* Блок дублей (FR-014, KON-165): ключ на линии «Название», классификация (CR-023) */
+                <tr className="needs__details dup-block">
+                  <td colSpan={9}>
+                    {n.duplicates!.map((d) => {
+                      const id = `${n.jira_key}:${d.jira_key}`;
+                      const value = cls[id] ?? d.classification;
+                      return (
+                        <div className="dup-item" key={d.jira_key}>
+                          {d.jira_url ? (
+                            <a className="dup-key" href={d.jira_url} target="_blank" rel="noreferrer">
+                              {shortKey(d.jira_key)}
+                            </a>
+                          ) : (
+                            <span className="dup-key">{shortKey(d.jira_key)}</span>
+                          )}
+                          <span className="dup-title" title={d.title}>{d.title}</span>
+                          <span className="dup-type">{duplicateTypeLabel(d.contract_type)}</span>
+                          <span className="dup-rate">
+                            {d.rate_amount == null ? "—" : d.rate_amount.toLocaleString("ru-RU")}
+                          </span>
+                          <span className="dup-pct">{d.match_percent}%</span>
+                          <span className="cls">
+                            <button
+                              type="button"
+                              className="cls-btn"
+                              aria-haspopup="listbox"
+                              aria-expanded={clsOpen === id}
+                              onClick={() => setClsOpen(clsOpen === id ? null : id)}
+                            >
+                              {value === "duplicate" ? "Дубль" : "Похожая"}
+                              <Chevron />
+                            </button>
+                            {clsOpen === id && (
+                              <span className="cls-menu" role="listbox" aria-label="Классификация связи">
+                                {(["similar", "duplicate"] as const).map((v) => (
+                                  <button
+                                    type="button"
+                                    key={v}
+                                    onClick={() => { classify(n.jira_key, d, v); setClsOpen(null); }}
+                                  >
+                                    <span className="mark">{value === v ? "✓" : ""}</span>
+                                    {v === "duplicate" ? "Дубль" : "Похожая"}
+                                  </button>
+                                ))}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </td>
                 </tr>
               )}

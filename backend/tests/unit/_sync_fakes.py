@@ -35,6 +35,10 @@ class FakeSyncRepo:
         self.epic_comments_store: dict[str, dict[str, dict]] = {}
         self.theses: dict[str, dict] = {}
         self.saved_theses: list[tuple] = []
+        self.dup_calls = 0
+        self.dup_count = 0
+        self.duplicates: dict[str, list[dict]] = {}
+        self.classifications: list[tuple] = []
 
     def set_poller(self, login: str, secret_updated_at: datetime = T0) -> None:
         self.pollers = [p for p in self.pollers if p.login != login]
@@ -70,6 +74,8 @@ class FakeSyncRepo:
     def list_needs(self, f, *, limit, offset, sort="created", order_dir="desc"):
         self.list_calls.append({"filter": f, "limit": limit, "offset": offset,
                                 "sort": sort, "order_dir": order_dir})
+        if getattr(self, "list_result", None) is not None:
+            return self.list_result, len(self.list_result)
         return [], 0
 
     def max_need_updated(self):
@@ -80,6 +86,19 @@ class FakeSyncRepo:
         for r in rows:
             self.needs[r.jira_key] = r
         return len(rows)
+
+    # --- Дубли потребностей (FR-014 v1.1) ---
+    def refresh_duplicates(self, *, window_days: int = 14, threshold: int = 15):
+        self.dup_calls += 1
+        return self.dup_count
+
+    def duplicates_for(self, keys):
+        return {k: list(self.duplicates.get(k, [])) for k in keys
+                if self.duplicates.get(k)}
+
+    def set_duplicate_classification(self, need_key, dup_key, classification):
+        self.classifications.append((need_key, dup_key, classification))
+        return True
 
     def employee_login_map(self):
         by: dict[str, list[str]] = {}

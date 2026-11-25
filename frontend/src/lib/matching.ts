@@ -130,6 +130,21 @@ export function candidatesLabel(n: number): string {
   return `${n} ${word}`;
 }
 
+// «1 дубль», «2 дубля», «5 дублей», «21 дубль», «12 дублей» (FR-014, KON-165)
+export function duplicatesLabel(n: number): string {
+  const last = n % 10;
+  const tens = n % 100;
+  const word = tens >= 11 && tens <= 14 ? "дублей" : last === 1 ? "дубль" : last >= 2 && last <= 4 ? "дубля" : "дублей";
+  return `${n} ${word}`;
+}
+
+// Тип связи в строке дубля: сокращения по решению KON-165 (Суб/Прямой)
+export function duplicateTypeLabel(contractType?: string | null): string {
+  if (contractType === "Субподрядчик") return "Суб";
+  if (contractType === "Прямой контракт") return "Прямой";
+  return contractType || "—";
+}
+
 export const TECH_TERM_MAX_LEN = 64;
 export const TECH_TERMS_MAX = 500;
 

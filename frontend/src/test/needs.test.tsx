@@ -104,7 +104,7 @@ describe("Потребности", () => {
     expect(within(row).getByText("Аналитик 1С")).toBeInTheDocument();
     expect(within(row).getByText("Поиск кандидата")).toBeInTheDocument();
     expect(within(row).getByText(/Клиент А/)).toBeInTheDocument();
-    expect(within(row).getByText("Прямой контракт")).toBeInTheDocument();
+    expect(within(row).getByText("Прямой")).toBeInTheDocument();
     expect(within(row).getByText(/2\s750 RUB/)).toBeInTheDocument();
     expect(row.textContent).not.toContain("/ час");
     expect(screen.getByRole("columnheader", { name: "Клиент" })).toBeInTheDocument();

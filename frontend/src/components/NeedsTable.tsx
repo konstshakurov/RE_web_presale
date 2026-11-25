@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from "react";
 
 import { api } from "../api/client";
 import type { DuplicateOut, NeedOut, NeedSort, SortOrder } from "../api/types";
-import { candidatesLabel, duplicatesLabel, duplicateTypeLabel } from "../lib/matching";
+import { candidatesLabel, contractTypeLabel, duplicatesLabel } from "../lib/matching";
 import { statusClass } from "../lib/statusTone";
 import { formatDateTime, formatRate } from "../lib/needs";
 import ClientRules from "./ClientRules";
@@ -183,7 +183,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                     </button>
                   )}
                 </td>
-                <td>{n.contract_type || "—"}</td>
+                <td>{contractTypeLabel(n.contract_type)}</td>
                 <td className="rate">
                   <strong>{rate.main}</strong>
                   {rate.vat && <span className="rate__vat">{rate.vat}</span>}
@@ -266,7 +266,7 @@ export default function NeedsTable({ items, sort, onSort, onChanged }: Props) {
                             <span className="dup-key">{shortKey(d.jira_key)}</span>
                           )}
                           <span className="dup-title" title={d.title}>{d.title}</span>
-                          <span className="dup-type">{duplicateTypeLabel(d.contract_type)}</span>
+                          <span className="dup-type">{contractTypeLabel(d.contract_type)}</span>
                           <span className="dup-rate">
                             {d.rate_amount == null ? "—" : d.rate_amount.toLocaleString("ru-RU")}
                           </span>

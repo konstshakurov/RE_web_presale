@@ -138,8 +138,8 @@ export function duplicatesLabel(n: number): string {
   return `${n} ${word}`;
 }
 
-// Тип связи в строке дубля: сокращения по решению KON-165 (Суб/Прямой)
-export function duplicateTypeLabel(contractType?: string | null): string {
+// Тип контракта: сокращения по решению владельца (CR-022 п. 3.9, KON-165): «Суб», «Прямой»
+export function contractTypeLabel(contractType?: string | null): string {
   if (contractType === "Субподрядчик") return "Суб";
   if (contractType === "Прямой контракт") return "Прямой";
   return contractType || "—";

@@ -524,6 +524,122 @@ class TestCreateFunctionalRequirement(BaseMCPTest):
         self.assertIn("ДОЛЖНА", result)
 
 
+class TestUpdateRequirementSpec(BaseMCPTest):
+    P = "fr_update_spec_test"
+
+    def setUp(self):
+        super().setUp()
+        content = """# FR-015 — Правила клиента
+
+| Атрибут | Значение |
+|---------|----------|
+| Тип | Функциональное требование |
+| Статус | draft |
+| Версия | 1.1 |
+
+## Формулировка
+
+> _Формулировка: «Система ДОЛЖНА [действие]...»_
+
+Старое требование.
+
+## Обоснование
+
+Старое обоснование.
+
+## Ограничения и допущения
+
+Старое ограничение.
+
+## Связанные требования
+
+`BR-006`
+
+---
+
+## Трассировка
+
+Ссылка на граф.
+"""
+        spec_path = mod71._save_spec(content, self.P, "fr_015_client_rules.md")
+        save_spec_repo(make_spec_repo(self.P, [{
+            "id": "FR-015", "type": "functional", "title": "Правила клиента",
+            "version": "1.1", "status": "approved", "source_artifact": spec_path,
+        }]))
+
+    def test_updates_existing_sections_and_preserves_other_content(self):
+        result = mod71.update_requirement_spec(
+            project_id=self.P,
+            req_id="FR-015",
+            description="Система ДОЛЖНА показывать тезисы из комментариев эпика.",
+            change_reason="CR-020: LLM-тезисы правил клиента",
+            new_version="1.2",
+            new_status="under_change",
+            rationale="Уменьшает ручной поиск правил и сохраняет проверяемые источники.",
+            constraints="Комментарий синхронизируется раз в сутки; LLM работает по хешу.",
+            acceptance_criteria="1. У тезиса есть ссылка и автор источника.\n2. Повторное открытие не запускает LLM без изменения хеша.",
+            related_ids_json='["BR-006", "FR-023"]',
+        )
+
+        self.assertIn("✅ Спецификация `FR-015` обновлена", result)
+        self.assertIn("Версия в файле: 1.2", result)
+        repo = load_spec_repo(self.P)
+        node = next(r for r in repo["requirements"] if r["id"] == "FR-015")
+        self.assertEqual(node["version"], "1.1")
+        self.assertEqual(node["status"], "approved")
+        with open(node["source_artifact"], encoding="utf-8") as f:
+            saved = f.read()
+        self.assertIn("Система ДОЛЖНА показывать тезисы", saved)
+        self.assertIn("## Acceptance Criteria", saved)
+        self.assertIn("CR-020: LLM-тезисы правил клиента", saved)
+        self.assertIn("## Трассировка", saved)
+        self.assertNotIn("Старое требование.", saved)
+
+    def test_appends_history_inside_existing_history_section(self):
+        node = next(r for r in load_spec_repo(self.P)["requirements"] if r["id"] == "FR-015")
+        with open(node["source_artifact"], "a", encoding="utf-8") as f:
+            f.write("\n## История изменений\n\n- 1.1 (old): existing.\n\n---\n")
+        result = mod71.update_requirement_spec(
+            project_id=self.P, req_id="FR-015", description="Updated statement.",
+            change_reason="CR-020: history append", new_version="1.2",
+        )
+        self.assertIn("Спецификация `FR-015` обновлена", result)
+        with open(node["source_artifact"], encoding="utf-8") as f:
+            saved = f.read()
+        history = saved.split("## История изменений", 1)[1].split("---", 1)[0]
+        self.assertIn("1.1 (old): existing.", history)
+        self.assertIn("CR-020: history append", history)
+        self.assertIn("## Трассировка", saved)
+
+    def test_missing_spec_does_not_create_a_file(self):
+        save_spec_repo(make_spec_repo(self.P, [{
+            "id": "FR-016", "type": "functional", "title": "Missing spec",
+            "version": "1.0", "status": "approved", "source_artifact": "",
+        }]))
+        specs = mod71._specs_dir(self.P)
+        before = set(os.listdir(specs))
+        result = mod71.update_requirement_spec(
+            project_id=self.P, req_id="FR-016", description="New text",
+            change_reason="CR-020",
+        )
+        self.assertIn("Спецификация для `FR-016` не найдена", result)
+        self.assertEqual(set(os.listdir(specs)), before)
+
+    def test_ambiguous_section_does_not_write_partial_changes(self):
+        node = next(r for r in load_spec_repo(self.P)["requirements"] if r["id"] == "FR-015")
+        with open(node["source_artifact"], "a", encoding="utf-8") as f:
+            f.write("\n## Формулировка\n\nDuplicate.\n")
+        result = mod71.update_requirement_spec(
+            project_id=self.P, req_id="FR-015", description="New text",
+            change_reason="CR-020", new_version="1.2",
+        )
+        self.assertIn("неоднозначен", result)
+        with open(node["source_artifact"], encoding="utf-8") as f:
+            saved = f.read()
+        self.assertIn("Старое требование.", saved)
+        self.assertIn("Duplicate.", saved)
+
+
 # ---------------------------------------------------------------------------
 # 7.1.4 — create_use_case
 # ---------------------------------------------------------------------------

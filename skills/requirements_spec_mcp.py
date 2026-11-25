@@ -6,6 +6,7 @@ Tools:
   - analyze_elicitation_context  — analyzes 4.3 artifacts, list of candidate requirements
   - create_user_story            — User Story with AC, auto-registration in 5.1
   - create_functional_requirement — SRS-style (functional/non_functional/business_rule), auto-registration in 5.1
+  - update_requirement_spec      — updates an existing 7.1 spec without recreating its 5.1 node
   - create_use_case              — textual UC specification, auto-registration in 5.1
   - generate_use_case_diagram    — PlantUML Use Case Diagram for all project UCs
   - create_business_process      — text + PlantUML Activity Diagram, auto-registration in 5.1
@@ -26,13 +27,15 @@ Artifact storage: output/{project_id}_specs/
 import json
 import os
 import glob
-from datetime import date
+import re
+from datetime import date, datetime, timezone
 from typing import Optional
 from mcp.server.fastmcp import FastMCP
 from skills.common import (write_json_artifact,
     save_artifact, logger, DATA_DIR, data_path, normalize_project_id, specs_dir,
     parse_json_str_list, BUSINESS_NODE_TYPES, SOLUTION_SCOPE_NODE_TYPE,
     read_json_artifact, guard_artifact_errors, is_archived, archived_suffix,
+    find_spec_file,
     safe_filename_part, CorruptArtifactError, list_with_cap,
 )
 
@@ -737,6 +740,188 @@ def create_functional_requirement(
     reg_note = _register_in_repo(project_id, req_id, repo_type_map[req_type], title, spec_path, priority, goal_ids, owner=owner)
 
     return content + f"\n\n---\n\n**Регистрация в 5.1:** {reg_note}\n**Файл:** `{spec_path}`"
+
+
+def _replace_spec_section(content: str, heading: str, body: str) -> str | None:
+    """Replace exactly one Markdown H2 section without changing surrounding sections."""
+    lines = content.splitlines()
+    matches = [i for i, line in enumerate(lines) if line.strip() == f"## {heading}"]
+    if len(matches) != 1:
+        return None
+    start = matches[0]
+    end = next(
+        (i for i in range(start + 1, len(lines))
+         if lines[i].strip().startswith("## ") or lines[i].strip() == "---"),
+        len(lines),
+    )
+    replacement = [""] + body.strip().splitlines() + [""]
+    lines[start + 1:end] = replacement
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _insert_spec_section(content: str, heading: str, body: str) -> str:
+    """Insert a new H2 section before the traceability section, or append it."""
+    lines = content.splitlines()
+    trace = next((i for i, line in enumerate(lines)
+                  if line.strip() == "## Трассировка"), len(lines))
+    block = [f"## {heading}", "", *body.strip().splitlines(), "", "---", ""]
+    lines[trace:trace] = block
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _append_spec_history(content: str, entry: str) -> str:
+    """Append one history item inside the section, before its separator/next heading."""
+    lines = content.splitlines()
+    matches = [i for i, line in enumerate(lines)
+               if line.strip() == "## История изменений"]
+    if len(matches) > 1:
+        raise ValueError("В спецификации неоднозначный раздел `История изменений`.")
+    if not matches:
+        return _insert_spec_section(content, "История изменений", entry)
+
+    start = matches[0]
+    end = next(
+        (i for i in range(start + 1, len(lines))
+         if lines[i].strip().startswith("## ") or lines[i].strip() == "---"),
+        len(lines),
+    )
+    body = lines[start + 1:end]
+    if entry not in body:
+        while body and not body[-1].strip():
+            body.pop()
+        body.extend(["", entry])
+    lines[start + 1:end] = [""] + body + [""]
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _replace_spec_attribute(content: str, label: str, value: str) -> str | None:
+    """Replace a single two-column metadata row in a 7.1 specification."""
+    lines = content.splitlines()
+    matches = [i for i, line in enumerate(lines)
+               if line.strip().startswith(f"| {label} |")]
+    if len(matches) != 1:
+        return None
+    lines[matches[0]] = f"| {label} | {value} |"
+    return "\n".join(lines).rstrip() + "\n"
+
+
+@mcp.tool()
+@guard_artifact_errors
+def update_requirement_spec(
+    project_id: str,
+    req_id: str,
+    description: str,
+    change_reason: str,
+    new_version: str = "",
+    new_status: str = "",
+    rationale: str = "",
+    constraints: str = "",
+    acceptance_criteria: str = "",
+    related_ids_json: str = "",
+) -> str:
+    """Update the text of an existing 7.1 specification without recreating its node.
+
+    The 5.1 node's status/version remain owned by 5.2/5.5; this tool updates only
+    the matching specification file and its visible metadata/history. It deliberately
+    refuses missing or ambiguous specs rather than creating a second file.
+    """
+    project_id = normalize_project_id(project_id)
+    repo = _load_repo(project_id)
+    node = next((r for r in repo.get("requirements", []) if r.get("id") == req_id), None)
+    if node is None:
+        return f"❌ Требование `{req_id}` не найдено в графе 5.1 проекта `{project_id}`."
+    if not description.strip():
+        return "❌ Формулировка не может быть пустой; спецификация не изменена."
+    if not change_reason.strip():
+        return "❌ Укажите `change_reason` для истории; спецификация не изменена."
+    if new_version and not re.fullmatch(r"\d+\.\d+", new_version):
+        return "❌ Версия должна быть в формате major.minor, например 1.2. Спецификация не изменена."
+    valid_statuses = {
+        "draft", "confirmed", "pending_approval", "approved", "conditional_approved",
+        "rejected", "under_change", "verified", "validated", "implemented",
+        "on_hold", "deprecated", "superseded", "retired",
+    }
+    if new_status and new_status not in valid_statuses:
+        return f"❌ Недопустимый статус `{new_status}`; спецификация не изменена."
+
+    related_ids = None
+    if related_ids_json:
+        related_ids, error = parse_json_str_list(related_ids_json, "related_ids_json")
+        if error:
+            return error
+
+    spec_path = find_spec_file(node, project_id)
+    if not spec_path:
+        return f"❌ Спецификация для `{req_id}` не найдена; новый файл не создан."
+    try:
+        with open(spec_path, "r", encoding="utf-8") as f:
+            original = f.read()
+    except OSError as exc:
+        return f"❌ Не удалось прочитать спецификацию `{req_id}`: {exc}. Ничего не изменено."
+
+    # Preserve the requirement-type guidance line while replacing only its statement.
+    formulation = re.search(
+        r"(?ms)(^## Формулировка\s*\n)(.*?)(?=^## |^---\s*$|\Z)", original
+    )
+    if not formulation:
+        return f"❌ В спецификации `{req_id}` нет раздела `Формулировка`; ничего не изменено."
+    hint = next((line for line in formulation.group(2).splitlines()
+                 if line.strip().startswith("> _")), "")
+    formulation_body = "\n".join(part for part in (hint, "", description.strip()) if part is not None)
+    updated = _replace_spec_section(original, "Формулировка", formulation_body)
+    if updated is None:
+        return f"❌ Раздел `Формулировка` в `{req_id}` неоднозначен; ничего не изменено."
+
+    if rationale:
+        updated = _replace_spec_section(updated, "Обоснование", rationale)
+        if updated is None:
+            return f"❌ Раздел `Обоснование` в `{req_id}` неоднозначен; ничего не изменено."
+    if constraints:
+        if re.search(r"(?m)^## Ограничения и допущения\s*$", updated):
+            updated = _replace_spec_section(updated, "Ограничения и допущения", constraints)
+            if updated is None:
+                return f"❌ Раздел `Ограничения и допущения` в `{req_id}` неоднозначен; ничего не изменено."
+        else:
+            updated = _insert_spec_section(updated, "Ограничения и допущения", constraints)
+    if acceptance_criteria:
+        if re.search(r"(?m)^## Acceptance Criteria\s*$", updated):
+            updated = _replace_spec_section(updated, "Acceptance Criteria", acceptance_criteria)
+            if updated is None:
+                return f"❌ Раздел `Acceptance Criteria` в `{req_id}` неоднозначен; ничего не изменено."
+        else:
+            updated = _insert_spec_section(updated, "Acceptance Criteria", acceptance_criteria)
+    if related_ids is not None:
+        related_md = ", ".join(f"`{rid}`" for rid in related_ids) if related_ids else "—"
+        updated = _replace_spec_section(updated, "Связанные требования", related_md)
+        if updated is None:
+            return f"❌ Раздел `Связанные требования` в `{req_id}` неоднозначен; ничего не изменено."
+
+    visible_version = new_version
+    if visible_version:
+        updated = _replace_spec_attribute(updated, "Версия", visible_version)
+        if updated is None:
+            return f"❌ Строка версии в `{req_id}` неоднозначна; ничего не изменено."
+    if new_status:
+        updated = _replace_spec_attribute(updated, "Статус", new_status)
+        if updated is None:
+            return f"❌ Строка статуса в `{req_id}` неоднозначна; ничего не изменено."
+
+    if visible_version:
+        today = datetime.now(timezone.utc).date()
+        history_line = f"- {visible_version} ({today}, {change_reason.strip()})"
+        try:
+            updated = _append_spec_history(updated, history_line)
+        except ValueError as exc:
+            return f"❌ {exc} Спецификация `{req_id}` не изменена."
+
+    # Keep the existing basename/source path; _save_spec retains project-directory containment checks.
+    saved_path = _save_spec(updated, project_id, os.path.basename(spec_path))
+    return (
+        f"✅ Спецификация `{req_id}` обновлена через 7.1.\n"
+        f"Версия в файле: {visible_version or 'без изменения'}; "
+        f"статус в файле: {new_status or 'без изменения'}.\n"
+        f"Граф 5.1 не изменялся. Файл: `{saved_path}`"
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 <!doctype html>
 <!--
-  KON-166 (Pre.UX-16) · Вариант B — базовый стиль как в A (референс CR-022, скрин 3 + скрин 4),
-  но две содержательные оси различия:
+  KON-166 (Pre.UX-16) · Вариант B — базовый стиль как в A (референс CR-022 + поправки 25.11.2026, FR-038 v1.5),
+  две оси различия:
     1) «Правила ⌄» и «N кандидатов ⌄»/«Сопоставить ⌄» раскрываются компактным ПОПОВЕРОМ
-       под ячейкой (таблица не перестраивается, контекст строки не теряется), а не inline-блоком;
-    2) плотность таблицы: компактная (13.5px, строка ~40px) — под рабочий список в 2000 строк.
-  Пункты 3.1–3.12 выполнены так же, как в A. Данные вымышленные.
+       под ячейкой (таблица не перестраивается), а не inline-блоком;
+    2) плотность таблицы: компактная (строки 12px; в A — 13px).
+  Поправки владельца 25.11.2026 применены так же, как в A. Данные вымышленные.
   Ширина/тема: ?w=1280|1024&theme=light|dark или селекторы в служебной панели.
 -->
 <html lang="ru" data-theme="light">
@@ -20,29 +20,25 @@
     --border:#323f4b; --accent:#3e8ef7; --primary:#2870d4; --nav:#0f1b33;
     --row-hover:#232c37; --row-sel:#232c37;
     --n-blue:#3e8ef7; --n-blue-hover:#5ea4f8; --n-tint:transparent; --n-tint-strong:#232c37;
-    --pill-ok-bg:var(--panel-2);  --pill-ok-fg:#34c38f;
-    --pill-info-bg:var(--panel-2);--pill-info-fg:#34c38f;
-    --pill-err-bg:var(--panel-2); --pill-err-fg:#34c38f;
-    --pill-warn-bg:var(--panel-2);--pill-warn-fg:#34c38f;
     --chip-bg:transparent; --chip-fg:var(--accent); --chip-border:var(--border);
-    --card-shadow:none; --head-bg:var(--panel-2); --field-bg:var(--panel-2);
+    --qbtn-bg:transparent; --qbtn-border:var(--border);
+    --contour:none; --head-bg:var(--panel-2); --field-bg:var(--panel-2);
   }
-  /* ===== Светлая тема: палитра А2 (KON-149) + яркие значения по референсу (CR-022) ===== */
+  /* ===== Светлая тема: палитра А2 (KON-149) + синий акцент чипов по референсу (CR-022) ===== */
   [data-theme="light"] {
     --bg:#f7f8fa; --panel:#ffffff; --panel-2:#eef1f5; --text:#1e293b; --muted:#5a6a7f;
     --border:#dde3ea; --accent:#2368b8; --primary:#2470c8; --primary-hover:#1e5fad; --nav:#202b36;
     --row-hover:#f1f4f9; --row-sel:#e9eefc;
+    /* KON-166: синий чипов групп и кнопок (предложение UX, принято 25.11.2026);
+       невыделенные чипы/кнопки дат — заливка #f7f9fe, контур как у поля поиска (раунд 5) */
     --n-blue:#1a66d9; --n-blue-hover:#1554b8; --n-tint:#e8f0fd; --n-tint-strong:#d8e6fb;
-    --pill-ok-bg:#15803d;  --pill-ok-fg:#ffffff;
-    --pill-info-bg:#1a66d9;--pill-info-fg:#ffffff;
-    --pill-err-bg:#dc2626; --pill-err-fg:#ffffff;
-    --pill-warn-bg:#b45309;--pill-warn-fg:#ffffff;
-    --chip-bg:var(--n-tint); --chip-fg:var(--n-blue); --chip-border:transparent;
-    --card-shadow:0 1px 2px rgba(16,24,40,.05); --head-bg:var(--panel-2); --field-bg:#ffffff;
+    --chip-bg:#f7f9fe; --chip-fg:var(--n-blue); --chip-border:var(--border);
+    --qbtn-bg:#f7f9fe; --qbtn-border:var(--border);
+    --contour:0 1px 3px rgba(16,24,40,.08); --head-bg:var(--panel-2); --field-bg:#ffffff;
   }
   * { box-sizing:border-box; }
   html,body { margin:0; padding:0; }
-  body { background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:var(--bg); color:var(--text); font:14px/1.16 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-weight:450; /* раунд 4: межстрочный −20%; вес 450 */ }
   button { font:inherit; }
   a { color:var(--n-blue); }
 
@@ -56,18 +52,20 @@
   /* ===== Каркас ===== */
   .page { width:1280px; margin:0 auto; }
   .topbar { display:flex; align-items:stretch; height:56px; padding:0 24px; background:var(--nav); gap:28px; }
-  .brand { display:flex; align-items:center; gap:8px; color:#fff; font-size:18px; font-weight:600; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand__head { display:block; height:34px; width:auto; } /* как в Header.tsx: head 34px */
+  .brand__word { display:block; height:15px; width:auto; }  /* wordmark 21.5/48 от head */
   .topnav { display:flex; align-items:stretch; gap:4px; }
-  .topnav a { display:flex; align-items:center; padding:0 16px; text-decoration:none; color:#cbd2d9; font-size:14px; }
+  .topnav a { display:flex; align-items:center; padding:0 16px; text-decoration:none; color:#fff; font-size:14px; font-weight:450; /* шапка системы: вес 450, цвет белый */ }
   .topnav a.active { background:var(--bg); color:var(--text); border-radius:8px 8px 0 0; font-weight:500; }
   [data-theme="light"] .topnav a.active { background:#f7f8fa; color:#1e293b; }
   .topbar .spacer { flex:1; }
-  .topuser { display:flex; align-items:center; gap:10px; color:#cbd2d9; font-size:14px; }
+  .topuser { display:flex; align-items:center; gap:10px; color:#fff; font-size:14px; font-weight:450; /* шапка системы: вес 450, цвет белый */ }
   .badge-admin { background:#3d94ff; color:#fff; font-size:11.5px; font-weight:600; border-radius:999px; padding:3px 10px; }
-  .iconbtn { background:none; border:0; color:#cbd2d9; cursor:pointer; display:flex; }
+  .iconbtn { background:none; border:0; color:#fff; cursor:pointer; display:flex; }
   main { padding:0 24px 32px; }
   .page-head { display:flex; align-items:center; justify-content:space-between; margin:22px 0 14px; }
-  h1 { margin:0; font-size:30px; font-weight:700; letter-spacing:-.01em; }
+  h1 { margin:0; font-size:30px; font-weight:700; letter-spacing:-.01em; line-height:1.16; }
   .sync { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:14px; }
   .sync .stamp { display:flex; align-items:center; gap:6px; }
   .btn-refresh {
@@ -82,7 +80,7 @@
   .chip {
     display:inline-flex; align-items:center; background:var(--chip-bg); color:var(--chip-fg);
     border:1px solid var(--chip-border); border-radius:999px; padding:7px 15px;
-    font-size:13.5px; font-weight:500; cursor:pointer;
+    font-size:13.5px; font-weight:450; cursor:pointer;
   }
   .chip .cnt { opacity:.6; font-weight:400; margin-left:7px; }
   .chip:hover { border-color:var(--n-blue); }
@@ -93,7 +91,7 @@
   .filters {
     display:flex; gap:10px; align-items:center;
     background:var(--panel); border:1px solid var(--border); border-radius:12px;
-    box-shadow:var(--card-shadow); padding:12px; margin-bottom:8px;
+    box-shadow:var(--contour); padding:12px; margin-bottom:8px;
   }
   .f-search { flex:1 1 auto; position:relative; min-width:220px; }
   .f-search .lead { position:absolute; left:12px; top:12px; color:var(--muted); pointer-events:none; }
@@ -116,21 +114,22 @@
   .f-dates input[type="date"] { border:0; background:transparent; color:var(--text); font:inherit; font-size:13.5px; width:118px; padding:0; }
   .f-quick { display:flex; gap:8px; flex:none; }
   .qbtn {
-    height:40px; padding:0 14px; border:0; border-radius:8px;
-    background:var(--n-tint); color:var(--n-blue); font-size:13.5px; font-weight:500; cursor:pointer;
+    height:40px; padding:0 14px; border:1px solid var(--qbtn-border); border-radius:8px;
+    background:var(--qbtn-bg); color:var(--n-blue); font-size:13.5px; font-weight:450; cursor:pointer;
   }
-  [data-theme="dark"] .qbtn { border:1px solid var(--border); }
   .qbtn:hover { border:1px solid var(--n-blue); }
   .qbtn.on { background:var(--n-tint-strong); border:1px solid var(--n-blue); font-weight:600; }
+  .qbtn:disabled { color:var(--muted); cursor:default; } /* невыделенное: та же заливка/контур, текст приглушён */
+  .qbtn:disabled:hover { border-color:var(--qbtn-border); }
   .jql { margin:6px 4px 14px; font-size:12.5px; color:var(--muted); }
   .jql b { font-weight:600; color:var(--muted); }
 
   /* ===== Таблица: контейнер 12px (3.4), шапка −20% (3.12); плотность КОМПАКТНАЯ ===== */
-  .tablewrap { background:var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow:var(--card-shadow); }
-  table { width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px; }
+  .tablewrap { background:var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow:var(--contour); }
+  table { width:100%; border-collapse:separate; border-spacing:0; font-size:12px; /* плотность B: строки 12px (базовый A = 13px) */ }
   thead th {
-    background:var(--head-bg); color:var(--muted); font-size:11.5px; font-weight:600; text-align:left;
-    padding:5px 10px; border-bottom:1px solid var(--border); white-space:nowrap;
+    background:var(--head-bg); color:var(--muted); font-size:12px; font-weight:600; text-align:left;
+    padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap;
   }
   thead th:first-child { border-top-left-radius:12px; }
   thead th:last-child { border-top-right-radius:12px; }
@@ -145,19 +144,21 @@
   td .title { display:block; }
   .created { white-space:nowrap; }
 
-  /* Статус: пилюля + «Изменить ⌄» (3.5) */
-  .pill {
-    display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:3px 9px;
-    font-size:12px; font-weight:600; white-space:nowrap;
+  /* Статус: пастельное облачко прежних цветов, полностью круглое (pill), вес 450,
+     без шеврона; высота облачка ≈ высоте кнопок (25px) + «Изменить ⌄» */
+  .status {
+    display:inline-block; border-radius:999px; padding:5px 10px;
+    font-size:12.5px; font-weight:450; white-space:nowrap;
+    background:#eaedf2; color:#44546a;
   }
-  .pill .chev svg { display:block; opacity:.95; }
-  .pill--ok { background:var(--pill-ok-bg); color:var(--pill-ok-fg); }
-  .pill--info { background:var(--pill-info-bg); color:var(--pill-info-fg); }
-  .pill--err { background:var(--pill-err-bg); color:var(--pill-err-fg); }
-  .pill--warn { background:var(--pill-warn-bg); color:var(--pill-warn-fg); }
+  [data-theme="dark"] .status { background:var(--panel-2); color:#34c38f; }
+  [data-theme="light"] .status--ok { background:#dcf4e7; color:#12633f; }
+  [data-theme="light"] .status--info { background:#e0ebfb; color:#1c4f9e; }
+  [data-theme="light"] .status--err { background:#fce3e8; color:#9d1f38; }
+  [data-theme="light"] .status--warn { background:#fdefcf; color:#764a00; }
   .edit {
-    display:inline-flex; align-items:center; gap:3px; margin-top:5px; padding:0;
-    background:none; border:0; color:var(--n-blue); font-size:13px; cursor:pointer;
+    display:flex; width:max-content; align-items:center; gap:3px; margin-top:5px; padding:0;
+    background:none; border:0; color:var(--n-blue); font-size:inherit; cursor:pointer;
   }
   .edit:hover { text-decoration:underline; text-underline-offset:2px; }
   .edit .chev svg { display:block; transition:transform .12s; }
@@ -182,36 +183,36 @@
   .client-name { color:var(--n-blue); text-decoration:underline; text-underline-offset:2px; display:block; }
   .linkish {
     display:inline-flex; align-items:center; gap:3px; background:none; border:0; padding:0; margin-top:2px;
-    color:var(--n-blue); font-size:13px; cursor:pointer;
+    color:var(--n-blue); font-size:inherit; cursor:pointer;
   }
   .linkish:hover { text-decoration:underline; text-underline-offset:2px; }
   .linkish .chev svg { display:block; transition:transform .12s; }
   .linkish[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
 
-  /* Ставка (3.10) */
-  .rate-main { font-size:12.5px; font-weight:700; white-space:nowrap; }
-  .rate-sub { font-size:11px; color:var(--muted); }
-  .rate-none { color:var(--muted); font-weight:400; font-size:13.5px; }
+  /* Ставка (3.10): одна строка, шрифт строки, «—» */
+  .rate-main { font-size:inherit; font-weight:700; white-space:nowrap; }
+  .rate-sub { font-size:12px; color:var(--muted); } /* раунд 4: как основной шрифт таблицы */
+  .rate-none { color:var(--muted); }
 
   /* Кандидаты (3.7); ROS как есть */
   .candcol { display:flex; flex-direction:column; align-items:flex-start; gap:5px; }
   .btn-cand {
-    display:inline-flex; align-items:center; gap:5px; background:var(--n-blue); color:#fff;
-    border:0; border-radius:8px; padding:5px 11px; font-size:12.5px; font-weight:600; cursor:pointer;
+    display:inline-flex; align-items:center; gap:5px; height:25px; background:var(--n-blue); color:#fff;
+    border:0; border-radius:8px; padding:0 11px; font-size:12.5px; font-weight:450; cursor:pointer;
   }
   .btn-cand:hover { background:var(--n-blue-hover); }
   .btn-cand .chev svg { display:block; transition:transform .12s; }
   .btn-cand[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
   .cand-count {
     display:inline-flex; align-items:center; gap:4px; background:none; border:0; padding:0;
-    color:var(--n-blue); font-size:13px; cursor:pointer;
+    color:var(--n-blue); font-size:inherit; cursor:pointer;
   }
   .cand-count:hover { text-decoration:underline; text-underline-offset:2px; }
   .cand-count .chev svg { display:block; transition:transform .12s; }
   .cand-count[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
   .btn-ros {
-    display:inline-flex; background:none; border:1px solid var(--n-blue); color:var(--n-blue);
-    border-radius:8px; padding:4px 11px; font-size:12.5px; cursor:pointer;
+    display:inline-flex; align-items:center; height:25px; background:none; border:1px solid var(--n-blue);
+    color:var(--n-blue); border-radius:8px; padding:0 11px; font-size:12.5px; font-weight:450; cursor:pointer;
   }
   .btn-ros:hover { background:var(--n-tint); }
 
@@ -219,14 +220,15 @@
   .anchored { position:relative; }
   .pop {
     position:absolute; top:calc(100% + 6px); right:-4px; z-index:60;
-    width:min(660px, 62vw);
+    width:min(760px, 74vw);
     background:var(--panel); border:1px solid var(--border); border-radius:12px;
     box-shadow:0 12px 34px rgba(16,24,40,.18); padding:14px 16px;
+    font-size:12.5px;
   }
   [data-theme="dark"] .pop { box-shadow:0 12px 34px rgba(0,0,0,.55); }
   .pop[hidden] { display:none; }
   .pop-head { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .pop-head h3 { margin:0; font-size:15px; }
+  .pop-head h3 { margin:0; font-size:15px; line-height:1.16; }
   .pop-head .x {
     margin-left:auto; width:26px; height:26px; border:0; border-radius:6px;
     background:none; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -249,27 +251,38 @@
   .cands-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
   .cands-head .calc { font-size:12.5px; color:var(--muted); }
   .cands-head .ctl { margin-left:auto; display:flex; gap:8px; align-items:center; }
-  .cands select { height:30px; border:1px solid var(--border); border-radius:8px; background:var(--field-bg); color:var(--text); font-size:12.5px; padding:0 8px; }
-  .btn-recalc { height:30px; padding:0 12px; background:var(--panel); color:var(--n-blue); border:1px solid var(--n-blue); border-radius:8px; font-size:12.5px; cursor:pointer; }
+  /* Селект «LLM по умолчанию»: высота 25px как у кнопок; шеврон сдвинут от края (раунд 4) */
+  .cands select {
+    appearance:none; height:25px; border:1px solid var(--border); border-radius:8px;
+    background:var(--field-bg); color:var(--text); font-size:12.5px; padding:0 26px 0 8px;
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12' fill='none' stroke='%235a6a7f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 4.5 2.5 3 2.5-3'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 8px center;
+  }
+  [data-theme="dark"] .cands select {
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12' fill='none' stroke='%239aa5b1' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 4.5 2.5 3 2.5-3'/%3E%3C/svg%3E");
+  }
+  .btn-recalc { height:25px; padding:0 11px; background:var(--panel); color:var(--n-blue); border:1px solid var(--n-blue); border-radius:8px; font-size:12.5px; font-weight:450; cursor:pointer; }
+  /* Раскладка карточек кандидатов — как в реализации (заголовки колонок убраны, раунд 6) */
   .cand-card {
-    display:grid; grid-template-columns:190px 70px 1fr auto; gap:12px;
+    display:grid; grid-template-columns:160px 190px 1fr auto; gap:12px; align-items:start;
+  }
+  .cand-card {
     background:var(--panel-2); border:0; border-radius:8px;
-    padding:9px 12px; margin-top:8px; font-size:12.5px;
+    padding:9px 12px; margin-top:8px; font-size:12px;
   }
   .cand-name { font-weight:600; }
-  .status { display:inline-block; border-radius:4px; padding:2px 8px; font-size:12px; white-space:nowrap; margin-top:4px; background:#eaedf2; color:#44546a; }
-  [data-theme="dark"] .status { background:var(--panel-2); color:#34c38f; }
-  [data-theme="light"] .status--ok { background:#dcf4e7; color:#12633f; }
+  .cand-key { color:var(--muted); font-size:11px; margin-top:2px; }
+  .cand-chip { margin-top:4px; display:inline-block; }
   .pct { display:inline-flex; justify-content:center; border-radius:999px; padding:3px 10px; font-size:12px; font-weight:600; background:#c9efdc; color:#0b5c3e; }
   .pct.mid { background:#fbeabc; color:#7a4f00; }
-  .cand-skills { color:var(--muted); margin-top:4px; }
+  .cand-skills { color:var(--muted); margin-top:5px; }
   .cand-why .why-t { font-weight:600; font-size:12px; }
   .cand-why ul { margin:2px 0 0; padding-left:15px; }
-  .cand-note { margin-top:6px; color:var(--muted); font-size:12px; display:flex; gap:5px; align-items:center; }
+  .cand-note { margin-top:5px; color:var(--muted); font-size:11.5px; display:flex; gap:5px; align-items:center; }
   .cand-acts { display:flex; flex-direction:column; gap:6px; }
-  .btn-sec { background:var(--panel); color:var(--n-blue); border:1px solid var(--n-blue); border-radius:8px; padding:4px 11px; font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .btn-sec { display:inline-flex; align-items:center; justify-content:center; height:25px; background:var(--panel); color:var(--n-blue); border:1px solid var(--n-blue); border-radius:8px; padding:0 11px; font-size:12.5px; font-weight:450; cursor:pointer; white-space:nowrap; }
   .btn-sec:hover { background:var(--n-tint); }
-  .btn-pri { background:var(--n-blue); color:#fff; border:0; border-radius:8px; padding:5px 11px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn-pri { display:inline-flex; align-items:center; justify-content:center; height:25px; background:var(--n-blue); color:#fff; border:0; border-radius:8px; padding:0 11px; font-size:12.5px; font-weight:450; cursor:pointer; white-space:nowrap; }
   .btn-pri:hover { background:var(--n-blue-hover); }
 
   /* Пагинация — как сейчас (открытый вопрос о стиле нумерации) */
@@ -286,7 +299,7 @@
 
 <div class="proto">
   <b>KON-166 · Прототип · Вариант B</b>
-  <span class="dim">базовый стиль как в A; оси: поповеры вместо inline-блоков + компактная плотность</span>
+  <span class="dim">базовый стиль как в A; оси: поповеры вместо inline-блоков + компактная плотность (12px)</span>
   <span style="flex:1"></span>
   <label>Тема <select id="themeSel"><option value="light">светлая (А2)</option><option value="dark">тёмная</option></select></label>
   <label>Ширина <select id="wSel"><option value="1280">1280</option><option value="1024">1024</option></select></label>
@@ -296,12 +309,8 @@
 <div class="page" id="page">
   <header class="topbar">
     <div class="brand">
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-        <circle cx="13" cy="13" r="12" stroke="#fff" stroke-width="2"/>
-        <path d="M17 7.5c2.2 1 3.3 3 3.3 5.2 0 4-3.2 6.2-7.2 6.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="10.8" cy="10.4" r="1.4" fill="#fff"/>
-      </svg>
-      regoose
+      <img class="brand__head" src="logo_head.svg" alt="">
+      <img class="brand__word" src="logo_wordmark.svg" alt="regoose">
     </div>
     <nav class="topnav">
       <a class="active" href="#">Потребности</a>
@@ -328,7 +337,6 @@
           актуально на 24.11.2026, 17:27
         </span>
         <button class="btn-refresh">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 8A5.6 5.6 0 1 1 11.9 4"/><path d="M13.6 2.6v3h-3"/></svg>
           Обновить
         </button>
       </div>
@@ -395,9 +403,7 @@
             <td>a.orlova</td>
             <td><span class="title">Миграция биллинга ERP — системный аналитик, Middle+</span></td>
             <td>
-              <span class="pill pill--ok">Кандидат назначен
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span><br>
+              <span class="status status--ok">Кандидат назначен</span><br>
               <button class="edit" data-toggle="#edit-6012" aria-expanded="false" aria-haspopup="menu">Изменить
                 <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
               </button>
@@ -431,7 +437,7 @@
                     </dl>
                   </div>
                   <div>
-                    <p class="cap">Правила из комментариев эпика <span class="status" style="margin-top:0">Обновляется…</span></p>
+                    <p class="cap">Правила из комментариев эпика <span class="status">Обновляется…</span></p>
                     <div class="rule-cards">
                       <div class="rule-card"><span>Кандидат два дня в неделю работает в офисе заказчика.</span><span class="src">2 источника</span></div>
                       <div class="rule-card"><span>Согласование оффера — до подписания договора.</span><span class="src">1 источник</span></div>
@@ -460,9 +466,7 @@
             <td>d.belova</td>
             <td><span class="title">Портал самообслуживания — бизнес-аналитик, Senior</span></td>
             <td>
-              <span class="pill pill--info">Поиск кандидата
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span><br>
+              <span class="status status--info">Поиск кандидата</span><br>
               <button class="edit" data-toggle="#edit-6009" aria-expanded="false" aria-haspopup="menu">Изменить
                 <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
               </button>
@@ -505,10 +509,13 @@
                 <div class="cand-card">
                   <div>
                     <div class="cand-name">Марк Левин</div>
-                    <span class="status status--ok">Свободен</span>
+                    <div class="cand-key">5501</div>
+                    <span class="status status--ok cand-chip">Свободен</span>
+                  </div>
+                  <div>
+                    <span class="pct">92%</span>
                     <div class="cand-skills">postgres, python, airflow, dbt</div>
                   </div>
-                  <div><span class="pct">92%</span></div>
                   <div>
                     <div>Закрывает требования по стеку данных и отчётности.</div>
                     <div class="cand-why">
@@ -524,17 +531,20 @@
                 <div class="cand-card">
                   <div>
                     <div class="cand-name">Лидия Ветрова</div>
-                    <span class="status status--ok">Свободен</span>
-                    <div class="cand-skills">a/b-тесты, ab-анализ, sql</div>
+                    <div class="cand-key">4920</div>
+                    <span class="status status--ok cand-chip">Свободен</span>
                   </div>
-                  <div><span class="pct mid">85%</span></div>
+                  <div>
+                    <span class="pct mid">85%</span>
+                    <div class="cand-skills">a/b-тесты, ab-анализ, sql</div>
+                    <div class="cand-note"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 13.5 6 6.5 13H3v-3.5Z"/><path d="m8.5 4 3.5 3.5"/></svg>Заметка: доступна с января</div>
+                  </div>
                   <div>
                     <div>Сильный профиль продуктовой аналитики.</div>
                     <div class="cand-why">
                       <span class="why-t">Чего не хватает до 100%</span>
                       <ul><li>В CV не указан опыт работы с DWH</li></ul>
                     </div>
-                    <div class="cand-note"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 13.5 6 6.5 13H3v-3.5Z"/><path d="m8.5 4 3.5 3.5"/></svg>Заметка: доступна с января</div>
                   </div>
                   <div class="cand-acts">
                     <button class="btn-sec">Резюме</button>
@@ -552,9 +562,7 @@
             <td>m.grishin</td>
             <td><span class="title">Аналитика DWH — системный аналитик, Middle</span></td>
             <td>
-              <span class="pill pill--err">Кандидатов нет
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span><br>
+              <span class="status status--err">Кандидатов нет</span><br>
               <button class="edit" data-toggle="#edit-6004" aria-expanded="false" aria-haspopup="menu">Изменить
                 <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
               </button>
@@ -588,9 +596,7 @@
             <td>e.volkova</td>
             <td><span class="title">Автоматизация управленческой отчётности — аналитик</span></td>
             <td>
-              <span class="pill pill--info">Найм
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span><br>
+              <span class="status status--info">Найм</span><br>
               <button class="edit" data-toggle="#edit-5998" aria-expanded="false" aria-haspopup="menu">Изменить
                 <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
               </button>
@@ -624,9 +630,7 @@
             <td>n.fedorova</td>
             <td><span class="title">Поддержка процесса найма — бизнес-аналитик, Junior</span></td>
             <td class="statuscell">
-              <span class="pill pill--warn">Требуется кандидат
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span><br>
+              <span class="status status--warn">Требуется кандидат</span><br>
               <button class="edit" data-toggle="#edit-5990" aria-expanded="false" aria-haspopup="menu">Изменить
                 <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
               </button>
@@ -661,9 +665,7 @@
             <td>i.sazhina</td>
             <td><span class="title">Оценка трудозатрат интеграции — аналитик</span></td>
             <td>
-              <span class="pill pill--err">Отказ по кандидату
-                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
-              </span>
+              <span class="status status--err">Отказ по кандидату</span>
             </td>
             <td>
               <a class="client-name" href="#">SA-3801</a>

@@ -269,6 +269,18 @@
             "title": "Jira Key",
             "type": "string"
           },
+          "jira_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ссылка на задачу в Jira",
+            "title": "Jira Url"
+          },
           "match_percent": {
             "description": "Совпадение описаний, % (порог 15%, ISS-005)",
             "title": "Match Percent",

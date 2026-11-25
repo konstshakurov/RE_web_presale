@@ -270,6 +270,13 @@ export const api = {
       "GET",
       `/needs/match-counts?${keys.map((k) => `keys=${encodeURIComponent(k)}`).join("&")}`,
     ),
+  // Классификация связи-дубля «Похожая / Дубль» (FR-014 v1.1, CR-023); 404 - связи нет
+  setDuplicateClassification: (needKey: string, dupKey: string, classification: "similar" | "duplicate") =>
+    request<{ need_key: string; dup_need_key: string; classification: string }>(
+      "POST",
+      `/sync/needs/${encodeURIComponent(needKey)}/duplicates/${encodeURIComponent(dupKey)}`,
+      { classification },
+    ),
   startMatch: (key: string, body: { provider_id?: number | null; force?: boolean } = {}) =>
     request<MatchState>("POST", `/needs/${encodeURIComponent(key)}/match`, body),
   matchNext: (key: string, providerId?: number | null) =>

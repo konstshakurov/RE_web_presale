@@ -66,6 +66,17 @@ export interface RateBenchmark {
   as_of: string;
 }
 
+// Связь-дубль потребности (FR-014 v1.1; вывод - design/KON-165/decision.md).
+export interface DuplicateOut {
+  jira_key: string;
+  title: string;
+  match_percent: number; // совпадение описаний, % (порог 15%, ISS-005)
+  classification: "similar" | "duplicate"; // классификация пользователя (CR-023)
+  contract_type?: string | null;
+  rate_amount?: number | null; // ставка цифрой; null - «—»
+  jira_url?: string | null;
+}
+
 export interface NeedOut {
   jira_key: string;
   title: string;
@@ -80,6 +91,7 @@ export interface NeedOut {
   jira_url?: string | null;
   jira_created_at: string;
   jira_updated_at: string;
+  duplicates?: DuplicateOut[]; // связи-дубли (FR-014): совпадение описаний >= 15% за 2 недели
 }
 
 export interface NeedsPage {

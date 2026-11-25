@@ -1,10 +1,11 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "../App";
-import type { NeedOut, NeedsPage, SyncStamp } from "../api/types";
+import type { DuplicateOut, NeedOut, NeedsPage, SyncStamp } from "../api/types";
+import { duplicatesLabel } from "../lib/matching";
 
 const ME = {
   login: "test.user",
@@ -398,5 +399,69 @@ describe("Потребности", () => {
     await userEvent.click(screen.getByRole("button", { name: "Обновить" }));
     await waitFor(() => expect(screen.queryByRole("cell", { name: "1" })).not.toBeInTheDocument());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
+describe("Дубли потребностей (FR-014, KON-165)", () => {
+  const dup: DuplicateOut = {
+    jira_key: "AN-2", title: "Субподряд «Открытые решения»", match_percent: 52,
+    classification: "similar", contract_type: "Субподрядчик", rate_amount: 195000,
+  };
+
+  it("склонение: 1 дубль, 2 дубля, 5 дублей, 11 дублей, 21 дубль", () => {
+    expect(duplicatesLabel(1)).toBe("1 дубль");
+    expect(duplicatesLabel(2)).toBe("2 дубля");
+    expect(duplicatesLabel(5)).toBe("5 дублей");
+    expect(duplicatesLabel(11)).toBe("11 дублей");
+    expect(duplicatesLabel(21)).toBe("21 дубль");
+  });
+
+  it("индикатор - новой строкой под названием; без дублей - индикатора нет", async () => {
+    route((u) => (u.includes("/sync/needs?") ? json(page([need({ duplicates: [dup] })])) : undefined));
+    const first = renderNeeds();
+    const pill = await screen.findByRole("button", { name: /Дубли:/ });
+    expect(pill).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("1 дубль")).toBeInTheDocument();
+    first.unmount();
+    // без дублей индикатора нет
+    route((u) => (u.includes("/sync/needs?") ? json(page([need()])) : undefined));
+    renderNeeds();
+    await screen.findByRole("cell", { name: "1" });
+    expect(screen.queryByRole("button", { name: /Дубли:/ })).not.toBeInTheDocument();
+  });
+
+  it("раскрытие: ключ, название, Суб, ставка цифрой или тире, %, классификация", async () => {
+    const dupNoRate: DuplicateOut = { ...dup, jira_key: "AN-3", title: "Субподряд «БСС»", match_percent: 34, rate_amount: null };
+    route((u) => (u.includes("/sync/needs?") ? json(page([need({ duplicates: [dup, dupNoRate] })])) : undefined));
+    const view = renderNeeds();
+    await userEvent.click(await screen.findByRole("button", { name: /Дубли: 2 дубля/ }));
+    expect(screen.getByText("52%")).toBeInTheDocument();
+    expect(screen.getAllByText("Суб").length).toBe(2);
+    expect(screen.getByText("195 000")).toBeInTheDocument();
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    view.unmount();
+  });
+
+  it("классификация: выбор сохраняется в API; при ошибке - откат текста кнопки", async () => {
+    route((u) => {
+      if (u.includes("/sync/needs?")) return json(page([need({ duplicates: [dup] })]));
+      if (u.includes("/duplicates/AN-2")) return json({ detail: "ошибка" }, 500);
+    });
+    const view = renderNeeds();
+    await userEvent.click(await screen.findByRole("button", { name: /Дубли: 1 дубль/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Похожая" }));
+    const menu = screen.getByRole("listbox");
+    const dubItem = within(menu).getAllByRole("button").find((b) => b.textContent === "Дубль")!;
+    fireEvent.click(dubItem);
+    // optimistic: текст сменился сразу, запрос ушёл один (в микро-таске после клика)
+    expect(await screen.findByRole("button", { name: "Дубль" })).toBeInTheDocument();
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.filter(([u]) => String(u).includes("/duplicates/AN-2")).length).toBe(1),
+    );
+    await waitFor(() => {
+      // ошибка API: откат к прежнему тексту
+      expect(screen.getByRole("button", { name: "Похожая" })).toBeInTheDocument();
+    });
+    view.unmount();
   });
 });

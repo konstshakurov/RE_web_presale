@@ -11,9 +11,10 @@ Usage:
     python phase.py design       # Ch. 7 — requirements analysis and design
     python phase.py full         # all servers (unrestricted mode)
 
-After switching — restart Claude Code: /exit, then: claude --continue
+After switching — restart the client session to load the new MCP servers.
 """
 
+import copy
 import json
 import os
 import sys
@@ -23,15 +24,15 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
+    except (OSError, ValueError) as exc:
+        print(f"Warning: could not set stdout encoding: {exc}", file=sys.stderr)
 
 # ---------------------------------------------------------------------------
-# Project root — for absolute paths in .mcp.json (ADR-REVIEW item 10)
+# Project root — for absolute paths in generated MCP configs (ADR-REVIEW item 10)
 # ---------------------------------------------------------------------------
 
 # Absolute path to the project root (where this file lives).
-# Used when generating .mcp.json so Claude Code can find the servers
+# Used when generating .mcp.json and .opencode/opencode.json
 # regardless of the working directory at startup.
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -169,7 +170,14 @@ PHASES = {
 # ---------------------------------------------------------------------------
 
 MCP_FILE = Path(".mcp.json")
+OPENCODE_CONFIG_FILE = Path(".opencode/opencode.json")
 STATE_FILE = Path(".phase_state")  # remembers the current phase
+
+MANAGED_SERVER_NAMES = {
+    server_name
+    for phase_info in PHASES.values()
+    for server_name in phase_info["servers"]
+}
 
 
 def read_current_phase() -> str | None:
@@ -179,11 +187,72 @@ def read_current_phase() -> str | None:
 
 
 def write_phase(phase: str):
+    opencode_config = opencode_config_for_phase(_read_opencode_config(), phase)
     config = {"mcpServers": PHASES[phase]["servers"]}
+
     MCP_FILE.write_text(
         json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+    OPENCODE_CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OPENCODE_CONFIG_FILE.write_text(
+        json.dumps(opencode_config, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     STATE_FILE.write_text(phase, encoding="utf-8")
+
+
+def _read_opencode_config() -> dict:
+    """Read the project OpenCode config, preserving non-phase settings."""
+    if not OPENCODE_CONFIG_FILE.exists():
+        return {"$schema": "https://opencode.ai/config.json"}
+
+    try:
+        config = json.loads(OPENCODE_CONFIG_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            f"Не удалось прочитать {OPENCODE_CONFIG_FILE}: ожидается корректный JSON"
+        ) from exc
+    if not isinstance(config, dict):
+        raise TypeError(f"Корень {OPENCODE_CONFIG_FILE} должен быть JSON-объектом")
+    return config
+
+
+def _as_opencode_server(server: dict) -> dict:
+    """Convert phase.py's Claude MCP server shape to OpenCode's local shape."""
+    return {
+        "type": "local",
+        "command": [server["command"], *server["args"]],
+        "environment": server.get("env", {}),
+    }
+
+
+def opencode_config_for_phase(config: dict, phase: str) -> dict:
+    """Return OpenCode config with only this phase's Ai_RE servers enabled.
+
+    Keep top-level settings, MCP options, and servers not managed by phase.py.
+    """
+    if phase not in PHASES:
+        raise ValueError(f"Неизвестная фаза: {phase}")
+
+    result = copy.deepcopy(config)
+    mcp = result.setdefault("mcp", {})
+    if not isinstance(mcp, dict):
+        raise TypeError('Поле "mcp" в OpenCode config должно быть объектом')
+    servers = mcp.setdefault("servers", {})
+    if not isinstance(servers, dict):
+        raise TypeError('Поле "mcp.servers" в OpenCode config должно быть объектом')
+
+    unmanaged_servers = {
+        name: server
+        for name, server in servers.items()
+        if name not in MANAGED_SERVER_NAMES
+    }
+    active_servers = {
+        name: _as_opencode_server(server)
+        for name, server in PHASES[phase]["servers"].items()
+    }
+    mcp["servers"] = {**unmanaged_servers, **active_servers}
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +314,7 @@ def show_status():
     print()
     print(c("gray", "─" * 55))
     print(f"  Использование: {c('bold', 'python phase.py <фаза>')}")
-    print(f"  После переключения: {c('yellow', '/exit')}, затем {c('yellow', 'claude --continue')}")
+    print("  После переключения перезапустите сессию OpenCode или Claude Code.")
     print()
 
 
@@ -276,7 +345,8 @@ def switch_phase(phase: str):
         print(f"  {c('gray', f'Предыдущая: {old_phase}')}")
 
     print()
-    print(c("yellow", "  → Перезапусти Claude Code: /exit, затем: claude --continue"))
+    print(c("yellow", "  → Перезапусти сессию OpenCode, чтобы загрузились серверы новой фазы."))
+    print(c("gray", "    В Claude Code: /exit, затем claude --continue."))
     print()
 
 

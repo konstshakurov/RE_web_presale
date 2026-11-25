@@ -1,0 +1,417 @@
+<!doctype html>
+<!--
+  KON-166 (Pre.UX-16) · Вариант 0 — раздел «Потребности» в ТЕКУЩЕМ виде (скрин 2),
+  для сравнения с вариантами A и B. Ничего из CR-022 не применено:
+  пастельные чипы, кнопки-ссылки переходов под чипом, «не указана», «Субподряд»,
+  «Правила»/«N кандидатов» без шевронов, «Обновить» без иконки, шапка таблицы обычной высоты.
+  Служебная панель и параметры ?w=|theme= — как в вариантах A/B.
+-->
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KON-166 · Вариант 0 — Потребности (как сейчас)</title>
+<style>
+  /* Токены: как в текущем styles.css (KON-149) */
+  :root {
+    --bg:#12171d; --panel:#1b222b; --panel-2:#232c37; --text:#e4e7eb; --muted:#9aa5b1;
+    --border:#323f4b; --accent:#3e8ef7; --primary:#2870d4; --nav:#0f1b33;
+    --row-hover:#232c37; --row-sel:#232c37;
+    --secondary:#3e8ef7; --secondary-hover-bg:rgba(62,142,247,.12);
+  }
+  [data-theme="light"] {
+    --bg:#f7f8fa; --panel:#ffffff; --panel-2:#eef1f5; --text:#1e293b; --muted:#5a6a7f;
+    --border:#dde3ea; --accent:#2368b8; --primary:#2470c8; --primary-hover:#1e5fad; --nav:#202b36;
+    --row-hover:#f1f4f9; --row-sel:#e9eefc;
+    --secondary:#2368b8; --secondary-hover-bg:rgba(35,104,184,.08);
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  button { font:inherit; }
+  a { color:var(--accent); }
+
+  .proto { display:flex; gap:18px; align-items:center; padding:6px 14px; background:#10161c; color:#c9d3dd; font-size:12px; border-bottom:1px solid #2a3540; }
+  .proto b { color:#fff; font-weight:600; }
+  .proto .dim { opacity:.65; }
+  .proto select { font-size:12px; background:#1b222b; color:#e4e7eb; border:1px solid #323f4b; border-radius:4px; padding:2px 6px; }
+  .proto label { display:flex; gap:6px; align-items:center; }
+
+  .page { width:1280px; margin:0 auto; }
+  .topbar { display:flex; align-items:stretch; height:56px; padding:0 24px; background:var(--nav); gap:28px; }
+  .brand { display:flex; align-items:center; gap:8px; color:#fff; font-size:18px; font-weight:600; }
+  .topnav { display:flex; align-items:stretch; gap:4px; }
+  .topnav a { display:flex; align-items:center; padding:0 16px; text-decoration:none; color:#cbd2d9; font-size:14px; }
+  .topnav a.active { background:var(--bg); color:var(--text); border-radius:8px 8px 0 0; font-weight:500; }
+  [data-theme="light"] .topnav a.active { background:#f7f8fa; color:#1e293b; }
+  .topbar .spacer { flex:1; }
+  .topuser { display:flex; align-items:center; gap:10px; color:#cbd2d9; font-size:14px; }
+  .badge-admin { background:#3d94ff; color:#fff; font-size:11.5px; font-weight:600; border-radius:999px; padding:3px 10px; }
+  .iconbtn { background:none; border:0; color:#cbd2d9; cursor:pointer; display:flex; }
+  main { padding:0 24px 32px; }
+
+  .page-head { display:flex; align-items:center; justify-content:space-between; margin:22px 0 14px; }
+  h1 { margin:0; font-size:28px; font-weight:700; }
+  .sync { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:14px; }
+  /* Текущая «Обновить»: вторичная кнопка, без иконки */
+  .btn-secondary {
+    background:var(--secondary-hover-bg); color:var(--secondary);
+    border:1px solid var(--secondary); border-radius:4px; padding:7px 14px;
+    font-size:14px; cursor:pointer;
+  }
+
+  /* Текущие чипы групп: радиус 16px, рамка, прозрачный фон */
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .chip {
+    display:inline-flex; align-items:center;
+    background:transparent; color:var(--accent);
+    border:1px solid var(--border); border-radius:16px;
+    padding:4px 12px; font-size:13.5px; cursor:pointer;
+  }
+  .chip .cnt { opacity:.8; margin-left:4px; }
+  .chip.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  /* Текущий блок фильтров: метки видимы, поля на panel-2, радиус 4px */
+  .filters {
+    display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end;
+    background:var(--panel); border:1px solid var(--border); border-radius:6px;
+    padding:14px 16px; margin-bottom:16px;
+  }
+  .field label, .field .flabel { display:block; font-size:13px; margin-bottom:5px; color:var(--text); }
+  .f-search input {
+    width:100%; max-width:420px; height:36px;
+    border:1px solid var(--border); border-radius:4px;
+    background:var(--panel-2); color:var(--text); font:inherit; padding:0 10px;
+  }
+  .f-search input::placeholder { color:var(--muted); }
+  .f-right { display:flex; gap:16px; align-items:end; }
+  .datebox {
+    display:flex; align-items:center; gap:6px; height:36px;
+    padding:0 8px; background:var(--panel-2); border:1px solid var(--border);
+    border-radius:4px; color:var(--muted);
+  }
+  .datebox input[type="date"] { height:32px; width:auto; min-width:0; background:transparent; border:0; color:var(--text); font:inherit; font-size:13.5px; padding:0 2px; }
+  .datebox input[type="date"]:invalid { color:var(--muted); }
+  .btn-reset {
+    background:var(--secondary-hover-bg); color:var(--secondary);
+    border:1px solid var(--secondary); border-radius:4px; padding:7px 14px;
+    font-size:14px; cursor:pointer; opacity:.55; cursor:default;
+  }
+
+  /* Текущая таблица: прямые углы, обычная шапка */
+  .tablewrap { background:var(--panel); border:1px solid var(--border); }
+  table { width:100%; border-collapse:separate; border-spacing:0; }
+  thead th { background:var(--panel-2); text-align:left; padding:10px 12px; font-size:13px; font-weight:600; border-bottom:1px solid var(--border); white-space:nowrap; }
+  thead th .hint-i { color:var(--muted); display:inline-flex; vertical-align:-2px; margin-left:4px; }
+  tbody td { padding:10px 12px; border-top:1px solid var(--border); vertical-align:top; }
+  tbody tr:first-child td { border-top:0; }
+  tbody tr:hover td { background:var(--row-hover); }
+  th.c-key{width:60px} th.c-author{width:110px} th.c-status{width:210px}
+  th.c-client{width:150px} th.c-contract{width:118px} th.c-rate{width:110px}
+  th.c-cand{width:140px} th.c-created{width:130px}
+  td .key { text-decoration:underline; text-underline-offset:2px; }
+  td .title { display:block; }
+  .created { white-space:nowrap; }
+
+  /* Текущий статус: пастельный чип + кнопки-ссылки переходов */
+  .status { display:inline-block; border-radius:4px; padding:2px 8px; font-size:13px; white-space:nowrap; background:#eaedf2; color:#44546a; }
+  [data-theme="dark"] .status { background:var(--panel-2); color:#34c38f; }
+  [data-theme="light"] .status--ok { background:#dcf4e7; color:#12633f; }
+  [data-theme="light"] .status--info { background:#e0ebfb; color:#1c4f9e; }
+  [data-theme="light"] .status--err { background:#fce3e8; color:#9d1f38; }
+  [data-theme="light"] .status--warn { background:#fdefcf; color:#764a00; }
+  .acts { display:flex; gap:10px; margin-top:6px; flex-wrap:wrap; }
+  .acts .link { background:none; border:0; padding:0; color:var(--accent); font-size:13.5px; cursor:pointer; }
+  .acts .link:hover { text-decoration:underline; }
+
+  /* Текущая ставка: «не указана» жирным (3.10 меняет это) */
+  .rate-main { font-weight:700; }
+  .rate-sub { font-size:11.5px; color:var(--muted); }
+
+  /* Текущие кнопки столбца «Кандидаты» */
+  .candcol { display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+  .cand-count { background:none; border:0; padding:0; color:var(--accent); font-size:13.5px; cursor:pointer; }
+  .cand-count:hover { text-decoration:underline; }
+  .primary-small { background:var(--primary); color:#fff; border:0; border-radius:4px; padding:4px 10px; font-size:13.5px; cursor:pointer; }
+  .ros-small { background:none; color:var(--secondary); border:1px solid var(--secondary); border-radius:4px; padding:4px 10px; font-size:13.5px; cursor:pointer; }
+  .rules-link { background:none; border:0; padding:0; margin-top:3px; color:var(--accent); font-size:13px; cursor:pointer; display:block; }
+
+  .pager { display:flex; align-items:center; gap:12px; margin-top:12px; font-size:13px; color:var(--muted); }
+  .pager .pg-btns { margin-left:auto; display:flex; gap:8px; }
+  .pager button { background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:6px 12px; font-size:13px; cursor:pointer; }
+  .pager button:disabled { opacity:.5; cursor:default; }
+  .pager label { display:flex; gap:8px; align-items:center; }
+  .pager select { border:1px solid var(--border); border-radius:4px; background:var(--panel-2); color:var(--text); font-size:13px; padding:5px 8px; }
+</style>
+</head>
+<body>
+
+<div class="proto">
+  <b>KON-166 · Прототип · Вариант 0</b>
+  <span class="dim">текущая реализация (скрин 2) — для сравнения; CR-022 не применён</span>
+  <span style="flex:1"></span>
+  <label>Тема <select id="themeSel"><option value="light">светлая (А2)</option><option value="dark">тёмная</option></select></label>
+  <label>Ширина <select id="wSel"><option value="1280">1280</option><option value="1024">1024</option></select></label>
+  <span class="dim">данные вымышленные</span>
+</div>
+
+<div class="page" id="page">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="12" stroke="#fff" stroke-width="2"/>
+        <path d="M17 7.5c2.2 1 3.3 3 3.3 5.2 0 4-3.2 6.2-7.2 6.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="10.8" cy="10.4" r="1.4" fill="#fff"/>
+      </svg>
+      regoose
+    </div>
+    <nav class="topnav">
+      <a class="active" href="#">Потребности</a>
+      <a href="#">Сотрудники</a>
+      <a href="#">Резюме</a>
+      <a href="#">Настройки</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="topuser">
+      Анна Смирнова
+      <span class="badge-admin">Админ</span>
+      <button class="iconbtn" title="Выйти" aria-label="Выйти">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H4.5A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H9"/><path d="m10.5 5.5 3 2.5-3 2.5M13.5 8H7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <h1>Потребности</h1>
+      <div class="sync">
+        <span>актуально на 24.11.2026, 17:27</span>
+        <button class="btn-secondary">Обновить</button>
+      </div>
+    </div>
+
+    <nav class="chips" aria-label="Группы статусов">
+      <button class="chip on" aria-pressed="true">Без кандидата <span class="cnt">4</span></button>
+      <button class="chip">Кандидат назначен <span class="cnt">51</span></button>
+      <button class="chip">Интервью <span class="cnt">176</span></button>
+      <button class="chip">Закреплён <span class="cnt">3</span></button>
+      <button class="chip">Отказ по кандидату <span class="cnt">258</span></button>
+      <button class="chip">Прочие <span class="cnt">1 499</span></button>
+      <button class="chip">Все статусы <span class="cnt">1 991</span></button>
+    </nav>
+
+    <section class="filters" aria-label="Фильтры">
+      <div class="field f-search">
+        <label for="q">Поиск</label>
+        <input id="q" type="search" value="DWH" placeholder="Ключ или название" aria-label="Поиск по ключу и названию">
+      </div>
+      <div class="f-right">
+        <div class="field">
+          <span class="flabel" id="lbl-dates">Создана</span>
+          <div class="datebox" role="group" aria-labelledby="lbl-dates">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.2" y="3.6" width="11.6" height="10" rx="1.5"/><path d="M2.2 7h11.6M5.6 1.8v3.2M10.4 1.8v3.2"/></svg>
+            <input type="date" aria-label="Создана с">
+            <span aria-hidden="true">—</span>
+            <input type="date" aria-label="Создана по">
+          </div>
+        </div>
+        <button class="btn-reset" disabled>Сбросить даты</button>
+      </div>
+    </section>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="c-key">Ключ</th>
+            <th class="c-author">Автор</th>
+            <th>Название</th>
+            <th class="c-status">Статус</th>
+            <th class="c-client">Клиент</th>
+            <th class="c-contract">Контракт</th>
+            <th class="c-rate">Ставка</th>
+            <th class="c-cand">Кандидаты
+              <span class="hint-i" title="Сопоставление с сотрудниками (FR-005)">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="4.8" r=".9" fill="currentColor" stroke="none"/></svg>
+              </span>
+            </th>
+            <th class="c-created">Создана <span aria-hidden="true">▼</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="key" href="#">6012</a></td>
+            <td>a.orlova</td>
+            <td><span class="title">Миграция биллинга ERP — системный аналитик, Middle+</span></td>
+            <td>
+              <span class="status status--ok">Кандидат назначен</span>
+              <div class="acts">
+                <button class="link">Поиск</button>
+                <button class="link">Найм</button>
+                <button class="link">Кандидатов нет</button>
+              </div>
+            </td>
+            <td>
+              <a href="#">SA-4107</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">2 240 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="primary-small">Сопоставить</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">20.11.2026, 10:41</td>
+          </tr>
+          <tr>
+            <td><a class="key" href="#">6009</a></td>
+            <td>d.belova</td>
+            <td><span class="title">Портал самообслуживания — бизнес-аналитик, Senior</span></td>
+            <td>
+              <span class="status status--info">Поиск кандидата</span>
+              <div class="acts">
+                <button class="link">Найм</button>
+                <button class="link">Кандидатов нет</button>
+              </div>
+            </td>
+            <td>
+              <a href="#">СеверЛайн</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Субподряд</td>
+            <td><span class="rate-main">не указана</span></td>
+            <td>
+              <div class="candcol">
+                <button class="cand-count">8 кандидатов</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">18.11.2026, 09:15</td>
+          </tr>
+          <tr>
+            <td><a class="key" href="#">6004</a></td>
+            <td>m.grishin</td>
+            <td><span class="title">Аналитика DWH — системный аналитик, Middle</span></td>
+            <td>
+              <span class="status status--err">Кандидатов нет</span>
+              <div class="acts">
+                <button class="link">Поиск</button>
+                <button class="link">Найм</button>
+              </div>
+            </td>
+            <td>
+              <a href="#">Атлас Ритейл</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">1 800 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="primary-small">Сопоставить</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">15.11.2026, 14:02</td>
+          </tr>
+          <tr>
+            <td><a class="key" href="#">5998</a></td>
+            <td>e.volkova</td>
+            <td><span class="title">Автоматизация управленческой отчётности — аналитик</span></td>
+            <td>
+              <span class="status status--info">Найм</span>
+              <div class="acts">
+                <button class="link">Поиск</button>
+                <button class="link">Кандидатов нет</button>
+              </div>
+            </td>
+            <td>
+              <a href="#">SA-3980</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">47 USD</span><br><span class="rate-sub">с НДС</span><br><span class="rate-sub">от клиента</span></td>
+            <td>
+              <div class="candcol">
+                <button class="primary-small">Сопоставить</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">12.11.2026, 11:30</td>
+          </tr>
+          <tr>
+            <td><a class="key" href="#">5990</a></td>
+            <td>n.fedorova</td>
+            <td><span class="title">Поддержка процесса найма — бизнес-аналитик, Junior</span></td>
+            <td>
+              <span class="status status--warn">Требуется кандидат</span>
+              <div class="acts">
+                <button class="link">Поиск</button>
+                <button class="link">Найм</button>
+                <button class="link">Кандидатов нет</button>
+              </div>
+            </td>
+            <td>
+              <a href="#">Глобал Логистик</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Субподряд</td>
+            <td><span class="rate-main">950 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="cand-count">5 кандидатов</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">05.11.2026, 16:47</td>
+          </tr>
+          <tr>
+            <td><a class="key" href="#">5983</a></td>
+            <td>i.sazhina</td>
+            <td><span class="title">Оценка трудозатрат интеграции — аналитик</span></td>
+            <td><span class="status status--err">Отказ по кандидату</span></td>
+            <td>
+              <a href="#">SA-3801</a>
+              <button class="rules-link">Правила</button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">не указана</span><br><span class="rate-sub">от произв.</span></td>
+            <td>
+              <div class="candcol">
+                <button class="primary-small">Сопоставить</button>
+                <button class="ros-small">ROS</button>
+              </div>
+            </td>
+            <td class="created">30.10.2026, 13:20</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <span>1–6 из 6</span>
+      <span class="pg-btns">
+        <button disabled>Назад</button>
+        <button>Вперёд</button>
+      </span>
+      <label>На странице
+        <select><option>50</option><option selected>100</option><option>200</option><option>500</option></select>
+      </label>
+    </div>
+  </main>
+</div>
+
+<script>
+  var usp = new URLSearchParams(location.search);
+  var w = usp.get("w") || "1280";
+  var th = usp.get("theme") || "light";
+  document.documentElement.dataset.theme = th;
+  document.getElementById("page").style.width = w + "px";
+  document.getElementById("wSel").value = w;
+  document.getElementById("themeSel").value = th;
+  document.getElementById("wSel").onchange = function () { usp.set("w", this.value); location.search = usp.toString(); };
+  document.getElementById("themeSel").onchange = function () { usp.set("theme", this.value); location.search = usp.toString(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!doctype html>
+<!--
+  KON-166 (Pre.UX-16) · Вариант A — «Потребности» строго по референсу CR-022 (скрин 3 + скрин 4)
+  Столбцы — по скрину 2 (решение владельца). Кебаб-меню не реализуется (3.11).
+  Данные вымышленные. Токены KON-166 предлагаются здесь впервые — см. README.md.
+  Ширина/тема: селектор в служебной панели или параметры ?w=1280|1024&theme=light|dark
+-->
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KON-166 · Вариант A — Потребности (по референсу CR-022)</title>
+<style>
+  /* ===== Токены: тёмная = «как сейчас» (FR-038: тёмная тема не меняется) ===== */
+  :root {
+    --bg:#12171d; --panel:#1b222b; --panel-2:#232c37; --text:#e4e7eb; --muted:#9aa5b1;
+    --border:#323f4b; --accent:#3e8ef7; --primary:#2870d4; --nav:#0f1b33;
+    --row-hover:#232c37; --row-sel:#232c37;
+    /* KON-166 (тёмные значения = текущий вид раздела) */
+    --n-blue:#3e8ef7; --n-blue-hover:#5ea4f8; --n-tint:transparent; --n-tint-strong:#232c37;
+    --pill-ok-bg:var(--panel-2);  --pill-ok-fg:#34c38f;
+    --pill-info-bg:var(--panel-2);--pill-info-fg:#34c38f;
+    --pill-err-bg:var(--panel-2); --pill-err-fg:#34c38f;
+    --pill-warn-bg:var(--panel-2);--pill-warn-fg:#34c38f;
+    --chip-bg:transparent; --chip-fg:var(--accent); --chip-border:var(--border);
+    --card-shadow:none; --head-bg:var(--panel-2); --field-bg:var(--panel-2);
+  }
+  /* ===== Светлая тема: палитра А2 (KON-149) + яркие значения по референсу (CR-022) ===== */
+  [data-theme="light"] {
+    --bg:#f7f8fa; --panel:#ffffff; --panel-2:#eef1f5; --text:#1e293b; --muted:#5a6a7f;
+    --border:#dde3ea; --accent:#2368b8; --primary:#2470c8; --primary-hover:#1e5fad; --nav:#202b36;
+    --row-hover:#f1f4f9; --row-sel:#e9eefc;
+    /* KON-166: ярче нынешних, белый текст на пилюлях ≥ 4.5:1 */
+    --n-blue:#1a66d9; --n-blue-hover:#1554b8; --n-tint:#e8f0fd; --n-tint-strong:#d8e6fb;
+    --pill-ok-bg:#15803d;  --pill-ok-fg:#ffffff;   /* 5.0:1 */
+    --pill-info-bg:#1a66d9;--pill-info-fg:#ffffff; /* 5.3:1 */
+    --pill-err-bg:#dc2626; --pill-err-fg:#ffffff;  /* 4.8:1 */
+    --pill-warn-bg:#b45309;--pill-warn-fg:#ffffff; /* 4.5:1 */
+    --chip-bg:var(--n-tint); --chip-fg:var(--n-blue); --chip-border:transparent;
+    --card-shadow:0 1px 2px rgba(16,24,40,.05); --head-bg:var(--panel-2); --field-bg:#ffffff;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text);
+    font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  button { font:inherit; }
+  a { color:var(--n-blue); }
+
+  /* ===== Служебная панель прототипа (не часть интерфейса) ===== */
+  .proto {
+    display:flex; gap:18px; align-items:center; padding:6px 14px;
+    background:#10161c; color:#c9d3dd; font-size:12px;
+    border-bottom:1px solid #2a3540;
+  }
+  .proto b { color:#fff; font-weight:600; }
+  .proto .dim { opacity:.65; }
+  .proto select {
+    font-size:12px; background:#1b222b; color:#e4e7eb;
+    border:1px solid #323f4b; border-radius:4px; padding:2px 6px;
+  }
+  .proto label { display:flex; gap:6px; align-items:center; }
+
+  /* ===== Каркас страницы ===== */
+  .page { width:1280px; margin:0 auto; }
+  .topbar {
+    display:flex; align-items:stretch; height:56px; padding:0 24px;
+    background:var(--nav); gap:28px;
+  }
+  .brand { display:flex; align-items:center; gap:8px; color:#fff; font-size:18px; font-weight:600; }
+  .topnav { display:flex; align-items:stretch; gap:4px; }
+  .topnav a {
+    display:flex; align-items:center; padding:0 16px; text-decoration:none;
+    color:#cbd2d9; font-size:14px;
+  }
+  .topnav a.active { background:var(--bg); color:var(--text); border-radius:8px 8px 0 0; font-weight:500; }
+  [data-theme="light"] .topnav a.active { background:#f7f8fa; color:#1e293b; }
+  .topbar .spacer { flex:1; }
+  .topuser { display:flex; align-items:center; gap:10px; color:#cbd2d9; font-size:14px; }
+  .badge-admin {
+    background:#3d94ff; color:#fff; font-size:11.5px; font-weight:600;
+    border-radius:999px; padding:3px 10px; display:inline-flex; align-items:center; gap:4px;
+  }
+  .iconbtn { background:none; border:0; color:#cbd2d9; cursor:pointer; display:flex; }
+
+  main { padding:0 24px 32px; }
+
+  /* ===== Заголовок страницы и синхронизация ===== */
+  .page-head { display:flex; align-items:center; justify-content:space-between; margin:22px 0 14px; }
+  h1 { margin:0; font-size:30px; font-weight:700; letter-spacing:-.01em; }
+  .sync { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:14px; }
+  .sync .stamp { display:flex; align-items:center; gap:6px; }
+  .btn-refresh {
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--panel); color:var(--n-blue);
+    border:1.5px solid var(--n-blue); border-radius:8px;
+    padding:8px 16px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .btn-refresh:hover { background:var(--n-tint); }
+  .btn-refresh:focus-visible, .btn-refresh:focus { outline:2px solid var(--n-blue); outline-offset:2px; }
+
+  /* ===== Чипы групп статусов (FR-035, 3.1, 3.9) ===== */
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .chip {
+    display:inline-flex; align-items:center;
+    background:var(--chip-bg); color:var(--chip-fg);
+    border:1px solid var(--chip-border); border-radius:999px;
+    padding:7px 15px; font-size:13.5px; font-weight:500; cursor:pointer;
+  }
+  .chip .cnt { opacity:.6; font-weight:400; margin-left:7px; }
+  .chip:hover { border-color:var(--n-blue); }
+  .chip.on { background:var(--n-blue); color:#fff; border-color:var(--n-blue); }
+  .chip.on .cnt { opacity:.85; }
+  .chip:focus-visible { outline:2px solid var(--n-blue); outline-offset:2px; }
+
+  /* ===== Блок фильтров (FR-034 v1.2, пункт 3.3) ===== */
+  .filters {
+    display:flex; gap:10px; align-items:center;
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    box-shadow:var(--card-shadow); padding:12px; margin-bottom:8px;
+  }
+  .f-search { flex:1 1 auto; position:relative; min-width:220px; }
+  .f-search .lead { position:absolute; left:12px; top:12px; color:var(--muted); pointer-events:none; }
+  .f-search input {
+    width:100%; height:40px; border:1px solid var(--border); border-radius:8px;
+    background:var(--field-bg); color:var(--text); font:inherit;
+    padding:0 36px 0 36px;
+  }
+  .f-search input::placeholder { color:var(--muted); }
+  .f-search .clr {
+    position:absolute; right:8px; top:8px; width:24px; height:24px;
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:0; color:var(--muted); cursor:pointer; border-radius:6px;
+  }
+  .f-search .clr:hover { color:var(--text); background:var(--panel-2); }
+  .f-dates {
+    display:flex; align-items:center; gap:8px; flex:none;
+    height:40px; border:1px solid var(--border); border-radius:8px;
+    background:var(--field-bg); padding:0 10px; color:var(--muted);
+  }
+  .f-dates input[type="date"] {
+    border:0; background:transparent; color:var(--text); font:inherit;
+    font-size:13.5px; width:118px; padding:0;
+  }
+  .f-quick { display:flex; gap:8px; flex:none; }
+  .qbtn {
+    height:40px; padding:0 14px; border:0; border-radius:8px;
+    background:var(--n-tint); color:var(--n-blue);
+    font-size:13.5px; font-weight:500; cursor:pointer;
+  }
+  [data-theme="dark"] .qbtn { border:1px solid var(--border); }
+  .qbtn:hover { border:1px solid var(--n-blue); }
+  .qbtn.on { background:var(--n-tint-strong); border:1px solid var(--n-blue); font-weight:600; }
+  .qbtn:focus-visible, .qbtn:focus { outline:2px solid var(--n-blue); outline-offset:2px; }
+  .jql { margin:6px 4px 14px; font-size:12.5px; color:var(--muted); }
+  .jql b { font-weight:600; color:var(--muted); }
+
+  /* ===== Таблица: контейнер по референсу (3.4), шапка −20% (3.12) ===== */
+  .tablewrap {
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    box-shadow:var(--card-shadow);
+  }
+  table { width:100%; border-collapse:separate; border-spacing:0; }
+  thead th {
+    background:var(--head-bg); color:var(--muted);
+    font-size:12px; font-weight:600; text-align:left;
+    padding:7px 12px; /* ~31px против ~40px сейчас: −20% (3.12) */
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th:first-child { border-top-left-radius:12px; }
+  thead th:last-child { border-top-right-radius:12px; }
+  thead th .hint-i { color:var(--muted); display:inline-flex; vertical-align:-2px; margin-left:4px; }
+  tbody td { padding:10px 12px; border-top:1px solid var(--border); vertical-align:top; }
+  tbody tr:first-child td { border-top:0; }
+  tbody tr:hover td { background:var(--row-hover); }
+  tbody tr.is-selected td { background:var(--row-sel); }
+  tbody tr.is-selected td:first-child { box-shadow:inset 3px 0 0 var(--primary); }
+  th.c-key{width:60px} th.c-author{width:110px} th.c-status{width:200px}
+  th.c-client{width:150px} th.c-contract{width:118px} th.c-rate{width:112px}
+  th.c-cand{width:150px} th.c-created{width:132px}
+
+  td .key { color:var(--n-blue); text-decoration:underline; text-underline-offset:2px; }
+  td .title { display:block; }
+  .created { white-space:nowrap; }
+
+  /* Столбец «Статус»: яркая пилюля + «Изменить ⌄» (FR-011 v1.4, 3.5) */
+  .pill {
+    display:inline-flex; align-items:center; gap:5px;
+    border-radius:999px; padding:4px 10px;
+    font-size:12.5px; font-weight:600; white-space:nowrap;
+  }
+  .pill .chev svg { display:block; opacity:.95; }
+  .pill--ok { background:var(--pill-ok-bg); color:var(--pill-ok-fg); }
+  .pill--info { background:var(--pill-info-bg); color:var(--pill-info-fg); }
+  .pill--err { background:var(--pill-err-bg); color:var(--pill-err-fg); }
+  .pill--warn { background:var(--pill-warn-bg); color:var(--pill-warn-fg); }
+  .edit {
+    display:inline-flex; align-items:center; gap:3px;
+    margin-top:7px; padding:0; background:none; border:0;
+    color:var(--n-blue); font-size:13.5px; cursor:pointer;
+  }
+  .edit:hover { text-decoration:underline; text-underline-offset:2px; }
+  .edit .chev svg { display:block; transition:transform .12s; }
+  .edit[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
+  .edit:focus-visible { outline:2px solid var(--n-blue); outline-offset:2px; border-radius:4px; }
+
+  /* Меню переходов — эталон скрин 4 (состав — только доступные переходы FR-026) */
+  .menuwrap { position:relative; display:inline-block; }
+  .menu {
+    position:absolute; top:calc(100% + 4px); left:-6px; z-index:50;
+    min-width:225px; padding:5px;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    box-shadow:0 10px 30px rgba(16,24,40,.16);
+  }
+  [data-theme="dark"] .menu { box-shadow:0 10px 30px rgba(0,0,0,.5); }
+  .menu[hidden] { display:none; }
+  .menu button {
+    display:flex; align-items:center; gap:10px; width:100%;
+    padding:8px 10px; border:0; border-radius:6px; background:none;
+    color:var(--text); font-size:13.5px; text-align:left; cursor:pointer;
+  }
+  .menu button:hover { background:var(--row-hover); }
+  .menu button:focus-visible { outline:2px solid var(--n-blue); outline-offset:-2px; }
+  .menu .mi { color:var(--muted); display:flex; }
+  .menu .mi--err { color:var(--err,#b42318); }
+
+  /* Клиент: ссылка + «Правила ⌄» (3.6, 3.8) */
+  .client-name { color:var(--n-blue); text-decoration:underline; text-underline-offset:2px; display:block; }
+  .linkish {
+    display:inline-flex; align-items:center; gap:3px;
+    background:none; border:0; padding:0; margin-top:3px;
+    color:var(--n-blue); font-size:13px; cursor:pointer;
+  }
+  .linkish:hover { text-decoration:underline; text-underline-offset:2px; }
+  .linkish .chev svg { display:block; transition:transform .12s; }
+  .linkish[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
+
+  /* Ставка (3.10): одна строка, уменьшенный шрифт, «—» */
+  .rate-main { font-size:13px; font-weight:700; white-space:nowrap; }
+  .rate-sub { font-size:11.5px; color:var(--muted); }
+  .rate-none { color:var(--muted); font-weight:400; font-size:14px; }
+
+  /* Кандидаты (3.7): «Сопоставить ⌄», ROS как есть */
+  .candcol { display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+  .btn-cand {
+    display:inline-flex; align-items:center; gap:5px;
+    background:var(--n-blue); color:#fff; border:0; border-radius:8px;
+    padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .btn-cand:hover { background:var(--n-blue-hover); }
+  .btn-cand .chev svg { display:block; transition:transform .12s; }
+  .btn-cand[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
+  .cand-count {
+    display:inline-flex; align-items:center; gap:4px;
+    background:none; border:0; padding:0;
+    color:var(--n-blue); font-size:13.5px; cursor:pointer;
+  }
+  .cand-count:hover { text-decoration:underline; text-underline-offset:2px; }
+  .cand-count .chev svg { display:block; transition:transform .12s; }
+  .cand-count[aria-expanded="true"] .chev svg { transform:rotate(180deg); }
+  .btn-ros {
+    display:inline-flex; background:none; border:1px solid var(--n-blue);
+    color:var(--n-blue); border-radius:8px; padding:5px 12px;
+    font-size:13px; cursor:pointer;
+  }
+  .btn-ros:hover { background:var(--n-tint); }
+
+  /* ===== Раскрытые блоки: inline под строкой (как сейчас) ===== */
+  tr.details td { background:var(--row-sel); border-top:1px solid var(--border); }
+  .rules { display:grid; grid-template-columns:1fr 1.25fr; gap:20px; padding:4px 6px 14px; }
+  .rules h3 { margin:8px 0 6px; font-size:15px; }
+  .rules .cap { font-size:12.5px; color:var(--muted); margin:0 0 8px; }
+  .kv { display:grid; grid-template-columns:170px 1fr; row-gap:6px; column-gap:12px; font-size:13px; }
+  .kv dt { font-weight:600; color:var(--text); }
+  .kv dd { margin:0; color:var(--text); }
+  .rule-cards { display:flex; flex-direction:column; gap:8px; }
+  .rule-card {
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:8px 12px; font-size:13px;
+  }
+  .rule-card .src { color:var(--muted); font-size:11.5px; white-space:nowrap; }
+  .rules-foot { grid-column:1 / -1; font-size:11.5px; color:var(--muted); }
+
+  /* Блок кандидатов */
+  .cands { padding:2px 6px 16px; }
+  .cands-head { display:flex; align-items:center; gap:12px; margin:8px 0 2px; flex-wrap:wrap; }
+  .cands-head h3 { margin:0; font-size:15px; display:flex; align-items:center; gap:6px; }
+  .cands-head .calc { font-size:12.5px; color:var(--muted); }
+  .cands-head .ctl { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .cands select {
+    height:32px; border:1px solid var(--border); border-radius:8px;
+    background:var(--field-bg); color:var(--text); font-size:13px; padding:0 8px;
+  }
+  .btn-recalc {
+    height:32px; padding:0 12px; background:var(--panel); color:var(--n-blue);
+    border:1px solid var(--n-blue); border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;
+  }
+  .cand-card {
+    display:grid; grid-template-columns:200px 74px 1fr auto; gap:14px;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; margin-top:8px; font-size:13px;
+  }
+  .cand-name { font-weight:600; }
+  .status {
+    display:inline-block; border-radius:4px; padding:2px 8px;
+    font-size:12.5px; white-space:nowrap; margin-top:4px;
+    background:var(--chip-neu,#eaedf2); color:#44546a;
+  }
+  [data-theme="dark"] .status { background:var(--panel-2); color:#34c38f; }
+  [data-theme="light"] .status--ok { background:#dcf4e7; color:#12633f; }
+  .pct {
+    display:inline-flex; justify-content:center; border-radius:999px;
+    padding:3px 10px; font-size:12.5px; font-weight:600;
+    background:#c9efdc; color:#0b5c3e;
+  }
+  .pct.mid { background:#fbeabc; color:#7a4f00; }
+  .cand-skills { color:var(--muted); margin-top:4px; }
+  .cand-why { margin-top:6px; }
+  .cand-why .why-t { font-weight:600; font-size:12.5px; }
+  .cand-why ul { margin:2px 0 0; padding-left:16px; }
+  .cand-note { margin-top:6px; color:var(--muted); font-size:12.5px; display:flex; gap:5px; align-items:center; }
+  .cand-acts { display:flex; flex-direction:column; gap:6px; justify-content:flex-start; }
+  .btn-sec {
+    background:var(--panel); color:var(--n-blue); border:1px solid var(--n-blue);
+    border-radius:8px; padding:5px 12px; font-size:13px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-sec:hover { background:var(--n-tint); }
+  .btn-pri {
+    background:var(--n-blue); color:#fff; border:0; border-radius:8px;
+    padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+  .btn-pri:hover { background:var(--n-blue-hover); }
+
+  /* ===== Пагинация — как сейчас (вне 3.1–3.12, открытый вопрос) ===== */
+  .pager { display:flex; align-items:center; gap:12px; margin-top:12px; font-size:13px; color:var(--muted); }
+  .pager .pg-btns { margin-left:auto; display:flex; gap:8px; }
+  .pager button {
+    background:var(--panel); color:var(--text); border:1px solid var(--border);
+    border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer;
+  }
+  .pager button:disabled { opacity:.5; cursor:default; }
+  .pager label { display:flex; gap:8px; align-items:center; }
+  .pager select {
+    border:1px solid var(--border); border-radius:8px; background:var(--field-bg);
+    color:var(--text); font-size:13px; padding:5px 8px;
+  }
+
+  .chev { display:inline-flex; }
+</style>
+</head>
+<body>
+
+<!-- Служебная панель прототипа — не часть интерфейса -->
+<div class="proto">
+  <b>KON-166 · Прототип · Вариант A</b>
+  <span class="dim">стиль и пункты 3.1–3.12 строго по референсу (скрин 3 + скрин 4), столбцы по скрину 2</span>
+  <span style="flex:1"></span>
+  <label>Тема <select id="themeSel"><option value="light">светлая (А2)</option><option value="dark">тёмная</option></select></label>
+  <label>Ширина <select id="wSel"><option value="1280">1280</option><option value="1024">1024</option></select></label>
+  <span class="dim">данные вымышленные</span>
+</div>
+
+<div class="page" id="page">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="12" stroke="#fff" stroke-width="2"/>
+        <path d="M17 7.5c2.2 1 3.3 3 3.3 5.2 0 4-3.2 6.2-7.2 6.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="10.8" cy="10.4" r="1.4" fill="#fff"/>
+      </svg>
+      regoose
+    </div>
+    <nav class="topnav">
+      <a class="active" href="#">Потребности</a>
+      <a href="#">Сотрудники</a>
+      <a href="#">Резюме</a>
+      <a href="#">Настройки</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="topuser">
+      Анна Смирнова
+      <span class="badge-admin">Админ</span>
+      <button class="iconbtn" title="Выйти" aria-label="Выйти">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H4.5A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H9"/><path d="m10.5 5.5 3 2.5-3 2.5M13.5 8H7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <h1>Потребности</h1>
+      <div class="sync">
+        <span class="stamp">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 8A5.6 5.6 0 1 1 11.9 4"/><path d="M13.6 2.6v3h-3"/></svg>
+          актуально на 24.11.2026, 17:27
+        </span>
+        <button class="btn-refresh" id="refreshBtn">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 8A5.6 5.6 0 1 1 11.9 4"/><path d="M13.6 2.6v3h-3"/></svg>
+          Обновить
+        </button>
+      </div>
+    </div>
+
+    <!-- Чипы групп (FR-035): «Суб» — демонстрация сокращения 3.9 -->
+    <nav class="chips" aria-label="Группы статусов">
+      <button class="chip">Без кандидата <span class="cnt">4</span></button>
+      <button class="chip">Кандидат назначен <span class="cnt">51</span></button>
+      <button class="chip">Интервью <span class="cnt">176</span></button>
+      <button class="chip">Закреплён <span class="cnt">3</span></button>
+      <button class="chip">Суб <span class="cnt">12</span></button>
+      <button class="chip">Прочие <span class="cnt">1 499</span></button>
+      <button class="chip on" aria-pressed="true">Все статусы <span class="cnt">1 991</span></button>
+    </nav>
+
+    <!-- Блок фильтров (FR-034 v1.2): активный дата-диапазон + «30 дней» -->
+    <section class="filters" aria-label="Фильтры">
+      <div class="f-search">
+        <span class="lead"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.6 10.6 3.9 3.9"/></svg></span>
+        <input id="q" type="search" value="DWH" aria-label="Поиск по ключу и названию" placeholder="Ключ или название">
+        <button class="clr" id="clrBtn" title="Очистить поиск" aria-label="Очистить поиск">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+        </button>
+      </div>
+      <div class="f-dates" role="group" aria-label="Создана, диапазон дат">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.2" y="3.6" width="11.6" height="10" rx="1.5"/><path d="M2.2 7h11.6M5.6 1.8v3.2M10.4 1.8v3.2"/></svg>
+        <input type="date" value="2026-11-01" aria-label="Создана с">
+        <span aria-hidden="true">—</span>
+        <input type="date" value="2026-11-30" aria-label="Создана по">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.2" y="3.6" width="11.6" height="10" rx="1.5"/><path d="M2.2 7h11.6M5.6 1.8v3.2M10.4 1.8v3.2"/></svg>
+      </div>
+      <div class="f-quick" role="group" aria-label="Быстрый выбор периода">
+        <button class="qbtn">Сегодня</button>
+        <button class="qbtn">7 дней</button>
+        <button class="qbtn on" aria-pressed="true">30 дней</button>
+        <button class="qbtn">Сбросить даты</button>
+      </div>
+    </section>
+    <p class="jql"><b>JQL:</b> project = ANALYTICS AND issuetype = "Потребность" ORDER BY created DESC <span aria-hidden="true">·</span> только чтение, редактируется в «Настройках»</p>
+
+    <!-- Таблица: контейнер 12px (3.4), шапка −20% (3.12), кебаб-меню нет (3.11) -->
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="c-key">Ключ</th>
+            <th class="c-author">Автор</th>
+            <th>Название</th>
+            <th class="c-status">Статус</th>
+            <th class="c-client">Клиент</th>
+            <th class="c-contract">Контракт</th>
+            <th class="c-rate">Ставка</th>
+            <th class="c-cand">Кандидаты
+              <span class="hint-i" title="Сопоставление с сотрудниками (FR-005)">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="4.8" r=".9" fill="currentColor" stroke="none"/></svg>
+              </span>
+            </th>
+            <th class="c-created">Создана <span aria-hidden="true">▼</span></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- R1: «Правила ⌃» активно, блок правил раскрыт inline (как сейчас) -->
+          <tr class="is-selected">
+            <td><a class="key" href="#">6012</a></td>
+            <td>a.orlova</td>
+            <td><span class="title">Миграция биллинга ERP — системный аналитик, Middle+</span></td>
+            <td>
+              <span class="pill pill--ok">Кандидат назначен
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span><br>
+              <button class="edit" data-toggle="#edit-6012" aria-expanded="false" aria-haspopup="menu">Изменить
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+              <span class="menu" id="edit-6012" role="menu" hidden>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.6 10.6 3.9 3.9"/></svg></span>Поиск кандидата</button>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.2" y="5" width="11.6" height="8" rx="1.5"/><path d="M6 5V3.8A1.8 1.8 0 0 1 7.8 2h.4A1.8 1.8 0 0 1 10 3.8V5"/></svg></span>Найм</button>
+                <button role="menuitem" tabindex="-1"><span class="mi mi--err"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="5.6"/><path d="M4.2 11.8 11.8 4.2"/></svg></span>Кандидатов нет</button>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">SA-4107</a>
+              <button class="linkish" aria-expanded="true" aria-controls="rules-6012">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">2 240 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="btn-cand" aria-expanded="false">Сопоставить
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">20.11.2026, 10:41</td>
+          </tr>
+          <tr class="details is-selected" id="rules-6012">
+            <td colspan="9">
+              <div class="rules">
+                <div>
+                  <h3>Правила клиента: SA-4107</h3>
+                  <p class="cap">Правила из полей карточки эпика (FR-015)</p>
+                  <dl class="kv">
+                    <dt>Условия для производства</dt><dd>Есть</dd>
+                    <dt>Штрафы</dt><dd>Общие</dd>
+                    <dt>Привлечение третьих лиц</dt><dd>Запрещено</dd>
+                    <dt>Формат работы</dt><dd>гибрид, 2 дня в офисе</dd>
+                    <dt>NDA</dt><dd>Нет</dd>
+                  </dl>
+                </div>
+                <div>
+                  <h3 style="visibility:hidden" aria-hidden="true">·</h3>
+                  <p class="cap">Правила из комментариев эпика <span class="status" style="margin-top:0">Обновляется…</span></p>
+                  <div class="rule-cards">
+                    <div class="rule-card"><span>Кандидат два дня в неделю работает в офисе заказчика.</span><span class="src">2 источника</span></div>
+                    <div class="rule-card"><span>Согласование оффера — до подписания договора.</span><span class="src">1 источник</span></div>
+                  </div>
+                </div>
+                <div class="rules-foot">Получено из Jira 24.11.2026, 17:31</div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- R2: «8 кандидатов ⌃» активно, блок кандидатов раскрыт inline; ставка «—» -->
+          <tr class="is-selected">
+            <td><a class="key" href="#">6009</a></td>
+            <td>d.belova</td>
+            <td><span class="title">Портал самообслуживания — бизнес-аналитик, Senior</span></td>
+            <td>
+              <span class="pill pill--info">Поиск кандидата
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span><br>
+              <button class="edit" data-toggle="#edit-6009" aria-expanded="false" aria-haspopup="menu">Изменить
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+              <span class="menu" id="edit-6009" role="menu" hidden>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.2" y="5" width="11.6" height="8" rx="1.5"/><path d="M6 5V3.8A1.8 1.8 0 0 1 7.8 2h.4A1.8 1.8 0 0 1 10 3.8V5"/></svg></span>Найм</button>
+                <button role="menuitem" tabindex="-1"><span class="mi mi--err"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="5.6"/><path d="M4.2 11.8 11.8 4.2"/></svg></span>Кандидатов нет</button>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">СеверЛайн</a>
+              <button class="linkish" aria-expanded="false">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Суб</td>
+            <td><span class="rate-none">—</span></td>
+            <td>
+              <div class="candcol">
+                <button class="cand-count" aria-expanded="true" aria-controls="cands-6009">8 кандидатов
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">18.11.2026, 09:15</td>
+          </tr>
+          <tr class="details is-selected" id="cands-6009">
+            <td colspan="9">
+              <div class="cands">
+                <div class="cands-head">
+                  <h3>Кандидаты на 6009
+                    <span class="hint-i" title="Оценка сопоставления (FR-005)"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="4.8" r=".9" fill="currentColor" stroke="none"/></svg></span>
+                  </h3>
+                  <span class="calc">Рассчитано: 24.11.2026, 12:44 · модель qwen (пример). Оценено кандидатов: 8 из 17.</span>
+                  <span class="ctl">
+                    <select aria-label="Модель сопоставления"><option>LLM по умолчанию</option></select>
+                    <button class="btn-recalc">Пересчитать</button>
+                  </span>
+                </div>
+                <div class="cand-card">
+                  <div>
+                    <div class="cand-name">Марк Левин</div>
+                    <span class="status status--ok">Свободен</span>
+                    <div class="cand-skills">postgres, python, airflow, dbt</div>
+                  </div>
+                  <div><span class="pct">92%</span></div>
+                  <div>
+                    <div>Закрывает требования по стеку данных и отчётности.</div>
+                    <div class="cand-why">
+                      <span class="why-t">Чего не хватает до 100%</span>
+                      <ul><li>В CV не упомянут опыт тендерных процедур</li></ul>
+                    </div>
+                  </div>
+                  <div class="cand-acts">
+                    <button class="btn-sec">Резюме</button>
+                    <button class="btn-pri">Назначить</button>
+                  </div>
+                </div>
+                <div class="cand-card">
+                  <div>
+                    <div class="cand-name">Лидия Ветрова</div>
+                    <span class="status status--ok">Свободен</span>
+                    <div class="cand-skills">a/b-тесты, ab-анализ, sql</div>
+                  </div>
+                  <div><span class="pct mid">85%</span></div>
+                  <div>
+                    <div>Сильный профиль продуктовой аналитики.</div>
+                    <div class="cand-why">
+                      <span class="why-t">Чего не хватает до 100%</span>
+                      <ul><li>В CV не указан опыт работы с DWH</li></ul>
+                    </div>
+                    <div class="cand-note"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 13.5 6 6.5 13H3v-3.5Z"/><path d="m8.5 4 3.5 3.5"/></svg>Заметка: доступна с января</div>
+                  </div>
+                  <div class="cand-acts">
+                    <button class="btn-sec">Резюме</button>
+                    <button class="btn-pri">Назначить</button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- R3: «Кандидатов нет», меню закрыто; ставка в одну строку -->
+          <tr>
+            <td><a class="key" href="#">6004</a></td>
+            <td>m.grishin</td>
+            <td><span class="title">Аналитика DWH — системный аналитик, Middle</span></td>
+            <td>
+              <span class="pill pill--err">Кандидатов нет
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span><br>
+              <button class="edit" data-toggle="#edit-6004" aria-expanded="false" aria-haspopup="menu">Изменить
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+              <span class="menu" id="edit-6004" role="menu" hidden>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.6 10.6 3.9 3.9"/></svg></span>Поиск кандидата</button>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.2" y="5" width="11.6" height="8" rx="1.5"/><path d="M6 5V3.8A1.8 1.8 0 0 1 7.8 2h.4A1.8 1.8 0 0 1 10 3.8V5"/></svg></span>Найм</button>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">Атлас Ритейл</a>
+              <button class="linkish" aria-expanded="false">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">1 800 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="btn-cand" aria-expanded="false">Сопоставить
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">15.11.2026, 14:02</td>
+          </tr>
+
+          <!-- R4: «Найм» -->
+          <tr>
+            <td><a class="key" href="#">5998</a></td>
+            <td>e.volkova</td>
+            <td><span class="title">Автоматизация управленческой отчётности — аналитик</span></td>
+            <td>
+              <span class="pill pill--info">Найм
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span><br>
+              <button class="edit" data-toggle="#edit-5998" aria-expanded="false" aria-haspopup="menu">Изменить
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+              <span class="menu" id="edit-5998" role="menu" hidden>
+                <button role="menuitem" tabindex="-1"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.6 10.6 3.9 3.9"/></svg></span>Поиск кандидата</button>
+                <button role="menuitem" tabindex="-1"><span class="mi mi--err"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="5.6"/><path d="M4.2 11.8 11.8 4.2"/></svg></span>Кандидатов нет</button>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">SA-3980</a>
+              <button class="linkish" aria-expanded="false">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">47 USD</span><br><span class="rate-sub">от клиента</span></td>
+            <td>
+              <div class="candcol">
+                <button class="btn-cand" aria-expanded="false">Сопоставить
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">12.11.2026, 11:30</td>
+          </tr>
+
+          <!-- R5: «Требуется кандидат», меню «Изменить ⌄» ОТКРЫТО (эталон скрин 4) -->
+          <tr>
+            <td><a class="key" href="#">5990</a></td>
+            <td>n.fedorova</td>
+            <td><span class="title">Поддержка процесса найма — бизнес-аналитик, Junior</span></td>
+            <td class="statuscell">
+              <span class="pill pill--warn">Требуется кандидат
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span><br>
+              <button class="edit" data-toggle="#edit-5990" aria-expanded="true" aria-haspopup="menu">Изменить
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+              <span class="menu" id="edit-5990" role="menu" aria-label="Доступные переходы статуса">
+                <button role="menuitem"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.6 10.6 3.9 3.9"/></svg></span>Поиск кандидата</button>
+                <button role="menuitem"><span class="mi"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.2" y="5" width="11.6" height="8" rx="1.5"/><path d="M6 5V3.8A1.8 1.8 0 0 1 7.8 2h.4A1.8 1.8 0 0 1 10 3.8V5"/></svg></span>Найм</button>
+                <button role="menuitem"><span class="mi mi--err"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="5.6"/><path d="M4.2 11.8 11.8 4.2"/></svg></span>Кандидатов нет</button>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">Глобал Логистик</a>
+              <button class="linkish" aria-expanded="false">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Суб</td>
+            <td><span class="rate-main">950 RUB</span><br><span class="rate-sub">с НДС</span></td>
+            <td>
+              <div class="candcol">
+                <button class="cand-count" aria-expanded="false">5 кандидатов
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">05.11.2026, 16:47</td>
+          </tr>
+
+          <!-- R6: «Отказ по кандидату» — кнопки «Изменить» нет (FR-011 AC1) -->
+          <tr>
+            <td><a class="key" href="#">5983</a></td>
+            <td>i.sazhina</td>
+            <td><span class="title">Оценка трудозатрат интеграции — аналитик</span></td>
+            <td>
+              <span class="pill pill--err">Отказ по кандидату
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </span>
+            </td>
+            <td>
+              <a class="client-name" href="#">SA-3801</a>
+              <button class="linkish" aria-expanded="false">Правила
+                <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+              </button>
+            </td>
+            <td>Прямой контракт</td>
+            <td><span class="rate-main">3 100 RUB</span><br><span class="rate-sub">от произв.</span></td>
+            <td>
+              <div class="candcol">
+                <button class="btn-cand" aria-expanded="false">Сопоставить
+                  <span class="chev"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 4.5 2.5 3 2.5-3"/></svg></span>
+                </button>
+                <button class="btn-ros" title="ROS специалиста">ROS</button>
+              </div>
+            </td>
+            <td class="created">30.10.2026, 13:20</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Пагинация — как сейчас (вне 3.1–3.12; открытый вопрос о стиле нумерации из референса) -->
+    <div class="pager">
+      <span>1–6 из 1 991</span>
+      <span class="pg-btns">
+        <button disabled>Назад</button>
+        <button>Вперёд</button>
+      </span>
+      <label>На странице
+        <select><option>50</option><option selected>100</option><option>200</option><option>500</option></select>
+      </label>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Служебные параметры прототипа
+  var usp = new URLSearchParams(location.search);
+  var w = usp.get("w") || "1280";
+  var th = usp.get("theme") || "light";
+  document.documentElement.dataset.theme = th;
+  document.getElementById("page").style.width = w + "px";
+  document.getElementById("wSel").value = w;
+  document.getElementById("themeSel").value = th;
+  document.getElementById("wSel").onchange = function () {
+    usp.set("w", this.value); location.search = usp.toString();
+  };
+  document.getElementById("themeSel").onchange = function () {
+    usp.set("theme", this.value); location.search = usp.toString();
+  };
+
+  // Демо-переключатели (меню, блоки). В продакшене поведение задаёт FR-011/FR-036.
+  // Меню позиционируется под кнопкой «Изменить»
+  document.querySelectorAll(".edit").forEach(function (btn) {
+    var menu = document.querySelector(btn.dataset.toggle);
+    if (!menu || !menu.classList.contains("menu")) return;
+    var wrap = document.createElement("span");
+    wrap.className = "menuwrap";
+    btn.parentNode.insertBefore(wrap, btn);
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+  });
+  document.querySelectorAll("[data-toggle]").forEach(function (btn) {
+    var target = document.querySelector(btn.dataset.toggle);
+    if (!target) return;
+    if (btn.getAttribute("aria-expanded") === "true") target.hidden = false;
+    btn.addEventListener("click", function () {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!open));
+      target.hidden = open;
+      if (!open) {
+        var first = target.querySelector("button");
+        if (first) first.focus();
+      }
+    });
+  });
+  // Раскрытые блоки: «Правила ⌃» / «N кандидатов ⌃» — свернуть по повторному клику
+  document.querySelectorAll(".linkish[aria-controls], .cand-count[aria-controls]").forEach(function (btn) {
+    var target = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!target) return;
+    btn.addEventListener("click", function () {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      var tr = document.getElementById(btn.getAttribute("aria-controls"));
+      tr.style.display = open ? "none" : "";
+      btn.setAttribute("aria-expanded", String(!open));
+    });
+  });
+  // Фокус в открытом меню + Esc
+  var openMenu = document.querySelector('.menu:not([hidden])');
+  if (openMenu) { var f = openMenu.querySelector("button"); if (f) f.focus(); }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      document.querySelectorAll('.menu:not([hidden])').forEach(function (m) { m.hidden = true; });
+      document.querySelectorAll('.edit[aria-expanded="true"]').forEach(function (b) {
+        b.setAttribute("aria-expanded", "false"); b.focus();
+      });
+    }
+  });
+  // Поиск: очистка по X
+  var q = document.getElementById("q"), clr = document.getElementById("clrBtn");
+  clr.addEventListener("click", function () { q.value = ""; q.focus(); });
+</script>
+</body>
+</html>

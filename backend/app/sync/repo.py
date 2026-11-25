@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from .mapping import EmployeeRow, NeedRow
+from .duplicates import canonical_pair, match_percent
 
 if TYPE_CHECKING:
     from psycopg_pool import ConnectionPool
@@ -238,6 +239,104 @@ class SyncRepo:
                 )
             conn.cursor().executemany(_NEED_UPSERT, params)
         return len(rows)
+
+    # --- Дубли потребностей (FR-014 v1.1, CR-023, KON-165) ---
+
+    def refresh_duplicates(self, *, window_days: int = 14, threshold: int = 15) -> int:
+        """Пересчёт связей-дублей в окне (FR-014): сравнение описаний потребностей окна
+        (по статусу, не резолюции - БП-10). Сохранённая classification пользователя не
+        трогается (ON CONFLICT обновляет только match_percent/calculated_at); связи окна,
+        выпавшие из расчёта, удаляются. Число связей после пересчёта."""
+        rows = self._needs_window_texts(window_days)
+        pairs = [
+            {"need_key": k1, "dup_need_key": k2, "match_percent": pct}
+            for i, a in enumerate(rows) for b in rows[i + 1:]
+            for k1, k2, pct in [(*canonical_pair(a["jira_key"], b["jira_key"]),
+                                 match_percent(a["text"], b["text"]))]
+            if pct >= threshold
+        ]
+        window_keys = [r["jira_key"] for r in rows]
+        with self._app.connection() as conn, conn.transaction():
+            cur = conn.cursor()
+            cur.execute(
+                "CREATE TEMP TABLE tmp_dup (need_key text, dup_need_key text, "
+                "match_percent smallint) ON COMMIT DROP"
+            )
+            if pairs:
+                cur.executemany(
+                    "INSERT INTO tmp_dup (need_key, dup_need_key, match_percent) "
+                    "VALUES (%(need_key)s, %(dup_need_key)s, %(match_percent)s)", pairs)
+                cur.executemany(
+                    "INSERT INTO app.need_duplicate (need_key, dup_need_key, match_percent) "
+                    "VALUES (%(need_key)s, %(dup_need_key)s, %(match_percent)s) "
+                    "ON CONFLICT (need_key, dup_need_key) DO UPDATE SET "
+                    "match_percent = EXCLUDED.match_percent, calculated_at = now()", pairs)
+            cur.execute(
+                "DELETE FROM app.need_duplicate d WHERE "
+                "(d.need_key = ANY(%s::text[]) OR d.dup_need_key = ANY(%s::text[])) "
+                "AND NOT EXISTS (SELECT 1 FROM tmp_dup t "
+                "WHERE t.need_key = d.need_key AND t.dup_need_key = d.dup_need_key)",
+                (window_keys, window_keys),
+            )
+            return len(pairs)
+
+    def _needs_window_texts(self, window_days: int) -> list[dict]:
+        """Потребности окна (все статусы - BR-010): jira_key + текст требований к кандидату
+        (описание + customfield_10811)."""
+        with self._app.connection() as conn:
+            return [
+                {"jira_key": r[0],
+                 "text": " ".join(t for t in (r[1], r[2]) if t)}
+                for r in conn.execute(
+                    "SELECT jira_key, description, requirements_text FROM app.jira_need "
+                    "WHERE jira_created_at >= now() - (%s || ' days')::interval",
+                    (window_days,),
+                ).fetchall()
+            ]
+
+    def duplicates_for(self, keys: list[str]) -> dict[str, list[dict]]:
+        """Связи-дубли для ключей страницы: другой ключ пары, %, классификация и поля
+        потребности-дубля (название, тип, ставка) для вывода (KON-165)."""
+        if not keys:
+            return {}
+        with self._app.connection() as conn:
+            rows = conn.execute(
+            "SELECT d.need_key, d.dup_need_key, d.match_percent, d.classification, "
+            " n.title, n.contract_type, n.rate_amount "
+            "FROM app.need_duplicate d JOIN app.jira_need n ON n.jira_key = d.dup_need_key "
+            "WHERE d.need_key = ANY(%s::text[]) "
+            "UNION ALL "
+            "SELECT d.need_key, d.dup_need_key, d.match_percent, d.classification, "
+            " n.title, n.contract_type, n.rate_amount "
+            "FROM app.need_duplicate d JOIN app.jira_need n ON n.jira_key = d.need_key "
+            "WHERE d.dup_need_key = ANY(%s::text[])",
+            (keys, keys),
+        ).fetchall()
+        out: dict[str, list[dict]] = {}
+        for need_key, dup_key, pct, classification, title, contract, rate in rows:
+            for owner, other in ((need_key, dup_key), (dup_key, need_key)):
+                if owner in keys:
+                    out.setdefault(owner, []).append({
+                        "jira_key": other, "title": title,
+                        "match_percent": pct, "classification": classification,
+                        "contract_type": contract, "rate_amount":
+                        None if rate is None else float(rate),
+                    })
+        return out
+
+    def set_duplicate_classification(self, need_key: str, dup_need_key: str,
+                                     classification: str) -> bool:
+        """Классификация связи «Похожая/Дубль» (CR-023); пара в каноническом порядке.
+        True - связь найдена и обновлена."""
+        k1, k2 = canonical_pair(need_key, dup_need_key)
+        with self._app.connection() as conn:
+            row = conn.execute(
+                "UPDATE app.need_duplicate SET classification = %s "
+                "WHERE need_key = %s AND dup_need_key = %s RETURNING 1",
+                (classification, k1, k2),
+            ).fetchone()
+        return row is not None
+
 
     def reconcile_need_employees(self, mapping: dict[str, str]) -> int:
         """Сверяет employee_key кэша потребностей с однозначной картой логин -> ключ карточки:

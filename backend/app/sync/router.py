@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
-from ..auth.deps import SessionContext, authenticated
+from ..auth.deps import SessionContext, authenticated, authenticated_csrf
 from ..jira_session.service import require_jira_ok
 from .repo import NO_DEPT_HEAD, SCOPE_EMPLOYEES, SCOPE_EPIC_COMMENTS, SCOPE_NEEDS, NeedFilter
 from .service import (
@@ -54,6 +54,19 @@ class Rate(BaseModel):
     proposer: str | None = None
 
 
+class DuplicateOut(BaseModel):
+    """Связь-дубль потребности (FR-014 v1.1; вывод - design/KON-165/decision.md)."""
+
+    jira_key: str
+    title: str
+    match_percent: int = Field(description="Совпадение описаний, % (порог 15%, ISS-005)")
+    classification: Literal["similar", "duplicate"] = Field(
+        description="Классификация пользователя (CR-023): similar = Похожая, duplicate = Дубль")
+    contract_type: str | None = Field(None, description="Прямой контракт | Субподрядчик")
+    rate_amount: float | None = Field(None, description="Ставка цифрой; None - «—»")
+    jira_url: str | None = Field(None, description="Ссылка на задачу в Jira")
+
+
 class NeedOut(BaseModel):
     jira_key: str
     jira_url: str | None = Field(None, description="Ссылка на задачу в Jira (нужен JIRA_BASE_URL)")
@@ -69,6 +82,8 @@ class NeedOut(BaseModel):
     contract_type: str | None = None
     rate: Rate
     tags: list[str] = []
+    duplicates: list[DuplicateOut] = Field(
+        default=[], description="Связи-дубли (FR-014): совпадение описаний >= 15% за 2 недели")
     jira_created_at: datetime
     jira_updated_at: datetime
     synced_at: datetime
@@ -247,6 +262,7 @@ def list_needs(
         ),
         limit=limit, offset=offset, sort=sort, order_dir=order,
     )
+    duplicates = service.repo.duplicates_for([it["jira_key"] for it in items])
     out = [
         NeedOut(
             **{k: v for k, v in it.items() if not k.startswith("rate_")},
@@ -257,6 +273,10 @@ def list_needs(
                 includes_vat=it["rate_includes_vat"], unit=it["rate_unit"],
                 proposer=it["rate_proposer"],
             ),
+            duplicates=[
+                DuplicateOut(**d, jira_url=_url(service, d["jira_key"]))
+                for d in duplicates.get(it["jira_key"], [])
+            ],
         )
         for it in items
     ]
@@ -376,6 +396,28 @@ def refresh(
         scope=body.scope, ok=True, fetched=res.fetched, upserted=res.upserted,
         skipped=res.skipped, sync=_stamp(service.sync_info(body.scope)),
     )
+
+
+class DuplicateClassificationIn(BaseModel):
+    classification: Literal["similar", "duplicate"] = Field(
+        description="similar = Похожая, duplicate = Дубль (CR-023)")
+
+
+@router.post("/needs/{key}/duplicates/{dup_key}", status_code=200)
+def set_duplicate_classification(
+    key: str, dup_key: str, body: DuplicateClassificationIn, request: Request,
+    ctx: SessionContext = Depends(authenticated_csrf),
+) -> dict:
+    """Классификация связи-дубля «Похожая / Дубль» (FR-014 v1.1, CR-023); сохраняется
+    персистентно и переживает пересинхронизацию. 404 - связи нет."""
+    service = _service(request)
+    if not service.repo.set_duplicate_classification(key, dup_key, body.classification):
+        raise HTTPException(
+            status_code=404,
+            detail={"state": "not_found", "code": "duplicate_not_found",
+                    "message": "Связь-дубль не найдена (возможно, пересчёт ушёл ниже порога)"},
+        )
+    return {"need_key": key, "dup_need_key": dup_key, "classification": body.classification}
 
 
 @router.get(

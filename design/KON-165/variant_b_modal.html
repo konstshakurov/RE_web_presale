@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KON-165 — вариант B: значок + модальное окно</title>
+<style>
+:root, :root[data-theme="dark"] {
+  --bg:#12171d; --panel:#1b222b; --panel-2:#232c37; --text:#e4e7eb; --muted:#9aa5b1;
+  --border:#323f4b; --accent:#3e8ef7; --nav:#0f1b33; --err:#ff8a80; --ok:#34c38f; --warn:#f5b041;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg:#f4f6f8; --panel:#ffffff; --panel-2:#eef1f4; --text:#1f2933; --muted:#616e7c;
+  --border:#cbd2d9; --accent:#1f6fd6; --nav:#1f2933; --err:#b42318; --ok:#1a7f5a; --warn:#b7791f;
+  color-scheme: light;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; }
+.bar { display:flex; gap:12px; align-items:center; padding:8px 24px; background:var(--nav); color:#fff; }
+.bar button { background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:4px 10px; cursor:pointer; }
+.bar .hint { margin-left:auto; font-size:13px; opacity:.8; }
+.wrap { padding:16px 24px 40px; position:relative; }
+h2 { font-size:15px; margin:18px 0 8px; color:var(--muted); font-weight:600; }
+
+table.needs { width:100%; border-collapse:collapse; background:var(--panel); }
+.needs th { text-align:left; padding:8px 10px; background:var(--panel-2); font-size:calc(1em - 2px); color:var(--muted); font-weight:600; }
+.needs td { padding:8px 10px; border-top:1px solid var(--border); vertical-align:top; }
+.needs a { color:var(--accent); }
+
+.dup-btn { display:inline-flex; align-items:center; gap:4px; background:none; border:none; color:var(--warn);
+  padding:2px; margin-left:6px; border-radius:6px; cursor:pointer; vertical-align:middle; }
+.dup-btn:hover { background:var(--panel-2); }
+.dup-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.dup-btn .n { font-size:12px; font-weight:600; color:var(--warn); }
+.chip { display:inline-block; font-size:12px; padding:1px 8px; border-radius:999px; background:var(--panel-2); border:1px solid var(--border); }
+
+/* --- Вариант B: модальное окно --- */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; }
+.modal { width:min(640px, calc(100vw - 48px)); max-height:80vh; overflow:auto; background:var(--panel);
+  border:1px solid var(--border); border-radius:10px; padding:20px 24px; box-shadow:0 12px 40px rgba(0,0,0,.35); }
+.modal h3 { margin:0 0 4px; font-size:16px; }
+.modal .sub { font-size:13px; color:var(--muted); margin:0 0 12px; }
+.dup-item { display:flex; gap:12px; align-items:baseline; padding:10px 0; border-top:1px solid var(--border); }
+.dup-pct { flex:0 0 auto; font-size:12px; font-weight:600; padding:1px 8px; border-radius:999px; background:#fbeabc; color:#7a4f00; }
+:root[data-theme="dark"] .dup-pct { background:rgba(245,176,65,.18); color:var(--warn); }
+.dup-key { flex:0 0 110px; font-weight:600; }
+.dup-status { flex:0 0 auto; margin-left:auto; }
+.modal .note { font-size:13px; color:var(--muted); margin:14px 0 0; }
+.modal .close { margin-top:16px; background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 14px; cursor:pointer; }
+.modal .close:focus-visible, .dup-item a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>KON-165 · Вариант B — значок + модальное окно</b>
+  <button type="button" onclick="const h=document.documentElement;h.dataset.theme=h.dataset.theme==='light'?'dark':'light'">Тема</button>
+  <span class="hint">Значок рядом с названием; клик — окно со списком дублей (таблица остаётся на месте).</span>
+</div>
+<div class="wrap">
+
+<h2>Таблица (за окном видна строка-источник)</h2>
+<table class="needs">
+  <thead><tr><th>Ключ</th><th>Название</th><th>Статус</th><th>Клиент</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><a href="#">5965</a></td>
+      <td><span style="white-space:nowrap">Подбор аналитиков данных для проекта отчётности (Магнит)
+        <button type="button" class="dup-btn" aria-haspopup="dialog" aria-label="Дубли: 2. Открыть список">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 9.5v5"/><path d="M12 17.4v.01"/></svg>
+          <span class="n" aria-hidden="true">2</span>
+        </button></span>
+      </td>
+      <td><span class="chip">Требуется кандидат</span></td><td>Магнит</td>
+    </tr>
+    <tr>
+      <td><a href="#">5941</a></td>
+      <td>Аналитик 1С:ERP (производство)</td>
+      <td><span class="chip">Кандидат назначен</span></td><td>ЛеманаПРО</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="overlay" role="presentation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <h3 id="dlg-title">Возможные дубли потребности <a href="#">ANALYTICS-5965</a></h3>
+    <p class="sub">Совпадение описания требований к кандидату ≥ 15% (ISS-005); потребности на аналитиков за последние 2 недели, во всех статусах (БП-10).</p>
+
+    <div class="dup-item">
+      <span class="dup-pct">52%</span>
+      <span class="dup-key"><a href="#">ANALYTICS-5968</a></span>
+      <span>Субподряд «Открытые решения» — аналитики данных</span>
+      <span class="dup-status"><span class="chip">Поиск кандидата</span></span>
+    </div>
+    <div class="dup-item">
+      <span class="dup-pct">34%</span>
+      <span class="dup-key"><a href="#">ANALYTICS-5969</a></span>
+      <span>Субподряд «БСС инжиниринг» — аналитики данных</span>
+      <span class="dup-status"><span class="chip">Кандидатов нет</span></span>
+    </div>
+
+    <p class="note">Расчёт выполняется при синхронизации; предупреждение информирует и не ограничивает работу с потребностью.</p>
+    <button type="button" class="close" onclick="document.querySelector('.overlay').style.display='none'">Закрыть</button>
+  </div>
+</div>
+
+<h2>Дублей нет — значок не показывается (в таблице ничего не меняется)</h2>
+<table class="needs">
+  <thead><tr><th>Ключ</th><th>Название</th><th>Статус</th></tr></thead>
+  <tbody><tr><td><a href="#">5930</a></td><td>Аналитик мобильного приложения</td><td><span class="chip">Требуется кандидат</span></td></tr></tbody>
+</table>
+</div>
+</body>
+</html>

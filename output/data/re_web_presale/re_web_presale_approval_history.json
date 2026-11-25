@@ -3005,49 +3005,70 @@
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-011 (UC-005 v2.1)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация UC-005 обновлена через 7.1 до v2.1 по CR-011 — форма входа совместима с менеджером паролей браузера (username/current-password, пароль не очищается до ответа, readOnly при отправке, Credential Management API в Chrome), критерии приёмки дополнены. Реализовано KON-132, рамка KON-154."
             },
             {
               "req_id": "FR-002",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-012 (FR-002 v1.1)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-002 обновлена через 7.1 до v1.1 по CR-012. В тело включены: мультивыбор статусов чипами («Все N» + 9 статусов, «Уволенные» — отдельный тумблер, ИЛИ между статусами и И с остальными фильтрами), фильтр «РО» (customfield_14401, «Все»/имена по алфавиту/«Без РО», «Не назначен» = NULL, неактивные и скрытые РО не показываются), строка «Показано N из M» и «Сбросить фильтры», счётчики с учётом РО и «Уволенные». UI — design/KON-134/decision.md v5 (approved); реализация KON-136/138, приёмка KON-140 Pass."
             },
             {
               "req_id": "FR-028",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-012 (FR-028 v1.2)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-23",
+              "resolution_notes": "Условие выполнено: спецификация FR-028 обновлена через 7.1 до v1.2 по CR-012. Добавлены синхронизируемое поле customfield_14401 (логин в нижнем регистре, отображаемое имя, active), нормализация «Не назначен» в NULL, ограничения синхронизации и критерии приёмки. Изменение реализовано в KON-136."
             },
             {
               "req_id": "FR-031",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-013/015/016 (FR-031 v1.2)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-031 обновлена через 7.1 до v1.2 по CR-013/015 — шапка 64 px (вместо 56), логотип из двух ассетов, чип «Админ» по фактической роли, без меню пользователя, активная вкладка цвета --bg; UI — design/KON-135 (approved). Реализовано KON-139, QA KON-141 Pass."
             },
             {
               "req_id": "FR-038",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-013/015/016 (FR-038 v1.2)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-038 обновлена через 7.1 до v1.2 по CR-013/015/016 — логотип в шапке из двух ассетов (KON-135), светлая тема — палитра А2 (design/KON-149), цветные статус-чипы по statusTone.ts, заливка строк; привязка статусов к цветам подтверждена владельцем 29.10.2026. Реализовано KON-139/150/152/153/154, QA KON-141 и KON-151 Pass."
             },
             {
               "req_id": "FR-032",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-014 (FR-032 v2.0)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-032 обновлена через 7.1 до v2.0 по CR-014 — чипы статусов-мультивыбор, фильтр «РО», мгновенное применение фильтров, поиск по смыслу кнопкой «Найти» (не охватывает «Уволен»), «Сбросить» не трогает чипы. UI — design/KON-134 v5, раздел «Резюме». Реализовано KON-143/145, QA KON-147 Pass."
             },
             {
               "req_id": "FR-036",
               "decision": "conditional",
               "condition_text": "Тело спецификации обновлено в 7.1 по CR-014 (FR-036 v1.1)",
               "condition_deadline": "2026-11-02",
-              "condition_owner": "Аналитик"
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие перекрыто последующим раундом и фактически выполнено: тело спецификации FR-036 обновлено в 7.1 (v1.2 по CR-019 — правила объективности вывода) и требование утверждено в раунде APKG-CR020-FR015 / восстановлено в APKG-CR020-RESTORE. Раунд APKG-CR011-016-CLOSE вытеснен; закрывается для чистоты истории."
             },
             {
               "req_id": "FR-001",
@@ -3366,6 +3387,1953 @@
         "COMP-SEQ-JiraChangeStatus": false,
         "COMP-SEQ-JiraSessionExpired": false
       }
+    },
+    "APKG-CR020-RESTORE": {
+      "package_id": "APKG-CR020-RESTORE",
+      "package_title": "Восстановление прежних статусов после широкого BFS CR-020",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "BP-001",
+        "FR-005",
+        "FR-028",
+        "FR-010",
+        "FR-034",
+        "FR-011",
+        "FR-016",
+        "FR-018",
+        "UC-003",
+        "BR-001",
+        "BR-005",
+        "COMP-SEQ-JiraAssignCandidate",
+        "NFR-009",
+        "BR-002",
+        "FR-030",
+        "NFR-008",
+        "FR-037",
+        "BR-007",
+        "COMP-SEQ-JiraSessionExpired",
+        "BR-006",
+        "FR-014",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-038",
+        "FR-020",
+        "FR-012",
+        "BR-010",
+        "FR-008",
+        "NFR-010",
+        "FR-003",
+        "FR-019",
+        "FR-022",
+        "FR-013",
+        "FR-033",
+        "FR-021",
+        "UC-004",
+        "FR-025",
+        "UC-002",
+        "FR-001",
+        "FR-009",
+        "FR-036",
+        "FR-007",
+        "BR-009",
+        "FR-004",
+        "FR-035",
+        "FR-027",
+        "NFR-007",
+        "FR-032",
+        "FR-039",
+        "FR-024",
+        "UC-005",
+        "FR-017",
+        "NFR-006",
+        "FR-002",
+        "FR-023",
+        "FR-031",
+        "UC-006",
+        "FR-029",
+        "FR-026",
+        "UC-001",
+        "FR-006",
+        "FR-040",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-008",
+        "COMP-SEQ-JiraLoginSession",
+        "BR-003",
+        "COMP-SEQ-JiraChangeStatus"
+      ],
+      "created_date": "2026-11-23",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "UC-005",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-011 (UC-005 v2.1)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация UC-005 обновлена через 7.1 до v2.1 по CR-011 — форма входа совместима с менеджером паролей браузера (username/current-password, пароль не очищается до ответа, readOnly при отправке, Credential Management API в Chrome), критерии приёмки дополнены. Реализовано KON-132, рамка KON-154."
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-012 (FR-002 v1.1)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-002 обновлена через 7.1 до v1.1 по CR-012. В тело включены: мультивыбор статусов чипами («Все N» + 9 статусов, «Уволенные» — отдельный тумблер, ИЛИ между статусами и И с остальными фильтрами), фильтр «РО» (customfield_14401, «Все»/имена по алфавиту/«Без РО», «Не назначен» = NULL, неактивные и скрытые РО не показываются), строка «Показано N из M» и «Сбросить фильтры», счётчики с учётом РО и «Уволенные». UI — design/KON-134/decision.md v5 (approved); реализация KON-136/138, приёмка KON-140 Pass."
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-012 (FR-028 v1.2)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-23",
+              "resolution_notes": "Условие выполнено: спецификация FR-028 обновлена через 7.1 до v1.2 по CR-012. Добавлены синхронизируемое поле customfield_14401 (логин в нижнем регистре, отображаемое имя, active), нормализация «Не назначен» в NULL, ограничения синхронизации и критерии приёмки. Изменение реализовано в KON-136."
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-013/015/016 (FR-031 v1.2)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-031 обновлена через 7.1 до v1.2 по CR-013/015 — шапка 64 px (вместо 56), логотип из двух ассетов, чип «Админ» по фактической роли, без меню пользователя, активная вкладка цвета --bg; UI — design/KON-135 (approved). Реализовано KON-139, QA KON-141 Pass."
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-013/015/016 (FR-038 v1.2)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-038 обновлена через 7.1 до v1.2 по CR-013/015/016 — логотип в шапке из двух ассетов (KON-135), светлая тема — палитра А2 (design/KON-149), цветные статус-чипы по statusTone.ts, заливка строк; привязка статусов к цветам подтверждена владельцем 29.10.2026. Реализовано KON-139/150/152/153/154, QA KON-141 и KON-151 Pass."
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "conditional",
+              "condition_text": "Тело спецификации обновлено в 7.1 по CR-014 (FR-032 v2.0)",
+              "condition_deadline": "2026-11-02",
+              "condition_owner": "Аналитик",
+              "condition_closed": true,
+              "condition_closed_date": "2026-11-24",
+              "resolution_notes": "Условие выполнено: спецификация FR-032 обновлена через 7.1 до v2.0 по CR-014 — чипы статусов-мультивыбор, фильтр «РО», мгновенное применение фильтров, поиск по смыслу кнопкой «Найти» (не охватывает «Уволен»), «Сбросить» не трогает чипы. UI — design/KON-134 v5, раздел «Резюме». Реализовано KON-143/145, QA KON-147 Pass."
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraAssignCandidate",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraSessionExpired",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraIncrementalSync",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraEpicRules",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraLoginSession",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraChangeStatus",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Только восстановление состояний до ошибочно широкого BFS CR-020: 60 ранее approved и 6 conditional_approved; это не новая оценка их содержания. Само целевое требование FR-015 намеренно исключено из пакета и остаётся under_change до обновления по CR-020.",
+          "recorded_date": "2026-11-23"
+        }
+      },
+      "baseline_version": "v2.1",
+      "status": "baselined",
+      "verification_snapshot": {
+        "BP-001": true,
+        "FR-005": true,
+        "FR-028": true,
+        "FR-010": true,
+        "FR-034": true,
+        "FR-011": true,
+        "FR-016": true,
+        "FR-018": true,
+        "UC-003": true,
+        "BR-001": true,
+        "BR-005": true,
+        "COMP-SEQ-JiraAssignCandidate": false,
+        "NFR-009": true,
+        "BR-002": true,
+        "FR-030": true,
+        "NFR-008": true,
+        "FR-037": true,
+        "BR-007": true,
+        "COMP-SEQ-JiraSessionExpired": false,
+        "BR-006": true,
+        "FR-014": true,
+        "COMP-SEQ-JiraIncrementalSync": false,
+        "FR-038": true,
+        "FR-020": true,
+        "FR-012": true,
+        "BR-010": true,
+        "FR-008": true,
+        "NFR-010": true,
+        "FR-003": true,
+        "FR-019": true,
+        "FR-022": true,
+        "FR-013": true,
+        "FR-033": true,
+        "FR-021": true,
+        "UC-004": true,
+        "FR-025": true,
+        "UC-002": true,
+        "FR-001": true,
+        "FR-009": true,
+        "FR-036": true,
+        "FR-007": true,
+        "BR-009": true,
+        "FR-004": true,
+        "FR-035": true,
+        "FR-027": true,
+        "NFR-007": true,
+        "FR-032": true,
+        "FR-039": true,
+        "FR-024": true,
+        "UC-005": true,
+        "FR-017": true,
+        "NFR-006": true,
+        "FR-002": true,
+        "FR-023": true,
+        "FR-031": true,
+        "UC-006": true,
+        "FR-029": true,
+        "FR-026": true,
+        "UC-001": true,
+        "FR-006": true,
+        "FR-040": true,
+        "COMP-SEQ-JiraEpicRules": false,
+        "BR-008": true,
+        "COMP-SEQ-JiraLoginSession": false,
+        "BR-003": true,
+        "COMP-SEQ-JiraChangeStatus": false
+      }
+    },
+    "APKG-CR020-FR015": {
+      "package_id": "APKG-CR020-FR015",
+      "package_title": "CR-020 — FR-015 v1.2: тезисы правил клиента из комментариев эпика",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-015"
+      ],
+      "created_date": "2026-11-23",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца об объёме CR-020 принято 05.11.2026; UX-вариант B утверждён 10.11.2026; production QA Pass подтверждён владельцем 23.11.2026. Утверждена спецификация FR-015 v1.2 без дополнительных условий.",
+          "recorded_date": "2026-11-23"
+        }
+      },
+      "baseline_version": "v2.0",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-015": true
+      }
+    },
+    "APKG-CR021-CLOSE": {
+      "package_id": "APKG-CR021-CLOSE",
+      "package_title": "CR-021 — FR-019 v1.2: правило ориентира при менее чем 3 ставках",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-019"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца 24.11.2026 по CR-021: зафиксировать правило KON-95 в FR-019 v1.2. Без условий.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.2",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-019": true
+      }
+    },
+    "APKG-CR021-RESTORE": {
+      "package_id": "APKG-CR021-RESTORE",
+      "package_title": "Восстановление статусов после широкого BFS CR-021",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "COMP-DB-ReWebPresale",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraIncrementalSync",
+        "COMP-SEQ-JiraEpicRules",
+        "COMP-SEQ-JiraAssignCandidate",
+        "COMP-SEQ-JiraChangeStatus",
+        "COMP-SEQ-JiraSessionExpired"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "DD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "ERD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-DB-ReWebPresale",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraLoginSession",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraIncrementalSync",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraEpicRules",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraAssignCandidate",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraChangeStatus",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraSessionExpired",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Только восстановление состояний после ошибочно широкого BFS CR-021: ранее все эти требования были approved (baseline v2.1); это не новая оценка их содержания. Само целевое требование CR FR-019 уже утверждено и включено в baseline v2.2 (APKG-CR021-CLOSE) и в пакет не включено.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.3",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-001": true,
+        "FR-002": true,
+        "FR-003": true,
+        "FR-004": true,
+        "FR-005": true,
+        "FR-006": true,
+        "FR-007": true,
+        "FR-008": true,
+        "FR-009": true,
+        "FR-010": true,
+        "FR-011": true,
+        "FR-012": true,
+        "FR-013": true,
+        "FR-014": true,
+        "FR-015": true,
+        "FR-016": true,
+        "FR-017": true,
+        "FR-018": true,
+        "FR-020": true,
+        "FR-021": true,
+        "FR-022": true,
+        "FR-023": true,
+        "FR-024": true,
+        "FR-025": true,
+        "FR-026": true,
+        "FR-027": true,
+        "FR-028": true,
+        "FR-029": true,
+        "FR-030": true,
+        "NFR-006": true,
+        "NFR-007": true,
+        "NFR-008": true,
+        "NFR-009": true,
+        "NFR-010": true,
+        "BR-001": true,
+        "BR-002": true,
+        "BR-003": true,
+        "BR-005": true,
+        "BR-006": true,
+        "BR-007": true,
+        "BR-008": true,
+        "BR-009": true,
+        "BR-010": true,
+        "UC-001": true,
+        "UC-002": true,
+        "UC-003": true,
+        "UC-004": true,
+        "UC-005": true,
+        "UC-006": true,
+        "BP-001": true,
+        "DD-001": true,
+        "ERD-001": true,
+        "FR-031": true,
+        "FR-032": true,
+        "FR-033": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-036": true,
+        "FR-037": true,
+        "FR-038": true,
+        "FR-039": true,
+        "FR-040": true,
+        "COMP-DB-ReWebPresale": false,
+        "COMP-SEQ-JiraLoginSession": false,
+        "COMP-SEQ-JiraIncrementalSync": false,
+        "COMP-SEQ-JiraEpicRules": false,
+        "COMP-SEQ-JiraAssignCandidate": false,
+        "COMP-SEQ-JiraChangeStatus": false,
+        "COMP-SEQ-JiraSessionExpired": false
+      }
+    },
+    "APKG-CR023-CLOSE": {
+      "package_id": "APKG-CR023-CLOSE",
+      "package_title": "CR-023 — FR-014 v1.1: классификация «Похожая / Дубль» с сохранением",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-014"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца 24.11.2026 по CR-023: классификация «Похожая / Дубль» с сохранением в FR-014 v1.1; UI — decision.md KON-165. Без условий.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.4",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-014": true
+      }
+    },
+    "APKG-CR023-RESTORE": {
+      "package_id": "APKG-CR023-RESTORE",
+      "package_title": "Восстановление статусов после широкого BFS CR-023",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "COMP-DB-ReWebPresale",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraIncrementalSync",
+        "COMP-SEQ-JiraEpicRules",
+        "COMP-SEQ-JiraAssignCandidate",
+        "COMP-SEQ-JiraChangeStatus",
+        "COMP-SEQ-JiraSessionExpired"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "DD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "ERD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-DB-ReWebPresale",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraLoginSession",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraIncrementalSync",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraEpicRules",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraAssignCandidate",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraChangeStatus",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraSessionExpired",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Только восстановление состояний после ошибочно широкого BFS CR-023: ранее все эти требования были approved (baseline v2.3); это не новая оценка их содержания. Целевое требование CR FR-014 утверждено в baseline v2.4 (APKG-CR023-CLOSE) и в пакет не включено.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.5",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-001": true,
+        "FR-002": true,
+        "FR-003": true,
+        "FR-004": true,
+        "FR-005": true,
+        "FR-006": true,
+        "FR-007": true,
+        "FR-008": true,
+        "FR-009": true,
+        "FR-010": true,
+        "FR-011": true,
+        "FR-012": true,
+        "FR-013": true,
+        "FR-015": true,
+        "FR-016": true,
+        "FR-017": true,
+        "FR-018": true,
+        "FR-019": true,
+        "FR-020": true,
+        "FR-021": true,
+        "FR-022": true,
+        "FR-023": true,
+        "FR-024": true,
+        "FR-025": true,
+        "FR-026": true,
+        "FR-027": true,
+        "FR-028": true,
+        "FR-029": true,
+        "FR-030": true,
+        "NFR-006": true,
+        "NFR-007": true,
+        "NFR-008": true,
+        "NFR-009": true,
+        "NFR-010": true,
+        "BR-001": true,
+        "BR-002": true,
+        "BR-003": true,
+        "BR-005": true,
+        "BR-006": true,
+        "BR-007": true,
+        "BR-008": true,
+        "BR-009": true,
+        "BR-010": true,
+        "UC-001": true,
+        "UC-002": true,
+        "UC-003": true,
+        "UC-004": true,
+        "UC-005": true,
+        "UC-006": true,
+        "BP-001": true,
+        "DD-001": true,
+        "ERD-001": true,
+        "FR-031": true,
+        "FR-032": true,
+        "FR-033": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-036": true,
+        "FR-037": true,
+        "FR-038": true,
+        "FR-039": true,
+        "FR-040": true,
+        "COMP-DB-ReWebPresale": false,
+        "COMP-SEQ-JiraLoginSession": false,
+        "COMP-SEQ-JiraIncrementalSync": false,
+        "COMP-SEQ-JiraEpicRules": false,
+        "COMP-SEQ-JiraAssignCandidate": false,
+        "COMP-SEQ-JiraChangeStatus": false,
+        "COMP-SEQ-JiraSessionExpired": false
+      }
+    },
+    "APKG-CR022-CLOSE": {
+      "package_id": "APKG-CR022-CLOSE",
+      "package_title": "CR-022 — FR-011 v1.4, FR-034 v1.1, FR-035 v1.1, FR-036 v1.3, FR-038 v1.3: UI раздела «Потребности» по референсу владельца",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-011",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-038"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-036",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца 24.11.2026 по CR-022 (референсы: скрин 3 — эталон вида, скрин 4 — эталон меню статусов; пункты 3.1–3.12): обновить FR-011 v1.4 («Изменить ⌄» с меню переходов), FR-034 v1.1 (дата-диапазон — новая функциональность; «Обновить» с иконкой; «—» в ставке), FR-035 v1.1 (чипы по референсу, «Суб»), FR-036 v1.3 («Сопоставить ⌄»), FR-038 v1.3 (токены раздела). Без условий. UI — design/KON-166 (Pre.UX-16, REW-46).",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.6",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-011": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-036": true,
+        "FR-038": true
+      }
+    },
+    "APKG-CR022-RESTORE": {
+      "package_id": "APKG-CR022-RESTORE",
+      "package_title": "Восстановление прежних статусов после широкого BFS CR-022",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "UC-002",
+        "UC-001",
+        "BR-008",
+        "FR-031",
+        "FR-013",
+        "FR-026",
+        "BP-001",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-001",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-037",
+        "FR-023",
+        "FR-028",
+        "FR-029",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-002",
+        "BR-001",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BR-003",
+        "BR-005",
+        "NFR-010",
+        "NFR-009",
+        "BR-010",
+        "BR-006",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-002",
+        "BR-009",
+        "NFR-008",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-003",
+        "FR-004",
+        "FR-022",
+        "FR-027",
+        "FR-032",
+        "FR-033",
+        "FR-039",
+        "FR-040",
+        "FR-012",
+        "FR-017",
+        "FR-024",
+        "FR-025",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-021",
+        "FR-030",
+        "BR-007",
+        "NFR-007",
+        "NFR-006",
+        "COMP-DB-ReWebPresale",
+        "ERD-001",
+        "DD-001"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "UC-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-031",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-013",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-026",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BP-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraChangeStatus",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-014",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-015",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-016",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-018",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-019",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-020",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-037",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-023",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-028",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-029",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraAssignCandidate",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "UC-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-005",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-010",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraEpicRules",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-002",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-009",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-008",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraIncrementalSync",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-003",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-004",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-022",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-027",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-032",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-033",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-039",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-040",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-012",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-017",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-024",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-025",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraLoginSession",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-SEQ-JiraSessionExpired",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-021",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-030",
+              "decision": "approved"
+            },
+            {
+              "req_id": "BR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-007",
+              "decision": "approved"
+            },
+            {
+              "req_id": "NFR-006",
+              "decision": "approved"
+            },
+            {
+              "req_id": "COMP-DB-ReWebPresale",
+              "decision": "approved"
+            },
+            {
+              "req_id": "ERD-001",
+              "decision": "approved"
+            },
+            {
+              "req_id": "DD-001",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Только восстановление состояний после ошибочно широкого BFS CR-022: ранее все эти требования были approved (baseline v2.5); это не новая оценка их содержания. Целевые требования CR-022 (FR-011, FR-034, FR-035, FR-036, FR-038) утверждены в APKG-CR022-CLOSE (baseline v2.6) и в этот пакет не включены.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.7",
+      "status": "baselined",
+      "verification_snapshot": {
+        "UC-002": true,
+        "UC-001": true,
+        "BR-008": true,
+        "FR-031": true,
+        "FR-013": true,
+        "FR-026": true,
+        "BP-001": true,
+        "COMP-SEQ-JiraChangeStatus": false,
+        "FR-001": true,
+        "FR-005": true,
+        "FR-006": true,
+        "FR-007": true,
+        "FR-008": true,
+        "FR-009": true,
+        "FR-010": true,
+        "FR-014": true,
+        "FR-015": true,
+        "FR-016": true,
+        "FR-018": true,
+        "FR-019": true,
+        "FR-020": true,
+        "FR-037": true,
+        "FR-023": true,
+        "FR-028": true,
+        "FR-029": true,
+        "COMP-SEQ-JiraAssignCandidate": false,
+        "FR-002": true,
+        "BR-001": true,
+        "UC-003": true,
+        "UC-004": true,
+        "UC-005": true,
+        "UC-006": true,
+        "BR-003": true,
+        "BR-005": true,
+        "NFR-010": true,
+        "NFR-009": true,
+        "BR-010": true,
+        "BR-006": true,
+        "COMP-SEQ-JiraEpicRules": false,
+        "BR-002": true,
+        "BR-009": true,
+        "NFR-008": true,
+        "COMP-SEQ-JiraIncrementalSync": false,
+        "FR-003": true,
+        "FR-004": true,
+        "FR-022": true,
+        "FR-027": true,
+        "FR-032": true,
+        "FR-033": true,
+        "FR-039": true,
+        "FR-040": true,
+        "FR-012": true,
+        "FR-017": true,
+        "FR-024": true,
+        "FR-025": true,
+        "COMP-SEQ-JiraLoginSession": false,
+        "COMP-SEQ-JiraSessionExpired": false,
+        "FR-021": true,
+        "FR-030": true,
+        "BR-007": true,
+        "NFR-007": true,
+        "NFR-006": true,
+        "COMP-DB-ReWebPresale": false,
+        "ERD-001": true,
+        "DD-001": true
+      }
+    },
+    "APKG-CR022-COLUMNS": {
+      "package_id": "APKG-CR022-COLUMNS",
+      "package_title": "CR-022 — дополнение: FR-034 v1.2, состав столбцов «в сделанном виде» (уточнение владельца 24.11.2026)",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-034"
+      ],
+      "created_date": "2026-11-24",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Уточнение владельца 24.11.2026 в рамках обсуждения CR-022: состав и названия столбцов сохраняются «в сделанном виде» по скрину 2 текущей реализации (Ключ, Автор, Название, Статус, Клиент, Контракт, Ставка, Кандидаты, Создана); текст FR-034 приведён к факту (v1.1 → v1.2, прецедент CR-009/010). Референс скрин 3 — эталон стиля (пункты 3.1–3.12), не состава столбцов. Кебаб-меню — не делать (3.11); ROS — реализованная функция FR-041/BF-12, вне скоупа. Без условий.",
+          "recorded_date": "2026-11-24"
+        }
+      },
+      "baseline_version": "v2.8",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-034": true
+      }
     }
   },
   "baselines": [
@@ -3477,7 +5445,465 @@
           "recorded_date": "2026-10-02"
         }
       }
+    },
+    {
+      "baseline_version": "v2.0",
+      "package_id": "APKG-CR020-FR015",
+      "package_title": "CR-020 — FR-015 v1.2: тезисы правил клиента из комментариев эпика",
+      "approach": "predictive",
+      "created_date": "2026-11-23",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-015"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-23"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.1",
+      "package_id": "APKG-CR020-RESTORE",
+      "package_title": "Восстановление прежних статусов после широкого BFS CR-020",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "BP-001",
+        "FR-005",
+        "FR-028",
+        "FR-010",
+        "FR-034",
+        "FR-011",
+        "FR-016",
+        "FR-018",
+        "UC-003",
+        "BR-001",
+        "BR-005",
+        "COMP-SEQ-JiraAssignCandidate",
+        "NFR-009",
+        "BR-002",
+        "FR-030",
+        "NFR-008",
+        "FR-037",
+        "BR-007",
+        "COMP-SEQ-JiraSessionExpired",
+        "BR-006",
+        "FR-014",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-038",
+        "FR-020",
+        "FR-012",
+        "BR-010",
+        "FR-008",
+        "NFR-010",
+        "FR-003",
+        "FR-019",
+        "FR-022",
+        "FR-013",
+        "FR-033",
+        "FR-021",
+        "UC-004",
+        "FR-025",
+        "UC-002",
+        "FR-001",
+        "FR-009",
+        "FR-036",
+        "FR-007",
+        "BR-009",
+        "FR-004",
+        "FR-035",
+        "FR-027",
+        "NFR-007",
+        "FR-032",
+        "FR-039",
+        "FR-024",
+        "UC-005",
+        "FR-017",
+        "NFR-006",
+        "FR-002",
+        "FR-023",
+        "FR-031",
+        "UC-006",
+        "FR-029",
+        "FR-026",
+        "UC-001",
+        "FR-006",
+        "FR-040",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-008",
+        "COMP-SEQ-JiraLoginSession",
+        "BR-003",
+        "COMP-SEQ-JiraChangeStatus"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-23"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.2",
+      "package_id": "APKG-CR021-CLOSE",
+      "package_title": "CR-021 — FR-019 v1.2: правило ориентира при менее чем 3 ставках",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-019"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.3",
+      "package_id": "APKG-CR021-RESTORE",
+      "package_title": "Восстановление статусов после широкого BFS CR-021",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "COMP-DB-ReWebPresale",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraIncrementalSync",
+        "COMP-SEQ-JiraEpicRules",
+        "COMP-SEQ-JiraAssignCandidate",
+        "COMP-SEQ-JiraChangeStatus",
+        "COMP-SEQ-JiraSessionExpired"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.4",
+      "package_id": "APKG-CR023-CLOSE",
+      "package_title": "CR-023 — FR-014 v1.1: классификация «Похожая / Дубль» с сохранением",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-014"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.5",
+      "package_id": "APKG-CR023-RESTORE",
+      "package_title": "Восстановление статусов после широкого BFS CR-023",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-011",
+        "FR-012",
+        "FR-013",
+        "FR-015",
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-021",
+        "FR-022",
+        "FR-023",
+        "FR-024",
+        "FR-025",
+        "FR-026",
+        "FR-027",
+        "FR-028",
+        "FR-029",
+        "FR-030",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "BR-001",
+        "BR-002",
+        "BR-003",
+        "BR-005",
+        "BR-006",
+        "BR-007",
+        "BR-008",
+        "BR-009",
+        "BR-010",
+        "UC-001",
+        "UC-002",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BP-001",
+        "DD-001",
+        "ERD-001",
+        "FR-031",
+        "FR-032",
+        "FR-033",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-037",
+        "FR-038",
+        "FR-039",
+        "FR-040",
+        "COMP-DB-ReWebPresale",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraIncrementalSync",
+        "COMP-SEQ-JiraEpicRules",
+        "COMP-SEQ-JiraAssignCandidate",
+        "COMP-SEQ-JiraChangeStatus",
+        "COMP-SEQ-JiraSessionExpired"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.6",
+      "package_id": "APKG-CR022-CLOSE",
+      "package_title": "CR-022 — FR-011 v1.4, FR-034 v1.1, FR-035 v1.1, FR-036 v1.3, FR-038 v1.3: UI раздела «Потребности» по референсу владельца",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-011",
+        "FR-034",
+        "FR-035",
+        "FR-036",
+        "FR-038"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.7",
+      "package_id": "APKG-CR022-RESTORE",
+      "package_title": "Восстановление прежних статусов после широкого BFS CR-022",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "UC-002",
+        "UC-001",
+        "BR-008",
+        "FR-031",
+        "FR-013",
+        "FR-026",
+        "BP-001",
+        "COMP-SEQ-JiraChangeStatus",
+        "FR-001",
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008",
+        "FR-009",
+        "FR-010",
+        "FR-014",
+        "FR-015",
+        "FR-016",
+        "FR-018",
+        "FR-019",
+        "FR-020",
+        "FR-037",
+        "FR-023",
+        "FR-028",
+        "FR-029",
+        "COMP-SEQ-JiraAssignCandidate",
+        "FR-002",
+        "BR-001",
+        "UC-003",
+        "UC-004",
+        "UC-005",
+        "UC-006",
+        "BR-003",
+        "BR-005",
+        "NFR-010",
+        "NFR-009",
+        "BR-010",
+        "BR-006",
+        "COMP-SEQ-JiraEpicRules",
+        "BR-002",
+        "BR-009",
+        "NFR-008",
+        "COMP-SEQ-JiraIncrementalSync",
+        "FR-003",
+        "FR-004",
+        "FR-022",
+        "FR-027",
+        "FR-032",
+        "FR-033",
+        "FR-039",
+        "FR-040",
+        "FR-012",
+        "FR-017",
+        "FR-024",
+        "FR-025",
+        "COMP-SEQ-JiraLoginSession",
+        "COMP-SEQ-JiraSessionExpired",
+        "FR-021",
+        "FR-030",
+        "BR-007",
+        "NFR-007",
+        "NFR-006",
+        "COMP-DB-ReWebPresale",
+        "ERD-001",
+        "DD-001"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.8",
+      "package_id": "APKG-CR022-COLUMNS",
+      "package_title": "CR-022 — дополнение: FR-034 v1.2, состав столбцов «в сделанном виде» (уточнение владельца 24.11.2026)",
+      "approach": "predictive",
+      "created_date": "2026-11-24",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-034"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-24"
+        }
+      }
     }
   ],
-  "updated": "2026-10-29"
+  "updated": "2026-11-24"
 }

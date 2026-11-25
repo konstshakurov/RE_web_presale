@@ -1,6 +1,6 @@
 # API — эндпоинты приложения, работающие с Jira
 
-Источник: `backend/app/{auth,sync,assign}/router.py`, `backend/openapi.json` (экспорт `app.export_openapi`).
+Источник: `backend/app/{auth,sync,client_rules,assign}/router.py`, `backend/openapi.json` (экспорт `app.export_openapi`).
 Пути даны как в OpenAPI (без внешнего префикса proxy). Аутентификация — серверная сессия (cookie HttpOnly), изменяющие вызовы — с CSRF-токеном.
 Зависимость `require_jira_ok` блокирует вызов, если сессия Jira пользователя не `ok`: **409** (`needs_reauthorization`/отказ с текстом), **503** (`unavailable`).
 
@@ -12,9 +12,11 @@
 | `GET /sync/needs`, `GET /sync/needs/groups` | сессия | потребности из кэша (фильтры, страницы, группы статусов) + штамп `sync` | FR-001, 034, 035, 020 |
 | `GET /sync/employees` | сессия | сотрудники из кэша + штамп; фильтры: `status` (повторяемый, ИЛИ), `dept_head` (логин или `__none__` = «Без РО»), поиск, «уволенные» (по И) | FR-002, 032 |
 | `GET /sync/employees/dept-heads` | сессия | РО для фильтра (логин, имя); без неактивных и скрытых | FR-002, 032 |
-| `GET /sync/status` | сессия | штампы обеих областей: `state`, `stale`, `last_success_at`, `paused`, `message` | FR-028, NFR-008 |
+| `GET /sync/status` | сессия | штампы областей `needs`, `employees`, `epic_comments`: `state`, `stale`, `last_success_at`, `paused`, `message` | FR-028, NFR-008 |
 | `POST /sync/refresh` | `require_jira_ok` | немедленный инкрементальный опрос токеном пользователя; `scope = needs \| employees` | FR-028, FR-034 |
 | `GET /sync/epics/{epic_key}?refresh=` | сессия | эпик, правила клиента, число потребностей; кэш 1 час; при отказе Jira и наличии кэша — кэш с `stale=true` и `error` | FR-015 |
+| `GET /needs/{key}/client-rules/theses` | сессия приложения | кэш тезисов по хешу комментариев; свежий хеш — 200, устаревший — 202 и асинхронный пересчёт; источники содержат автора, дату и ссылку на комментарий | FR-015, CR-020 |
+| `POST /needs/{key}/client-rules/regenerate` | администратор | ручной пересчёт тезисов; внешний провайдер требует подтверждения отправки по FR-023 | FR-015, FR-023, CR-020 |
 | `GET /needs/{key}/status-actions` | `require_jira_ok` | белый список статус-действий ∩ переходы Jira, поля и справочники из ответа Jira | FR-011, 026 |
 | `POST /needs/{key}/status` | `require_jira_ok` | сменить статус (`search \| hire \| no_candidates`) | FR-011, 026, UC-002 |
 | `POST /needs/{key}/assign` | `require_jira_ok` | назначить кандидата (профиль, исполнитель, вложения, комментарий, переход 21, ставка) | FR-008–010, 013, 018, UC-001 |

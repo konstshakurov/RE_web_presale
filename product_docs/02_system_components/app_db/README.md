@@ -1,13 +1,13 @@
 # app_db — паспорт компонента (SRV)
 
-Статус страницы: `implemented`. Актуально на 05.11.2026 по миграциям `db/migrations/app_db/V001…V010` + ключи ROS в `app_setting` (миграции не требуют).
+Статус страницы: `implemented`. Актуально на 23.11.2026 по миграциям `db/migrations/app_db/V001…V010` + ключи ROS в `app_setting` (миграции не требуют).
 
 | Атрибут | Значение |
 |---|---|
-| Назначение | Пользователи и сессии приложения, шифрованные секреты, настройки, кэш Jira (потребности, эпики, состояние опроса), группы статусов, провайдеры и очередь задач LLM, параметры модели ROS |
+| Назначение | Пользователи и сессии приложения, шифрованные секреты, настройки, кэш Jira (потребности, эпики и комментарии), кэш LLM-тезисов правил клиента, группы статусов, провайдеры и очередь задач LLM, параметры модели ROS |
 | СУБД | PostgreSQL 16, база `app_db`, схема `app` (служебная `meta.schema_migration`) |
 | Роль приложения | `app_rw` (DML, не видит `cv_db`); миграции выполняются владельцем БД, не `app_rw` |
-| Код | `backend/app/app_repo/`, `backend/app/sync/repo.py`, `backend/app/secrets/store.py`, `backend/app/llm_gateway/repo.py`, `backend/app/status_groups/repo.py`, `backend/app/auth/`, `backend/app/ros/` |
+| Код | `backend/app/app_repo/`, `backend/app/sync/repo.py`, `backend/app/client_rules/`, `backend/app/secrets/store.py`, `backend/app/llm_gateway/repo.py`, `backend/app/status_groups/repo.py`, `backend/app/auth/`, `backend/app/ros/` |
 | Бизнес-функции | BF-01, BF-03, BF-06, BF-12 |
 | Требования | FR-015, 021, 028, 030, 035; NFR-004, 005, 006, 007, 008, 010; ERD-001, DD-001 (логическая модель — слой 1); FR-041 (параметры ROS) |
 | Архитектурное решение | ADR-003 (две БД), ADR-004, ADR-005, ADR-006, ADR-007, ADR-008, ADR-011 |
@@ -29,6 +29,8 @@
 | V006 | `jira_need.employee_login` («Профиль сотрудника») | KON-61 |
 | V007 | заполнение 4 групп статусов | KON-61 |
 | V008 | `llm_provider.model`, очередь `llm_task` | KON-37 |
+| V009 | `cvtpl_template`: временное хранение файла шаблона клиента между шагами LLM | KON-80 |
+| V010 | `epic_comment` и `epic_rules_cache`: комментарии эпиков и кэш тезисов правил клиента по хешу | KON-160 / REW-28 |
 
 Порядок применения: `db/migrations/bootstrap/00_roles_and_databases.sql` (один раз, суперпользователь) → `db/migrations/apply.sh up app_db` (ведёт `meta.schema_migration`); откат — `*.down.sql`. Тестовые данные — `db/seed/`.
 
@@ -42,6 +44,10 @@
 2 979 000). API: `GET /admin/ros/settings` (чтение — любому пользователю, нужно для расчёта),
 `PUT /admin/ros/settings` (роль `admin`, CSRF). Код — `backend/app/ros/`; границы значений —
 0..100 для ставок, billable 1..744, `fot_limit` 1..1e9, `indirect_cost` 0..1e7.
+
+## Комментарии эпиков и тезисы правил клиента (KON-160)
+
+`app.epic_comment` хранит снимок комментариев Jira по `(epic_key, comment_id)` с автором, датой обновления, телом и временем получения. `app.epic_rules_cache` хранит хеш исходных комментариев, JSON-тезисы, время генерации и провайдера. Пересчёт запускается лениво при несовпадении хеша; сам GET не ждёт завершения LLM.
 
 ## Правила
 * Межбазовых FK нет — только мягкие ссылки по ключу (ADR-003): `jira_need.employee_key` → `cv.employee.jira_key`, `llm_task` ← `cv.*.task_id`, `cv.*.provider_id` → `llm_provider.id`.
@@ -58,3 +64,4 @@
 |---|---|---|
 | 2026-10-26 | KON-129 | страница создана из KON-29 и миграций V001–V008 |
 | 2026-11-05 | REW-30 (Dev-53) | раздел «Настройки и параметры модели ROS»: ключи `ros_*` в `app_setting`, API GET/PUT `/admin/ros/settings`; миграция не потребовалась |
+| 2026-11-23 | REW-28 (KON-160) | учтена миграция V010: кэш комментариев эпика и кэш тезисов LLM |

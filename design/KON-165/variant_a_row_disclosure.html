@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KON-165 — вариант A (правка 5): блок-раскрытие, ключ от линии названия</title>
+<style>
+:root, :root[data-theme="dark"] {
+  --bg:#12171d; --panel:#1b222b; --panel-2:#232c37; --text:#e4e7eb; --muted:#9aa5b1;
+  --border:#323f4b; --accent:#3e8ef7; --nav:#0f1b33; --err:#ff8a80; --ok:#34c38f; --warn:#f5b041;
+  color-scheme: dark;
+  --dup-bg:#f8e3a8; --dup-text:#7a4f00; --dup-ico:#e8a013;
+  --cls-bg:#e9f1fb; --cls-text:#2565b8;
+}
+:root[data-theme="light"] {
+  --bg:#f4f6f8; --panel:#ffffff; --panel-2:#eef1f4; --text:#1f2933; --muted:#616e7c;
+  --border:#cbd2d9; --accent:#1f6fd6; --nav:#1f2933; --err:#b42318; --ok:#1a7f5a; --warn:#b7791f;
+  color-scheme: light;
+  --dup-bg:#fdefc4; --dup-text:#7c4e00; --dup-ico:#dd900e;
+  --cls-bg:#e7f0fb; --cls-text:#1f5fa9;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; }
+.bar { display:flex; gap:12px; align-items:center; padding:8px 24px; background:var(--nav); color:#fff; flex-wrap:wrap; }
+.bar button { background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:4px 10px; cursor:pointer; }
+.bar .hint { margin-left:auto; font-size:13px; opacity:.8; }
+.wrap { padding:16px 24px 40px; overflow-x:auto; }
+h2 { font-size:15px; margin:18px 0 8px; color:var(--muted); font-weight:600; }
+
+table.needs { width:100%; min-width:1040px; border-collapse:separate; border-spacing:0;
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.needs th, .needs td { padding:8px 10px; text-align:left; vertical-align:top; }
+.needs th { background:var(--panel-2); font-size:calc(1em - 2px); color:var(--muted); font-weight:600; }
+.needs td { border-top:1px solid var(--border); }
+.needs a { color:var(--accent); }
+.col-key { width:84px; } .col-status { width:150px; } .col-client { width:110px; }
+.col-type { width:64px; } .col-rate { width:96px; }
+.chip { display:inline-block; font-size:12px; padding:1px 8px; border-radius:999px; background:var(--panel-2); border:1px solid var(--border); }
+
+/* Название + индикатор новой строкой с интервалом */
+.need-title { display:block; }
+.dup-line { display:block; margin-top:7px; line-height:0; }
+
+/* --- Индикатор дублей: статичное облачко (без рамки и анимаций), высота как у % и «Похожая» --- */
+.dup-pill, .dup-pct, .cls > button { height:22px; display:inline-flex; align-items:center;
+  font-size:12px; font-weight:600; line-height:1; border-radius:999px; border:none; }
+.dup-pill { gap:5px; padding:0 11px; background:var(--dup-bg); color:var(--dup-text); white-space:nowrap; cursor:pointer; }
+.dup-pill:focus-visible, .cls > button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.dup-pill svg { color:var(--dup-ico); flex:0 0 auto; }
+.dup-pill .chev { flex:0 0 auto; color:var(--dup-text); display:inline-flex; }
+.dup-pill.is-open .chev { transform:rotate(180deg); }
+.dup-pct { padding:0 10px; background:#fbeabc; color:#7a4f00; }
+:root[data-theme="dark"] .dup-pct { background:rgba(245,176,65,.18); color:var(--warn); }
+
+/* --- Блок-раскрытие (не строки таблицы): сдвиг до линии названия, затем ключ, название, тип, ставка, %, классификация --- */
+.dup-row td { background:var(--panel-2); border-top:1px dashed var(--border); padding:8px 10px 10px; }
+.dup-item { display:grid; grid-template-columns:max-content minmax(0,1fr) 48px 96px 56px 120px;
+  gap:12px; align-items:center; padding:7px 6px 7px 84px; } /* 84px = ширина колонки «Ключ»: ключ начинается на линии названия */
+.dup-item:last-of-type { border-bottom:none; }
+.dup-key { font-weight:600; }
+.dup-title { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dup-type { color:var(--muted); font-size:13px; }
+.dup-rate { font-size:13px; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right; }
+.dup-rate.na { color:var(--muted); }
+
+/* --- Кнопка классификации: фикс. ширина, текст слева, шеврон справа (без анимации) --- */
+.cls { position:relative; }
+.cls > button { gap:6px; width:120px; padding:0 11px; background:var(--cls-bg); color:var(--cls-text);
+  white-space:nowrap; text-align:left; cursor:pointer; justify-content:flex-start; }
+.cls > button .chev { margin-left:auto; display:inline-flex; }
+.cls > button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.cls-menu { display:none; position:absolute; right:0; top:calc(100% + 4px); z-index:5; min-width:150px;
+  background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25); }
+.cls.open .cls-menu { display:block; }
+.cls-menu button { display:flex; gap:8px; align-items:center; width:100%; text-align:left; background:none;
+  border:none; padding:7px 10px; border-radius:7px; color:var(--text); font-size:13px; line-height:1.3; cursor:pointer; }
+.cls-menu button:hover { background:var(--panel-2); }
+.cls-menu .mark { width:16px; color:var(--ok); flex:0 0 auto; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>KON-165 · Вариант A (правка 5)</b>
+  <button type="button" onclick="const h=document.documentElement;h.dataset.theme=h.dataset.theme==='light'?'dark':'light'">Тема</button>
+  <span class="hint">Блок-раскрытие (не строки таблицы); ключ начинается на линии названия; статичные облачка 22px; «Похожая ⌄» фикс. ширины, шеврон справа.</span>
+</div>
+<div class="wrap">
+
+<h2>1–2. Дубли есть (раскрыто / свёрнуто) · склонение: 2 дубля, 1 дубль, 6 дублей</h2>
+<table class="needs">
+  <thead><tr><th class="col-key">Ключ</th><th>Название</th><th class="col-status">Статус</th><th class="col-client">Клиент</th><th class="col-type">Тип</th><th class="col-rate">Ставка</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><a href="#">5965</a></td>
+      <td>
+        <span class="need-title">Подбор аналитиков данных для проекта отчётности (Магнит)</span>
+        <span class="dup-line">
+          <button type="button" class="dup-pill is-open" aria-expanded="true" onclick="toggleDup(this)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 9.5v5"/><path d="M12 17.4v.01"/></svg>
+            2 дубля
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span>
+          </button>
+        </span>
+      </td>
+      <td><span class="chip">Требуется кандидат</span></td><td>Магнит</td><td>Прямой</td><td>320 000</td>
+    </tr>
+    <tr class="dup-row">
+      <td colspan="6">
+        <div class="dup-item">
+          <span class="dup-key"><a href="#">5968</a></span>
+          <span class="dup-title" title="Открытые решения — аналитики данных для проекта отчётности (субподряд)">Открытые решения — аналитики данных для проекта отчётности</span>
+          <span class="dup-type">Суб</span>
+          <span class="dup-rate">195 000</span>
+          <span class="dup-pct">52%</span>
+          <span class="cls open">
+            <button type="button" aria-haspopup="listbox" aria-expanded="true" onclick="toggleCls(this)">Похожая <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span></button>
+            <span class="cls-menu" role="listbox" aria-label="Классификация связи">
+              <button type="button" onclick="pick(this,'Похожая')"><span class="mark">✓</span>Похожая</button>
+              <button type="button" onclick="pick(this,'Дубль')"><span class="mark"></span>Дубль</button>
+            </span>
+          </span>
+        </div>
+        <div class="dup-item">
+          <span class="dup-key"><a href="#">5969</a></span>
+          <span class="dup-title" title="БСС Инжиниринг — аналитики данных для проекта отчётности (субподряд)">БСС Инжиниринг — аналитики данных для проекта отчётности</span>
+          <span class="dup-type">Суб</span>
+          <span class="dup-rate"><span class="na">—</span></span>
+          <span class="dup-pct">34%</span>
+          <span class="cls">
+            <button type="button" aria-haspopup="listbox" aria-expanded="false" onclick="toggleCls(this)">Похожая <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span></button>
+            <span class="cls-menu" role="listbox" aria-label="Классификация связи">
+              <button type="button" onclick="pick(this,'Похожая')"><span class="mark">✓</span>Похожая</button>
+              <button type="button" onclick="pick(this,'Дубль')"><span class="mark"></span>Дубль</button>
+            </span>
+          </span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="#">5966</a></td>
+      <td>
+        <span class="need-title">Подбор аналитиков данных для проекта отчётности (МосБиржа)</span>
+        <span class="dup-line">
+          <button type="button" class="dup-pill" aria-expanded="false" onclick="toggleDup(this)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 9.5v5"/><path d="M12 17.4v.01"/></svg>
+            1 дубль
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span>
+          </button>
+        </span>
+      </td>
+      <td><span class="chip">Требуется кандидат</span></td><td>МосБиржа</td><td>Прямой</td><td>280 000</td>
+    </tr>
+    <tr class="dup-row" hidden>
+      <td colspan="6">
+        <div class="dup-item">
+          <span class="dup-key"><a href="#">5970</a></span>
+          <span class="dup-title">Субподряд — аналитики данных (МосБиржа)</span>
+          <span class="dup-type">Суб</span>
+          <span class="dup-rate"><span class="na">—</span></span>
+          <span class="dup-pct">29%</span>
+          <span class="cls"><button type="button" onclick="toggleCls(this)">Похожая <span class="chev"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span></button>
+          <span class="cls-menu"><button type="button" onclick="pick(this,'Похожая')"><span class="mark">✓</span>Похожая</button><button type="button" onclick="pick(this,'Дубль')"><span class="mark"></span>Дубль</button></span></span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="#">5901</a></td>
+      <td>
+        <span class="need-title" title="Very long need title — Аналитик для проекта внедрения системы управления складом и логистикой с интеграциями">Very long need title — Аналитик для проекта внедрения системы управления складом и логистикой с интеграциями</span>
+        <span class="dup-line">
+          <button type="button" class="dup-pill" aria-expanded="false" onclick="toggleDup(this)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 9.5v5"/><path d="M12 17.4v.01"/></svg>
+            6 дублей
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span>
+          </button>
+        </span>
+      </td>
+      <td><span class="chip">Требуется кандидат</span></td><td>Магнит</td><td>Прямой</td><td>—</td>
+    </tr>
+    <tr class="dup-row" hidden>
+      <td colspan="6">
+        <div class="dup-item">
+          <span class="dup-key"><a href="#">5902</a></span>
+          <span class="dup-title" title="Субподряд — аналитик БД (очень длинное название, которое обрезается многоточием при нехватке ширины ячейки)">Субподряд — аналитик БД (очень длинное название, которое обрезается многоточием при нехватке ширины ячейки)</span>
+          <span class="dup-type">Суб</span>
+          <span class="dup-rate">215 000</span>
+          <span class="dup-pct">61%</span>
+          <span class="cls"><button type="button" onclick="toggleCls(this)">Дубль <span class="chev"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 6 4.5 4.5L12.5 6"/></svg></span></button>
+          <span class="cls-menu"><button type="button" onclick="pick(this,'Похожая')"><span class="mark"></span>Похожая</button><button type="button" onclick="pick(this,'Дубль')"><span class="mark">✓</span>Дубль</button></span></span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="#">5930</a></td>
+      <td>Аналитик мобильного приложения</td>
+      <td><span class="chip">Требуется кандидат</span></td><td>Магнит</td><td>Прямой</td><td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Правила (для decision.md)</h2>
+<ul style="font-size:13px; color:var(--muted); max-width:940px; line-height:1.5">
+  <li>Индикатор — отдельной строкой под названием, с интервалом ~7px; «дублей нет» — индикатора нет.</li>
+  <li>Облачко индикатора статичное: без рамки, без hover/анимаций; высота 22px — как у пилюли % и кнопки «Похожая»; шрифт 12px/600; склонение 1 дубль / 2–4 дубля / 5–20 дублей.</li>
+  <li>Раскрытие — colspan-блок под строкой (не новые строки таблицы): блок с подложкой и пунктирной верхней границей.</li>
+  <li>Каждая запись блока: ключ-ссылка, начинающийся на линии колонки «Название» (сдвиг блока = ширина колонки «Ключ»), затем название (одной строкой, ellipsis, полное — в title), Суб/Прямой, ставка цифрой (nowrap) или «—», пилюля %, классификация.</li>
+  <li>«Похожая ⌄» — голубоватое облачко фиксированной ширины (не меняется при смене на «Дубль»), текст слева, шеврон в едином месте справа; меню «Похожая / Дубль», выбранный пункт с ✓, выбор сохраняется на сервере.</li>
+  <li>Шевроны на одной линии с текстом; при раскрытии ⌄ → ⌃; <code>aria-expanded</code> у индикатора и кнопки классификации.</li>
+</ul>
+</div>
+<script>
+function toggleDup(btn){
+  const row = btn.closest('tr');
+  const block = row.nextElementSibling;
+  const open = block.hasAttribute('hidden');
+  if (open) block.removeAttribute('hidden'); else block.setAttribute('hidden','');
+  btn.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function toggleCls(btn){
+  const cls = btn.closest('.cls');
+  const open = !cls.classList.contains('open');
+  document.querySelectorAll('.cls.open').forEach(x => { x.classList.remove('open'); x.querySelector('button').setAttribute('aria-expanded','false'); });
+  cls.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function pick(menuBtn, label){
+  const cls = menuBtn.closest('.cls');
+  cls.querySelectorAll('.mark').forEach(m => m.textContent = '');
+  menuBtn.querySelector('.mark').textContent = '✓';
+  const btn = cls.querySelector(':scope > button');
+  btn.childNodes[0].textContent = label + ' ';
+  cls.classList.remove('open');
+}
+</script>
+</body>
+</html>

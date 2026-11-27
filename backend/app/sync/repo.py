@@ -296,32 +296,39 @@ class SyncRepo:
 
     def duplicates_for(self, keys: list[str]) -> dict[str, list[dict]]:
         """Связи-дубли для ключей страницы: другой ключ пары, %, классификация и поля
-        потребности-дубля (название, тип, ставка) для вывода (KON-165)."""
+        потребности-дубля (название, тип, ставка) для вывода (KON-165). Одна выборка:
+        каждая связь даёт по одной записи для каждой из сторон, оказавшейся в ключах;
+        данные «другой стороны» берутся из её строки jira_need (без UNION - иначе пара,
+        у которой в ключах обе стороны, возвращается дважды)."""
         if not keys:
             return {}
         with self._app.connection() as conn:
             rows = conn.execute(
-            "SELECT d.need_key, d.dup_need_key, d.match_percent, d.classification, "
-            " n.title, n.contract_type, n.rate_amount "
-            "FROM app.need_duplicate d JOIN app.jira_need n ON n.jira_key = d.dup_need_key "
-            "WHERE d.need_key = ANY(%s::text[]) "
-            "UNION ALL "
-            "SELECT d.need_key, d.dup_need_key, d.match_percent, d.classification, "
-            " n.title, n.contract_type, n.rate_amount "
-            "FROM app.need_duplicate d JOIN app.jira_need n ON n.jira_key = d.need_key "
-            "WHERE d.dup_need_key = ANY(%s::text[])",
-            (keys, keys),
-        ).fetchall()
+                "SELECT d.need_key, d.dup_need_key, d.match_percent, d.classification, "
+                " na.jira_key, na.title, na.contract_type, na.rate_amount, "
+                " nb.jira_key, nb.title, nb.contract_type, nb.rate_amount "
+                "FROM app.need_duplicate d "
+                "JOIN app.jira_need na ON na.jira_key = d.need_key "
+                "JOIN app.jira_need nb ON nb.jira_key = d.dup_need_key "
+                "WHERE d.need_key = ANY(%s::text[]) OR d.dup_need_key = ANY(%s::text[])",
+                (keys, keys),
+            ).fetchall()
         out: dict[str, list[dict]] = {}
-        for need_key, dup_key, pct, classification, title, contract, rate in rows:
-            for owner, other in ((need_key, dup_key), (dup_key, need_key)):
-                if owner in keys:
-                    out.setdefault(owner, []).append({
-                        "jira_key": other, "title": title,
-                        "match_percent": pct, "classification": classification,
-                        "contract_type": contract, "rate_amount":
-                        None if rate is None else float(rate),
-                    })
+        for (need_key, dup_key, pct, classification,
+             a_key, a_title, a_type, a_rate,
+             b_key, b_title, b_type, b_rate) in rows:
+            sides = {need_key: (a_key, a_title, a_type, a_rate),
+                     dup_key: (b_key, b_title, b_type, b_rate)}
+            for owner, other_key in ((need_key, dup_key), (dup_key, need_key)):
+                if owner not in keys:
+                    continue
+                o_key, o_title, o_type, o_rate = sides[other_key]
+                out.setdefault(owner, []).append({
+                    "jira_key": o_key, "title": o_title,
+                    "match_percent": pct, "classification": classification,
+                    "contract_type": o_type, "rate_amount":
+                    None if o_rate is None else float(o_rate),
+                })
         return out
 
     def set_duplicate_classification(self, need_key: str, dup_need_key: str,

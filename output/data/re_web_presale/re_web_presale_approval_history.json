@@ -5334,6 +5334,96 @@
       "verification_snapshot": {
         "FR-034": true
       }
+    },
+    "APKG-CR022-AMEND": {
+      "package_id": "APKG-CR022-AMEND",
+      "package_title": "CR-022 — поправки владельца 25.11.2026 по варианту A (KON-166): FR-011 v1.5, FR-034 v1.3, FR-035 v1.2, FR-038 v1.5",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-011",
+        "FR-034",
+        "FR-035",
+        "FR-038"
+      ],
+      "created_date": "2026-11-25",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-011",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-034",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца 25.11.2026 (сообщение с правками по варианту A KON-166, «Макет уже хорош. Но сделаем правки»): (1) системный шрифт не менять; вес 400→500 глобально, в шапке разделы и имя — 500; (2) шрифт строк таблицы «Потребности» −2 пункта; шрифт столбца «Ставка» — как во всей строке; (3) высота шапки таблицы — прежняя (отмена п. 3.12); (4) кнопка «Обновить» — без иконки внутри (иконка уже перед текстом штампа; отмена п. 3.2); (5) чипы групп статусов — синий как предложено UX, шрифт 500 не жирный; (6) облачок статуса без шеврона, прежние цвета фона/текста (не белый), шрифт 500; (7) высота кнопок внутри таблицы («Сопоставить», «ROS», «Резюме», «Назначить», «Похожая» и др.) = высоте облачка статуса, шрифт 500; (8) затемнение по контуру блока фильтров применить и к таблице; (9) раскрытые блоки «Правила»/«Сопоставить» — белые на голубом фоне (предложение UX), внутренняя раскладка текста — как уже реализовано. Без условий.",
+          "recorded_date": "2026-11-25"
+        }
+      },
+      "baseline_version": "v2.9",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-011": true,
+        "FR-034": true,
+        "FR-035": true,
+        "FR-038": true
+      }
+    },
+    "APKG-CR022-FINAL": {
+      "package_id": "APKG-CR022-FINAL",
+      "package_title": "CR-022 — финал по утверждённому визуалу KON-166 (вариант A, 25.11.2026): FR-038 v1.6, FR-035 v1.3",
+      "approach": "predictive",
+      "approach_source": "указан в этом вызове",
+      "audience": "all",
+      "sprint_number": "",
+      "req_ids": [
+        "FR-038",
+        "FR-035"
+      ],
+      "created_date": "2026-11-25",
+      "stakeholder_decisions": {
+        "Константин Шакуров": {
+          "stakeholder_name": "Константин Шакуров",
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "req_decisions": [
+            {
+              "req_id": "FR-038",
+              "decision": "approved"
+            },
+            {
+              "req_id": "FR-035",
+              "decision": "approved"
+            }
+          ],
+          "rejection_reason": "",
+          "comment": "Решение владельца 25.11.2026: визуал варианта A (design/KON-166) утверждён («Получилось отлично. Сохраняй. В разработку возьмем в пятницу»); по согласованной процедуре после утверждения визуала проведена разовая сверка спецификаций с финальным прототипом: FR-038 v1.6 (вес 450, шапка 450/белый, строки 13px, line-height 1.16, облачка круглые без шеврона, кнопки таблицы 25px, невыделенные элементы фильтров #f7f9fe + --border, раскрытые блоки без заголовков колонок) и FR-035 v1.3 (невыделенные чипы #f7f9fe + --border, выделенный синий, шрифт 450). Остальные требования CR-022 (FR-011 v1.5, FR-034 v1.3, FR-036 v1.3) расхождений с визуалом не имеют. Без условий. Реализация — в пятницу 27.11.2026.",
+          "recorded_date": "2026-11-25"
+        }
+      },
+      "baseline_version": "v2.10",
+      "status": "baselined",
+      "verification_snapshot": {
+        "FR-038": true,
+        "FR-035": true
+      }
     }
   },
   "baselines": [
@@ -5903,7 +5993,53 @@
           "recorded_date": "2026-11-24"
         }
       }
+    },
+    {
+      "baseline_version": "v2.9",
+      "package_id": "APKG-CR022-AMEND",
+      "package_title": "CR-022 — поправки владельца 25.11.2026 по варианту A (KON-166): FR-011 v1.5, FR-034 v1.3, FR-035 v1.2, FR-038 v1.5",
+      "approach": "predictive",
+      "created_date": "2026-11-25",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-011",
+        "FR-034",
+        "FR-035",
+        "FR-038"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-25"
+        }
+      }
+    },
+    {
+      "baseline_version": "v2.10",
+      "package_id": "APKG-CR022-FINAL",
+      "package_title": "CR-022 — финал по утверждённому визуалу KON-166 (вариант A, 25.11.2026): FR-038 v1.6, FR-035 v1.3",
+      "approach": "predictive",
+      "created_date": "2026-11-25",
+      "decided_by": "Константин Шакуров",
+      "approved_req_ids": [
+        "FR-038",
+        "FR-035"
+      ],
+      "open_conditions": [],
+      "force_created": false,
+      "forced_gates": [],
+      "stakeholder_summary": {
+        "Константин Шакуров": {
+          "raci": "accountable",
+          "overall_decision": "approved",
+          "recorded_date": "2026-11-25"
+        }
+      }
     }
   ],
-  "updated": "2026-11-24"
+  "updated": "2026-11-25"
 }
